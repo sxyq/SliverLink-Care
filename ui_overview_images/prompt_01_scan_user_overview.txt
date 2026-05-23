@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: product UI overview image for a Chinese elderly-care smart nameplate platform
+Primary request: Create one polished overview board containing five realistic mobile app screens for "智联名牌"扫码用户端. The screens must look like actual running product UI, not wireframes.
+Scene/backdrop: clean light healthcare service presentation board, subtle off-white background, no decorative blobs.
+Subject: five smartphone screens arranged horizontally with small captions: 1) 微信扫码后的基础信息页, 2) 短信验证码二次验证页, 3) 健康档案详情页, 4) 主要用药情况页, 5) 量表记录摘要页.
+Style/medium: high-fidelity Chinese mobile UI mockup, modern healthcare service interface, polished production design.
+Composition/framing: landscape 16:9 overview, five phone mockups evenly spaced, each screen readable, no overlap, consistent status bar and navigation.
+Lighting/mood: bright, trustworthy, warm clinical care tone.
+Color palette: white, soft mint green, medical blue accents, warm amber for emergency contact button, restrained and professional.
+Text (verbatim): include clear Chinese UI labels such as "智联名牌", "基本信息", "健康档案编号", "紧急联系人", "一键拨打", "查看健康档案", "短信验证码", "验证后查看", "健康档案", "主要用药", "量表记录", "PHQ-9", "GAD-7", "UCLA".
+Functional details: 基础信息页直接显示姓名、性别、年龄、紧急联系人、ABO血型、Rh血型、过敏史摘要; 查看健康档案前显示短信验证码; 验证通过后才显示健康档案、用药、量表摘要; 手机号使用脱敏格式如 138****5678.
+Constraints: show only functions from the provided document and user notes. Include HTTPS/OpenID/JWT/SMS verification as small trust badges where appropriate. No health detection ability, no real-time vitals, no diagnosis, no appointment booking, no chat/social features. Use clean cards with 8px radius or less, icons in buttons, professional typography, text must fit.
+Avoid: fake device glare that hides UI, illegible tiny text, marketing hero page, stock photos, exaggerated gradients, one-color purple theme, health-monitoring charts, wearable sensor data, diagnosis claims, random English text, watermark.

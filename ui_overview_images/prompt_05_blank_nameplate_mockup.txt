@@ -1,0 +1,12 @@
+Use case: product-mockup
+Asset type: blank physical smart nameplate mockup for an elderly-care volunteer service product
+Primary request: Generate a polished product mockup image showing a two-sided blank "智联名牌" physical nameplate design. The mockup should show the front side and back side side-by-side on a clean tabletop or presentation board. Specific personal information must be left blank.
+Subject: a rectangular wearable nameplate badge with rounded corners, front and back displayed. Front side has blank labeled fields for "姓名", "年龄", "联系电话" using clean empty underline placeholders. Back side has a large QR code placeholder area, a small blank "健康档案编号" placeholder, and a short label "扫码查看基础信息". Use a professional healthcare volunteer service style.
+Style/medium: realistic product mockup, high-quality printed plastic or laminated card, clean modern medical service design.
+Composition/framing: landscape 16:9, front card on the left, back card on the right, both fully visible, slight perspective, no hand, no person.
+Lighting/mood: soft studio lighting, warm trustworthy healthcare tone.
+Color palette: white base, soft mint green accents, medical blue-green, small amber emergency accent, restrained and professional.
+Text (verbatim): "智联名牌", "姓名：____", "年龄：____", "联系电话：____", "健康档案编号：____", "扫码查看基础信息". Keep all personal fields blank, no real names or real phone numbers.
+Functional details: front side should clearly be for printed basic info; back side should clearly contain a QR code placeholder, not a real scannable QR code. Include subtle lanyard slot or small punch hole if natural, but keep the card practical.
+Constraints: do not include any real personal information. Do not include health monitoring, vital signs, diagnosis, appointment, chat, or sensor features. No hospital logo, no government logo, no brand logo except "智联名牌". Text should be legible and not crowded. No watermark.
+Avoid: filled-in personal data, realistic scannable QR content, busy background, decorative blobs, dark theme, cartoon style, medical diagnosis claims.

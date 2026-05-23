@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: full product flow overview image for presentation and defense
+Primary request: Create one polished 16:9 overview image explaining the complete "智联名牌" product flow with multiple realistic UI screens and a physical smart nameplate mockup.
+Scene/backdrop: clean presentation board for a healthcare volunteer service project.
+Subject: show a physical elderly smart nameplate front and back on the left; front has "姓名 / 年龄 / 联系电话", back has a QR code. Then show arrows to mobile scan basic information screen, SMS verification screen, verified health archive screen, volunteer entry screen, and admin security audit dashboard.
+Style/medium: high-fidelity product and UI mockup, professional healthcare service presentation.
+Composition/framing: landscape 16:9, one flow from left to right: 实体名牌 -> 微信扫码 -> 基本信息 -> 短信验证 -> 健康档案 -> 志愿者填写 -> 后台审计. Use small labels above each stage.
+Lighting/mood: warm, reliable, clean, suitable for academic defense or client demo.
+Color palette: white, soft mint, medical blue, warm amber emergency accents, neutral gray.
+Text (verbatim): include "智联名牌", "实体名牌", "微信扫码", "基础信息", "紧急联系人", "短信验证码", "验证后查看", "健康档案", "志愿者填写", "RBAC权限", "AES-256", "HTTPS", "操作日志".
+Functional details: clearly indicate that scan first shows basic information directly; viewing health archive requires SMS verification; volunteer fills records; admin backend audits access. Show security badges for HTTPS, OpenID + JWT, SMS二次验证, RBAC, AES-256, IP白名单, 接口签名, 操作日志.
+Constraints: only use functions from the document and user notes. Do not include health detection ability, wearable sensors, real-time vital signs, diagnosis, appointment booking, or unrelated family chat.
+Avoid: unreadable small text, cluttered infographic, decorative orbs, stock-photo background, random modules, watermark, overly cute style.

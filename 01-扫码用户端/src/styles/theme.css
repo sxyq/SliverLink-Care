@@ -1,0 +1,31 @@
+:root {
+  --sl-bg: #edf7f4;
+  --sl-bg-light: #f4faf8;
+  --sl-primary: #126b78;
+  --sl-secondary: #0a8067;
+  --sl-accent: #d77b25;
+  --sl-text: #17212b;
+  --sl-text-secondary: #667783;
+  --sl-border: #d8e7e3;
+  --sl-card-shadow: 0 8px 24px rgba(23, 33, 43, 0.07);
+  --sl-radius: 8px;
+  --sl-max-width: 480px;
+  --sl-gap: 14px;
+  --sl-page-pad: 16px;
+}
+
+body {
+  margin: 0;
+  color: var(--sl-text);
+  background: var(--sl-bg);
+  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button, input {
+  font: inherit;
+}

@@ -1,0 +1,58 @@
+package com.silverlink.care.module.volunteer;
+
+import com.silverlink.care.common.ApiResponse;
+import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import com.silverlink.care.module.audit.AuditLogService;
+import com.silverlink.care.security.JwtTokenProvider;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/volunteer")
+public class VolunteerController {
+
+    private final VolunteerService volunteerService;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final AuditLogService auditLogService;
+    private final SilverLinkDataService data;
+
+    public VolunteerController(VolunteerService volunteerService, JwtTokenProvider jwtTokenProvider, AuditLogService auditLogService, SilverLinkDataService data) {
+        this.volunteerService = volunteerService;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.auditLogService = auditLogService;
+        this.data = data;
+    }
+
+    @PostMapping("/login")
+    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> body, HttpServletRequest request) {
+        String account = body.get("account");
+        String password = body.get("password");
+        var user = data.login(account, password, "VOLUNTEER");
+        if (user.isPresent()) {
+            String token = jwtTokenProvider.generateToken(account, "VOLUNTEER", 86400000L);
+            Map<String, String> map = new LinkedHashMap<>();
+            map.put("token", token);
+            map.put("name", data.dec(user.get().get("name_enc")));
+            auditLogService.record(account, "VOLUNTEER", request.getRemoteAddr(), "系统", "LOGIN", "SUCCESS", null, null);
+            return ApiResponse.ok(map);
+        }
+        auditLogService.record(account, "UNKNOWN", request.getRemoteAddr(), "系统", "LOGIN", "FAIL", "密码错误", null);
+        return ApiResponse.fail(401, "账号或密码错误");
+    }
+
+    @PostMapping("/logout")
+    public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request) {
+        auditLogService.record(authentication, request.getRemoteAddr(), "绯荤粺", "LOGOUT", "SUCCESS");
+        return ApiResponse.ok();
+    }
+
+    @GetMapping("/me/elders")
+    public ApiResponse<List<Map<String, Object>>> myElders(Authentication authentication) {
+        return ApiResponse.ok(volunteerService.getMyElders(authentication.getName()));
+    }
+}

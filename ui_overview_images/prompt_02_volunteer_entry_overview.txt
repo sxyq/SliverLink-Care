@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: product UI overview image for volunteer data-entry workflow
+Primary request: Create one polished overview board containing five realistic mobile/tablet screens for "智联名牌"护理志愿者填写端. The screens must look like actual running product UI, not wireframes.
+Scene/backdrop: clean healthcare operations presentation board, light background.
+Subject: five app screens: 1) 志愿者登录页, 2) 本人负责老人列表, 3) 基本信息编辑页, 4) 健康档案填写页, 5) PHQ-9/GAD-7/UCLA量表填写页.
+Style/medium: high-fidelity Chinese app UI mockup, practical form design, calm healthcare operations style.
+Composition/framing: landscape 16:9 overview, five screens arranged as a workflow with subtle arrows, readable forms.
+Lighting/mood: efficient, trustworthy, warm community care.
+Color palette: white, light teal, deep blue text, amber verification accents, subtle gray borders.
+Text (verbatim): include Chinese labels "志愿者登录", "账号", "密码", "本人负责老人", "档案编号", "基本信息编辑", "紧急联系人", "短信验真", "健康档案填写", "身高", "体重", "腰围", "BMI", "主要用药", "量表填写", "PHQ-9", "GAD-7", "UCLA", "提交保存".
+Functional details: list page must show permission note "仅显示本人负责老人"; basic information editing should show SMS verification for identity changes; health archive form includes height, weight, waist, BMI, self-evaluation, cognitive/emotional screening; medication table includes medicine name, dosage, usage, medication time; scale page shows selectable answer chips.
+Constraints: only include document-supported functions. No health detection, no real-time monitoring, no diagnostic AI, no appointment booking. Forms should be usable and uncluttered; use icons in buttons, toggles/chips for options, clear submit states.
+Avoid: spreadsheet-like dense full-grid tables, unreadable text, decorative blobs, stock people, device overlaps, watermark, random invented modules.

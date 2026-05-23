@@ -1,0 +1,18 @@
+:root {
+  --bg-page: #eef2f5;
+  --bg-sidebar: #132c3a;
+  --bg-menu-active: #1c7488;
+  --color-primary: #115f72;
+  --color-success: #0a8067;
+  --color-danger: #c2410c;
+  --color-text: #17212b;
+  --color-text-secondary: #687989;
+  --color-border: #d9e2e8;
+  --color-table-header: #f6f9fb;
+  --color-white: #ffffff;
+  --sidebar-width: 220px;
+  --panel-radius: 8px;
+  --panel-padding: 18px;
+  --content-padding: 22px;
+  --font-family: "Microsoft YaHei", system-ui, sans-serif;
+}

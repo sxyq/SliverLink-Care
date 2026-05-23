@@ -1,0 +1,260 @@
+.card {
+  background: var(--sl-card-bg);
+  border-radius: var(--sl-radius-lg);
+  padding: 16px;
+  box-shadow: var(--sl-shadow);
+  margin-bottom: 12px;
+}
+
+.card-clickable {
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.card-clickable:active {
+  transform: scale(0.98);
+  box-shadow: var(--sl-shadow-lg);
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--sl-text-secondary);
+  margin-bottom: 6px;
+}
+
+.form-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius);
+  background: var(--sl-input-bg);
+  font-size: 15px;
+  color: var(--sl-text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: var(--sl-primary);
+}
+
+.form-input::placeholder {
+  color: #B0BEC5;
+}
+
+.form-input.error {
+  border-color: var(--sl-danger);
+}
+
+.form-select {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius);
+  background: var(--sl-input-bg);
+  font-size: 15px;
+  color: var(--sl-text);
+  outline: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237F8C8D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+}
+
+.form-select:focus {
+  border-color: var(--sl-primary);
+}
+
+.form-error {
+  font-size: 12px;
+  color: var(--sl-danger);
+  margin-top: 4px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 44px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--sl-radius);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--sl-primary);
+  color: #FFFFFF;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--sl-primary-light);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--sl-primary);
+  border: 1px solid var(--sl-primary);
+}
+
+.btn-danger {
+  background: var(--sl-danger);
+  color: #FFFFFF;
+}
+
+.btn-sm {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--sl-border);
+  background: var(--sl-input-bg);
+  color: var(--sl-text);
+}
+
+.chip.active {
+  background: var(--sl-chip-active-bg);
+  color: #FFFFFF;
+  border-color: var(--sl-chip-active-bg);
+}
+
+.field-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #F0F4F5;
+}
+
+.field-row:last-child {
+  border-bottom: none;
+}
+
+.field-label {
+  font-size: 13px;
+  color: var(--sl-text-secondary);
+  flex-shrink: 0;
+  width: 80px;
+}
+
+.field-value {
+  font-size: 14px;
+  color: var(--sl-text);
+  text-align: right;
+  flex: 1;
+  word-break: break-all;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: var(--sl-card-bg);
+  border-radius: var(--sl-radius-lg);
+  padding: 24px;
+  width: 85%;
+  max-width: 340px;
+  box-shadow: var(--sl-shadow-lg);
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 640px) {
+  .card {
+    padding: 14px;
+  }
+
+  .field-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .field-label {
+    width: auto;
+  }
+
+  .field-value {
+    width: 100%;
+    text-align: left;
+  }
+
+  .modal-content {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    padding: 18px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .btn,
+  .modal-actions .btn,
+  .modal-actions button {
+    width: 100%;
+  }
+}
+
+@media (min-width: 641px) {
+  .card {
+    padding: 18px;
+  }
+}

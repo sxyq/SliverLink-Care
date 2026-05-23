@@ -1,0 +1,42 @@
+spring:
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:prod}
+  application:
+    name: silverlink-care-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://127.0.0.1:3306/silverlink_care?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:silverlink}
+    password: ${SPRING_DATASOURCE_PASSWORD:silverlink_pass}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+
+server:
+  port: 8080
+
+silverlink:
+  qrcode:
+    public-base-url: ${SILVERLINK_SCAN_URL_PREFIX:http://sxyq27.online/silverlink/scan/?token=}
+  security:
+    jwt-secret: demo-jwt-secret-key-2026-silverlink-care-must-be-32-bytes!!
+    aes-key-id: demo-key-v1
+    aes-key-base64: ${SILVERLINK_AES_KEY_BASE64:QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=}
+    signature-window-seconds: 300
+  sms:
+    provider: ${SILVERLINK_SMS_PROVIDER:configured}
+    access-key: ${SILVERLINK_SMS_ACCESS_KEY:}
+    secret: ${SILVERLINK_SMS_SECRET:}
+    sign-name: ${SILVERLINK_SMS_SIGN_NAME:}
+    template-code: ${SILVERLINK_SMS_TEMPLATE_CODE:}
+    mock-enabled: false
+    code-ttl-seconds: 300
+    max-attempts: 5
+
+logging:
+  level:
+    com.silverlink.care: info

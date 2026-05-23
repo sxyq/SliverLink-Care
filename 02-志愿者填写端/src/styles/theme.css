@@ -1,0 +1,35 @@
+:root {
+  --sl-bg: #EDF5F7;
+  --sl-primary: #126B78;
+  --sl-permission: #0A8067;
+  --sl-warn: #D77B25;
+  --sl-text: #18222D;
+  --sl-text-secondary: #5F6F7A;
+  --sl-border: #D8E7EA;
+  --sl-card-bg: #ffffff;
+  --sl-card-shadow: 0 10px 26px rgb(24 34 45 / 8%);
+  --sl-radius: 8px;
+  --sl-input-height: 42px;
+  --sl-chip-bg: #EEF7F5;
+  --sl-chip-border: #CFE1DE;
+}
+
+body {
+  margin: 0;
+  background: var(--sl-bg);
+  color: var(--sl-text);
+  font-family: Inter, "Microsoft YaHei", system-ui, sans-serif;
+  min-width: 320px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button, input {
+  font: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 设备在线状态 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/RelayCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+                <View
+                    android:id="@+id/onlineIndicator"
+                    android:layout_width="12dp"
+                    android:layout_height="12dp"
+                    android:background="@drawable/circle_green" />
+                <TextView
+                    android:id="@+id/deviceStatusText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:text="@string/device_online"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/sl_success" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 基础配置卡 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/RelayCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView style="@style/RelaySectionTitle" android:text="基础配置" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
+                <include layout="@layout/item_config_row" android:id="@+id/rowReceiverPhone" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowServerUrl" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowDeviceId" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowDeviceSecret" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 短信前缀规则卡 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/RelayCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView style="@style/RelaySectionTitle" android:text="@string/prefix_rule_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="8dp"/>
+                <TextView android:id="@+id/prefixRuleValue" style="@style/RelayBodyText" android:text="SL" android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 统计网格卡 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/RelayCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView style="@style/RelaySectionTitle" android:text="今日统计" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="12dp"/>
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="3"
+                    android:useDefaultMargins="true">
+                    <include layout="@layout/item_metric" android:id="@+id/metricReceived" />
+                    <include layout="@layout/item_metric" android:id="@+id/metricSuccess" />
+                    <include layout="@layout/item_metric" android:id="@+id/metricFailed" />
+                    <include layout="@layout/item_metric" android:id="@+id/metricPending" />
+                    <include layout="@layout/item_metric" android:id="@+id/metricLastSync" />
+                    <include layout="@layout/item_metric" android:id="@+id/metricUptime" />
+                </GridLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- 最近短信记录 -->
+        <com.google.android.material.card.MaterialCardView
+            style="@style/RelayCardView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp">
+                <TextView style="@style/RelaySectionTitle" android:text="@string/recent_sms_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="8dp"/>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recentSmsList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+                <TextView
+                    android:id="@+id/emptyRecentSms"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    android:gravity="center"
+                    android:text="@string/no_recent_sms"
+                    android:textColor="@color/sl_text_secondary"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

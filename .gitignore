@@ -1,0 +1,34 @@
+# Secrets and local editor state
+.ssh-check/
+.vscode/
+*.pem
+id_rsa
+local.properties
+.env.local
+
+# Logs and temporary files
+*.log
+dev-server*.out.log
+dev-server*.err.log
+_local_run_logs/
+_smoke_artifacts/
+_server_smoke_artifacts/
+tmp*.py
+
+# Frontend dependencies and build outputs
+node_modules/
+dist/
+*.tsbuildinfo
+
+# Java backend build outputs
+target/
+
+# Android build outputs
+.gradle/
+.kotlin/
+build/
+app/build/
+
+# OS files
+Thumbs.db
+.DS_Store

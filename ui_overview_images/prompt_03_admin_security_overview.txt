@@ -1,0 +1,13 @@
+Use case: ui-mockup
+Asset type: product UI overview image for web management backend and security controls
+Primary request: Create one polished overview board containing four realistic desktop web screens for "智联名牌"管理后台 and security audit. The screens must look like actual running web UI, not wireframes.
+Scene/backdrop: professional product presentation board with desktop browser windows.
+Subject: four desktop UI screens: 1) 后台账号密码登录, 2) 管理首页数据概览, 3) 老人档案管理列表 with desensitized data, 4) RBAC权限配置 + 操作日志/安全审计.
+Style/medium: high-fidelity Chinese SaaS admin dashboard UI, restrained medical operations system, dense but organized.
+Composition/framing: landscape 16:9 overview, browser windows in a grid, readable tables and settings panels.
+Lighting/mood: secure, compliant, practical.
+Color palette: white, neutral gray, medical blue, teal status indicators, red only for risk alerts.
+Text (verbatim): include Chinese labels "智联名牌管理后台", "账号密码登录", "老人档案", "二维码管理", "志愿者管理", "角色权限", "RBAC", "操作日志", "IP白名单", "接口签名", "AES-256加密", "HTTPS", "微信OpenID", "JWT短时Token", "短信二次验证", "脱敏展示".
+Functional details: dashboard should show counts for老人档案、志愿者、今日扫码、验证通过、异常访问; archive list should show masked phone numbers like 138****5678; RBAC page should show roles志愿者/项目管理员/审计员/系统管理员 and data scope; audit log should show operator, action, IP, result, time.
+Constraints: backend operator uses account-password login and RBAC; restrict access to authorized data; show security hardening modules clearly. No medical diagnosis modules and no health monitoring devices.
+Avoid: consumer marketing page, huge hero section, fantasy gradients, illegible tables, random English filler, unmasked phone numbers, watermark.

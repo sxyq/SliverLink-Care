@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.SilverLinkSmsRelay" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/sl_primary</item>
+        <item name="colorPrimaryVariant">@color/sl_primary_variant</item>
+        <item name="colorOnPrimary">@color/sl_on_primary</item>
+        <item name="android:statusBarColor" tools:targetApi="l">@color/sl_primary</item>
+        <item name="android:windowBackground">@color/sl_background</item>
+    </style>
+
+    <style name="RelayCardView" parent="Widget.Material3.CardView.Elevated">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">2dp</item>
+        <item name="cardBackgroundColor">@color/sl_card_bg</item>
+        <item name="contentPadding">16dp</item>
+    </style>
+
+    <style name="RelaySectionTitle" parent="TextAppearance.Material3.TitleMedium">
+        <item name="android:textColor">@color/sl_text_primary</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="RelayBodyText" parent="TextAppearance.Material3.BodyMedium">
+        <item name="android:textColor">@color/sl_text_secondary</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="RelayStatusChip" parent="Widget.Material3.Chip.Input">
+        <item name="chipCornerRadius">8dp</item>
+    </style>
+</resources>
