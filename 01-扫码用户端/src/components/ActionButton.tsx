@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 
 interface ActionButtonProps {
   icon?: LucideIcon;
-  variant?: 'primary' | 'emergency' | 'secondary';
+  variant?: 'primary' | 'emergency' | 'secondary' | 'outline';
   children: React.ReactNode;
   onClick?: () => void;
   href?: string;

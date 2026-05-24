@@ -29,6 +29,12 @@ export default function SmsVerifyPage() {
   const vState = useSyncExternalStore(subscribe, getVerificationState);
   const isInvitationRegister = !!(state?.code && state.name && state.phone && state.relationship && state.password);
 
+  useEffect(() => {
+    if (!state?.phone || (state?.code === undefined && state?.backupPhone === undefined)) {
+      navigate('/login', { replace: true });
+    }
+  }, [navigate, state]);
+
   const sendCurrentSms = async (phone: string) => {
     const result = isInvitationRegister && state?.code
       ? await sendInvitationSms(state.code, phone)
@@ -139,7 +145,7 @@ export default function SmsVerifyPage() {
 
         <div className="info-banner mt-24">
           <ShieldAlert size={16} />
-          <span>验证码由后端短信服务发送；未配置短信服务商时会提示发送失败。</span>
+          <span>邀请码注册后会绑定到当前家属账号；单个家属账号最多可绑定 4 位老人。</span>
         </div>
       </div>
     </div>

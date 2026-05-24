@@ -28,10 +28,10 @@ public class SmsController {
             smsService.sendCode(phone, scene);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("phone", maskPhone(phone));
-            auditLogService.record("扫码用户", "SCAN", request.getRemoteAddr(), maskPhone(phone), "SMS_SEND", "SUCCESS", null, null);
+            auditLogService.record("扫码用户", "SCAN", request, maskPhone(phone), "SMS_SEND", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         } catch (RuntimeException e) {
-            auditLogService.record("扫码用户", "SCAN", request.getRemoteAddr(), maskPhone(phone), "SMS_SEND", "FAIL", e.getMessage(), null);
+            auditLogService.record("扫码用户", "SCAN", request, maskPhone(phone), "SMS_SEND", "FAIL", e.getMessage(), null);
             return ApiResponse.fail(429, e.getMessage());
         }
     }
@@ -41,7 +41,7 @@ public class SmsController {
         boolean ok = smsService.verify(body.get("phone"), body.get("code"), body.getOrDefault("scene", "SCAN"));
         Map<String, Boolean> map = new LinkedHashMap<>();
         map.put("verified", ok);
-        auditLogService.record("扫码用户", "SCAN", request.getRemoteAddr(), maskPhone(body.get("phone")), "SMS_VERIFY", ok ? "SUCCESS" : "FAIL", ok ? null : "验证码错误", null);
+        auditLogService.record("扫码用户", "SCAN", request, maskPhone(body.get("phone")), "SMS_VERIFY", ok ? "SUCCESS" : "FAIL", ok ? null : "验证码错误", null);
         return ApiResponse.ok(map);
     }
 

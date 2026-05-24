@@ -1,6 +1,7 @@
-import { Pill, ShieldCheck } from 'lucide-react';
-import { MedicationList } from '../components/MedicationList';
-import { VerificationBadge } from '../components/VerificationBadge';
+import { CircleAlert, Pill } from 'lucide-react';
+import { AppAttribution } from '../components/AppAttribution';
+import { BottomTabBar } from '../components/BottomTabBar';
+import { PageTopBar } from '../components/PageTopBar';
 import type { Medication } from '../types';
 
 interface MedicationPageProps {
@@ -13,29 +14,33 @@ export function MedicationPage({ data, loading }: MedicationPageProps) {
   if (!data || data.length === 0) return <div className="sl-page loading">暂无用药记录</div>;
 
   return (
-    <div className="sl-page">
-      <header className="sl-hero slim">
-        <div>
-          <h1>主要用药</h1>
-          <p>验证后查看的敏感信息</p>
-        </div>
-        <ShieldCheck size={32} />
-      </header>
+    <div className="sl-page sl-detail-page sl-has-bottom-nav">
+      <PageTopBar title="主要用药" leading="back" trailing="menu" />
 
-      <div className="sl-badge-bar">
-        <VerificationBadge state="verified" />
+      <div className="sl-list-stack">
+        {data.map((item, index) => (
+          <section className="sl-panel sl-list-card" key={`${item.name}-${index}`}>
+            <div className="sl-list-card-icon">
+              <Pill size={26} />
+            </div>
+            <div className="sl-list-card-body">
+              <h3>{item.name}</h3>
+              <p>{item.dosage} | {item.time}</p>
+            </div>
+          </section>
+        ))}
       </div>
 
-      <section className="sl-card">
-        <div className="sl-section-title">
-          <Pill size={20} />
-          <h2>用药记录</h2>
+      <section className="sl-warning-card">
+        <CircleAlert size={18} />
+        <div>
+          <p>用药信息仅供照护参考，</p>
+          <p>请遵医嘱</p>
         </div>
-        <MedicationList items={data} />
-        <p className="sl-disclaimer">
-          用药信息仅供照护参考，请遵医嘱。
-        </p>
       </section>
+
+      <AppAttribution />
+      <BottomTabBar />
     </div>
   );
 }

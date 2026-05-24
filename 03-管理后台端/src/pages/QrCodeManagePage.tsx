@@ -3,8 +3,8 @@ import { QrCode, Settings2 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
-import { disableQrCode, fetchQrCodes, regenerateQrCode } from '../api/adminApi';
-import type { QrCodeRow } from '../types';
+import { disableQrCode, fetchQrCodes, fetchSmsRelayDevices, regenerateQrCode, updateQrCodeRelayDevice } from '../api/adminApi';
+import type { QrCodeRow, SmsRelayDeviceRow } from '../types';
 import { exportToCsv } from '../utils/exportCsv';
 
 type QrColumnKey = 'basic' | 'status' | 'createdAt' | 'actions';
@@ -39,6 +39,7 @@ function buildStableUrl(row: QrCodeRow) {
 
 export function QrCodeManagePage() {
   const [rows, setRows] = useState<QrCodeRow[]>([]);
+  const [relayDevices, setRelayDevices] = useState<SmsRelayDeviceRow[]>([]);
   const [keyword, setKeyword] = useState('');
   const [statusFilter, setStatusFilter] = useState(ALL_STATUS);
   const [selectedRow, setSelectedRow] = useState<QrCodeRow | null>(null);
@@ -48,10 +49,17 @@ export function QrCodeManagePage() {
   const [previewImage, setPreviewImage] = useState('');
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState('');
+  const [bindingRelayDeviceId, setBindingRelayDeviceId] = useState('');
+  const [bindingSaving, setBindingSaving] = useState(false);
   const columns = useTableColumnVisibility('sl_columns_qrcodes', qrColumnOptions);
 
   async function load() {
-    setRows(await fetchQrCodes());
+    const [nextRows, nextRelayDevices] = await Promise.all([
+      fetchQrCodes(),
+      fetchSmsRelayDevices(),
+    ]);
+    setRows(nextRows);
+    setRelayDevices(nextRelayDevices);
   }
 
   useEffect(() => {
@@ -102,10 +110,14 @@ export function QrCodeManagePage() {
     };
   }, [selectedRow]);
 
+  useEffect(() => {
+    setBindingRelayDeviceId(selectedRow?.relayDeviceId || '');
+  }, [selectedRow]);
+
   const filtered = useMemo(
     () =>
       rows.filter((row) => {
-        const text = `${row.id} ${row.archiveNo ?? ''} ${row.elderName ?? ''} ${row.elderPhone ?? ''}`;
+        const text = `${row.id} ${row.archiveNo ?? ''} ${row.elderName ?? ''} ${row.elderPhone ?? ''} ${row.relayDeviceId ?? ''} ${row.relayReceiverPhone ?? ''}`;
         return (!keyword || text.includes(keyword)) && (statusFilter === ALL_STATUS || row.status === statusFilter);
       }),
     [keyword, rows, statusFilter],
@@ -168,6 +180,36 @@ export function QrCodeManagePage() {
     setActionMessage('扫码访问链接已复制。');
   }
 
+  async function handleSaveRelayDevice() {
+    if (!selectedRow) return;
+    setBindingSaving(true);
+    setActionMessage('');
+    try {
+      const updated = await updateQrCodeRelayDevice(selectedRow.id, bindingRelayDeviceId);
+      setRows((prev) => prev.map((row) => (
+        row.id === selectedRow.id
+          ? {
+              ...row,
+              relayDeviceId: updated.relayDeviceId,
+              relayReceiverPhone: updated.relayReceiverPhone,
+            }
+          : row
+      )));
+      setSelectedRow((prev) => (prev
+        ? {
+            ...prev,
+            relayDeviceId: updated.relayDeviceId,
+            relayReceiverPhone: updated.relayReceiverPhone,
+          }
+        : prev));
+      setActionMessage(updated.relayDeviceId ? '扫码短信接收设备已更新。' : '已清除扫码短信接收设备绑定，将回退到默认可用设备。');
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : '短信接收设备保存失败');
+    } finally {
+      setBindingSaving(false);
+    }
+  }
+
   function closeModal() {
     setSelectedRow(null);
     setActionMessage('');
@@ -182,6 +224,8 @@ export function QrCodeManagePage() {
         年龄: row.elderAge == null ? '-' : String(row.elderAge),
         电话: row.elderPhone || '-',
         绑定档案: row.archiveNo || '-',
+        短信接收设备: row.relayDeviceId || '默认设备',
+        接收手机号: row.relayReceiverPhone || '跟随默认设备',
         二维码ID: row.id,
         状态: row.status,
         创建时间: formatTime(row.createdAt),
@@ -241,6 +285,8 @@ export function QrCodeManagePage() {
                         <div style={{ display: 'grid', gap: 4, marginTop: 6 }}>
                           <span>二维码 ID：{row.id}</span>
                           <span>绑定档案：{row.archiveNo || '-'}</span>
+                          <span>短信接收设备：{row.relayDeviceId || '未指定，使用默认设备'}</span>
+                          <span>接收手机号：{row.relayReceiverPhone || '跟随默认设备'}</span>
                         </div>
                       </details>
                     </div>
@@ -339,6 +385,28 @@ export function QrCodeManagePage() {
                   扫码访问链接
                   <input value={previewUrl || '当前未保存可展示链接'} readOnly />
                 </label>
+                <label>
+                  短信接收设备
+                  <select value={bindingRelayDeviceId} onChange={(event) => setBindingRelayDeviceId(event.target.value)}>
+                    <option value="">未指定，使用默认设备</option>
+                    {relayDevices.map((device) => (
+                      <option key={device.deviceId} value={device.deviceId}>
+                        {device.deviceId} · {device.receiverPhone || '未配置手机号'}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  当前接收手机号
+                  <input
+                    value={
+                      bindingRelayDeviceId
+                        ? relayDevices.find((device) => device.deviceId === bindingRelayDeviceId)?.receiverPhone || '未配置手机号'
+                        : (selectedRow.relayReceiverPhone || '跟随默认设备')
+                    }
+                    readOnly
+                  />
+                </label>
                 {previewError && (
                   <p className="form-error" style={{ gridColumn: '1 / -1', margin: 0 }}>
                     {previewError}
@@ -360,6 +428,9 @@ export function QrCodeManagePage() {
             </div>
 
             <div className="form-actions" style={{ marginTop: 18 }}>
+              <button className="secondary" onClick={handleSaveRelayDevice} disabled={pendingAction !== null || bindingSaving}>
+                {bindingSaving ? '保存中...' : '保存短信接收设备'}
+              </button>
               <button className="danger" onClick={handleDisable} disabled={pendingAction !== null || selectedRow.status === '已停用'}>
                 {pendingAction === 'disable' ? '停用中...' : '停用二维码'}
               </button>

@@ -7,8 +7,9 @@ const RELATIONSHIPS = ['配偶', '子女', '兄弟姐妹', '其他'];
 export default function FamilyRegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const code = (location.state as { code?: string })?.code || '';
+  const presetCode = (location.state as { code?: string } | null)?.code || '';
 
+  const [inviteCode, setInviteCode] = useState(presetCode);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [relationship, setRelationship] = useState('');
@@ -18,6 +19,7 @@ export default function FamilyRegisterPage() {
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
+    if (!inviteCode.trim()) newErrors['inviteCode'] = '请输入邀请码';
     if (!name.trim()) newErrors['name'] = '请输入姓名';
     if (!phone.trim()) {
       newErrors['phone'] = '请输入手机号';
@@ -39,7 +41,7 @@ export default function FamilyRegisterPage() {
 
   const handleSubmit = () => {
     if (!validate()) return;
-    navigate('/verify', { state: { code, name, phone, relationship, password } });
+    navigate('/verify', { state: { code: inviteCode.trim(), name, phone, relationship, password } });
   };
 
   return (
@@ -47,6 +49,17 @@ export default function FamilyRegisterPage() {
       <TopBar title="家属协管账号注册" />
       <div className="page-container">
         <div className="card">
+          <div className="form-group">
+            <label className="form-label">邀请码</label>
+            <input
+              className={`form-input${errors['inviteCode'] ? ' error' : ''}`}
+              placeholder="请输入后台发放的邀请码"
+              value={inviteCode}
+              onChange={(e) => setInviteCode(e.target.value)}
+            />
+            {errors['inviteCode'] && <div className="form-error">{errors['inviteCode']}</div>}
+          </div>
+
           <div className="form-group">
             <label className="form-label">姓名</label>
             <input
@@ -91,7 +104,7 @@ export default function FamilyRegisterPage() {
             <label className="form-label">密码</label>
             <input
               className={`form-input${errors['password'] ? ' error' : ''}`}
-              placeholder="请设置登录密码（至少6位）"
+              placeholder="首次注册请设置密码；已有账号请输入原密码"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -110,6 +123,10 @@ export default function FamilyRegisterPage() {
             />
             {errors['confirmPassword'] && <div className="form-error">{errors['confirmPassword']}</div>}
           </div>
+        </div>
+
+        <div className="info-banner mt-16">
+          仅支持通过邀请码注册或继续绑定老人。没有邀请码时暂时无法创建家属账号，忘记密码请联系管理员处理。
         </div>
 
         <button className="btn btn-primary btn-block mt-16" onClick={handleSubmit}>

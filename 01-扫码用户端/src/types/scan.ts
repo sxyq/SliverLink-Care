@@ -4,6 +4,7 @@ export interface ElderBasicInfo {
   name: string;
   gender: string;
   age: number;
+  residence?: string;
   emergencyContact: string;
   emergencyPhoneMasked: string;
   emergencyPhoneDial: string;

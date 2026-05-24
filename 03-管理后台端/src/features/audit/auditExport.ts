@@ -9,6 +9,10 @@ export function exportAuditLogs(rows: AuditLog[], filename?: string) {
   const data = rows.map((log) => ({
     操作时间: log.time,
     操作人: log.operator,
+    验证方式: log.verificationMethod || '',
+    访问人姓名: log.visitorName || '',
+    访问人手机号: log.visitorPhone || log.visitorPhoneMasked || '',
+    访问人身份证号: log.visitorIdCard || log.visitorIdCardMasked || '',
     操作类型: log.action,
     操作对象: log.target,
     来源IP: log.ip,

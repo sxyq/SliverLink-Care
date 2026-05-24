@@ -1,5 +1,5 @@
 import { http } from './httpClient';
-import type { BasicInfo, HealthFormState, Medication, ScaleForm } from '../types';
+import type { BasicInfo, HealthFormState, Medication, ScaleForm, ScaleRecord, ScaleType } from '../types';
 
 export async function saveBasicInfo(elderId: string, form: BasicInfo) {
   return http<{ recordId: string }>(`/api/elder/${elderId}/basic`, {
@@ -8,6 +8,7 @@ export async function saveBasicInfo(elderId: string, form: BasicInfo) {
       name: form.name,
       gender: form.gender,
       age: Number(form.age || 0),
+      residence: form.residence,
       emergencyContactName: form.emergencyContactName,
       emergencyPhone: form.emergencyContactPhone,
       relationship: form.emergencyContactRelation,
@@ -64,4 +65,24 @@ export async function saveScaleRecords(elderId: string, scale: ScaleForm) {
       answers: scale.answers,
     }]),
   });
+}
+
+export async function fetchScaleRecords(elderId: string): Promise<ScaleRecord[]> {
+  const rows = await http<Array<Record<string, unknown>>>(`/api/elder/${elderId}/scale-records`);
+  return rows.map((row) => ({
+    scale: String(row.scale || row.name || 'PHQ-9') as ScaleType,
+    name: String(row.name || row.scale || 'PHQ-9') as ScaleType,
+    score: Number(row.score || 0),
+    date: String(row.date || row.updatedAt || ''),
+    volunteer: String(row.volunteer || ''),
+    answers: Array.isArray(row.answers)
+      ? row.answers.map((item) => {
+          const answer = (item ?? {}) as Record<string, unknown>;
+          return {
+            question: String(answer.question || ''),
+            value: answer.value == null ? null : Number(answer.value),
+          };
+        })
+      : [],
+  }));
 }

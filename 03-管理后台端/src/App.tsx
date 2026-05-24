@@ -25,6 +25,22 @@ export function App() {
     }
   }, [role]);
 
+  useEffect(() => {
+    function syncSession() {
+      const token = localStorage.getItem('sl_admin_token');
+      const savedRole = localStorage.getItem('sl_admin_role') || '';
+      setLoggedIn(Boolean(token));
+      setRole(token ? savedRole : '');
+    }
+
+    window.addEventListener('storage', syncSession);
+    window.addEventListener('sl-admin-session-cleared', syncSession as EventListener);
+    return () => {
+      window.removeEventListener('storage', syncSession);
+      window.removeEventListener('sl-admin-session-cleared', syncSession as EventListener);
+    };
+  }, []);
+
   function handleLogin(nextRole: string) {
     localStorage.setItem('sl_admin_role', nextRole);
     setRole(nextRole);

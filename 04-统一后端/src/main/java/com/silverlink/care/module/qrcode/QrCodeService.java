@@ -1,6 +1,7 @@
 package com.silverlink.care.module.qrcode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
@@ -60,6 +61,7 @@ public class QrCodeService {
         entity.setQrId(qrId);
         entity.setElderId(elderId);
         entity.setArchiveNo(archiveNo);
+        entity.setRelayDeviceId(existing == null ? null : existing.getRelayDeviceId());
         entity.setQrToken(token);
         entity.setQrTokenHash(hashService.sha256(token));
         entity.setStatus("ENABLED");
@@ -69,16 +71,16 @@ public class QrCodeService {
         if (existing != null) {
             entity.setId(existing.getId());
             jdbc.update("""
-                    update qr_code set qr_id=?, archive_no=?, qr_token=?, qr_token_hash=?, status='ENABLED', key_id=?, created_at=?, disabled_at=null
+                    update qr_code set qr_id=?, archive_no=?, relay_device_id=?, qr_token=?, qr_token_hash=?, status='ENABLED', key_id=?, created_at=?, disabled_at=null
                     where id=?
-                    """, entity.getQrId(), entity.getArchiveNo(), entity.getQrToken(), entity.getQrTokenHash(),
+                    """, entity.getQrId(), entity.getArchiveNo(), entity.getRelayDeviceId(), entity.getQrToken(), entity.getQrTokenHash(),
                     entity.getKeyId(), entity.getCreatedAt(), entity.getId());
         } else {
             jdbc.update("""
-                    insert into qr_code (id, qr_id, elder_id, archive_no, qr_token, qr_token_hash, status, key_id, created_at, disabled_at)
-                    values (?,?,?,?,?,?,?,?,?,?)
-                    """, entity.getId(), entity.getQrId(), entity.getElderId(), entity.getArchiveNo(), entity.getQrToken(),
-                    entity.getQrTokenHash(), entity.getStatus(), entity.getKeyId(), entity.getCreatedAt(), null);
+                    insert into qr_code (id, qr_id, elder_id, archive_no, relay_device_id, qr_token, qr_token_hash, status, key_id, created_at, disabled_at)
+                    values (?,?,?,?,?,?,?,?,?,?,?)
+                    """, entity.getId(), entity.getQrId(), entity.getElderId(), entity.getArchiveNo(), entity.getRelayDeviceId(),
+                    entity.getQrToken(), entity.getQrTokenHash(), entity.getStatus(), entity.getKeyId(), entity.getCreatedAt(), null);
         }
         return new QrCodeIssueResult(entity, token, buildPublicUrl(token));
     }
@@ -115,6 +117,33 @@ public class QrCodeService {
         jdbc.update("update qr_code set status='DISABLED', disabled_at=? where id=?", Instant.now().toString(), id);
     }
 
+    public QrCodeEntity bindRelayDevice(String id, String relayDeviceId) {
+        if (id == null || id.isBlank()) {
+            throw new BizException(400, "Missing qr code id");
+        }
+        String nextRelayDeviceId = relayDeviceId == null ? "" : relayDeviceId.trim();
+        if (!nextRelayDeviceId.isBlank()) {
+            Integer count = jdbc.queryForObject(
+                    "select count(*) from sms_relay_device where device_id=?",
+                    Integer.class,
+                    nextRelayDeviceId
+            );
+            if (count == null || count == 0) {
+                throw new BizException(404, "短信接收设备不存在");
+            }
+        }
+
+        int updated = jdbc.update(
+                "update qr_code set relay_device_id=? where id=?",
+                nextRelayDeviceId.isBlank() ? null : nextRelayDeviceId,
+                id
+        );
+        if (updated == 0) {
+            throw new BizException(404, "二维码不存在");
+        }
+        return findByIdWithRelayDevice(id);
+    }
+
     public String buildPublicUrl(String token) {
         if (publicBaseUrl.endsWith("=")) {
             return publicBaseUrl + token;
@@ -125,9 +154,14 @@ public class QrCodeService {
 
     public Collection<QrCodeEntity> listAll() {
         List<Map<String, Object>> rows = jdbc.queryForList("""
-                select q.*, e.name_enc as elder_name_enc, e.age as elder_age, e.emergency_phone_enc as elder_phone_enc
+                select q.*,
+                       e.name_enc as elder_name_enc,
+                       e.age as elder_age,
+                       e.emergency_phone_enc as elder_phone_enc,
+                       d.receiver_phone as relay_receiver_phone
                 from qr_code q
                 left join elder e on e.id = q.elder_id
+                left join sms_relay_device d on d.device_id = q.relay_device_id
                 order by q.created_at desc
                 """);
         List<QrCodeEntity> result = new ArrayList<>();
@@ -166,6 +200,8 @@ public class QrCodeService {
         e.setQrId(data.str(row.get("qr_id")));
         e.setElderId(data.str(row.get("elder_id")));
         e.setArchiveNo(data.str(row.get("archive_no")));
+        e.setRelayDeviceId(data.str(row.get("relay_device_id")));
+        e.setRelayReceiverPhone(data.str(row.get("relay_receiver_phone")));
         e.setQrToken(data.str(row.get("qr_token")));
         e.setQrTokenHash(data.str(row.get("qr_token_hash")));
         e.setStatus(data.str(row.get("status")));
@@ -173,5 +209,15 @@ public class QrCodeService {
         e.setCreatedAt(data.str(row.get("created_at")));
         e.setDisabledAt(data.str(row.get("disabled_at")));
         return e;
+    }
+
+    private QrCodeEntity findByIdWithRelayDevice(String id) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select q.*, d.receiver_phone as relay_receiver_phone
+                from qr_code q
+                left join sms_relay_device d on d.device_id = q.relay_device_id
+                where q.id=?
+                """, id);
+        return rows.isEmpty() ? null : toEntity(rows.get(0));
     }
 }

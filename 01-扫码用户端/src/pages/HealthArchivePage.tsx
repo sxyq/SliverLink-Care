@@ -1,45 +1,96 @@
-import { HeartPulse, ShieldCheck } from 'lucide-react';
-import { InfoCard } from '../components/InfoCard';
-import { VerificationBadge } from '../components/VerificationBadge';
-import type { HealthRecord } from '../types';
+import { BadgeInfo, HeartPulse, ShieldCheck, Stethoscope, TriangleAlert, UserRound } from 'lucide-react';
+import { AppAttribution } from '../components/AppAttribution';
+import { BottomTabBar } from '../components/BottomTabBar';
+import { PageTopBar } from '../components/PageTopBar';
+import { formatDate } from '../utils/format';
+import { formatMaskedContact } from '../utils/mask';
+import type { ElderBasicInfo, HealthRecord } from '../types';
 
 interface HealthArchivePageProps {
   data: HealthRecord | null;
+  basicInfo: ElderBasicInfo;
   loading: boolean;
+  verified?: boolean;
 }
 
-export function HealthArchivePage({ data, loading }: HealthArchivePageProps) {
+function formatVerifiedContact(basicInfo: ElderBasicInfo) {
+  const relation = basicInfo.relationship ? `（${basicInfo.relationship}）` : '';
+  return `${basicInfo.emergencyContact}${relation}  ${basicInfo.emergencyPhoneDial}`;
+}
+
+export function HealthArchivePage({ data, basicInfo, loading, verified = false }: HealthArchivePageProps) {
   if (loading) return <div className="sl-page loading">加载中...</div>;
   if (!data) return <div className="sl-page loading">暂无健康档案</div>;
 
-  const items = [
-    { label: '填写日期', value: data.date },
-    { label: '负责志愿者', value: data.volunteer },
-    { label: '身高', value: `${data.heightCm} cm` },
-    { label: '体重', value: `${data.weightKg} kg` },
-    { label: '腰围', value: `${data.waistCm} cm` },
-    { label: 'BMI', value: data.bmi.toFixed(1) },
-    { label: '健康状态自评', value: data.healthSelfAssessment },
-    { label: '生活自理能力自评', value: data.selfCareAssessment },
-    { label: '认知功能粗筛', value: data.cognitiveScreening },
-    { label: '情感状态粗筛', value: data.emotionScreening },
+  const infoRows = [
+    {
+      icon: Stethoscope,
+      label: '慢病情况',
+      value: data.healthSelfAssessment || '暂无记录',
+    },
+    { icon: TriangleAlert, label: '过敏史', value: basicInfo.allergySummary || '暂无记录' },
+    { icon: HeartPulse, label: '基础体征', value: `身高 ${data.heightCm}cm，体重 ${data.weightKg}kg，BMI ${data.bmi.toFixed(1)}` },
+    { icon: BadgeInfo, label: '既往史', value: data.emotionScreening || data.cognitiveScreening || '暂无记录' },
+    {
+      icon: UserRound,
+      label: '联系人',
+      value: verified
+        ? formatVerifiedContact(basicInfo)
+        : `${formatMaskedContact(basicInfo.emergencyContact, basicInfo.relationship)}  ${basicInfo.emergencyPhoneMasked}`,
+    },
   ];
 
   return (
-    <div className="sl-page">
-      <header className="sl-hero slim">
-        <div>
-          <h1>健康档案</h1>
-          <p>验证后查看的敏感信息</p>
-        </div>
-        <ShieldCheck size={32} />
-      </header>
+    <div className="sl-page sl-detail-page sl-has-bottom-nav">
+      <PageTopBar title="健康档案" leading="back" trailing="menu" />
 
-      <div className="sl-badge-bar">
-        <VerificationBadge state="verified" />
+      <div className="sl-verified-banner">
+        <ShieldCheck size={16} />
+        已通过短信验证
       </div>
 
-      <InfoCard items={items} />
+      <section className="sl-panel sl-info-block">
+        <div className="sl-info-block-head">
+          <span className="sl-info-block-icon">
+            <BadgeInfo size={18} />
+          </span>
+          <div>
+            <div className="sl-info-block-label">健康档案编号</div>
+            <div className="sl-info-block-value">{basicInfo.archiveNo}</div>
+          </div>
+        </div>
+      </section>
+
+      <section className="sl-panel sl-info-block">
+        <div className="sl-info-block-head">
+          <span className="sl-info-block-icon">
+            <HeartPulse size={18} />
+          </span>
+          <div className="sl-info-block-title">基础健康信息</div>
+        </div>
+
+        <div className="sl-detail-rows">
+          <div className="sl-detail-meta-row">
+            <span>最近更新： {formatDate(data.date)}</span>
+            <span>记录人： {data.volunteer || '暂无记录'}</span>
+          </div>
+
+          {infoRows.map((row) => {
+            const Icon = row.icon;
+            return (
+              <div key={row.label} className="sl-detail-row">
+                <span className="sl-detail-row-icon">
+                  <Icon size={16} />
+                </span>
+                <span className="sl-detail-row-label">{row.label}：</span>
+                <strong>{row.value}</strong>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+      <AppAttribution />
+      <BottomTabBar />
     </div>
   );
 }

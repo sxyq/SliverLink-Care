@@ -6,9 +6,10 @@ interface ScaleQuestionProps {
   item: ScaleAnswer;
   options: string[];
   onChange: (value: number) => void;
+  readOnly?: boolean;
 }
 
-export const ScaleQuestion: React.FC<ScaleQuestionProps> = ({ index, item, options, onChange }) => {
+export const ScaleQuestion: React.FC<ScaleQuestionProps> = ({ index, item, options, onChange, readOnly }) => {
   return (
     <div className="sl-question">
       <p className="sl-question-text">
@@ -22,6 +23,7 @@ export const ScaleQuestion: React.FC<ScaleQuestionProps> = ({ index, item, optio
             type="button"
             className={item.value === i ? 'sl-chip sl-chip-selected' : 'sl-chip'}
             onClick={() => onChange(i)}
+            disabled={readOnly}
           >
             {opt}
           </button>

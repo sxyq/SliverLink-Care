@@ -13,8 +13,8 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5174,
     proxy: {
-      '/silverlink-api': {
-        target: 'http://sxyq27.online',
+      '/api': {
+        target: 'http://sxyq27.online/silverlink-api',
         changeOrigin: true,
       },
     },

@@ -10,9 +10,9 @@
   --color-border: #d9e2e8;
   --color-table-header: #f6f9fb;
   --color-white: #ffffff;
-  --sidebar-width: 220px;
+  --sidebar-width: 286px;
   --panel-radius: 8px;
   --panel-padding: 18px;
-  --content-padding: 22px;
+  --content-padding: clamp(14px, 2vw, 22px);
   --font-family: "Microsoft YaHei", system-ui, sans-serif;
 }

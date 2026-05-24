@@ -1,6 +1,9 @@
-import { FileText, ShieldCheck } from 'lucide-react';
-import { ScaleSummaryCard } from '../components/ScaleSummaryCard';
-import { VerificationBadge } from '../components/VerificationBadge';
+import { ClipboardList, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { AppAttribution } from '../components/AppAttribution';
+import { BottomTabBar } from '../components/BottomTabBar';
+import { PageTopBar } from '../components/PageTopBar';
+import { formatDate } from '../utils/format';
 import type { ScaleSummary } from '../types';
 
 interface ScaleSummaryPageProps {
@@ -9,33 +12,43 @@ interface ScaleSummaryPageProps {
 }
 
 export function ScaleSummaryPage({ data, loading }: ScaleSummaryPageProps) {
+  const navigate = useNavigate();
+
   if (loading) return <div className="sl-page loading">加载中...</div>;
   if (!data || data.length === 0) return <div className="sl-page loading">暂无量表记录</div>;
 
   return (
-    <div className="sl-page">
-      <header className="sl-hero slim">
-        <div>
-          <h1>量表记录</h1>
-          <p>点击量表可查看记录详情</p>
-        </div>
-        <ShieldCheck size={32} />
-      </header>
+    <div className="sl-page sl-detail-page sl-has-bottom-nav">
+      <PageTopBar title="量表记录" leading="back" trailing="menu" />
 
-      <div className="sl-badge-bar">
-        <VerificationBadge state="verified" />
+      <div className="sl-list-stack">
+        {data.map((item) => (
+          <button
+            type="button"
+            className="sl-panel sl-scale-summary-card sl-scale-summary-button"
+            key={item.name}
+            onClick={() => navigate(`/scale/${encodeURIComponent(item.name)}`)}
+          >
+            <div className="sl-list-card-icon is-blue">
+              <ClipboardList size={24} />
+            </div>
+            <div className="sl-list-card-body">
+              <h3>{item.name}</h3>
+              <p>
+                最近记录： {formatDate(item.updatedAt)} | 分数 <strong>{item.score}</strong>
+              </p>
+            </div>
+          </button>
+        ))}
       </div>
 
-      <section className="sl-card">
-        <div className="sl-section-title">
-          <FileText size={20} />
-          <h2>量表摘要</h2>
-        </div>
-        <ScaleSummaryCard items={data} />
-        <p className="sl-disclaimer">
-          量表记录为社区随访记录，不作为医疗诊断结论。
-        </p>
-      </section>
+      <div className="sl-privacy-pill">
+        <Shield size={16} />
+        隐私保护
+      </div>
+
+      <AppAttribution />
+      <BottomTabBar />
     </div>
   );
 }

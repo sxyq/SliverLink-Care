@@ -6,6 +6,7 @@ public class DeviceConfigDto {
     private String serverUrl;
     private String messagePrefix;
     private String status;
+    private String serviceStatus;
     private String lastHeartbeat;
 
     public String getDeviceId() { return deviceId; }
@@ -18,6 +19,8 @@ public class DeviceConfigDto {
     public void setMessagePrefix(String messagePrefix) { this.messagePrefix = messagePrefix; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+    public String getServiceStatus() { return serviceStatus; }
+    public void setServiceStatus(String serviceStatus) { this.serviceStatus = serviceStatus; }
     public String getLastHeartbeat() { return lastHeartbeat; }
     public void setLastHeartbeat(String lastHeartbeat) { this.lastHeartbeat = lastHeartbeat; }
 }

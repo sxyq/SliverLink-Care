@@ -1,7 +1,8 @@
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { CareMedicationRecord } from './types';
+import { PageHeader } from '../components/PageHeader';
 
 type DraftMedication = Omit<CareMedicationRecord, 'updatedAt'>;
 
@@ -82,13 +83,12 @@ export function MedicationEditorPage({
       alert('请输入药品名称');
       return;
     }
+
     if (batchMode) {
       if (editingId) {
-        setDrafts((prev: CareMedicationRecord[]) =>
-          prev.map((item: CareMedicationRecord) => (item.id === editingId ? { ...editing } : item)),
-        );
+        setDrafts((prev) => prev.map((item) => (item.id === editingId ? { ...item, ...editing } : item)));
       } else {
-        setDrafts((prev: CareMedicationRecord[]) => [...prev, { ...editing, id: `draft-${Date.now()}` }]);
+        setDrafts((prev) => [...prev, { ...editing, id: `draft-${Date.now()}` }]);
       }
       closeModal();
       return;
@@ -109,7 +109,7 @@ export function MedicationEditorPage({
 
   async function handleDelete(id: string) {
     if (batchMode) {
-      setDrafts((prev: CareMedicationRecord[]) => prev.filter((item: CareMedicationRecord) => item.id !== id));
+      setDrafts((prev) => prev.filter((item) => item.id !== id));
       return;
     }
     if (onDelete) {
@@ -122,7 +122,7 @@ export function MedicationEditorPage({
     setSaving(true);
     try {
       await onSaveBatch(
-        drafts.map((item: CareMedicationRecord) => ({
+        drafts.map((item) => ({
           id: item.id,
           name: item.name,
           dosage: item.dosage,
@@ -136,89 +136,86 @@ export function MedicationEditorPage({
   }
 
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <strong style={{ fontSize: 16 }}>{title}</strong>
-            <div style={{ marginTop: 6, fontSize: 12, color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-              统一用药维护工作台，家属端与志愿者端共用同一套表单交互。
-            </div>
-          </div>
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {onBack ? (
-              <button type="button" onClick={onBack} style={plainButtonStyle}>
-                返回
-              </button>
-            ) : null}
-            <button type="button" onClick={openCreate} style={primaryButtonStyle}>
-              <Plus size={16} />
-              新增药品
+    <div className="sl-page">
+      <PageHeader title="主要用药" subtitle={title} onBack={onBack} />
+
+      <section className="sl-card sl-card-soft">
+        <div className="sl-section-title">
+          <h2>用药清单</h2>
+        </div>
+        <p className="sl-section-hint">按照药品名称、剂量、用法和用药时间逐条维护，提交后同步到老人护理档案。</p>
+        <div className="sl-submit-bar">
+          <button type="button" className="sl-btn sl-btn-secondary" onClick={openCreate}>
+            <Plus size={16} />
+            添加用药
+          </button>
+          {batchMode ? (
+            <button type="button" className="sl-btn sl-btn-primary" onClick={() => void handleSaveBatch()} disabled={saving}>
+              {saving ? '保存中...' : saveLabel}
             </button>
-            {batchMode ? (
-              <button type="button" onClick={() => void handleSaveBatch()} style={primaryButtonStyle} disabled={saving}>
-                {saving ? '保存中...' : saveLabel}
-              </button>
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </section>
 
       {loading ? (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-          加载中...
-        </div>
+        <section className="sl-card">
+          <div className="sl-empty-state">加载中...</div>
+        </section>
       ) : currentItems.length === 0 ? (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-          暂无用药记录
-        </div>
+        <section className="sl-card">
+          <div className="sl-empty-state">暂无用药记录</div>
+        </section>
       ) : (
-        currentItems.map((item: CareMedicationRecord) => (
-          <section key={item.id} className="card" style={{ padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between', gap: 12 }}>
-              <div>
-                <strong style={{ fontSize: 16 }}>{item.name}</strong>
-                <div style={{ marginTop: 8, fontSize: 13, color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-                  剂量 {item.dosage || '-'} · 用法 {item.usage || '-'} · 用药时间 {item.timing || '-'}
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                <button type="button" onClick={() => openEdit(item)} style={plainButtonStyle}>
+        <section className="sl-table-card">
+          <div className="sl-table-header">
+            <span>药品名称</span>
+            <span>剂量</span>
+            <span>用法</span>
+            <span>用药时间</span>
+            <span>操作</span>
+          </div>
+          {currentItems.map((item) => (
+            <div key={item.id} className="sl-table-row">
+              <span>{item.name}</span>
+              <span>{item.dosage || '-'}</span>
+              <span>{item.usage || '-'}</span>
+              <span>{item.timing || '-'}</span>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                <button type="button" className="sl-ghost-btn" onClick={() => openEdit(item)}>
                   编辑
                 </button>
-                <button type="button" onClick={() => void handleDelete(item.id)} style={dangerButtonStyle}>
+                <button type="button" className="sl-icon-btn" onClick={() => void handleDelete(item.id)} aria-label="删除药品">
                   <Trash2 size={14} />
-                  删除
                 </button>
               </div>
             </div>
-          </section>
-        ))
+          ))}
+        </section>
       )}
 
       {showModal ? (
-        <div style={overlayStyle} onClick={closeModal}>
-          <div style={modalStyle} onClick={(event) => event.stopPropagation()}>
-            <strong style={{ fontSize: 16 }}>{editingId ? '编辑药品' : '新增药品'}</strong>
-            <div style={formGridStyle}>
+        <div className="sl-modal-overlay" onClick={closeModal}>
+          <div className="sl-modal-card" onClick={(event) => event.stopPropagation()}>
+            <h3>{editingId ? '编辑药品' : '新增药品'}</h3>
+            <div className="sl-form-grid">
               <Field label="药品名称">
-                <input value={editing.name} onChange={(event) => updateDraftField('name', event.target.value)} style={inputStyle} />
+                <input className="sl-input" value={editing.name} onChange={(event) => updateDraftField('name', event.target.value)} />
               </Field>
               <Field label="剂量">
-                <input value={editing.dosage} onChange={(event) => updateDraftField('dosage', event.target.value)} style={inputStyle} />
+                <input className="sl-input" value={editing.dosage} onChange={(event) => updateDraftField('dosage', event.target.value)} />
               </Field>
               <Field label="用法">
-                <input value={editing.usage} onChange={(event) => updateDraftField('usage', event.target.value)} style={inputStyle} />
+                <input className="sl-input" value={editing.usage} onChange={(event) => updateDraftField('usage', event.target.value)} />
               </Field>
               <Field label="用药时间">
-                <input value={editing.timing} onChange={(event) => updateDraftField('timing', event.target.value)} style={inputStyle} />
+                <input className="sl-input" value={editing.timing} onChange={(event) => updateDraftField('timing', event.target.value)} />
               </Field>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button type="button" onClick={closeModal} style={plainButtonStyle}>
+            <div className="sl-modal-actions">
+              <button type="button" className="sl-btn sl-btn-secondary" onClick={closeModal}>
                 取消
               </button>
-              <button type="button" onClick={() => void handleModalSave()} style={primaryButtonStyle} disabled={saving}>
+              <button type="button" className="sl-btn sl-btn-primary" onClick={() => void handleModalSave()} disabled={saving}>
                 {saving ? '保存中...' : '确认保存'}
               </button>
             </div>
@@ -231,73 +228,9 @@ export function MedicationEditorPage({
 
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <label style={{ display: 'grid', gap: 6 }}>
-      <span style={{ fontSize: 12, color: 'var(--sl-text-secondary, #5F6F7A)' }}>{label}</span>
+    <label className="sl-label">
+      <span className="sl-label-text">{label}</span>
       {children}
     </label>
   );
 }
-
-const inputStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 42,
-  borderRadius: 10,
-  border: '1px solid var(--sl-border, #D8E7EA)',
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  padding: '10px 12px',
-  fontSize: 14,
-};
-
-const primaryButtonStyle: CSSProperties = {
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  border: 'none',
-  borderRadius: 10,
-  background: 'var(--sl-primary, #126B78)',
-  color: '#FFFFFF',
-  padding: '10px 14px',
-  cursor: 'pointer',
-};
-
-const plainButtonStyle: CSSProperties = {
-  border: '1px solid var(--sl-border, #D8E7EA)',
-  borderRadius: 10,
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  color: 'var(--sl-text, #18222D)',
-  padding: '10px 14px',
-  cursor: 'pointer',
-};
-
-const dangerButtonStyle: CSSProperties = {
-  ...plainButtonStyle,
-  display: 'inline-flex',
-  alignItems: 'center',
-  gap: 6,
-  color: '#D94444',
-};
-
-const overlayStyle: CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(24, 34, 45, 0.35)',
-  display: 'grid',
-  placeItems: 'center',
-  padding: 20,
-  zIndex: 999,
-};
-
-const modalStyle: CSSProperties = {
-  width: 'min(100%, 560px)',
-  borderRadius: 16,
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  padding: 20,
-  display: 'grid',
-  gap: 16,
-};
-
-const formGridStyle: CSSProperties = {
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-  gap: 12,
-};

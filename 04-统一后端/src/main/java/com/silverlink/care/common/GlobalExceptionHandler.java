@@ -10,7 +10,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BizException.class)
     public ResponseEntity<ApiResponse<Void>> handleBiz(BizException e) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        if (e.getCode() == 401) {
+            status = HttpStatus.UNAUTHORIZED;
+        } else if (e.getCode() == 403) {
+            status = HttpStatus.FORBIDDEN;
+        } else if (e.getCode() == 404) {
+            status = HttpStatus.NOT_FOUND;
+        }
+        return ResponseEntity.status(status)
                 .body(ApiResponse.fail(e.getCode(), e.getMessage()));
     }
 

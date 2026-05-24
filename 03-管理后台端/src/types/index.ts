@@ -11,6 +11,7 @@ export interface ElderRow {
   name: string;
   gender?: string;
   age: number;
+  residence?: string;
   phoneMasked: string;
   aboType?: string;
   rhType?: string;
@@ -22,6 +23,7 @@ export interface VolunteerRow {
   id: string;
   name: string;
   account: string;
+  phone?: string;
   elderCount: number;
   status: string;
   lastSubmit: string;
@@ -45,6 +47,8 @@ export interface QrCodeRow {
   elderName: string | null;
   elderAge?: number | null;
   elderPhone?: string | null;
+  relayDeviceId?: string | null;
+  relayReceiverPhone?: string | null;
   url?: string | null;
   status: string;
   createdAt: string;
@@ -87,6 +91,12 @@ export interface AuditLog {
   operator: string;
   role?: string;
   action: string;
+  verificationMethod?: string;
+  visitorName?: string;
+  visitorPhone?: string;
+  visitorPhoneMasked?: string;
+  visitorIdCard?: string;
+  visitorIdCardMasked?: string;
   target: string;
   ip: string;
   result: '成功' | '失败' | string;
@@ -108,6 +118,7 @@ export interface NavItem {
 export interface InvitationRow {
   id: string;
   code: string;
+  elderId: string;
   elderName: string;
   archiveNo: string;
   expiresAt: string;
@@ -128,4 +139,39 @@ export interface FamilyBindingRow {
   boundAt: string;
   status: string;
   createMethod?: string;
+}
+
+export interface SmsRelayDeviceRow {
+  deviceId: string;
+  receiverPhone: string;
+  serverUrl: string;
+  messagePrefix: string;
+  status: string;
+  serviceStatus: string;
+  lastHeartbeat: string;
+}
+
+export interface SmsRelayRecordRow {
+  id: string;
+  deviceId: string;
+  receiverPhone: string;
+  senderPhone: string;
+  messageBody: string;
+  receivedAt: string;
+  uploadedAt: string;
+  status: string;
+}
+
+export interface SmsRelaySessionRow {
+  sessionId: string;
+  elderId: string;
+  target: string;
+  relayDeviceId: string;
+  receiverPhone: string;
+  messageBody: string;
+  status: string;
+  expiresAt: string;
+  verifiedAt: string;
+  senderPhoneMasked: string;
+  createdAt: string;
 }

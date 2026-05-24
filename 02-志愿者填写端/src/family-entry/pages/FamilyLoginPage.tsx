@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { UserRoundCheck } from 'lucide-react';
 import { familyLogin } from '../api/familyAuthApi';
 
@@ -84,12 +84,33 @@ export default function FamilyLoginPage() {
         >
           {loading ? '登录中...' : '登录'}
         </button>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, gap: 12 }}>
+          <button
+            type="button"
+            onClick={() => navigate('/register')}
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              color: 'var(--sl-primary)',
+              fontSize: 14,
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            注册家属账号
+          </button>
+          <span style={{ color: 'var(--sl-text-secondary)', fontSize: 13 }}>
+            忘记密码请联系管理员
+          </span>
+        </div>
       </div>
 
-      <div style={{ textAlign: 'center', marginTop: 24 }}>
-        <Link to="/invite/INVITE001" style={{ fontSize: 13, color: 'var(--sl-primary)' }}>
-          通过邀请码注册
-        </Link>
+      <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--sl-text-secondary)', fontSize: 13, lineHeight: 1.7 }}>
+        家属账号需通过专属邀请码注册
+        <br />
+        单个家属账号最多可绑定 4 位老人
       </div>
     </div>
   );

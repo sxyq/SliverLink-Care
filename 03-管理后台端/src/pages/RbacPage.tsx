@@ -218,7 +218,7 @@ export function RbacPage() {
     const normalizedAccount = confirmAccount.trim();
     const normalizedPassword = confirmPassword.trim();
     const accountValid = normalizedAccount === 'admin';
-    const passwordValid = normalizedPassword === 'admin' || normalizedPassword === 'Admin@123456';
+    const passwordValid = normalizedPassword === 'admin';
 
     if (!accountValid || !passwordValid) {
       setConfirmError('当前管理员账号或密码不正确，未执行账号类型变更。');

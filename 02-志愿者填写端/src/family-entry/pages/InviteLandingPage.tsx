@@ -132,13 +132,13 @@ export default function InviteLandingPage() {
         <>
           <div className="info-banner mt-16">
             <ShieldCheck size={16} />
-            <span>邀请码有效，点击下方按钮继续注册家属协管账号。</span>
+            <span>邀请码有效。家属可通过该邀请码注册协管账号，或为已有账号继续绑定老人，单账号最多绑定 4 位老人。</span>
           </div>
           <button
             className="btn btn-primary btn-block mt-16"
             onClick={() => navigate('/register', { state: { code: invitation.code } })}
           >
-            继续注册
+            继续注册 / 绑定
           </button>
         </>
       ) : (

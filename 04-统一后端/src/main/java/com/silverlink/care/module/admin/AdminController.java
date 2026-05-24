@@ -41,16 +41,16 @@ public class AdminController {
             Map<String, String> map = new LinkedHashMap<>();
             map.put("token", token);
             map.put("role", "系统管理员");
-            auditLogService.record(account, "SYSTEM_ADMIN", request.getRemoteAddr(), "系统", "LOGIN", "SUCCESS", null, null);
+            auditLogService.record(account, "SYSTEM_ADMIN", request, "系统", "LOGIN", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         }
-        auditLogService.record(account, "UNKNOWN", request.getRemoteAddr(), "系统", "LOGIN", "FAIL", "密码错误", null);
+        auditLogService.record(account, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
         return ApiResponse.fail(401, "账号或密码错误");
     }
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request) {
-        auditLogService.record(authentication, request.getRemoteAddr(), "绯荤粺", "LOGOUT", "SUCCESS");
+        auditLogService.record(authentication, request, "绯荤粺", "LOGOUT", "SUCCESS");
         return ApiResponse.ok();
     }
 
@@ -69,28 +69,28 @@ public class AdminController {
         String id = data.createElder(body);
         Map<String, Object> elder = data.elderDetail(id, false);
         qrCodeService.generateWithToken(id, String.valueOf(elder.getOrDefault("archiveNo", "")));
-        auditLogService.record(authentication, request.getRemoteAddr(), String.valueOf(elder.getOrDefault("archiveNo", id)), "CREATE_ELDER", "SUCCESS");
+        auditLogService.record(authentication, request, String.valueOf(elder.getOrDefault("archiveNo", id)), "CREATE_ELDER", "SUCCESS");
         return ApiResponse.ok(Map.of("id", id));
     }
 
     @PutMapping("/elders/{id}")
     public ApiResponse<Void> updateElder(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         data.updateElder(id, body);
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "UPDATE_ELDER", "SUCCESS");
+        auditLogService.record(authentication, request, id, "UPDATE_ELDER", "SUCCESS");
         return ApiResponse.ok();
     }
 
     @DeleteMapping("/elders/{id}")
     public ApiResponse<Void> deleteElder(@PathVariable String id, Authentication authentication, HttpServletRequest request) {
         data.deleteElder(id);
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "DELETE_ELDER", "SUCCESS");
+        auditLogService.record(authentication, request, id, "DELETE_ELDER", "SUCCESS");
         return ApiResponse.ok();
     }
 
     @PutMapping("/elders/{id}/status")
     public ApiResponse<Void> updateElderStatus(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         data.setElderStatus(id, String.valueOf(body.getOrDefault("status", "DISABLED")));
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "UPDATE_ELDER_STATUS", "SUCCESS");
+        auditLogService.record(authentication, request, id, "UPDATE_ELDER_STATUS", "SUCCESS");
         return ApiResponse.ok();
     }
 
@@ -102,14 +102,14 @@ public class AdminController {
     @PostMapping("/volunteers")
     public ApiResponse<Map<String, String>> createVolunteer(@RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         String id = data.createVolunteer(body);
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "CREATE_VOLUNTEER", "SUCCESS");
+        auditLogService.record(authentication, request, id, "CREATE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok(Map.of("id", id));
     }
 
     @PutMapping("/volunteers/{id}")
     public ApiResponse<Void> updateVolunteer(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         data.updateVolunteer(id, body);
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "UPDATE_VOLUNTEER", "SUCCESS");
+        auditLogService.record(authentication, request, id, "UPDATE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok();
     }
 
@@ -119,14 +119,14 @@ public class AdminController {
         if (elderIds instanceof List<?> list) {
             data.setVolunteerScope(id, list.stream().map(String::valueOf).toList());
         }
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "UPDATE_VOLUNTEER_SCOPE", "SUCCESS");
+        auditLogService.record(authentication, request, id, "UPDATE_VOLUNTEER_SCOPE", "SUCCESS");
         return ApiResponse.ok();
     }
 
     @DeleteMapping("/volunteers/{id}")
     public ApiResponse<Void> deleteVolunteer(@PathVariable String id, Authentication authentication, HttpServletRequest request) {
         data.deleteVolunteer(id);
-        auditLogService.record(authentication, request.getRemoteAddr(), id, "DELETE_VOLUNTEER", "SUCCESS");
+        auditLogService.record(authentication, request, id, "DELETE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok();
     }
 

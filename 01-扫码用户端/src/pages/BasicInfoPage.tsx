@@ -1,198 +1,131 @@
+import { Phone, PlusSquare, ShieldCheck, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Activity,
-  Brain,
-  CalendarDays,
-  ClipboardList,
-  FileText,
-  HeartPulse,
-  Phone,
-  Pill,
-  ShieldCheck,
-  Stethoscope,
-  User,
-} from 'lucide-react';
-import { InfoCard } from '../components/InfoCard';
 import { ActionButton } from '../components/ActionButton';
-import { SensitiveField } from '../components/SensitiveField';
-import { MedicationList } from '../components/MedicationList';
-import { maskName } from '../utils/mask';
-import type { ElderBasicInfo, HealthRecord, Medication } from '../types';
+import { AppAttribution } from '../components/AppAttribution';
+import { BottomTabBar } from '../components/BottomTabBar';
+import { PageTopBar } from '../components/PageTopBar';
+import { formatMaskedContact, maskName } from '../utils/mask';
+import type { ElderBasicInfo } from '../types';
 
 interface BasicInfoPageProps {
   data: ElderBasicInfo;
   verified?: boolean;
-  healthRecord?: HealthRecord | null;
-  medications?: Medication[] | null;
-  archiveLoading?: boolean;
-}
-
-function formatNumber(value: number, suffix = '') {
-  if (!Number.isFinite(value) || value === 0) return '未填写';
-  return `${value}${suffix}`;
 }
 
 function formatEmergencyContact(data: ElderBasicInfo) {
-  const contactMatch = (data.emergencyContact || '').match(/^(.+?)(?:（(.+?)）|\((.+?)\))?$/);
-  const emergencyContactName = contactMatch?.[1]?.trim() || data.emergencyContact || '';
-  const embeddedRelationship = contactMatch?.[2] || contactMatch?.[3] || '';
-  const relationship = data.relationship || embeddedRelationship || '';
-  const honorific = /女|母|妻|姐|妹|姑|姨|奶/.test(relationship)
-    ? '女士'
-    : /男|父|夫|哥|弟|爷|叔|伯/.test(relationship)
-      ? '男士'
-      : '人士';
-  return relationship
-    ? `${emergencyContactName} ${honorific}（${relationship}）`
-    : `${emergencyContactName} ${honorific}`;
+  return `${formatMaskedContact(data.emergencyContact, data.relationship)}  ${data.emergencyPhoneMasked}`;
 }
 
-export function BasicInfoPage({
-  data,
-  verified = false,
-  healthRecord,
-  medications,
-  archiveLoading,
-}: BasicInfoPageProps) {
+function formatVerifiedEmergencyContact(data: ElderBasicInfo) {
+  const relation = data.relationship ? `（${data.relationship}）` : '';
+  return `${data.emergencyContact}${relation}  ${data.emergencyPhoneDial}`;
+}
+
+export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
   const navigate = useNavigate();
-  const emergencyContactDisplay = formatEmergencyContact(data);
+  const [showConsentDialog, setShowConsentDialog] = useState(false);
 
-  const basicItems = [
-    { label: '姓名', value: maskName(data.name) },
-    { label: '性别', value: data.gender },
-    { label: '年龄', value: `${data.age} 岁` },
-    { label: '紧急联系人', value: emergencyContactDisplay },
-    { label: '联系电话', value: <SensitiveField value={data.emergencyPhoneMasked} /> },
-    { label: 'ABO 血型', value: data.aboType },
-    { label: 'Rh 血型', value: data.rhType },
-    { label: '过敏史摘要', value: data.allergySummary, wide: true },
-  ];
+  function handleViewArchive() {
+    if (verified) {
+      navigate('/health');
+      return;
+    }
+    setShowConsentDialog(true);
+  }
 
-  const healthItems = healthRecord
-    ? [
-        { label: '填写日期', value: healthRecord.date || '未填写' },
-        { label: '负责人员', value: healthRecord.volunteer || '未填写' },
-        { label: '身高', value: formatNumber(healthRecord.heightCm, ' cm') },
-        { label: '体重', value: formatNumber(healthRecord.weightKg, ' kg') },
-        { label: '腰围', value: formatNumber(healthRecord.waistCm, ' cm') },
-        { label: 'BMI', value: healthRecord.bmi ? healthRecord.bmi.toFixed(1) : '未填写' },
-        { label: '健康状态自评', value: healthRecord.healthSelfAssessment || '未填写', wide: true },
-        { label: '生活自理能力', value: healthRecord.selfCareAssessment || '未填写', wide: true },
-        { label: '认知功能筛查', value: healthRecord.cognitiveScreening || '未填写', wide: true },
-        { label: '情感状态筛查', value: healthRecord.emotionScreening || '未填写', wide: true },
-      ]
-    : [];
+  function handleContinueVerify() {
+    setShowConsentDialog(false);
+    navigate('/verify?target=health');
+  }
 
   return (
-    <div className="sl-page">
-      <header className="sl-hero">
-        <div>
-          <h1>智联名牌</h1>
-        </div>
-        <ShieldCheck size={40} />
-      </header>
+    <div className="sl-page sl-home-page sl-has-bottom-nav">
+      <PageTopBar title="智联名牌" leading="home" trailing="menu" />
 
-      <section className="sl-card sl-profile">
-        <div className="sl-profile-head">
+      <section className="sl-section-heading">
+        <h2>基本信息</h2>
+        <span className="sl-section-heading-badge">
+          <ShieldCheck size={18} />
+        </span>
+      </section>
+
+      <section className="sl-panel sl-profile-panel">
+        <div className="sl-profile-hero">
           <div className="sl-profile-avatar">
-            <User size={32} />
+            <UserRound size={42} />
           </div>
-          <div className="sl-profile-meta">
-            <span className="sl-tag">{data.archiveNo}</span>
-            <h2>{maskName(data.name)}</h2>
-            <p>{data.gender} · {data.age} 岁</p>
+          <div className="sl-profile-lines">
+            <p>姓名： {verified ? data.name : maskName(data.name)}</p>
+            <p>性别： {data.gender}</p>
+            <p>年龄： {data.age} 岁</p>
           </div>
+        </div>
+        <div className="sl-archive-line">
+          健康档案编号： {data.archiveNo}
         </div>
       </section>
 
-      <InfoCard items={basicItems}>
+      <section className="sl-panel sl-address-panel">
+        <div className="sl-mini-heading">
+          <h3>住址信息</h3>
+          <span className="sl-mini-heading-icon">
+            <ShieldCheck size={16} />
+          </span>
+        </div>
+        <div className="sl-address-line">
+          {verified ? (data.residence || '待补充') : '完成验证后可查看老人详细住址信息'}
+        </div>
+      </section>
+
+      <section className="sl-panel sl-contact-panel">
+        <div className="sl-contact-line">
+          <span>紧急联系人： {verified ? formatVerifiedEmergencyContact(data) : formatEmergencyContact(data)}</span>
+        </div>
         <ActionButton icon={Phone} variant="emergency" href={`tel:${data.emergencyPhoneDial}`}>
-          一键拨打紧急联系人
+          一键拨打
         </ActionButton>
-      </InfoCard>
+      </section>
 
-      {!verified && (
-        <section className="sl-card sl-menu-card">
-          <div className="sl-menu-title">
-            <ShieldCheck size={18} />
-            <span>查看详细健康信息需完成身份验证</span>
+      <section className="sl-panel sl-medical-panel">
+        <div className="sl-mini-heading">
+          <h3>医疗信息</h3>
+          <span className="sl-mini-heading-icon">
+            <PlusSquare size={16} />
+          </span>
+        </div>
+        <div className="sl-medical-list">
+          <div>ABO 血型： {data.aboType}型</div>
+          <div>Rh 血型： {data.rhType}</div>
+          <div>过敏史摘要： {data.allergySummary}</div>
+        </div>
+      </section>
+
+      <ActionButton variant="primary" onClick={handleViewArchive}>
+        查看健康档案
+      </ActionButton>
+
+      <AppAttribution />
+      <BottomTabBar />
+
+      {showConsentDialog ? (
+        <div className="sl-consent-overlay" role="dialog" aria-modal="true" aria-labelledby="sl-consent-title">
+          <div className="sl-consent-dialog">
+            <h3 id="sl-consent-title">查看详细信息前请先完成登记</h3>
+            <p>为保护老人隐私，查看健康档案、主要用药和量表记录前，需要先完成验证或登记身份信息。</p>
+            <p>继续操作后，系统将记录您的验证方式、登记姓名、手机号、身份证信息与来源 IP，用于访问审计与安全留痕。</p>
+            <p className="sl-consent-emphasis">点击“继续查看”即视为您已知晓并同意上述信息登记与审计记录。</p>
+            <div className="sl-consent-actions">
+              <button type="button" className="sl-consent-btn secondary" onClick={() => setShowConsentDialog(false)}>
+                暂不查看
+              </button>
+              <button type="button" className="sl-consent-btn primary" onClick={handleContinueVerify}>
+                继续查看
+              </button>
+            </div>
           </div>
-          <ActionButton icon={HeartPulse} variant="primary" onClick={() => navigate('/verify?target=home')}>
-            进行身份验证
-          </ActionButton>
-        </section>
-      )}
-
-      {verified && (
-        <>
-          <div className="sl-badge-bar">
-            <span className="sl-badge verified">
-              <ShieldCheck size={14} />
-              已通过身份验证
-            </span>
-          </div>
-
-          {archiveLoading && <div className="sl-card sl-loading-card">正在读取健康档案...</div>}
-
-          {!archiveLoading && healthRecord && (
-            <section className="sl-card">
-              <div className="sl-section-title">
-                <Stethoscope size={20} />
-                <h2>健康档案</h2>
-              </div>
-              <dl className="sl-info-grid">
-                {healthItems.map((item, idx) => (
-                  <div key={idx} className={item.wide ? 'wide' : ''}>
-                    <dt>{item.label}</dt>
-                    <dd>{item.value}</dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          )}
-
-          {!archiveLoading && medications && medications.length > 0 && (
-            <section className="sl-card">
-              <div className="sl-section-title">
-                <Pill size={20} />
-                <h2>主要用药</h2>
-              </div>
-              <MedicationList items={medications} />
-              <p className="sl-disclaimer">用药信息仅供照护参考，请遵医嘱。</p>
-            </section>
-          )}
-
-          <section className="sl-card sl-scale-entry">
-            <div className="sl-scale-entry-copy">
-              <span className="sl-scale-entry-icon">
-                <ClipboardList size={22} />
-              </span>
-              <div>
-                <h2>量表记录</h2>
-                <p>PHQ-9、GAD-7、UCLA 量表摘要和详情</p>
-              </div>
-            </div>
-            <ActionButton icon={FileText} variant="secondary" onClick={() => navigate('/scale')}>
-              查看量表记录
-            </ActionButton>
-          </section>
-
-          <section className="sl-card sl-health-notes">
-            <div>
-              <Activity size={18} />
-              <span>健康档案为社区随访信息，不替代医疗诊断。</span>
-            </div>
-            <div>
-              <Brain size={18} />
-              <span>量表结果仅作照护参考，异常情况请及时就医。</span>
-            </div>
-            <div>
-              <CalendarDays size={18} />
-              <span>信息以最近一次志愿者随访记录为准。</span>
-            </div>
-          </section>
-        </>
-      )}
+        </div>
+      ) : null}
     </div>
   );
 }

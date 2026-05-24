@@ -11,6 +11,7 @@ interface ElderForm {
   name: string;
   gender: '男' | '女';
   age: string;
+  residence: string;
   emergencyContactName: string;
   emergencyPhone: string;
   relationship: string;
@@ -19,7 +20,7 @@ interface ElderForm {
   allergySummary: string;
 }
 
-type ElderColumnKey = 'archiveNo' | 'name' | 'age' | 'phone' | 'volunteer' | 'status' | 'actions';
+type ElderColumnKey = 'archiveNo' | 'name' | 'age' | 'residence' | 'phone' | 'volunteer' | 'status' | 'actions';
 
 const ABO_OTHER = '__OTHER_ABO__';
 const RH_OTHER = '__OTHER_RH__';
@@ -28,6 +29,7 @@ const elderColumnOptions: TableColumnOption<ElderColumnKey>[] = [
   { key: 'archiveNo', label: '档案编号', defaultVisible: true },
   { key: 'name', label: '姓名', defaultVisible: true },
   { key: 'age', label: '年龄', defaultVisible: true },
+  { key: 'residence', label: '住址', defaultVisible: true },
   { key: 'phone', label: '联系电话', defaultVisible: true },
   { key: 'volunteer', label: '负责志愿者', defaultVisible: true },
   { key: 'status', label: '状态', defaultVisible: true },
@@ -39,6 +41,7 @@ const emptyForm: ElderForm = {
   name: '',
   gender: '男',
   age: '',
+  residence: '',
   emergencyContactName: '',
   emergencyPhone: '',
   relationship: '',
@@ -111,6 +114,7 @@ export function ElderArchivePage() {
         name,
         gender: form.gender,
         age,
+        residence: form.residence.trim(),
         emergencyContactName: form.emergencyContactName.trim(),
         emergencyPhone: phone,
         relationship: form.relationship.trim(),
@@ -146,6 +150,7 @@ export function ElderArchivePage() {
         姓名: row.name,
         性别: row.gender || '-',
         年龄: String(row.age),
+        住址: row.residence || '-',
         联系电话: row.phoneMasked,
         ABO血型: row.aboType || '-',
         Rh血型: row.rhType || '-',
@@ -231,6 +236,7 @@ export function ElderArchivePage() {
               {columns.isVisible('archiveNo') && <th>档案编号</th>}
               {columns.isVisible('name') && <th>姓名</th>}
               {columns.isVisible('age') && <th>年龄</th>}
+              {columns.isVisible('residence') && <th>住址</th>}
               {columns.isVisible('phone') && <th>联系电话</th>}
               {columns.isVisible('volunteer') && <th>负责志愿者</th>}
               {columns.isVisible('status') && <th>状态</th>}
@@ -243,6 +249,7 @@ export function ElderArchivePage() {
                 {columns.isVisible('archiveNo') && <td>{row.archiveNo}</td>}
                 {columns.isVisible('name') && <td>{row.name}</td>}
                 {columns.isVisible('age') && <td>{row.age}</td>}
+                {columns.isVisible('residence') && <td>{row.residence || '-'}</td>}
                 {columns.isVisible('phone') && <td>{row.phoneMasked}</td>}
                 {columns.isVisible('volunteer') && <td>{row.volunteer}</td>}
                 {columns.isVisible('status') && (
@@ -299,6 +306,10 @@ export function ElderArchivePage() {
               <label>
                 年龄
                 <input type="number" value={form.age} onChange={(event) => setForm((prev) => ({ ...prev, age: event.target.value }))} />
+              </label>
+              <label>
+                居住地
+                <input value={form.residence} onChange={(event) => setForm((prev) => ({ ...prev, residence: event.target.value }))} />
               </label>
               <label>
                 紧急联系人

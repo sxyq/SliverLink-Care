@@ -19,7 +19,25 @@ public class SmsRelayController {
     @PostMapping("/inbound")
     public ApiResponse<Void> inbound(
             @RequestBody InboundSmsRequest request,
-            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret) {
+            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret,
+            @RequestHeader(value = "X-Relay-Timestamp", required = false) String relayTimestamp,
+            @RequestHeader(value = "X-Relay-Nonce", required = false) String relayNonce,
+            @RequestHeader(value = "X-Relay-Signature", required = false) String relaySignature) {
+        smsRelayService.validateDeviceRequestSignature(
+                request.getDeviceId(),
+                deviceSecret,
+                "/api/sms-relay/inbound",
+                "POST",
+                new RelaySignatureHeaders(relayTimestamp, relayNonce, relaySignature),
+                String.join("\n",
+                        String.valueOf(request.getDeviceId()),
+                        String.valueOf(request.getReceiverPhone()),
+                        String.valueOf(request.getSenderPhone()),
+                        String.valueOf(request.getMessageBody()),
+                        String.valueOf(request.getReceivedAt()),
+                        String.valueOf(request.getMessagePrefix())
+                )
+        );
         smsRelayService.handleInbound(request, deviceSecret);
         return ApiResponse.ok(null);
     }
@@ -28,7 +46,18 @@ public class SmsRelayController {
     @PostMapping("/heartbeat")
     public ApiResponse<Void> heartbeat(
             @RequestBody HeartbeatRequest request,
-            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret) {
+            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret,
+            @RequestHeader(value = "X-Relay-Timestamp", required = false) String relayTimestamp,
+            @RequestHeader(value = "X-Relay-Nonce", required = false) String relayNonce,
+            @RequestHeader(value = "X-Relay-Signature", required = false) String relaySignature) {
+        smsRelayService.validateDeviceRequestSignature(
+                request.getDeviceId(),
+                deviceSecret,
+                "/api/sms-relay/heartbeat",
+                "POST",
+                new RelaySignatureHeaders(relayTimestamp, relayNonce, relaySignature),
+                request.getDeviceId() + "\n" + request.getTimestamp()
+        );
         smsRelayService.handleHeartbeat(request, deviceSecret);
         return ApiResponse.ok(null);
     }
@@ -37,7 +66,18 @@ public class SmsRelayController {
     @GetMapping("/devices/{deviceId}/config")
     public ApiResponse<DeviceConfigDto> getDeviceConfig(
             @PathVariable String deviceId,
-            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret) {
+            @RequestHeader(value = "X-Relay-Device-Secret", required = false) String deviceSecret,
+            @RequestHeader(value = "X-Relay-Timestamp", required = false) String relayTimestamp,
+            @RequestHeader(value = "X-Relay-Nonce", required = false) String relayNonce,
+            @RequestHeader(value = "X-Relay-Signature", required = false) String relaySignature) {
+        smsRelayService.validateDeviceRequestSignature(
+                deviceId,
+                deviceSecret,
+                "/api/sms-relay/devices/" + deviceId + "/config",
+                "GET",
+                new RelaySignatureHeaders(relayTimestamp, relayNonce, relaySignature),
+                deviceId
+        );
         return ApiResponse.ok(smsRelayService.getDeviceConfig(deviceId, deviceSecret));
     }
 
@@ -51,5 +91,17 @@ public class SmsRelayController {
     @GetMapping("/admin/devices")
     public ApiResponse<List<DeviceConfigDto>> listDevices() {
         return ApiResponse.ok(smsRelayService.listDevices());
+    }
+
+    // 管理后台 - 修改设备配置
+    @PutMapping("/admin/devices/{deviceId}")
+    public ApiResponse<DeviceConfigDto> updateDevice(@PathVariable String deviceId, @RequestBody DeviceConfigDto body) {
+        return ApiResponse.ok(smsRelayService.updateDevice(deviceId, body));
+    }
+
+    // 管理后台 - 查看验证会话
+    @GetMapping("/admin/sessions")
+    public ApiResponse<List<ScanVerificationAdminDto>> listSessions() {
+        return ApiResponse.ok(smsRelayService.listVerificationSessions());
     }
 }

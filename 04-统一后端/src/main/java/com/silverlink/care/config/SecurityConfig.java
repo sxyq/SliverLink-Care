@@ -23,9 +23,29 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/scan/**", "/api/sms/**", "/api/sms-relay/**", "/api/nameplates/**", "/api/audit-logs/report", "/api/admin/login", "/api/volunteer/login", "/api/invitations/**", "/api/family/login").permitAll()
+                .requestMatchers(
+                        "/api/scan/**",
+                        "/api/sms/**",
+                        "/api/sms-relay/inbound",
+                        "/api/sms-relay/heartbeat",
+                        "/api/sms-relay/devices/*/config",
+                        "/api/nameplates/**",
+                        "/api/audit-logs/report",
+                        "/api/admin/login",
+                        "/api/volunteer/login",
+                        "/api/invitations/**",
+                        "/api/family/login"
+                ).permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/admin/**", "/api/volunteer/me/**", "/api/elder/**", "/api/rbac/**", "/api/audit-logs/**", "/api/family/**").authenticated()
+                .requestMatchers(
+                        "/api/admin/**",
+                        "/api/volunteer/me/**",
+                        "/api/elder/**",
+                        "/api/rbac/**",
+                        "/api/audit-logs/**",
+                        "/api/family/**",
+                        "/api/sms-relay/admin/**"
+                ).authenticated()
                 .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

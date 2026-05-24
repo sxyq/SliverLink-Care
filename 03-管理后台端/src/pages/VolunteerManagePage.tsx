@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
-import { Home, Link2, UserCheck, Users } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Link2, Link as LinkIcon, UserCheck, Users } from 'lucide-react';
+import { InvitationManageSection } from '../components/InvitationManageSection';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
 import {
@@ -23,7 +24,7 @@ type VolunteerForm = {
   status: string;
 };
 
-type PageTab = 'volunteer' | 'family';
+type PageTab = 'volunteer' | 'family' | 'invitation';
 
 type FamilyGroup = {
   key: string;
@@ -160,6 +161,7 @@ export function VolunteerManagePage() {
   const [showDialog, setShowDialog] = useState(false);
   const [showScopeDialog, setShowScopeDialog] = useState(false);
   const [showAddElderPanel, setShowAddElderPanel] = useState(false);
+  const [scopeRailCollapsed, setScopeRailCollapsed] = useState(false);
   const [selectedVolunteer, setSelectedVolunteer] = useState<VolunteerRow | null>(null);
   const [selectedElderIds, setSelectedElderIds] = useState<string[]>([]);
   const [showFamilyDialog, setShowFamilyDialog] = useState(false);
@@ -305,7 +307,7 @@ export function VolunteerManagePage() {
     setForm({
       name: row.name,
       account: row.account,
-      phone: '',
+      phone: row.phone || '',
       password: '',
       status: row.status,
     });
@@ -317,6 +319,7 @@ export function VolunteerManagePage() {
     setSelectedVolunteer(row);
     setSelectedElderIds(scopeRegistry[row.id] || []);
     setShowAddElderPanel(false);
+    setScopeRailCollapsed(false);
     setScopeError('');
     setShowScopeDialog(true);
   }
@@ -326,6 +329,7 @@ export function VolunteerManagePage() {
     setSelectedVolunteer(null);
     setSelectedElderIds([]);
     setShowAddElderPanel(false);
+    setScopeRailCollapsed(false);
     setScopeError('');
   }
 
@@ -348,12 +352,17 @@ export function VolunteerManagePage() {
     }
 
     if (editingId) {
-      await updateVolunteer(editingId, {
+      const payload: Record<string, string> = {
         name,
         account,
         phone: form.phone,
         status: form.status === ACTIVE_STATUS ? 'ACTIVE' : 'DISABLED',
-      });
+      };
+      const password = form.password.trim();
+      if (password) {
+        payload.password = password;
+      }
+      await updateVolunteer(editingId, payload);
     } else {
       const createdAt = formatDateTime(new Date());
       const result = await createVolunteer({
@@ -476,26 +485,30 @@ export function VolunteerManagePage() {
       <header className="topbar">
         <div>
           <p className="eyebrow">志愿者管理</p>
-          <h2>志愿者与家属管理</h2>
+          <h2>志愿者、家属与邀请码管理</h2>
         </div>
       </header>
 
-      <section className="panel" style={{ marginTop: 14 }}>
+      <section className="panel volunteer-manage-panel" style={{ marginTop: 14 }}>
         <div className="panel-title">
-          <Users size={18} />
-          <h3>人员账号列表</h3>
+          {tab === 'invitation' ? <LinkIcon size={18} /> : <Users size={18} />}
+          <h3>{tab === 'invitation' ? '邀请码列表' : '人员账号列表'}</h3>
         </div>
 
-        <div className="segmented-tabs">
+        <div className="segmented-tabs volunteer-manage-tabs">
           <button className={tab === 'volunteer' ? 'active' : ''} onClick={() => setTab('volunteer')}>
             志愿者
           </button>
           <button className={tab === 'family' ? 'active' : ''} onClick={() => setTab('family')}>
             家属协管
           </button>
+          <button className={tab === 'invitation' ? 'active' : ''} onClick={() => setTab('invitation')}>
+            邀请码管理
+          </button>
         </div>
 
-        <div className="toolbar">
+        {tab !== 'invitation' && (
+        <div className="toolbar volunteer-manage-toolbar">
           <input
             placeholder={tab === 'volunteer' ? '搜索姓名、账号、ID、邀请码' : '搜索家属、老人姓名、档案编号'}
             value={keyword}
@@ -533,18 +546,22 @@ export function VolunteerManagePage() {
             </button>
           )}
         </div>
+        )}
 
-        {tab === 'volunteer' ? (
-          <table className="data-table">
+        {tab === 'invitation' ? (
+          <InvitationManageSection embedded />
+        ) : tab === 'volunteer' ? (
+          <div className="table-shell volunteer-table-shell">
+          <table className="data-table volunteer-manage-table">
             <thead>
               <tr>
-                {volunteerColumns.isVisible('id') && <th>志愿者 ID</th>}
-                {volunteerColumns.isVisible('account') && <th>账号信息</th>}
-                {volunteerColumns.isVisible('create') && <th>创建信息</th>}
-                {volunteerColumns.isVisible('assigned') && <th>负责老人</th>}
-                {volunteerColumns.isVisible('status') && <th>状态</th>}
-                {volunteerColumns.isVisible('lastSubmit') && <th>最近提交时间</th>}
-                {volunteerColumns.isVisible('actions') && <th>操作</th>}
+                {volunteerColumns.isVisible('id') && <th className="col-volunteer-id">志愿者 ID</th>}
+                {volunteerColumns.isVisible('account') && <th className="col-volunteer-account">账号信息</th>}
+                {volunteerColumns.isVisible('create') && <th className="col-volunteer-create">创建信息</th>}
+                {volunteerColumns.isVisible('assigned') && <th className="col-volunteer-assigned">负责老人</th>}
+                {volunteerColumns.isVisible('status') && <th className="col-volunteer-status">状态</th>}
+                {volunteerColumns.isVisible('lastSubmit') && <th className="col-volunteer-submit">最近提交时间</th>}
+                {volunteerColumns.isVisible('actions') && <th className="col-volunteer-actions">操作</th>}
               </tr>
             </thead>
             <tbody>
@@ -552,9 +569,9 @@ export function VolunteerManagePage() {
                 const assignedList = assignedEldersByVolunteer[row.id] || [];
                 return (
                   <tr key={row.id}>
-                    {volunteerColumns.isVisible('id') && <td>{row.id}</td>}
+                    {volunteerColumns.isVisible('id') && <td className="col-volunteer-id">{row.id}</td>}
                     {volunteerColumns.isVisible('account') && (
-                      <td>
+                      <td className="col-volunteer-account">
                         <div className="table-detail-cell">
                           <strong>{row.name}</strong>
                           <p>账号：{row.account}</p>
@@ -562,7 +579,7 @@ export function VolunteerManagePage() {
                       </td>
                     )}
                     {volunteerColumns.isVisible('create') && (
-                      <td>
+                      <td className="col-volunteer-create">
                         <div className="table-detail-cell">
                           <strong>{row.createMethod || '后台创建'}</strong>
                           <p>创建时间：{row.createdAt || '-'}</p>
@@ -571,7 +588,7 @@ export function VolunteerManagePage() {
                       </td>
                     )}
                     {volunteerColumns.isVisible('assigned') && (
-                      <td>
+                      <td className="col-volunteer-assigned">
                         <div className="table-detail-cell">
                           <strong>共 {assignedList.length || row.elderCount} 位</strong>
                           <div className="inline-chip-list">
@@ -589,13 +606,13 @@ export function VolunteerManagePage() {
                       </td>
                     )}
                     {volunteerColumns.isVisible('status') && (
-                      <td>
+                      <td className="col-volunteer-status">
                         <StatusTag status={row.status} />
                       </td>
                     )}
-                    {volunteerColumns.isVisible('lastSubmit') && <td>{row.lastSubmit}</td>}
+                    {volunteerColumns.isVisible('lastSubmit') && <td className="col-volunteer-submit">{row.lastSubmit}</td>}
                     {volunteerColumns.isVisible('actions') && (
-                      <td>
+                      <td className="col-volunteer-actions">
                         <div className="table-actions">
                           <button onClick={() => openScopeDialog(row)}>负责老人</button>
                           <button onClick={() => openEditDialog(row)}>编辑</button>
@@ -613,8 +630,10 @@ export function VolunteerManagePage() {
               })}
             </tbody>
           </table>
+          </div>
         ) : (
-          <table className="data-table">
+          <div className="table-shell volunteer-table-shell">
+          <table className="data-table volunteer-manage-table volunteer-manage-table--family">
             <thead>
               <tr>
                 {familyColumns.isVisible('name') && <th>家属姓名</th>}
@@ -661,6 +680,7 @@ export function VolunteerManagePage() {
               )}
             </tbody>
           </table>
+          </div>
         )}
       </section>
 
@@ -712,90 +732,138 @@ export function VolunteerManagePage() {
 
       {showScopeDialog && selectedVolunteer && (
         <div className="modal-overlay" onClick={closeScopeDialog}>
-          <div className="modal-content modal-content--wide" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-content modal-content--wide modal-content--scrollable" onClick={(event) => event.stopPropagation()}>
             <div className="panel-title">
               <Home size={18} />
               <h3>负责老人管理 - {selectedVolunteer.name}</h3>
             </div>
 
-            <div className="scope-summary-grid">
-              <div className="scope-summary-card">
-                <span>志愿者账号</span>
-                <strong>{selectedVolunteer.account}</strong>
+            <div className="modal-scroll-body">
+              <div className="scope-summary-grid">
+                <div className="scope-summary-card">
+                  <span>志愿者账号</span>
+                  <strong>{selectedVolunteer.account}</strong>
+                </div>
+                <div className="scope-summary-card">
+                  <span>当前负责数量</span>
+                  <strong>{assignedElders.length}</strong>
+                </div>
+                <div className="scope-summary-card">
+                  <span>可添加老人</span>
+                  <strong>{availableElders.length}</strong>
+                </div>
               </div>
-              <div className="scope-summary-card">
-                <span>当前负责数量</span>
-                <strong>{assignedElders.length}</strong>
-              </div>
-              <div className="scope-summary-card">
-                <span>可添加老人</span>
-                <strong>{availableElders.length}</strong>
-              </div>
-            </div>
 
-            <div className="toolbar" style={{ marginBottom: 14 }}>
-              <button className="secondary" onClick={() => setShowAddElderPanel((prev) => !prev)}>
-                {showAddElderPanel ? '收起添加' : '添加老人'}
-              </button>
-            </div>
+              <div className="toolbar" style={{ marginBottom: 14 }}>
+                <button className="secondary" onClick={() => setShowAddElderPanel((prev) => !prev)}>
+                  {showAddElderPanel ? '收起添加' : '添加老人'}
+                </button>
+              </div>
 
-            <div className="binding-list">
-              {assignedElders.map((elder) => (
-                <article key={elder.id} className="binding-card">
-                  <div>
-                    <strong>{elder.name}</strong>
-                    <p>{elder.archiveNo}</p>
-                    <p>
-                      {elder.age} 岁 / {elder.status}
-                    </p>
-                  </div>
-                  <div className="binding-card-actions">
-                    <button className="danger" onClick={() => removeElderFromVolunteer(elder.id)}>
-                      删除
+              <div className={`scope-dialog-layout${scopeRailCollapsed ? ' scope-dialog-layout--rail-collapsed' : ''}`}>
+                <div className="scope-dialog-main">
+                  {showAddElderPanel ? (
+                    <div className="scope-list scope-list--single">
+                      {availableElders.map((elder) => (
+                        <article key={elder.id} className="binding-card">
+                          <div>
+                            <strong>{elder.name}</strong>
+                            <p>{elder.archiveNo}</p>
+                            <p>
+                              {elder.age} 岁 / {elder.status}
+                            </p>
+                          </div>
+                          <div className="binding-card-actions">
+                            <button onClick={() => addElderToVolunteer(elder.id)}>添加</button>
+                          </div>
+                        </article>
+                      ))}
+
+                      {!availableElders.length && (
+                        <article className="binding-card">
+                          <div>
+                            <strong>暂无可添加老人</strong>
+                            <p>每位老人只能分配给一位志愿者，当前没有空闲老人。</p>
+                          </div>
+                        </article>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="binding-list">
+                      {assignedElders.map((elder) => (
+                        <article key={elder.id} className="binding-card">
+                          <div>
+                            <strong>{elder.name}</strong>
+                            <p>{elder.archiveNo}</p>
+                            <p>
+                              {elder.age} 岁 / {elder.status}
+                            </p>
+                          </div>
+                          <div className="binding-card-actions">
+                            <button className="danger" onClick={() => removeElderFromVolunteer(elder.id)}>
+                              删除
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+
+                      {!assignedElders.length && (
+                        <article className="binding-card">
+                          <div>
+                            <strong>当前未分配老人</strong>
+                            <p>请通过“添加老人”为该志愿者分配服务对象。</p>
+                          </div>
+                        </article>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <aside className={`scope-name-rail${scopeRailCollapsed ? ' scope-name-rail--collapsed' : ''}`}>
+                  <div className="scope-name-rail-header">
+                    {!scopeRailCollapsed && (
+                      <div>
+                        <strong>已选老人</strong>
+                        <span>{assignedElders.length} 位</span>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      className="scope-name-rail-toggle"
+                      onClick={() => setScopeRailCollapsed((prev) => !prev)}
+                      aria-label={scopeRailCollapsed ? '展开已选老人' : '收起已选老人'}
+                    >
+                      {scopeRailCollapsed ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
                     </button>
                   </div>
-                </article>
-              ))}
 
-              {!assignedElders.length && (
-                <article className="binding-card">
-                  <div>
-                    <strong>当前未分配老人</strong>
-                    <p>请通过“添加老人”为该志愿者分配服务对象。</p>
-                  </div>
-                </article>
-              )}
-            </div>
-
-            {showAddElderPanel && (
-              <div className="scope-list" style={{ marginTop: 14 }}>
-                {availableElders.map((elder) => (
-                  <article key={elder.id} className="binding-card">
-                    <div>
-                      <strong>{elder.name}</strong>
-                      <p>{elder.archiveNo}</p>
-                      <p>
-                        {elder.age} 岁 / {elder.status}
-                      </p>
+                  {scopeRailCollapsed ? (
+                    <div className="scope-name-rail-count">{assignedElders.length}</div>
+                  ) : (
+                    <div className="scope-name-rail-body">
+                      {assignedElders.length ? (
+                        assignedElders.map((elder) => (
+                          <button
+                            key={elder.id}
+                            type="button"
+                            className="scope-name-chip"
+                            onClick={() => removeElderFromVolunteer(elder.id)}
+                            title={`${elder.name} / ${elder.archiveNo}`}
+                          >
+                            <span>{elder.name}</span>
+                            <small>{elder.archiveNo}</small>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="scope-name-rail-empty">暂无已选老人</p>
+                      )}
                     </div>
-                    <div className="binding-card-actions">
-                      <button onClick={() => addElderToVolunteer(elder.id)}>添加</button>
-                    </div>
-                  </article>
-                ))}
-
-                {!availableElders.length && (
-                  <article className="binding-card">
-                    <div>
-                      <strong>暂无可添加老人</strong>
-                      <p>每位老人只能分配给一位志愿者，当前没有空闲老人。</p>
-                    </div>
-                  </article>
-                )}
+                  )}
+                </aside>
               </div>
-            )}
 
-            {scopeError && <p className="form-error">{scopeError}</p>}
+              {scopeError && <p className="form-error">{scopeError}</p>}
+            </div>
 
             <div className="form-actions">
               <button onClick={handleSaveScope}>保存负责老人</button>
@@ -809,48 +877,50 @@ export function VolunteerManagePage() {
 
       {showFamilyDialog && selectedFamilyGroup && (
         <div className="modal-overlay" onClick={closeFamilyDialog}>
-          <div className="modal-content modal-content--wide" onClick={(event) => event.stopPropagation()}>
+          <div className="modal-content modal-content--wide modal-content--scrollable" onClick={(event) => event.stopPropagation()}>
             <div className="panel-title">
               <Link2 size={18} />
               <h3>家属绑定老人审查</h3>
             </div>
 
-            <div className="scope-summary-grid">
-              <div className="scope-summary-card">
-                <span>家属姓名</span>
-                <strong>{selectedFamilyGroup.familyName}</strong>
+            <div className="modal-scroll-body">
+              <div className="scope-summary-grid">
+                <div className="scope-summary-card">
+                  <span>家属姓名</span>
+                  <strong>{selectedFamilyGroup.familyName}</strong>
+                </div>
+                <div className="scope-summary-card">
+                  <span>手机号</span>
+                  <strong>{selectedFamilyGroup.familyPhoneMasked}</strong>
+                </div>
+                <div className="scope-summary-card">
+                  <span>关系 / 绑定数量</span>
+                  <strong>
+                    {selectedFamilyGroup.relationship} / {selectedFamilyGroup.rows.length}
+                  </strong>
+                </div>
               </div>
-              <div className="scope-summary-card">
-                <span>手机号</span>
-                <strong>{selectedFamilyGroup.familyPhoneMasked}</strong>
-              </div>
-              <div className="scope-summary-card">
-                <span>关系 / 绑定数量</span>
-                <strong>
-                  {selectedFamilyGroup.relationship} / {selectedFamilyGroup.rows.length}
-                </strong>
-              </div>
-            </div>
 
-            <div className="binding-list">
-              {selectedFamilyGroup.rows.map((row) => (
-                <article key={row.id} className="binding-card">
-                  <div>
-                    <strong>{row.elderName}</strong>
-                    <p>{row.elderArchiveNo}</p>
-                    <p>邀请码：{row.invitationCode || '-'}</p>
-                    <p>绑定时间：{row.boundAt || '-'}</p>
-                  </div>
-                  <div className="binding-card-actions">
-                    <StatusTag status={row.status} />
-                    {row.status === BOUND_STATUS && (
-                      <button className="danger" onClick={() => handleUnbindFamily(row.id)}>
-                        解绑
-                      </button>
-                    )}
-                  </div>
-                </article>
-              ))}
+              <div className="binding-list">
+                {selectedFamilyGroup.rows.map((row) => (
+                  <article key={row.id} className="binding-card">
+                    <div>
+                      <strong>{row.elderName}</strong>
+                      <p>{row.elderArchiveNo}</p>
+                      <p>邀请码：{row.invitationCode || '-'}</p>
+                      <p>绑定时间：{row.boundAt || '-'}</p>
+                    </div>
+                    <div className="binding-card-actions">
+                      <StatusTag status={row.status} />
+                      {row.status === BOUND_STATUS && (
+                        <button className="danger" onClick={() => handleUnbindFamily(row.id)}>
+                          解绑
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                ))}
+              </div>
             </div>
 
             <div className="form-actions">

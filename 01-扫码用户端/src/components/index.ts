@@ -4,3 +4,6 @@ export * from './VerificationBadge';
 export * from './SensitiveField';
 export * from './MedicationList';
 export * from './ScaleSummaryCard';
+export * from './PageTopBar';
+export * from './BottomTabBar';
+export * from './AppAttribution';

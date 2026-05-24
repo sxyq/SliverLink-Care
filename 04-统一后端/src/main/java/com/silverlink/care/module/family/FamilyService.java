@@ -169,6 +169,13 @@ public class FamilyService {
         jdbc.update("update family_binding set status='DISABLED' where id=?", id);
     }
 
+    public String resolveFamilyOperator(String auth) {
+        if (auth == null || !auth.startsWith("Bearer ")) {
+            return "family-user";
+        }
+        return jwtTokenProvider.getSubject(auth.substring(7));
+    }
+
     private String resolveFamilyUserId(String auth) {
         if (auth == null || !auth.startsWith("Bearer ")) {
             throw new BizException(401, "未登录或 Token 无效");

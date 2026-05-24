@@ -1,8 +1,12 @@
 import { useMemo, useState } from 'react';
-import { ArrowLeft, Save } from 'lucide-react';
 import { saveHealthRecord } from '../api';
 import { calculateBMI } from '../utils/bmi';
 import type { AssignedElder, HealthFormState } from '../types';
+import { FormSection } from '../components/FormSection';
+import { PageHeader } from '../components/PageHeader';
+import { SelectChips } from '../components/SelectChips';
+import { SubmitBar } from '../components/SubmitBar';
+import { TextInput } from '../components/TextInput';
 
 interface HealthRecordFormPageProps {
   elder: AssignedElder;
@@ -26,6 +30,7 @@ const emotionOptions = ['无明显异常', '轻度', '中度', '重度'];
 
 export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProps) {
   const [form, setForm] = useState<HealthFormState>(defaultForm);
+  const [saving, setSaving] = useState(false);
 
   const bmi = useMemo(() => calculateBMI(form.heightCm, form.weightKg), [form.heightCm, form.weightKg]);
 
@@ -34,97 +39,58 @@ export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProp
   }
 
   async function handleSubmit() {
-    await saveHealthRecord(elder.id, form);
-    alert('健康档案已保存');
-    onBack();
+    setSaving(true);
+    try {
+      await saveHealthRecord(elder.id, form);
+      alert('健康档案已保存');
+      onBack();
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
-    <div className="app-shell">
-      <header className="topbar">
-        <button className="chip" onClick={onBack} style={{ color: '#fff', background: 'rgba(255,255,255,0.2)', border: 'none' }}>
-          <ArrowLeft size={16} />
-        </button>
-        <h1 style={{ margin: 0, fontSize: 16 }}>健康档案填写</h1>
-        <div style={{ width: 40 }} />
-      </header>
+    <div className="sl-page">
+      <PageHeader title="健康档案填写" subtitle={elder.name} onBack={onBack} />
 
-      <section className="card">
-        <div className="form-grid">
-          <label>
-            身高
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input type="number" value={form.heightCm} onChange={(e) => handleChange('heightCm', e.target.value)} />
-              <span style={{ color: '#5f6f7a', fontSize: 13 }}>cm</span>
-            </div>
-          </label>
-          <label>
-            体重
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input type="number" value={form.weightKg} onChange={(e) => handleChange('weightKg', e.target.value)} />
-              <span style={{ color: '#5f6f7a', fontSize: 13 }}>kg</span>
-            </div>
-          </label>
-          <label>
-            腰围
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <input type="number" value={form.waistCm} onChange={(e) => handleChange('waistCm', e.target.value)} />
-              <span style={{ color: '#5f6f7a', fontSize: 13 }}>cm</span>
-            </div>
-          </label>
-          <label>
-            BMI
-            <input readOnly value={bmi} />
-          </label>
+      <FormSection title="健康指标">
+        <div className="sl-metric-grid">
+          <div className="sl-metric-row">
+            <span className="sl-label-text">身高</span>
+            <TextInput label="" type="number" value={form.heightCm} onChange={(value) => handleChange('heightCm', value)} suffix="cm" />
+          </div>
+          <div className="sl-metric-row">
+            <span className="sl-label-text">体重</span>
+            <TextInput label="" type="number" value={form.weightKg} onChange={(value) => handleChange('weightKg', value)} suffix="kg" />
+          </div>
+          <div className="sl-metric-row">
+            <span className="sl-label-text">腰围</span>
+            <TextInput label="" type="number" value={form.waistCm} onChange={(value) => handleChange('waistCm', value)} suffix="cm" />
+          </div>
+          <div className="sl-metric-row">
+            <span className="sl-label-text">BMI</span>
+            <TextInput label="" value={bmi} onChange={() => undefined} readOnly />
+          </div>
         </div>
-      </section>
+      </FormSection>
 
-      <section className="card">
-        <div className="section-title"><h2>自评健康状况</h2></div>
-        <div className="choice-row">
-          {healthOptions.map((opt) => (
-            <button key={opt} className={form.healthSelfAssessment === opt ? 'chip selected' : 'chip'} onClick={() => handleChange('healthSelfAssessment', opt)}>
-              {opt}
-            </button>
-          ))}
-        </div>
+      <FormSection title="自评健康状况">
+        <SelectChips options={healthOptions} value={form.healthSelfAssessment} onChange={(value) => handleChange('healthSelfAssessment', value)} />
+      </FormSection>
 
-        <div className="section-title"><h2>生活自理能力自评</h2></div>
-        <div className="choice-row">
-          {selfCareOptions.map((opt) => (
-            <button key={opt} className={form.selfCareAssessment === opt ? 'chip selected' : 'chip'} onClick={() => handleChange('selfCareAssessment', opt)}>
-              {opt}
-            </button>
-          ))}
-        </div>
-      </section>
+      <FormSection title="生活自理能力">
+        <SelectChips options={selfCareOptions} value={form.selfCareAssessment} onChange={(value) => handleChange('selfCareAssessment', value)} />
+      </FormSection>
 
-      <section className="card">
-        <div className="section-title"><h2>认知功能粗筛（近1个月）</h2></div>
-        <div className="choice-row">
-          {cognitiveOptions.map((opt) => (
-            <button key={opt} className={form.cognitiveScreening === opt ? 'chip selected' : 'chip'} onClick={() => handleChange('cognitiveScreening', opt)}>
-              {opt}
-            </button>
-          ))}
-        </div>
+      <FormSection title="认知功能筛查（近 1 个月）">
+        <SelectChips options={cognitiveOptions} value={form.cognitiveScreening} onChange={(value) => handleChange('cognitiveScreening', value)} />
+      </FormSection>
 
-        <div className="section-title"><h2>情感状态粗筛（近2周）</h2></div>
-        <div className="choice-row">
-          {emotionOptions.map((opt) => (
-            <button key={opt} className={form.emotionScreening === opt ? 'chip selected' : 'chip'} onClick={() => handleChange('emotionScreening', opt)}>
-              {opt}
-            </button>
-          ))}
-        </div>
-      </section>
+      <FormSection title="情绪状态筛查（近 2 周）">
+        <SelectChips options={emotionOptions} value={form.emotionScreening} onChange={(value) => handleChange('emotionScreening', value)} />
+      </FormSection>
 
-      <div className="submit-bar">
-        <button className="btn-primary" onClick={handleSubmit}>
-          <Save size={18} />
-          提交保存
-        </button>
-      </div>
+      <SubmitBar onSubmit={() => void handleSubmit()} loading={saving} />
     </div>
   );
 }

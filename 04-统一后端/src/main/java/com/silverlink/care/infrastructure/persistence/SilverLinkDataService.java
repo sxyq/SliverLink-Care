@@ -1,5 +1,7 @@
 package com.silverlink.care.infrastructure.persistence;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
@@ -14,6 +16,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.*;
 
 @Service
@@ -24,11 +28,13 @@ public class SilverLinkDataService {
     private final JdbcTemplate jdbc;
     private final AesGcmCryptoService crypto;
     private final HashService hashService;
+    private final ObjectMapper objectMapper;
 
-    public SilverLinkDataService(JdbcTemplate jdbc, AesGcmCryptoService crypto, HashService hashService) {
+    public SilverLinkDataService(JdbcTemplate jdbc, AesGcmCryptoService crypto, HashService hashService, ObjectMapper objectMapper) {
         this.jdbc = jdbc;
         this.crypto = crypto;
         this.hashService = hashService;
+        this.objectMapper = objectMapper;
     }
 
     @PostConstruct
@@ -36,6 +42,7 @@ public class SilverLinkDataService {
         encryptColumn("app_user", "name_enc");
         encryptColumn("app_user", "phone_enc");
         encryptColumn("elder", "name_enc");
+        encryptColumn("elder", "residence_enc");
         encryptColumn("elder", "emergency_contact_name_enc");
         encryptColumn("elder", "emergency_phone_enc");
         encryptColumn("elder", "backup_contact_name_enc");
@@ -48,6 +55,12 @@ public class SilverLinkDataService {
         encryptColumn("scale_record", "payload_enc");
         encryptColumn("family_binding", "family_name_enc");
         encryptColumn("family_binding", "family_phone_enc");
+        encryptColumn("audit_log", "visitor_name_enc");
+        encryptColumn("audit_log", "visitor_phone_enc");
+        encryptColumn("audit_log", "visitor_id_card_enc");
+        encryptColumn("scan_verification_session", "visitor_name_enc");
+        encryptColumn("scan_verification_session", "visitor_phone_enc");
+        encryptColumn("scan_verification_session", "visitor_id_card_enc");
     }
 
     private void encryptColumn(String table, String column) {
@@ -106,6 +119,7 @@ public class SilverLinkDataService {
     private Map<String, Object> elderRow(Map<String, Object> row, boolean masked) {
         String phone = dec(row.get("emergency_phone_enc"));
         String name = dec(row.get("name_enc"));
+        String residence = dec(row.get("residence_enc"));
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", str(row.get("id")));
         map.put("elderId", str(row.get("id")));
@@ -124,6 +138,7 @@ public class SilverLinkDataService {
         map.put("backupContactRelation", "");
         map.put("phoneMasked", maskPhone(phone));
         map.put("relationship", str(row.get("relationship")));
+        map.put("residence", masked ? "" : residence);
         map.put("aboType", str(row.get("abo_type")));
         map.put("rhType", str(row.get("rh_type")));
         map.put("bloodType", str(row.get("abo_type")));
@@ -137,23 +152,35 @@ public class SilverLinkDataService {
         String id = "elder-" + System.currentTimeMillis();
         String archiveNo = value(body, "archiveNo", "A" + System.currentTimeMillis());
         jdbc.update("""
-                insert into elder (id, archive_no, name_enc, gender, age, emergency_contact_name_enc, emergency_phone_enc,
+                insert into elder (id, archive_no, name_enc, gender, age, residence_enc, emergency_contact_name_enc, emergency_phone_enc,
                 backup_contact_name_enc, backup_phone_enc, relationship, abo_type, rh_type, allergy_enc, status)
-                values (?,?,?,?,?,?,?,?,?,?,?,?,?, 'ACTIVE')
+                values (?,?,?,?,?,?,?,?,?,?,?,?,?,?, 'ACTIVE')
                 """, id, archiveNo, enc(value(body, "name", "未命名")), value(body, "gender", ""),
-                intValue(body.getOrDefault("age", 0)), enc(value(body, "emergencyContactName", value(body, "emergencyContact", ""))),
-                enc(value(body, "emergencyPhone", value(body, "phone", ""))), enc(value(body, "backupContactName", "")),
-                enc(value(body, "backupPhone", "")), value(body, "relationship", ""), value(body, "aboType", ""),
+                intValue(body.getOrDefault("age", 0)), enc(value(body, "residence", "")),
+                enc(value(body, "emergencyContactName", value(body, "emergencyContact", ""))),
+                enc(value(body, "emergencyPhone", value(body, "emergencyContactPhone", value(body, "phone", "")))),
+                enc(value(body, "backupContactName", "")),
+                enc(value(body, "backupPhone", "")),
+                value(body, "relationship", value(body, "emergencyContactRelation", "")), value(body, "aboType", ""),
                 value(body, "rhType", ""), enc(value(body, "allergySummary", value(body, "allergyHistory", ""))));
         return id;
     }
 
+    public String createElderForVolunteer(String account, Map<String, Object> body) {
+        String elderId = createElder(body);
+        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", account);
+        jdbc.update("insert ignore into volunteer_elder_scope (id, volunteer_user_id, elder_id) values (?,?,?)",
+                UUID.randomUUID().toString(), str(user.get("id")), elderId);
+        return elderId;
+    }
+
     public void updateElder(String id, Map<String, Object> body) {
         jdbc.update("""
-                update elder set name_enc=?, gender=?, age=?, emergency_contact_name_enc=?, emergency_phone_enc=?,
+                update elder set name_enc=?, gender=?, age=?, residence_enc=?, emergency_contact_name_enc=?, emergency_phone_enc=?,
                 backup_contact_name_enc=?, backup_phone_enc=?, relationship=?, abo_type=?, rh_type=?, allergy_enc=?
                 where id=?
                 """, enc(value(body, "name", "")), value(body, "gender", ""), intValue(body.getOrDefault("age", 0)),
+                enc(value(body, "residence", "")),
                 enc(value(body, "emergencyContactName", value(body, "emergencyContact", ""))),
                 enc(value(body, "emergencyPhone", value(body, "phone", ""))), enc(value(body, "backupContactName", "")),
                 enc(value(body, "backupPhone", "")), value(body, "relationship", ""), value(body, "aboType", ""),
@@ -177,6 +204,7 @@ public class SilverLinkDataService {
             String id = str(row.get("id"));
             map.put("id", id);
             map.put("name", dec(row.get("name_enc")));
+            map.put("phone", dec(row.get("phone_enc")));
             map.put("phoneMasked", maskPhone(dec(row.get("phone_enc"))));
             map.put("account", str(row.get("account")));
             map.put("role", "VOLUNTEER");
@@ -200,8 +228,20 @@ public class SilverLinkDataService {
     }
 
     public void updateVolunteer(String id, Map<String, Object> body) {
-        jdbc.update("update app_user set name_enc=?, phone_enc=?, status=? where id=? and role='VOLUNTEER'",
-                enc(value(body, "name", "")), enc(value(body, "phone", "")), value(body, "status", "ACTIVE"), id);
+        Map<String, Object> existing = one("select * from app_user where id=? and role='VOLUNTEER'", id);
+        String account = value(body, "account", str(existing.get("account")));
+        String name = value(body, "name", dec(existing.get("name_enc")));
+        String phone = body.containsKey("phone") ? str(body.get("phone")) : dec(existing.get("phone_enc"));
+        String status = value(body, "status", str(existing.get("status")));
+        String password = value(body, "password", "");
+
+        if (password.isBlank()) {
+            jdbc.update("update app_user set account=?, name_enc=?, phone_enc=?, status=? where id=? and role='VOLUNTEER'",
+                    account, enc(name), enc(phone), status, id);
+        } else {
+            jdbc.update("update app_user set account=?, password_hash=?, name_enc=?, phone_enc=?, status=? where id=? and role='VOLUNTEER'",
+                    account, password, enc(name), enc(phone), status, id);
+        }
         Object scope = body.get("elderIds");
         if (scope instanceof List<?> list) {
             setVolunteerScope(id, list.stream().map(String::valueOf).toList());
@@ -221,7 +261,7 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, Object>> assignedElders(String account) {
-        Map<String, Object> user = one("select * from app_user where account=?", account);
+        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", account);
         List<Map<String, Object>> rows = jdbc.queryForList("""
                 select e.* from elder e join volunteer_elder_scope s on e.id=s.elder_id
                 where s.volunteer_user_id=? and e.status='ACTIVE' order by e.updated_at desc
@@ -236,6 +276,40 @@ public class SilverLinkDataService {
         return result;
     }
 
+    public Map<String, Object> volunteerProfile(String account) {
+        Map<String, Object> row = one("select * from app_user where account=? and role='VOLUNTEER' and status='ACTIVE'", account);
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("account", str(row.get("account")));
+        map.put("name", dec(row.get("name_enc")));
+        map.put("phone", dec(row.get("phone_enc")));
+        return map;
+    }
+
+    public Map<String, Object> updateVolunteerProfile(String account, Map<String, Object> body) {
+        Map<String, Object> existing = one("select * from app_user where account=? and role='VOLUNTEER' and status='ACTIVE'", account);
+        String nextAccount = value(body, "account", str(existing.get("account")));
+        String nextName = value(body, "name", dec(existing.get("name_enc")));
+        String nextPhone = body.containsKey("phone") ? str(body.get("phone")) : dec(existing.get("phone_enc"));
+        String currentPassword = value(body, "currentPassword", "");
+        String nextPassword = value(body, "password", "");
+        String id = str(existing.get("id"));
+
+        if (nextPassword.isBlank()) {
+            jdbc.update("update app_user set account=?, name_enc=?, phone_enc=? where id=? and role='VOLUNTEER'",
+                    nextAccount, enc(nextName), enc(nextPhone), id);
+        } else {
+            if (currentPassword.isBlank()) {
+                throw new BizException(400, "修改密码前请输入当前密码");
+            }
+            if (!str(existing.get("password_hash")).equals(currentPassword)) {
+                throw new BizException(400, "当前密码不正确");
+            }
+            jdbc.update("update app_user set account=?, password_hash=?, name_enc=?, phone_enc=? where id=? and role='VOLUNTEER'",
+                    nextAccount, nextPassword, enc(nextName), enc(nextPhone), id);
+        }
+        return volunteerProfile(nextAccount);
+    }
+
     private String latestHealthDate(String elderId) {
         List<Map<String, Object>> rows = jdbc.queryForList("select record_date from health_record where elder_id=? order by created_at desc limit 1", elderId);
         return rows.isEmpty() ? "" : str(rows.get(0).get("record_date"));
@@ -246,7 +320,7 @@ public class SilverLinkDataService {
         if (auth == null) return;
         boolean volunteer = auth.getAuthorities().stream().anyMatch(a -> "ROLE_VOLUNTEER".equals(a.getAuthority()));
         if (!volunteer) return;
-        Map<String, Object> user = one("select * from app_user where account=?", auth.getName());
+        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", auth.getName());
         Integer count = jdbc.queryForObject("select count(*) from volunteer_elder_scope where volunteer_user_id=? and elder_id=?",
                 Integer.class, str(user.get("id")), elderId);
         if (count == null || count == 0) {
@@ -329,6 +403,7 @@ public class SilverLinkDataService {
             map.put("updatedAt", str(row.get("record_date")));
             map.put("date", str(row.get("record_date")));
             map.put("volunteer", str(row.get("volunteer")));
+            map.put("answers", parseScaleAnswers(dec(row.get("payload_enc"))));
             result.add(map);
         }
         return result;
@@ -377,18 +452,65 @@ public class SilverLinkDataService {
 
     public void saveScales(String elderId, List<Map<String, Object>> rows) {
         requireVolunteerScope(elderId);
-        jdbc.update("delete from scale_record where elder_id=?", elderId);
+        List<String> scaleNames = rows.stream()
+                .map(row -> value(row, "name", value(row, "scale", "PHQ-9")))
+                .distinct()
+                .toList();
+        for (String scaleName : scaleNames) {
+            jdbc.update("delete from scale_record where elder_id=? and scale_name=?", elderId, scaleName);
+        }
         for (Map<String, Object> row : rows) {
+            String payload;
+            try {
+                payload = objectMapper.writeValueAsString(row);
+            } catch (Exception ex) {
+                payload = row.toString();
+            }
             jdbc.update("insert into scale_record (id, elder_id, scale_name, score, record_date, volunteer, payload_enc) values (?,?,?,?,?,?,?)",
                     "scale-" + System.currentTimeMillis() + "-" + Math.abs(row.hashCode()), elderId,
                     value(row, "name", value(row, "scale", "PHQ-9")), intValue(row.getOrDefault("score", 0)),
-                    value(row, "date", LocalDateTime.now().format(FMT)), currentOperator(), enc(row.toString()));
+                    value(row, "date", LocalDateTime.now().format(FMT)), currentOperator(), enc(payload));
         }
     }
 
     public void recordAudit(String operator, String role, String ip, String target, String action, String result, String failReason, String requestId) {
-        jdbc.update("insert into audit_log (id, time, operator, role, source_ip, target, action, result, fail_reason, request_id) values (?,?,?,?,?,?,?,?,?,?)",
-                UUID.randomUUID().toString(), Instant.now().toString(), operator, role, ip, target, action, result, failReason, requestId);
+        recordAudit(operator, role, ip, target, action, result, failReason, requestId, "", "", "", "");
+    }
+
+    public void recordAudit(
+            String operator,
+            String role,
+            String ip,
+            String target,
+            String action,
+            String result,
+            String failReason,
+            String requestId,
+            String verificationMethod,
+            String visitorName,
+            String visitorPhone,
+            String visitorIdCard
+    ) {
+        jdbc.update("""
+                        insert into audit_log
+                        (id, time, operator, role, source_ip, target, action, verification_method, visitor_name_enc, visitor_phone_enc, visitor_id_card_enc, result, fail_reason, request_id)
+                        values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        """,
+                UUID.randomUUID().toString(),
+                Instant.now().toString(),
+                operator,
+                role,
+                ip,
+                target,
+                action,
+                verificationMethod,
+                enc(visitorName),
+                enc(visitorPhone),
+                enc(visitorIdCard),
+                result,
+                failReason,
+                requestId
+        );
     }
 
     public List<Map<String, Object>> auditLogs(String operator, String action, String result) {
@@ -406,6 +528,12 @@ public class SilverLinkDataService {
             map.put("sourceIp", row.get("source_ip"));
             map.put("target", row.get("target"));
             map.put("action", row.get("action"));
+            map.put("verificationMethod", row.get("verification_method"));
+            map.put("visitorName", dec(row.get("visitor_name_enc")));
+            map.put("visitorPhone", dec(row.get("visitor_phone_enc")));
+            map.put("visitorPhoneMasked", maskPhone(dec(row.get("visitor_phone_enc"))));
+            map.put("visitorIdCard", dec(row.get("visitor_id_card_enc")));
+            map.put("visitorIdCardMasked", maskIdCard(dec(row.get("visitor_id_card_enc"))));
             map.put("result", row.get("result"));
             map.put("failReason", row.get("fail_reason"));
             map.put("requestId", row.get("request_id"));
@@ -504,5 +632,48 @@ public class SilverLinkDataService {
         if (name == null || name.isBlank()) return "*";
         if (name.length() <= 1) return "*";
         return name.charAt(0) + "**";
+    }
+
+    public String maskIdCard(String idCard) {
+        if (idCard == null || idCard.isBlank()) return "";
+        if (idCard.length() <= 8) return idCard;
+        return idCard.substring(0, 4) + "********" + idCard.substring(idCard.length() - 4);
+    }
+
+    private List<Map<String, Object>> parseScaleAnswers(String payload) {
+        if (payload == null || payload.isBlank() || "{}".equals(payload)) {
+            return List.of();
+        }
+
+        try {
+            Map<String, Object> parsed = objectMapper.readValue(payload, new TypeReference<Map<String, Object>>() {});
+            Object answers = parsed.get("answers");
+            if (answers instanceof List<?> list) {
+                List<Map<String, Object>> result = new ArrayList<>();
+                for (Object item : list) {
+                    if (item instanceof Map<?, ?> map) {
+                        Map<String, Object> answer = new LinkedHashMap<>();
+                        answer.put("question", str(map.get("question")));
+                        Object value = map.get("value");
+                        answer.put("value", value == null ? null : intValue(value));
+                        result.add(answer);
+                    }
+                }
+                return result;
+            }
+        } catch (Exception ignored) {
+            // Fall back to legacy string payload parsing.
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        Matcher matcher = Pattern.compile("\\{question=(.*?), value=(null|-?\\d+)\\}").matcher(payload);
+        while (matcher.find()) {
+            Map<String, Object> answer = new LinkedHashMap<>();
+            answer.put("question", matcher.group(1).trim());
+            String rawValue = matcher.group(2);
+            answer.put("value", "null".equals(rawValue) ? null : Integer.parseInt(rawValue));
+            result.add(answer);
+        }
+        return result;
     }
 }

@@ -7,8 +7,8 @@ export default defineConfig(({ command }) => ({
   server: {
     port: 5173,
     proxy: {
-      '/silverlink-api': {
-        target: 'http://sxyq27.online',
+      '/api': {
+        target: 'http://sxyq27.online/silverlink-api',
         changeOrigin: true,
       },
     },

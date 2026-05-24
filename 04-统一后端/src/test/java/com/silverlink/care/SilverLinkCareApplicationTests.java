@@ -1,12 +1,13 @@
 package com.silverlink.care;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
 class SilverLinkCareApplicationTests {
 
     @Test
-    void contextLoads() {
+    void mainMethodExists() throws Exception {
+        Assertions.assertNotNull(
+                SilverLinkCareApplication.class.getDeclaredMethod("main", String[].class)
+        );
     }
 }

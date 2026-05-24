@@ -1,9 +1,10 @@
 import { ENDPOINTS } from '../config/endpoints';
 import { httpClient } from './httpClient';
-import type { ElderBasicInfo, HealthRecord, Medication, ScaleSummary } from '../types';
+import type { ElderBasicInfo, HealthRecord, Medication, ScaleAnswerDetail, ScaleSummary } from '../types';
 
 const ELDER_ID_KEY = 'silverlink.scan.elderId';
 const PHONE_KEY = 'silverlink.scan.emergencyPhone';
+const PHONE_MASKED_KEY = 'silverlink.scan.emergencyPhoneMasked';
 
 interface ScanResolveDto {
   elderId: string;
@@ -11,6 +12,7 @@ interface ScanResolveDto {
   name: string;
   gender: string;
   age: number;
+  residence?: string;
   emergencyContactName: string;
   emergencyPhoneMasked: string;
   emergencyPhoneDial?: string;
@@ -40,6 +42,7 @@ interface ScaleDto {
   date?: string;
   updatedAt?: string;
   volunteer?: string;
+  answers?: ScaleAnswerDetail[];
 }
 
 export function getResolvedElderId() {
@@ -48,6 +51,10 @@ export function getResolvedElderId() {
 
 export function getResolvedEmergencyPhone() {
   return window.localStorage.getItem(PHONE_KEY) || '';
+}
+
+export function getResolvedEmergencyPhoneMasked() {
+  return window.localStorage.getItem(PHONE_MASKED_KEY) || '';
 }
 
 export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
@@ -60,6 +67,9 @@ export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
   if (res.emergencyPhoneDial) {
     window.localStorage.setItem(PHONE_KEY, res.emergencyPhoneDial);
   }
+  if (res.emergencyPhoneMasked) {
+    window.localStorage.setItem(PHONE_MASKED_KEY, res.emergencyPhoneMasked);
+  }
 
   return {
     id: res.elderId,
@@ -67,6 +77,7 @@ export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
     name: res.name,
     gender: res.gender,
     age: Number(res.age || 0),
+    residence: String(res.residence || ''),
     emergencyContact: res.emergencyContactName,
     emergencyPhoneMasked: res.emergencyPhoneMasked,
     emergencyPhoneDial: res.emergencyPhoneDial || '',
@@ -77,9 +88,36 @@ export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
   };
 }
 
-export async function fetchHealthRecord(): Promise<HealthRecord> {
+export async function fetchVerifiedBasicInfo(sessionId: string): Promise<ElderBasicInfo> {
   const elderId = getResolvedElderId();
-  const res = await httpClient<HealthRecordDto>(`${ENDPOINTS.scanArchive}?elderId=${encodeURIComponent(elderId)}`, { method: 'GET' });
+  const res = await httpClient<ScanResolveDto>(
+    `${ENDPOINTS.scanVerifiedBasic}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+    { method: 'GET' },
+  );
+
+  return {
+    id: res.elderId,
+    archiveNo: res.archiveNo,
+    name: res.name,
+    gender: res.gender,
+    age: Number(res.age || 0),
+    residence: String(res.residence || ''),
+    emergencyContact: res.emergencyContactName,
+    emergencyPhoneMasked: res.emergencyPhoneMasked,
+    emergencyPhoneDial: res.emergencyPhoneDial || '',
+    relationship: res.relationship,
+    aboType: res.aboType,
+    rhType: res.rhType,
+    allergySummary: res.allergySummary,
+  };
+}
+
+export async function fetchHealthRecord(sessionId: string): Promise<HealthRecord> {
+  const elderId = getResolvedElderId();
+  const res = await httpClient<HealthRecordDto>(
+    `${ENDPOINTS.scanArchive}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+    { method: 'GET' },
+  );
   return {
     date: String(res.date || ''),
     volunteer: String(res.volunteer || ''),
@@ -94,18 +132,30 @@ export async function fetchHealthRecord(): Promise<HealthRecord> {
   };
 }
 
-export async function fetchMedications(): Promise<Medication[]> {
+export async function fetchMedications(sessionId: string): Promise<Medication[]> {
   const elderId = getResolvedElderId();
-  return httpClient<Medication[]>(`${ENDPOINTS.scanMedications}?elderId=${encodeURIComponent(elderId)}`, { method: 'GET' });
+  return httpClient<Medication[]>(
+    `${ENDPOINTS.scanMedications}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+    { method: 'GET' },
+  );
 }
 
-export async function fetchScaleSummaries(): Promise<ScaleSummary[]> {
+export async function fetchScaleSummaries(sessionId: string): Promise<ScaleSummary[]> {
   const elderId = getResolvedElderId();
-  const res = await httpClient<ScaleDto[]>(`${ENDPOINTS.scanScales}?elderId=${encodeURIComponent(elderId)}`, { method: 'GET' });
+  const res = await httpClient<ScaleDto[]>(
+    `${ENDPOINTS.scanScales}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+    { method: 'GET' },
+  );
   return res.map((item) => ({
     name: (item.name || item.scale || 'PHQ-9') as ScaleSummary['name'],
     score: Number(item.score || 0),
     updatedAt: String(item.updatedAt || item.date || ''),
     volunteer: String(item.volunteer || ''),
+    answers: Array.isArray(item.answers)
+      ? item.answers.map((answer) => ({
+          question: String(answer.question || ''),
+          value: typeof answer.value === 'number' ? answer.value : answer.value == null ? null : Number(answer.value),
+        }))
+      : [],
   }));
 }

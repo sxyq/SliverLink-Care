@@ -10,7 +10,7 @@ interface VerificationStore {
   lastError: string;
 }
 
-const AUTH_TTL_MS = 10 * 60 * 1000;
+const AUTH_TTL_MS = 20 * 60 * 1000;
 const MAX_ERROR_COUNT = 5;
 
 export function useVerificationStore() {

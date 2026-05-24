@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { SecurityProvider, useSecurity } from './app/SecurityProvider';
+import { ContentProtection } from './components/ContentProtection';
 import { useQrToken } from './hooks/useQrToken';
 import { useScanBasicInfo } from './hooks/useScanBasicInfo';
 import { useProtectedArchive } from './hooks/useProtectedArchive';
@@ -9,15 +10,23 @@ import { SmsVerifyPage } from './pages/SmsVerifyPage';
 import { HealthArchivePage } from './pages/HealthArchivePage';
 import { MedicationPage } from './pages/MedicationPage';
 import { ScaleSummaryPage } from './pages/ScaleSummaryPage';
+import { ScaleDetailPage } from './pages/ScaleDetailPage';
 import { NameplatePreviewPage } from './pages/NameplatePreviewPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { createAppRouter } from './routes/router';
 
 function AppRoutes() {
   const { token, isValid } = useQrToken();
-  const { data, loading, error } = useScanBasicInfo(isValid ? token : null);
-  const { verified } = useSecurity();
-  const { healthRecord, medications, scaleSummaries, loading: archiveLoading } = useProtectedArchive(verified);
+  const qrState = !token ? 'missing-token' : isValid ? 'valid-token' : 'invalid-qr';
+  const { data, loading, error } = useScanBasicInfo(qrState === 'valid-token' ? token : null);
+  const { verified, verifiedSessionId } = useSecurity();
+  const { verifiedBasicInfo, healthRecord, medications, scaleSummaries, loading: archiveLoading } = useProtectedArchive(verified, verifiedSessionId);
+  const protectionWatermark = useMemo(() => {
+    const base = verifiedBasicInfo || data;
+    const archiveNo = base?.archiveNo || '';
+    const sessionTail = verifiedSessionId ? verifiedSessionId.slice(-6) : 'public';
+    return `智联名牌 仅供查看 ${archiveNo} ${sessionTail}`;
+  }, [data, verifiedBasicInfo, verifiedSessionId]);
 
   const router = useMemo(() => {
     if (loading) {
@@ -27,33 +36,38 @@ function AppRoutes() {
         <div className="sl-page loading">正在读取...</div>,
         <div className="sl-page loading">正在读取...</div>,
         <div className="sl-page loading">正在读取...</div>,
+        <div className="sl-page loading">正在读取...</div>,
         <div className="sl-page loading">正在读取...</div>
       );
     }
 
     if (error || !data) {
+      const errorPage = qrState === 'missing-token'
+        ? <NotFoundPage variant="missing-token" />
+        : <NotFoundPage variant="invalid-qr" />;
       return createAppRouter(
-        <NotFoundPage />,
-        <NotFoundPage />,
-        <NotFoundPage />,
-        <NotFoundPage />,
-        <NotFoundPage />,
-        <NotFoundPage />
+        errorPage,
+        errorPage,
+        errorPage,
+        errorPage,
+        errorPage,
+        errorPage,
+        errorPage
       );
     }
 
+    const basicDisplayData = verifiedBasicInfo || data;
+
     return createAppRouter(
       <BasicInfoPage
-        data={data}
+        data={basicDisplayData}
         verified={verified}
-        healthRecord={healthRecord}
-        medications={medications}
-        archiveLoading={archiveLoading}
       />,
       <SmsVerifyPage />,
-      <HealthArchivePage data={healthRecord} loading={archiveLoading} />,
+      <HealthArchivePage data={healthRecord} basicInfo={basicDisplayData} loading={archiveLoading} verified={verified} />,
       <MedicationPage data={medications} loading={archiveLoading} />,
       <ScaleSummaryPage data={scaleSummaries} loading={archiveLoading} />,
+      <ScaleDetailPage data={scaleSummaries} loading={archiveLoading} />,
       <NameplatePreviewPage
         elderId={data.id}
         name={data.name}
@@ -62,9 +76,14 @@ function AppRoutes() {
         archiveNo={data.archiveNo}
       />
     );
-  }, [loading, error, data, verified, healthRecord, medications, scaleSummaries, archiveLoading]);
+  }, [loading, error, data, verified, verifiedBasicInfo, healthRecord, medications, scaleSummaries, archiveLoading, qrState]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <ContentProtection enabled={verified} watermarkText={protectionWatermark} />
+      <RouterProvider router={router} />
+    </>
+  );
 }
 
 export function App() {

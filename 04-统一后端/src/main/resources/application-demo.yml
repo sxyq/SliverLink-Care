@@ -25,6 +25,7 @@ silverlink:
     aes-key-id: demo-key-v1
     aes-key-base64: ${SILVERLINK_AES_KEY_BASE64:QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=}
     signature-window-seconds: 300
+    admin-signature-secret: ${SILVERLINK_ADMIN_SIGNATURE_SECRET:demo-admin-signature-secret}
   sms:
     provider: ${SILVERLINK_SMS_PROVIDER:configured}
     access-key: ${SILVERLINK_SMS_ACCESS_KEY:}
@@ -34,6 +35,24 @@ silverlink:
     mock-enabled: false
     code-ttl-seconds: 300
     max-attempts: 5
+    http-endpoint: ${SILVERLINK_SMS_HTTP_ENDPOINT:}
+    http-auth-header: ${SILVERLINK_SMS_HTTP_AUTH_HEADER:Authorization}
+    http-auth-token: ${SILVERLINK_SMS_HTTP_AUTH_TOKEN:}
+    http-timeout-seconds: ${SILVERLINK_SMS_HTTP_TIMEOUT_SECONDS:10}
+  smsrelay:
+    receiver-phone: ${SILVERLINK_SMSRELAY_RECEIVER_PHONE:13800001111}
+    message-prefix: ${SILVERLINK_SMSRELAY_MESSAGE_PREFIX:SL}
+    session-ttl-seconds: ${SILVERLINK_SMSRELAY_SESSION_TTL_SECONDS:300}
+    authorization-window-seconds: ${SILVERLINK_SMSRELAY_AUTHORIZATION_WINDOW_SECONDS:1200}
+    signature-window-seconds: ${SILVERLINK_SMSRELAY_SIGNATURE_WINDOW_SECONDS:300}
+    server-url: ${SILVERLINK_SMSRELAY_SERVER_URL:http://sxyq27.online/silverlink-api}
+    default-device-id: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_ID:relay-android-01}
+    default-device-secret: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_SECRET:secret-001}
+  wechat:
+    openid-salt: ${SILVERLINK_WECHAT_OPENID_SALT:demo-wechat-openid-salt}
+    app-id: ${SILVERLINK_WECHAT_APP_ID:}
+    app-secret: ${SILVERLINK_WECHAT_APP_SECRET:}
+    code2session-url: ${SILVERLINK_WECHAT_CODE2SESSION_URL:https://api.weixin.qq.com/sns/jscode2session}
 
 logging:
   level:

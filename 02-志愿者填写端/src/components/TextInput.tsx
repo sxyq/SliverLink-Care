@@ -23,7 +23,7 @@ export const TextInput: React.FC<TextInputProps> = ({
 }) => {
   return (
     <label className="sl-label">
-      <span className="sl-label-text">{label}</span>
+      {label ? <span className="sl-label-text">{label}</span> : null}
       <div className="sl-input-wrap">
         <input
           className={`sl-input${error ? ' sl-input-error' : ''}`}

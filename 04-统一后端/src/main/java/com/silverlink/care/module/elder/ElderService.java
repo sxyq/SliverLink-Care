@@ -30,4 +30,9 @@ public class ElderService {
     public void saveScales(String elderId, List<Map<String, Object>> body) {
         data.saveScales(elderId, body);
     }
+
+    public List<Map<String, Object>> getScales(String elderId) {
+        data.requireVolunteerScope(elderId);
+        return data.scales(elderId);
+    }
 }

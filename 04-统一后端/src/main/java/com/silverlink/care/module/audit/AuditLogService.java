@@ -1,6 +1,7 @@
 package com.silverlink.care.module.audit;
 
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +12,15 @@ import java.util.Map;
 
 @Service
 public class AuditLogService {
+
+    private static final String[] IP_HEADER_CANDIDATES = {
+            "X-Forwarded-For",
+            "X-Real-IP",
+            "Proxy-Client-IP",
+            "WL-Proxy-Client-IP",
+            "HTTP_X_FORWARDED_FOR",
+            "HTTP_CLIENT_IP"
+    };
 
     private final SilverLinkDataService data;
 
@@ -28,6 +38,70 @@ public class AuditLogService {
 
     public void record(String operator, String role, String ip, String target, String action, String result, String failReason, String requestId) {
         data.recordAudit(operator, role, ip, target, action, result, failReason, requestId);
+    }
+
+    public void record(
+            String operator,
+            String role,
+            String ip,
+            String target,
+            String action,
+            String result,
+            String failReason,
+            String requestId,
+            String verificationMethod,
+            String visitorName,
+            String visitorPhone,
+            String visitorIdCard
+    ) {
+        data.recordAudit(
+                operator,
+                role,
+                ip,
+                target,
+                action,
+                result,
+                failReason,
+                requestId,
+                verificationMethod,
+                visitorName,
+                visitorPhone,
+                visitorIdCard
+        );
+    }
+
+    public void record(String operator, String role, HttpServletRequest request, String target, String action, String result, String failReason, String requestId) {
+        record(operator, role, resolveClientIp(request), target, action, result, failReason, requestId);
+    }
+
+    public void record(
+            String operator,
+            String role,
+            HttpServletRequest request,
+            String target,
+            String action,
+            String result,
+            String failReason,
+            String requestId,
+            String verificationMethod,
+            String visitorName,
+            String visitorPhone,
+            String visitorIdCard
+    ) {
+        record(
+                operator,
+                role,
+                resolveClientIp(request),
+                target,
+                action,
+                result,
+                failReason,
+                requestId,
+                verificationMethod,
+                visitorName,
+                visitorPhone,
+                visitorIdCard
+        );
     }
 
     public String operatorOf(Authentication authentication) {
@@ -52,6 +126,37 @@ public class AuditLogService {
         record(operatorOf(authentication), roleOf(authentication), ip, target, action, result, null, null);
     }
 
+    public void record(Authentication authentication, HttpServletRequest request, String target, String action, String result) {
+        record(authentication, resolveClientIp(request), target, action, result);
+    }
+
+    public String resolveClientIp(HttpServletRequest request) {
+        if (request == null) {
+            return "";
+        }
+        for (String header : IP_HEADER_CANDIDATES) {
+            String value = request.getHeader(header);
+            String resolved = firstIp(value);
+            if (!resolved.isBlank()) {
+                return resolved;
+            }
+        }
+        return data.str(request.getRemoteAddr());
+    }
+
+    private String firstIp(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return "";
+        }
+        for (String part : raw.split(",")) {
+            String candidate = part == null ? "" : part.trim();
+            if (!candidate.isBlank() && !"unknown".equalsIgnoreCase(candidate)) {
+                return candidate;
+            }
+        }
+        return "";
+    }
+
     private List<AuditLogEntity> toEntities(List<Map<String, Object>> rows) {
         List<AuditLogEntity> list = new ArrayList<>();
         for (Map<String, Object> row : rows) {
@@ -63,6 +168,12 @@ public class AuditLogService {
             log.setSourceIp(data.str(row.get("sourceIp")));
             log.setTarget(data.str(row.get("target")));
             log.setAction(data.str(row.get("action")));
+            log.setVerificationMethod(data.str(row.get("verificationMethod")));
+            log.setVisitorName(data.str(row.get("visitorName")));
+            log.setVisitorPhone(data.str(row.get("visitorPhone")));
+            log.setVisitorPhoneMasked(data.str(row.get("visitorPhoneMasked")));
+            log.setVisitorIdCard(data.str(row.get("visitorIdCard")));
+            log.setVisitorIdCardMasked(data.str(row.get("visitorIdCardMasked")));
             log.setResult(data.str(row.get("result")));
             log.setFailReason(data.str(row.get("failReason")));
             log.setRequestId(data.str(row.get("requestId")));

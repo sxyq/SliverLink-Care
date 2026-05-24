@@ -3,6 +3,8 @@ export const ENDPOINTS = {
   scanAuthWechat: '/api/scan/auth/wechat',
   scanVerificationStart: '/api/scan/verification/start',
   scanVerificationStatus: '/api/scan/verification/status',
+  scanVerificationIdentity: '/api/scan/verification/identity',
+  scanVerifiedBasic: '/api/scan/basic-info',
   scanArchive: '/api/scan/archive',
   scanMedications: '/api/scan/medications',
   scanScales: '/api/scan/scales',

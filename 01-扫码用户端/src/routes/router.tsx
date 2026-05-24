@@ -9,6 +9,7 @@ export function createAppRouter(
   healthPage: React.ReactNode,
   medicationPage: React.ReactNode,
   scalePage: React.ReactNode,
+  scaleDetailPage: React.ReactNode,
   nameplatePage: React.ReactNode
 ) {
   return createHashRouter([
@@ -21,6 +22,7 @@ export function createAppRouter(
         { path: 'health', element: <ProtectedRoute>{healthPage}</ProtectedRoute> },
         { path: 'medication', element: <ProtectedRoute>{medicationPage}</ProtectedRoute> },
         { path: 'scale', element: <ProtectedRoute>{scalePage}</ProtectedRoute> },
+        { path: 'scale/:scaleName', element: <ProtectedRoute>{scaleDetailPage}</ProtectedRoute> },
         { path: 'nameplate', element: nameplatePage },
         { path: '404', element: <NotFoundPage /> },
         { path: '*', element: <Navigate to="/404" replace /> },

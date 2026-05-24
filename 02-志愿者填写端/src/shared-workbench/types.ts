@@ -4,6 +4,7 @@ export interface CareSubject {
   name: string;
   gender?: string;
   age?: number;
+  residence?: string;
   bloodType?: string;
   allergyHistory?: string;
   emergencyContactName?: string;
@@ -17,6 +18,7 @@ export interface CareActionCard {
   key: string;
   title: string;
   description: string;
+  icon?: string;
   tone?: 'default' | 'warning';
   onClick: () => void;
 }

@@ -265,64 +265,65 @@ export function MedicationManagePage() {
 
       {editor && (
         <div className="modal-overlay" onClick={closeEditor}>
-          <div className="modal-content" onClick={(event) => event.stopPropagation()} style={{ width: 720, maxWidth: '94vw' }}>
+          <div className="modal-content modal-content--wide modal-content--scrollable" onClick={(event) => event.stopPropagation()}>
             <div className="panel-title">
               <Pill size={18} />
               <h3>编辑用药信息</h3>
             </div>
-            <div className="inline-editor" style={{ marginBottom: 16 }}>
-              <strong>{editor.elderName || '未命名老人'}</strong>
-              <div style={{ marginTop: 6, color: 'var(--color-text-secondary)', fontSize: 13 }}>档案编号：{editor.archiveNo || '自动生成'}</div>
-            </div>
-            <div className="toolbar" style={{ marginBottom: 10 }}>
-              <TableColumnMenu options={medicationEditorColumnOptions} isVisible={editorColumns.isVisible} onToggle={editorColumns.toggle} onReset={editorColumns.reset} />
-            </div>
-            <table className="data-table">
-              <thead>
-                <tr>
-                  {editorColumns.isVisible('drugName') && <th>药品名称</th>}
-                  {editorColumns.isVisible('dosage') && <th>剂量</th>}
-                  {editorColumns.isVisible('usage') && <th>用法</th>}
-                  {editorColumns.isVisible('timing') && <th>用药时间</th>}
-                  {editorColumns.isVisible('actions') && <th>操作</th>}
-                </tr>
-              </thead>
-              <tbody>
+            <div className="modal-scroll-body">
+              <div className="inline-editor" style={{ marginBottom: 16 }}>
+                <strong>{editor.elderName || '未命名老人'}</strong>
+                <div style={{ marginTop: 6, color: 'var(--color-text-secondary)', fontSize: 13 }}>档案编号：{editor.archiveNo || '自动生成'}</div>
+              </div>
+              <div className="toolbar" style={{ marginBottom: 10 }}>
+                <TableColumnMenu
+                  options={medicationEditorColumnOptions}
+                  isVisible={editorColumns.isVisible}
+                  onToggle={editorColumns.toggle}
+                  onReset={editorColumns.reset}
+                />
+              </div>
+              <div className="medication-editor-list">
                 {editor.rows.map((row, index) => (
-                  <tr key={row.id}>
-                    {editorColumns.isVisible('drugName') && (
-                      <td>
-                        <input value={row.drugName} onChange={(event) => updateEditorRow(index, 'drugName', event.target.value)} />
-                      </td>
-                    )}
-                    {editorColumns.isVisible('dosage') && (
-                      <td>
-                        <input value={row.dosage} onChange={(event) => updateEditorRow(index, 'dosage', event.target.value)} />
-                      </td>
-                    )}
-                    {editorColumns.isVisible('usage') && (
-                      <td>
-                        <input value={row.usage} onChange={(event) => updateEditorRow(index, 'usage', event.target.value)} />
-                      </td>
-                    )}
-                    {editorColumns.isVisible('timing') && (
-                      <td>
-                        <input value={row.timing} onChange={(event) => updateEditorRow(index, 'timing', event.target.value)} />
-                      </td>
-                    )}
-                    {editorColumns.isVisible('actions') && (
-                      <td>
-                        <div className="table-actions">
-                          <button className="danger" onClick={() => removeEditorRow(index)}>
-                            删除
-                          </button>
-                        </div>
-                      </td>
-                    )}
-                  </tr>
+                  <article key={row.id} className="medication-editor-card">
+                    <div className="medication-editor-card-header">
+                      <strong>用药 {index + 1}</strong>
+                      {editorColumns.isVisible('actions') && (
+                        <button className="danger" onClick={() => removeEditorRow(index)}>
+                          删除
+                        </button>
+                      )}
+                    </div>
+                    <div className="medication-editor-grid">
+                      {editorColumns.isVisible('drugName') && (
+                        <label>
+                          <span>药品名称</span>
+                          <input value={row.drugName} onChange={(event) => updateEditorRow(index, 'drugName', event.target.value)} />
+                        </label>
+                      )}
+                      {editorColumns.isVisible('dosage') && (
+                        <label>
+                          <span>剂量</span>
+                          <input value={row.dosage} onChange={(event) => updateEditorRow(index, 'dosage', event.target.value)} />
+                        </label>
+                      )}
+                      {editorColumns.isVisible('usage') && (
+                        <label>
+                          <span>用法</span>
+                          <input value={row.usage} onChange={(event) => updateEditorRow(index, 'usage', event.target.value)} />
+                        </label>
+                      )}
+                      {editorColumns.isVisible('timing') && (
+                        <label>
+                          <span>用药时间</span>
+                          <input value={row.timing} onChange={(event) => updateEditorRow(index, 'timing', event.target.value)} />
+                        </label>
+                      )}
+                    </div>
+                  </article>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </div>
             <div className="form-actions" style={{ marginTop: 16, justifyContent: 'space-between' }}>
               <button className="secondary" onClick={addEditorRow} disabled={saving}>
                 新增用药

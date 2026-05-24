@@ -5,6 +5,8 @@ public class QrCodeEntity {
     private String qrId;
     private String elderId;
     private String archiveNo;
+    private String relayDeviceId;
+    private String relayReceiverPhone;
     private String elderName;
     private Integer elderAge;
     private String elderPhone;
@@ -23,6 +25,10 @@ public class QrCodeEntity {
     public void setElderId(String elderId) { this.elderId = elderId; }
     public String getArchiveNo() { return archiveNo; }
     public void setArchiveNo(String archiveNo) { this.archiveNo = archiveNo; }
+    public String getRelayDeviceId() { return relayDeviceId; }
+    public void setRelayDeviceId(String relayDeviceId) { this.relayDeviceId = relayDeviceId; }
+    public String getRelayReceiverPhone() { return relayReceiverPhone; }
+    public void setRelayReceiverPhone(String relayReceiverPhone) { this.relayReceiverPhone = relayReceiverPhone; }
     public String getElderName() { return elderName; }
     public void setElderName(String elderName) { this.elderName = elderName; }
     public Integer getElderAge() { return elderAge; }

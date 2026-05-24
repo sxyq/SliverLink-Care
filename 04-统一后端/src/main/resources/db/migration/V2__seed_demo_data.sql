@@ -1,5 +1,5 @@
 INSERT INTO app_user (id, account, password_hash, name_enc, phone_enc, role, status) VALUES
-('admin-001', 'admin', 'Admin@123456', '系统管理员', '13800000000', 'SYSTEM_ADMIN', 'ACTIVE'),
+('admin-001', 'admin', 'admin', '系统管理员', '13800000000', 'SYSTEM_ADMIN', 'ACTIVE'),
 ('vol-001', 'volunteer01', 'Volunteer@123456', '社区护理志愿者', '13800000001', 'VOLUNTEER', 'ACTIVE');
 
 INSERT INTO elder (

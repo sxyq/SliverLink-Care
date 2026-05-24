@@ -1,6 +1,7 @@
-import type { CSSProperties } from 'react';
-import { Search, User } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { ArrowLeft, ArrowRight, FilePenLine, Search, ShieldCheck, User } from 'lucide-react';
 import type { CareSubject } from './types';
+import { PageHeader } from '../components/PageHeader';
 
 interface SubjectListPageProps {
   title: string;
@@ -13,7 +14,11 @@ interface SubjectListPageProps {
   emptyText?: string;
   searchPlaceholder?: string;
   secondaryActionLabel?: string;
+  secondaryActionDescription?: string;
   onSecondaryAction?: (subject: CareSubject) => void;
+  headerLeadingAction?: ReactNode;
+  headerAction?: ReactNode;
+  preProfilePanel?: ReactNode;
 }
 
 export function SubjectListPage({
@@ -27,140 +32,255 @@ export function SubjectListPage({
   emptyText = '暂无可管理对象',
   searchPlaceholder = '请输入姓名或档案编号',
   secondaryActionLabel,
+  secondaryActionDescription = '快速维护基础资料、联系人和联系方式',
   onSecondaryAction,
+  headerLeadingAction,
+  headerAction,
+  preProfilePanel,
 }: SubjectListPageProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (subjects.length === 0) {
+      setActiveIndex(0);
+      return;
+    }
+    if (activeIndex > subjects.length - 1) {
+      setActiveIndex(subjects.length - 1);
+    }
+  }, [activeIndex, subjects.length]);
+
+  useEffect(() => {
+    const container = carouselRef.current;
+    if (!container || subjects.length <= 1) return;
+
+    const handleScroll = () => {
+      const cards = Array.from(container.querySelectorAll<HTMLElement>('[data-elder-card="true"]'));
+      if (cards.length === 0) return;
+
+      const containerCenter = container.scrollLeft + container.clientWidth / 2;
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
+
+      cards.forEach((card, index) => {
+        const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+        const distance = Math.abs(cardCenter - containerCenter);
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = index;
+        }
+      });
+
+      setActiveIndex((current) => (current === nearestIndex ? current : nearestIndex));
+    };
+
+    handleScroll();
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [subjects.length]);
+
+  function scrollToIndex(index: number) {
+    const container = carouselRef.current;
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll<HTMLElement>('[data-elder-card="true"]'));
+    const target = cards[index];
+    if (!target) return;
+    target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    setActiveIndex(index);
+  }
+
+  const activeSubject = subjects[activeIndex] ?? subjects[0];
+
+  function getBloodLabel(subject: CareSubject) {
+    return subject.bloodType || '待补充';
+  }
+
+  function getStatusLabel(subject: CareSubject) {
+    return subject.status || '待补充';
+  }
+
+  function getAllergyLabel(subject: CareSubject) {
+    return subject.allergyHistory || '暂无明确过敏史';
+  }
+
   return (
-    <div style={{ display: 'grid', gap: 16 }}>
-      <section className="card" style={{ padding: 16 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <Search size={16} color="var(--sl-primary, #126B78)" />
-          <strong style={{ fontSize: 16 }}>{title}</strong>
+    <div className="sl-page sl-page-list">
+      <PageHeader title={title} leadingAction={headerLeadingAction} action={headerAction} />
+
+      {primaryHint ? (
+        <div className="sl-permission-banner">
+          <ShieldCheck size={16} />
+          <span>{primaryHint}</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 10 }}>
-          <label style={{ display: 'grid', gap: 6 }}>
-            <span style={{ fontSize: 12, color: 'var(--sl-text-secondary, #5F6F7A)' }}>搜索</span>
-            <input
-              value={keyword}
-              onChange={(event) => onKeywordChange(event.target.value)}
-              placeholder={searchPlaceholder}
-              style={inputStyle}
-            />
-          </label>
+      ) : null}
+
+      <section className="sl-card sl-card-soft sl-search-panel">
+        <div className="sl-search-box">
+          <Search size={18} />
+          <input
+            className="sl-search-input"
+            value={keyword}
+            onChange={(event) => onKeywordChange(event.target.value)}
+            placeholder={searchPlaceholder}
+          />
+          <span className="sl-search-divider" />
+          <button type="button" className="sl-search-btn">
+            搜索
+          </button>
         </div>
-        {primaryHint ? (
-          <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-            {primaryHint}
-          </p>
-        ) : null}
       </section>
 
       {loading ? (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-          加载中...
-        </div>
+        <section className="sl-card">
+          <div className="sl-empty-state">加载中...</div>
+        </section>
       ) : subjects.length === 0 ? (
-        <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-          {emptyText}
-        </div>
+        <section className="sl-card">
+          <div className="sl-empty-state">{emptyText}</div>
+        </section>
       ) : (
-        subjects.map((subject) => (
-          <div
-            key={subject.id}
-            onClick={() => onSelect(subject)}
-            style={cardButtonStyle}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                onSelect(subject);
-              }
-            }}
-          >
-            <div style={avatarStyle}>
-              <User size={20} color="var(--sl-primary, #126B78)" />
+        <section className="sl-archive-layout">
+          <section className="sl-archive-overview">
+            <div className="sl-archive-overview-copy">
+              <span className="sl-overview-kicker">老人档案</span>
+              <h2>{subjects.length > 1 ? '左右滑动切换档案' : '当前负责老人档案'}</h2>
+              <p>
+                当前共 {subjects.length} 位老人
+                {subjects.length > 1 ? `，正在查看第 ${activeIndex + 1} 位` : ''}
+              </p>
             </div>
-            <div style={{ flex: 1, textAlign: 'left' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <strong style={{ fontSize: 16, color: 'var(--sl-text, #18222D)' }}>{subject.name}</strong>
-                {subject.status ? <span style={statusStyle}>{subject.status}</span> : null}
+
+            {subjects.length > 1 ? (
+              <div className="sl-carousel-nav">
+                <button
+                  type="button"
+                  className="sl-carousel-btn"
+                  onClick={() => scrollToIndex(Math.max(0, activeIndex - 1))}
+                  disabled={activeIndex === 0}
+                  aria-label="上一位老人"
+                >
+                  <ArrowLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="sl-carousel-btn"
+                  onClick={() => scrollToIndex(Math.min(subjects.length - 1, activeIndex + 1))}
+                  disabled={activeIndex === subjects.length - 1}
+                  aria-label="下一位老人"
+                >
+                  <ArrowRight size={16} />
+                </button>
               </div>
-              <div style={{ marginTop: 6, fontSize: 13, color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-                档案编号 {subject.archiveNo}
-                {subject.age ? ` · ${subject.age}岁` : ''}
-                {subject.gender ? ` · ${subject.gender}` : ''}
-              </div>
-              {subject.summary ? (
-                <div style={{ marginTop: 4, fontSize: 12, color: 'var(--sl-text-secondary, #5F6F7A)' }}>
-                  {subject.summary}
+            ) : null}
+          </section>
+
+          <div className="sl-archive-carousel" ref={carouselRef}>
+            {subjects.map((subject, index) => (
+              <article
+                key={subject.id}
+                data-elder-card="true"
+                className={`sl-archive-card${index === activeIndex ? ' is-active' : ''}`}
+                onClick={() => scrollToIndex(index)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    scrollToIndex(index);
+                  }
+                }}
+              >
+                <div className="sl-archive-card-top">
+                  <div className="sl-elder-avatar sl-elder-avatar-xl">
+                    <User size={30} />
+                  </div>
+                  <div className="sl-archive-card-copy">
+                    <div className="sl-elder-name-row">
+                      <h3 className="sl-archive-card-name">{subject.name}</h3>
+                    </div>
+                    <div className="sl-archive-card-subtitle">
+                      档案编号 {subject.archiveNo || '待生成'} {subject.gender || '待补充'} {subject.age ? `${subject.age}岁` : '年龄待补充'}
+                    </div>
+                    <div className="sl-archive-card-subtitle sl-archive-card-residence">
+                      住址 {subject.residence || '待补充'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="sl-archive-card-grid">
+                  <div className="sl-archive-data-pill">
+                    <span>状态</span>
+                    <strong>{getStatusLabel(subject)}</strong>
+                  </div>
+                  <div className="sl-archive-data-pill">
+                    <span>联系人</span>
+                    <strong>
+                      {subject.emergencyContactName
+                        ? `${subject.emergencyContactName}${subject.emergencyContactRelation ? `（${subject.emergencyContactRelation}）` : ''}`
+                        : '待补充'}
+                    </strong>
+                  </div>
+                  <div className="sl-archive-data-pill">
+                    <span>联系电话</span>
+                    <strong>{subject.emergencyContactPhone || '待补充'}</strong>
+                  </div>
+                  <div className="sl-archive-data-pill">
+                    <span>{subject.bloodType ? '血型' : '过敏史'}</span>
+                    <strong>{subject.bloodType ? getBloodLabel(subject) : getAllergyLabel(subject)}</strong>
+                  </div>
+                </div>
+
+                <div className="sl-archive-card-footer">
+                  <button
+                    type="button"
+                    className="sl-archive-inline-action"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onSelect(subject);
+                    }}
+                  >
+                    <span>进入档案</span>
+                    <ArrowRight size={15} />
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="sl-carousel-dots" aria-label="老人档案分页">
+            {subjects.map((subject, index) => (
+              <button
+                key={subject.id}
+                type="button"
+                className={`sl-carousel-dot${index === activeIndex ? ' is-active' : ''}`}
+                onClick={() => scrollToIndex(index)}
+                aria-label={`切换到${subject.name}`}
+              />
+            ))}
+          </div>
+
+          {activeSubject ? (
+            <>
+              {preProfilePanel}
+
+              {secondaryActionLabel && onSecondaryAction ? (
+                <div className="sl-single-actions sl-archive-actions">
+                  <button type="button" className="sl-single-action" onClick={() => onSecondaryAction(activeSubject)}>
+                    <div>
+                      <strong>{secondaryActionLabel}</strong>
+                      <span>{secondaryActionDescription}</span>
+                    </div>
+                    <FilePenLine size={18} />
+                  </button>
                 </div>
               ) : null}
-            </div>
-            {secondaryActionLabel && onSecondaryAction ? (
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onSecondaryAction(subject);
-                }}
-                style={secondaryButtonStyle}
-              >
-                {secondaryActionLabel}
-              </button>
-            ) : null}
-          </div>
-        ))
+            </>
+          ) : null}
+        </section>
       )}
+
+      <p className="sl-list-footer">共 {subjects.length} 位老人</p>
     </div>
   );
 }
-
-const inputStyle: CSSProperties = {
-  width: '100%',
-  minHeight: 42,
-  borderRadius: 10,
-  border: '1px solid var(--sl-border, #D8E7EA)',
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  padding: '10px 12px',
-  fontSize: 14,
-};
-
-const cardButtonStyle: CSSProperties = {
-  display: 'flex',
-  alignItems: 'center',
-  gap: 12,
-  width: '100%',
-  border: '1px solid var(--sl-border, #D8E7EA)',
-  borderRadius: 14,
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  padding: 14,
-  boxShadow: '0 8px 20px rgba(24, 34, 45, 0.06)',
-  cursor: 'pointer',
-};
-
-const avatarStyle: CSSProperties = {
-  width: 44,
-  height: 44,
-  borderRadius: 999,
-  display: 'grid',
-  placeItems: 'center',
-  background: 'var(--sl-chip-bg, #EEF7F5)',
-  flexShrink: 0,
-};
-
-const statusStyle: CSSProperties = {
-  padding: '2px 10px',
-  borderRadius: 999,
-  background: '#E6F7F0',
-  color: '#0A8067',
-  fontSize: 12,
-};
-
-const secondaryButtonStyle: CSSProperties = {
-  border: '1px solid var(--sl-border, #D8E7EA)',
-  borderRadius: 10,
-  background: 'var(--sl-card-bg, #FFFFFF)',
-  padding: '8px 12px',
-  fontSize: 13,
-  cursor: 'pointer',
-};

@@ -12,13 +12,7 @@ export function AdminLoginPage({ onLogin }: { onLogin: (role: string) => void })
     setError('');
     setSubmitting(true);
     try {
-      const normalizedAccount = account.trim();
-      const normalizedPassword = password.trim();
-      const loginAccount = normalizedAccount === 'admin' ? 'admin' : normalizedAccount;
-      const loginPassword =
-        normalizedAccount === 'admin' && normalizedPassword === 'admin' ? 'Admin@123456' : normalizedPassword;
-
-      const result = await loginAdmin(loginAccount, loginPassword);
+      const result = await loginAdmin(account.trim(), password.trim());
       if (result.ok) {
         onLogin(result.role || '系统管理员');
       } else {

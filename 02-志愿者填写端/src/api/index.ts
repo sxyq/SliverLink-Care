@@ -1,6 +1,6 @@
 import { http } from './httpClient';
 export { loginVolunteer, fetchAssignedElders } from './volunteerApi';
-export { saveBasicInfo, saveHealthRecord, saveMedications, saveScaleRecords } from './elderApi';
+export { saveBasicInfo, saveHealthRecord, saveMedications, saveScaleRecords, fetchScaleRecords } from './elderApi';
 export { saveBasicInfo as updateBasicInfo } from './elderApi';
 
 export async function sendSmsVerify(phone: string) {

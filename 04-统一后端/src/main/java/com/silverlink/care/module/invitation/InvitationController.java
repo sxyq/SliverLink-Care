@@ -27,7 +27,7 @@ public class InvitationController {
     @PostMapping("/invitations/{code}/send-sms")
     public ApiResponse<Void> sendSms(@PathVariable String code, @RequestBody SendSmsRequest req, HttpServletRequest request) {
         invitationService.sendSms(code, req.getPhone());
-        auditLogService.record("family-register", "INVITATION", request.getRemoteAddr(), code, "INVITATION_SEND_SMS", "SUCCESS", null, null);
+        auditLogService.record("family-register", "INVITATION", request, code, "INVITATION_SEND_SMS", "SUCCESS", null, null);
         return ApiResponse.ok(null);
     }
 
@@ -35,7 +35,7 @@ public class InvitationController {
     public ApiResponse<RegisterResultDto> register(@PathVariable String code, @RequestBody RegisterRequest req, HttpServletRequest request) {
         RegisterResultDto result = invitationService.register(code, req);
         boolean ok = Boolean.TRUE.equals(result.getOk());
-        auditLogService.record(req.getPhone(), "FAMILY", request.getRemoteAddr(), code, "INVITATION_REGISTER", ok ? "SUCCESS" : "FAIL", ok ? null : result.getMessage(), null);
+        auditLogService.record(req.getPhone(), "FAMILY", request, code, "INVITATION_REGISTER", ok ? "SUCCESS" : "FAIL", ok ? null : result.getMessage(), null);
         return ApiResponse.ok(result);
     }
 
@@ -47,21 +47,21 @@ public class InvitationController {
     @PostMapping("/admin/invitations")
     public ApiResponse<InvitationAdminDto> create(@RequestBody CreateInvitationRequest req, HttpServletRequest request) {
         InvitationAdminDto result = invitationService.create(req);
-        auditLogService.record("admin", "SYSTEM_ADMIN", request.getRemoteAddr(), result.getCode(), "CREATE_INVITATION", "SUCCESS", null, null);
+        auditLogService.record("admin", "SYSTEM_ADMIN", request, result.getCode(), "CREATE_INVITATION", "SUCCESS", null, null);
         return ApiResponse.ok(result);
     }
 
     @PutMapping("/admin/invitations/{id}/disable")
     public ApiResponse<Void> disable(@PathVariable String id, HttpServletRequest request) {
         invitationService.disable(id);
-        auditLogService.record("admin", "SYSTEM_ADMIN", request.getRemoteAddr(), id, "DISABLE_INVITATION", "SUCCESS", null, null);
+        auditLogService.record("admin", "SYSTEM_ADMIN", request, id, "DISABLE_INVITATION", "SUCCESS", null, null);
         return ApiResponse.ok(null);
     }
 
     @DeleteMapping("/admin/invitations/{id}")
     public ApiResponse<Void> delete(@PathVariable String id, HttpServletRequest request) {
         invitationService.delete(id);
-        auditLogService.record("admin", "SYSTEM_ADMIN", request.getRemoteAddr(), id, "DELETE_INVITATION", "SUCCESS", null, null);
+        auditLogService.record("admin", "SYSTEM_ADMIN", request, id, "DELETE_INVITATION", "SUCCESS", null, null);
         return ApiResponse.ok(null);
     }
 }

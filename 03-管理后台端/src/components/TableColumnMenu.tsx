@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Columns3, RotateCcw } from 'lucide-react';
 
 export interface TableColumnOption<T extends string = string> {
@@ -91,6 +92,8 @@ export function TableColumnMenu<T extends string>({
 }) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const [popoverStyle, setPopoverStyle] = useState<{ top: number; left: number; width: number } | null>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -104,17 +107,38 @@ export function TableColumnMenu<T extends string>({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+
+    function updatePopoverPosition() {
+      if (!buttonRef.current) return;
+      const rect = buttonRef.current.getBoundingClientRect();
+      const width = Math.min(240, window.innerWidth - 24);
+      const left = Math.max(12, Math.min(rect.right - width, window.innerWidth - width - 12));
+      setPopoverStyle({
+        top: rect.bottom + 8,
+        left,
+        width,
+      });
+    }
+
+    updatePopoverPosition();
+    window.addEventListener('resize', updatePopoverPosition);
+    window.addEventListener('scroll', updatePopoverPosition, true);
+    return () => {
+      window.removeEventListener('resize', updatePopoverPosition);
+      window.removeEventListener('scroll', updatePopoverPosition, true);
+    };
+  }, [open]);
+
   const visibleCount = useMemo(() => options.filter((item) => isVisible(item.key)).length, [isVisible, options]);
 
-  return (
-    <div className="column-menu" ref={rootRef}>
-      <button className="secondary" type="button" onClick={() => setOpen((prev) => !prev)}>
-        <Columns3 size={14} />
-        字段
-        <span className="column-menu-count">{visibleCount}</span>
-      </button>
-      {open && (
-        <div className="column-menu-popover">
+  const popover = open && popoverStyle
+    ? createPortal(
+        <div
+          className="column-menu-popover column-menu-popover--portal"
+          style={{ top: popoverStyle.top, left: popoverStyle.left, width: popoverStyle.width }}
+        >
           <div className="column-menu-header">
             <strong>字段显示</strong>
             <button className="secondary" type="button" onClick={onReset}>
@@ -136,8 +160,19 @@ export function TableColumnMenu<T extends string>({
               </label>
             ))}
           </div>
-        </div>
-      )}
+        </div>,
+        document.body,
+      )
+    : null;
+
+  return (
+    <div className="column-menu" ref={rootRef}>
+      <button className="secondary" type="button" ref={buttonRef} onClick={() => setOpen((prev) => !prev)}>
+        <Columns3 size={14} />
+        字段
+        <span className="column-menu-count">{visibleCount}</span>
+      </button>
+      {popover}
     </div>
   );
 }

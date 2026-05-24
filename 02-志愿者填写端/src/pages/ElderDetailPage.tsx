@@ -1,4 +1,5 @@
 import { SubjectDetailPage } from '@shared/SubjectDetailPage';
+import { FilePenLine } from 'lucide-react';
 import type { CareActionCard, CareSubject } from '@shared/types';
 import type { AssignedElder } from '../types';
 
@@ -6,9 +7,9 @@ interface ElderDetailPageProps {
   elder: AssignedElder;
   onBack: () => void;
   onEditBasic: () => void;
-  onEditHealth: () => void;
   onEditMedication: () => void;
   onEditScale: () => void;
+  onManageQrCode: () => void;
 }
 
 function toCareSubject(elder: AssignedElder): CareSubject {
@@ -18,6 +19,7 @@ function toCareSubject(elder: AssignedElder): CareSubject {
     name: elder.name,
     age: elder.age,
     gender: elder.gender,
+    residence: elder.residence,
     emergencyContactName: elder.emergencyContactName,
     emergencyContactPhone: elder.emergencyContactPhone,
     emergencyContactRelation: elder.emergencyContactRelation,
@@ -31,36 +33,59 @@ export function ElderDetailPage({
   elder,
   onBack,
   onEditBasic,
-  onEditHealth,
   onEditMedication,
   onEditScale,
+  onManageQrCode,
 }: ElderDetailPageProps) {
   const actions: CareActionCard[] = [
     {
       key: 'basic',
       title: '基本信息',
-      description: '维护老人基本资料、联系人、血型与过敏史。',
+      description: '资料与联系人',
+      icon: 'User',
       onClick: onEditBasic,
     },
     {
-      key: 'health',
-      title: '健康档案',
-      description: '填写身高、体重、BMI、自评与认知情感筛查。',
-      onClick: onEditHealth,
-    },
-    {
       key: 'medication',
-      title: '主要用药',
-      description: '维护当前用药名称、剂量、用法与用药时间。',
+      title: '用药记录',
+      description: '剂量与用法',
+      icon: 'Pill',
       onClick: onEditMedication,
     },
     {
       key: 'scale',
-      title: '量表填写',
-      description: '填写 PHQ-9、GAD-7 与 UCLA 量表。',
+      title: '量表评估',
+      description: 'PHQ / GAD / UCLA',
+      icon: 'ClipboardList',
       onClick: onEditScale,
+    },
+    {
+      key: 'qrcode',
+      title: '名牌二维码',
+      description: '查看与管理',
+      icon: 'QrCode',
+      onClick: onManageQrCode,
     },
   ];
 
-  return <SubjectDetailPage title="老人详情" subject={toCareSubject(elder)} onBack={onBack} actions={actions} />;
+  return (
+    <SubjectDetailPage
+      title="老人详情"
+      subject={toCareSubject(elder)}
+      onBack={onBack}
+      actions={actions}
+      headerAction={
+        <button
+          type="button"
+          className="sl-page-header-icon sl-page-header-icon-label"
+          onClick={onEditBasic}
+          aria-label="进入编辑"
+          title="进入编辑"
+        >
+          <FilePenLine size={18} />
+          <span>编辑</span>
+        </button>
+      }
+    />
+  );
 }

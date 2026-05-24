@@ -1,24 +1,39 @@
 :root {
-  --sl-bg: #edf7f4;
-  --sl-bg-light: #f4faf8;
-  --sl-primary: #126b78;
-  --sl-secondary: #0a8067;
-  --sl-accent: #d77b25;
-  --sl-text: #17212b;
-  --sl-text-secondary: #667783;
-  --sl-border: #d8e7e3;
-  --sl-card-shadow: 0 8px 24px rgba(23, 33, 43, 0.07);
-  --sl-radius: 8px;
-  --sl-max-width: 480px;
-  --sl-gap: 14px;
-  --sl-page-pad: 16px;
+  --sl-bg: #f4f7f8;
+  --sl-surface: #ffffff;
+  --sl-surface-soft: #f7fbfa;
+  --sl-primary: #2673dc;
+  --sl-primary-deep: #2a62c8;
+  --sl-secondary: #35b496;
+  --sl-secondary-deep: #2aa485;
+  --sl-accent: #ffb10f;
+  --sl-accent-deep: #f09b00;
+  --sl-text: #1b1f2a;
+  --sl-text-soft: #73808f;
+  --sl-border: #e7eeef;
+  --sl-mint: #e8f8f2;
+  --sl-blue-soft: #eaf2ff;
+  --sl-orange-soft: #fff5df;
+  --sl-shadow: 0 16px 36px rgba(22, 35, 54, 0.08);
+  --sl-radius-xl: 22px;
+  --sl-radius-lg: 18px;
+  --sl-radius-md: 14px;
+  --sl-page-width: 390px;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
 }
 
 body {
   margin: 0;
   color: var(--sl-text);
-  background: var(--sl-bg);
-  font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(53, 180, 150, 0.12), transparent 32%),
+    linear-gradient(180deg, #f8fcfb 0%, #eef6f8 100%);
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -26,6 +41,8 @@ body {
   box-sizing: border-box;
 }
 
-button, input {
+button,
+input,
+a {
   font: inherit;
 }

@@ -3,6 +3,7 @@ package com.silverlink.care.module.invitation;
 public class InvitationAdminDto {
     private String id;
     private String code;
+    private String elderId;
     private String elderName;
     private String archiveNo;
     private String expiresAt;
@@ -17,6 +18,8 @@ public class InvitationAdminDto {
     public void setId(String id) { this.id = id; }
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }
+    public String getElderId() { return elderId; }
+    public void setElderId(String elderId) { this.elderId = elderId; }
     public String getElderName() { return elderName; }
     public void setElderName(String elderName) { this.elderName = elderName; }
     public String getArchiveNo() { return archiveNo; }

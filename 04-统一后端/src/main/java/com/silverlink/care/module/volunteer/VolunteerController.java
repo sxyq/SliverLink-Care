@@ -38,21 +38,83 @@ public class VolunteerController {
             Map<String, String> map = new LinkedHashMap<>();
             map.put("token", token);
             map.put("name", data.dec(user.get().get("name_enc")));
-            auditLogService.record(account, "VOLUNTEER", request.getRemoteAddr(), "系统", "LOGIN", "SUCCESS", null, null);
+            auditLogService.record(account, "VOLUNTEER", request, "系统", "LOGIN", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         }
-        auditLogService.record(account, "UNKNOWN", request.getRemoteAddr(), "系统", "LOGIN", "FAIL", "密码错误", null);
+        auditLogService.record(account, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
         return ApiResponse.fail(401, "账号或密码错误");
     }
 
     @PostMapping("/logout")
     public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request) {
-        auditLogService.record(authentication, request.getRemoteAddr(), "绯荤粺", "LOGOUT", "SUCCESS");
+        auditLogService.record(authentication, request, "绯荤粺", "LOGOUT", "SUCCESS");
         return ApiResponse.ok();
     }
 
     @GetMapping("/me/elders")
     public ApiResponse<List<Map<String, Object>>> myElders(Authentication authentication) {
         return ApiResponse.ok(volunteerService.getMyElders(authentication.getName()));
+    }
+
+    @GetMapping("/me/profile")
+    public ApiResponse<Map<String, Object>> myProfile(Authentication authentication) {
+        return ApiResponse.ok(volunteerService.getMyProfile(authentication.getName()));
+    }
+
+    @PutMapping("/me/profile")
+    public ApiResponse<Map<String, String>> updateMyProfile(
+            @RequestBody Map<String, Object> body,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Map<String, Object> profile = volunteerService.updateMyProfile(authentication.getName(), body);
+        String nextAccount = String.valueOf(profile.getOrDefault("account", authentication.getName()));
+        String nextName = String.valueOf(profile.getOrDefault("name", nextAccount));
+        String token = jwtTokenProvider.generateToken(nextAccount, "VOLUNTEER", 86400000L);
+        auditLogService.record(authentication, request, nextAccount, "UPDATE_PROFILE", "SUCCESS");
+        return ApiResponse.ok(Map.of(
+                "token", token,
+                "account", nextAccount,
+                "name", nextName,
+                "phone", String.valueOf(profile.getOrDefault("phone", ""))
+        ));
+    }
+
+    @PostMapping("/me/elders")
+    public ApiResponse<Map<String, String>> createMyElder(
+            @RequestBody Map<String, Object> body,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        String id = volunteerService.createMyElder(authentication.getName(), body);
+        auditLogService.record(authentication, request, id, "CREATE_ELDER", "SUCCESS");
+        return ApiResponse.ok(Map.of("id", id));
+    }
+
+    @GetMapping("/me/elders/{elderId}/qr-manage")
+    public ApiResponse<Map<String, Object>> myElderQrCode(@PathVariable String elderId, Authentication authentication) throws Exception {
+        return ApiResponse.ok(volunteerService.getMyElderQrCode(authentication.getName(), elderId));
+    }
+
+    @PostMapping("/me/elders/{elderId}/qr-regenerate")
+    public ApiResponse<Map<String, Object>> regenerateMyElderQrCode(
+            @PathVariable String elderId,
+            Authentication authentication,
+            HttpServletRequest request
+    ) throws Exception {
+        Map<String, Object> result = volunteerService.regenerateMyElderQrCode(authentication.getName(), elderId);
+        auditLogService.record(authentication, request, elderId, "REGENERATE_QR", "SUCCESS");
+        return ApiResponse.ok(result);
+    }
+
+    @PutMapping("/me/elders/{elderId}/qr-disable")
+    public ApiResponse<Map<String, Object>> disableMyElderQrCode(
+            @PathVariable String elderId,
+            Authentication authentication,
+            HttpServletRequest request
+    ) {
+        Map<String, Object> result = volunteerService.disableMyElderQrCode(authentication.getName(), elderId);
+        auditLogService.record(authentication, request, elderId, "DISABLE_QR", "SUCCESS");
+        return ApiResponse.ok(result);
     }
 }

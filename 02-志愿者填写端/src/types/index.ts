@@ -4,6 +4,7 @@ export interface AssignedElder {
   name: string;
   gender?: BasicInfo['gender'] | string;
   age: number;
+  residence?: string;
   emergencyContactName?: string;
   emergencyContactPhone?: string;
   emergencyContactRelation?: string;
@@ -11,13 +12,14 @@ export interface AssignedElder {
   rhType?: string;
   allergySummary?: string;
   lastVisitDate: string;
-  status: '待随访' | '已完成' | '需复核';
+  status: '在档' | '已完成' | '需复核';
 }
 
 export interface BasicInfo {
   name: string;
   gender: '男' | '女';
   age: string;
+  residence: string;
   emergencyContactName: string;
   emergencyContactPhone: string;
   emergencyContactRelation: string;
@@ -44,6 +46,22 @@ export interface Medication {
   timing: string;
 }
 
+export interface VolunteerQrCodeInfo {
+  id: string;
+  qrId: string;
+  elderId: string;
+  archiveNo: string;
+  elderName: string;
+  elderAge: number;
+  elderPhone: string;
+  status: string;
+  createdAt: string;
+  disabledAt?: string;
+  token: string;
+  url: string;
+  securityNote?: string;
+}
+
 export interface ScaleAnswer {
   question: string;
   value: number | null;
@@ -53,5 +71,14 @@ export type ScaleType = 'PHQ-9' | 'GAD-7' | 'UCLA';
 
 export interface ScaleForm {
   type: ScaleType;
+  answers: ScaleAnswer[];
+}
+
+export interface ScaleRecord {
+  scale: ScaleType;
+  name: ScaleType;
+  score: number;
+  date: string;
+  volunteer?: string;
   answers: ScaleAnswer[];
 }

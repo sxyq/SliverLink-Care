@@ -5,13 +5,13 @@ import { LoginPage } from './pages/LoginPage';
 import { AssignedElderListPage } from './pages/AssignedElderListPage';
 import { ElderDetailPage } from './pages/ElderDetailPage';
 import { BasicInfoFormPage } from './pages/BasicInfoFormPage';
-import { HealthRecordFormPage } from './pages/HealthRecordFormPage';
 import { MedicationFormPage } from './pages/MedicationFormPage';
 import { ScaleFormPage } from './pages/ScaleFormPage';
+import { QrCodeManagePage } from './pages/QrCodeManagePage';
 import type { AssignedElder } from './types';
 import FamilyEntryApp from './family-entry/App';
 
-type Page = 'list' | 'detail' | 'basic' | 'health' | 'medication' | 'scale';
+type Page = 'list' | 'detail' | 'basic' | 'medication' | 'scale' | 'qrcode';
 
 function isFamilyEntryHash(hash: string): boolean {
   return hash === '#/family' || hash === '#/family/' || hash.startsWith('#/family/');
@@ -43,6 +43,14 @@ function Main() {
     setSelectedElder(null);
   }
 
+  function goDetail() {
+    if (!selectedElder) {
+      goList();
+      return;
+    }
+    setPage('detail');
+  }
+
   function selectElder(elder: AssignedElder) {
     setSelectedElder(elder);
     setPage('detail');
@@ -63,30 +71,58 @@ function Main() {
           elder={selectedElder}
           onBack={goList}
           onEditBasic={() => setPage('basic')}
-          onEditHealth={() => setPage('health')}
           onEditMedication={() => setPage('medication')}
           onEditScale={() => setPage('scale')}
+          onManageQrCode={() => setPage('qrcode')}
         />
       )}
       {page === 'basic' && selectedElder && (
-        <BasicInfoFormPage elder={selectedElder} onBack={goList} />
-      )}
-      {page === 'health' && selectedElder && (
-        <HealthRecordFormPage elder={selectedElder} onBack={goList} />
+        <BasicInfoFormPage elder={selectedElder} onBack={goDetail} />
       )}
       {page === 'medication' && selectedElder && (
-        <MedicationFormPage elder={selectedElder} onBack={goList} />
+        <MedicationFormPage elder={selectedElder} onBack={goDetail} />
       )}
       {page === 'scale' && selectedElder && (
-        <ScaleFormPage elder={selectedElder} onBack={goList} />
+        <ScaleFormPage elder={selectedElder} onBack={goDetail} />
+      )}
+      {page === 'qrcode' && selectedElder && (
+        <QrCodeManagePage elder={selectedElder} onBack={goDetail} />
       )}
       {selectedElder && page !== 'list' && page !== 'detail' && (
-        <div className="sl-quick-actions">
-          <button className={page === 'basic' ? 'sl-tab sl-tab-active' : 'sl-tab'} onClick={() => setPage('basic')}>基本信息</button>
-          <button className={page === 'health' ? 'sl-tab sl-tab-active' : 'sl-tab'} onClick={() => setPage('health')}>健康档案</button>
-          <button className={page === 'medication' ? 'sl-tab sl-tab-active' : 'sl-tab'} onClick={() => setPage('medication')}>用药</button>
-          <button className={page === 'scale' ? 'sl-tab sl-tab-active' : 'sl-tab'} onClick={() => setPage('scale')}>量表</button>
-        </div>
+        <nav className="sl-quick-nav" aria-label="档案快捷切换">
+          <button
+            type="button"
+            className={page === 'basic' ? 'sl-quick-nav-btn is-active' : 'sl-quick-nav-btn'}
+            onClick={() => setPage('basic')}
+          >
+            <span className="sl-quick-nav-title">基本信息</span>
+            <span className="sl-quick-nav-desc">档案资料</span>
+          </button>
+          <button
+            type="button"
+            className={page === 'medication' ? 'sl-quick-nav-btn is-active' : 'sl-quick-nav-btn'}
+            onClick={() => setPage('medication')}
+          >
+            <span className="sl-quick-nav-title">主要用药</span>
+            <span className="sl-quick-nav-desc">用药记录</span>
+          </button>
+          <button
+            type="button"
+            className={page === 'scale' ? 'sl-quick-nav-btn is-active' : 'sl-quick-nav-btn'}
+            onClick={() => setPage('scale')}
+          >
+            <span className="sl-quick-nav-title">量表信息</span>
+            <span className="sl-quick-nav-desc">评估记录</span>
+          </button>
+          <button
+            type="button"
+            className={page === 'qrcode' ? 'sl-quick-nav-btn is-active' : 'sl-quick-nav-btn'}
+            onClick={() => setPage('qrcode')}
+          >
+            <span className="sl-quick-nav-title">二维码管理</span>
+            <span className="sl-quick-nav-desc">扫码名牌</span>
+          </button>
+        </nav>
       )}
     </AppShell>
   );

@@ -1,4 +1,4 @@
-import type { AuditLog, ElderRow } from '../types';
+import type { AuditLog, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const GET_CACHE_TTL_MS = 15_000;
@@ -14,11 +14,21 @@ interface ApiEnvelope<T> {
 function clearAdminSession() {
   localStorage.removeItem('sl_admin_token');
   localStorage.removeItem('sl_admin_role');
+  window.dispatchEvent(new CustomEvent('sl-admin-session-cleared'));
 }
 
 function normalizeErrorMessage(text: string) {
   if (!text) return '请求失败';
-  if (text.startsWith('{')) return '请求失败';
+  if (text.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(text) as ApiEnvelope<unknown> & { error?: string };
+      if (parsed.message) return parsed.message;
+      if (parsed.error) return parsed.error;
+    } catch {
+      return '请求失败';
+    }
+    return '请求失败';
+  }
   return text;
 }
 
@@ -29,6 +39,41 @@ function isGetRequest(options?: RequestInit) {
 function getRequestCacheKey(path: string) {
   const token = localStorage.getItem('sl_admin_token') || '';
   return `${path}::${token}`;
+}
+
+const ADMIN_SIGNATURE_SECRET = import.meta.env.VITE_ADMIN_SIGNATURE_SECRET || 'demo-admin-signature-secret';
+
+async function hmacSha256Hex(secret: string, value: string) {
+  const cryptoApi = globalThis.crypto;
+  if (!cryptoApi?.subtle) {
+    throw new Error('当前浏览器不支持管理后台签名能力');
+  }
+  const encoder = new TextEncoder();
+  const key = await cryptoApi.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const signature = await cryptoApi.subtle.sign('HMAC', key, encoder.encode(value));
+  return Array.from(new Uint8Array(signature))
+    .map((item) => item.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+async function createSignatureHeaders(method: string, path: string) {
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const nonce =
+    globalThis.crypto?.randomUUID?.() ??
+    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  const requestPath = path.split('?')[0] || path;
+  const canonical = `${method.toUpperCase()}\n${requestPath}\n${timestamp}\n${nonce}`;
+  return {
+    'X-Timestamp': timestamp,
+    'X-Nonce': nonce,
+    'X-Signature': await hmacSha256Hex(ADMIN_SIGNATURE_SECRET, canonical),
+  };
 }
 
 export function invalidateAdminCache() {
@@ -52,10 +97,13 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   const token = localStorage.getItem('sl_admin_token') || '';
   const execute = async () => {
+    const method = options?.method || 'GET';
+    const signatureHeaders = await createSignatureHeaders(method, path);
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
       headers: {
         'Content-Type': 'application/json',
+        ...signatureHeaders,
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.headers || {}),
       },
@@ -68,6 +116,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('登录态已失效或当前账号无权访问，请重新登录管理员账号');
+      }
       throw new Error(normalizeErrorMessage(text));
     }
 
@@ -147,10 +198,18 @@ function mapMedicationRows(rows: Array<Record<string, unknown>>) {
 }
 
 export async function loginAdmin(account: string, password: string) {
-  const result = await request<{ token: string; role: string }>('/api/admin/login', {
-    method: 'POST',
-    body: JSON.stringify({ account, password }),
-  });
+  let result: { token: string; role: string };
+  try {
+    result = await request<{ token: string; role: string }>('/api/admin/login', {
+      method: 'POST',
+      body: JSON.stringify({ account, password }),
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'Unauthorized') {
+      throw new Error('账号或密码错误');
+    }
+    throw error;
+  }
   localStorage.setItem('sl_admin_token', result.token);
   localStorage.setItem('sl_admin_role', result.role || '系统管理员');
   return { ok: Boolean(result.token), role: result.role || '系统管理员' };
@@ -185,6 +244,7 @@ export async function fetchElders() {
     name: String(row.name || ''),
     gender: String(row.gender || ''),
     age: Number(row.age || 0),
+    residence: String(row.residence || ''),
     phoneMasked: String(
       row.phone || row.emergencyContactPhone || row.emergencyPhoneDial || row.phoneMasked || row.emergencyPhoneMasked || '',
     ),
@@ -219,6 +279,7 @@ export async function fetchVolunteers() {
     id: String(row.id || ''),
     name: String(row.name || ''),
     account: String(row.account || ''),
+    phone: String(row.phone || ''),
     elderCount: Number(row.scopeCount || row.elderCount || 0),
     status: formatAdminStatus(row.status),
     lastSubmit: String(row.lastSubmit || '-'),
@@ -262,6 +323,8 @@ export async function fetchQrCodes() {
     elderName: row.elderName ? String(row.elderName) : null,
     elderAge: row.elderAge == null ? null : Number(row.elderAge),
     elderPhone: row.elderPhone ? String(row.elderPhone) : null,
+    relayDeviceId: row.relayDeviceId ? String(row.relayDeviceId) : null,
+    relayReceiverPhone: row.relayReceiverPhone ? String(row.relayReceiverPhone) : null,
     url: row.url ? String(row.url) : null,
     status: formatQrStatus(row.status),
     createdAt: String(row.createdAt || ''),
@@ -283,11 +346,24 @@ export async function regenerateQrCode(id: string) {
   return request<Record<string, string>>(`/api/admin/qrcodes/${id}/regenerate`, { method: 'POST' });
 }
 
+export async function updateQrCodeRelayDevice(id: string, relayDeviceId: string) {
+  const row = await request<Record<string, unknown>>(`/api/admin/qrcodes/${encodeURIComponent(id)}/relay-device`, {
+    method: 'PUT',
+    body: JSON.stringify({ relayDeviceId }),
+  });
+  return {
+    id: String(row.id || ''),
+    relayDeviceId: row.relayDeviceId ? String(row.relayDeviceId) : null,
+    relayReceiverPhone: row.relayReceiverPhone ? String(row.relayReceiverPhone) : null,
+  };
+}
+
 export async function fetchInvitations() {
   const rows = await request<Array<Record<string, unknown>>>('/api/admin/invitations');
   return rows.map((row) => ({
     id: String(row.id || ''),
     code: String(row.code || ''),
+    elderId: String(row.elderId || row.elder_id || ''),
     elderName: String(row.elderName || ''),
     archiveNo: String(row.archiveNo || ''),
     expiresAt: String(row.expiresAt || ''),
@@ -340,6 +416,12 @@ export async function fetchAuditLogs() {
     operator: String(row.operator || ''),
     role: String(row.role || ''),
     action: String(row.action || ''),
+    verificationMethod: String(row.verificationMethod || ''),
+    visitorName: String(row.visitorName || ''),
+    visitorPhone: String(row.visitorPhone || ''),
+    visitorPhoneMasked: String(row.visitorPhoneMasked || ''),
+    visitorIdCard: String(row.visitorIdCard || ''),
+    visitorIdCardMasked: String(row.visitorIdCardMasked || ''),
     target: String(row.target || ''),
     ip: String(row.sourceIp || row.ip || ''),
     result: String(row.result || '').toUpperCase() === 'SUCCESS' ? '成功' : '失败',
@@ -403,4 +485,86 @@ export async function saveElderScales(elderId: string, items: Array<Record<strin
     method: 'POST',
     body: JSON.stringify(items),
   });
+}
+
+function formatRelayStatus(status: unknown) {
+  const value = String(status || '').trim().toUpperCase();
+  if (value === '在线') return '在线';
+  if (value === 'UPLOADED') return '已上传';
+  if (value === 'VERIFIED') return '已验证';
+  if (value === 'PENDING') return '等待验证';
+  if (value === 'EXPIRED') return '已过期';
+  return value || '未知';
+}
+
+function formatDateTime(value: unknown) {
+  const text = String(value || '');
+  if (!text) return '-';
+  const numeric = Number(text);
+  if (!Number.isNaN(numeric) && numeric > 0) {
+    return new Date(numeric).toLocaleString('zh-CN', { hour12: false });
+  }
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return text;
+  return date.toLocaleString('zh-CN', { hour12: false });
+}
+
+export async function fetchSmsRelayDevices() {
+  const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/devices');
+  return rows.map((row) => ({
+    deviceId: String(row.deviceId || ''),
+    receiverPhone: String(row.receiverPhone || ''),
+    serverUrl: String(row.serverUrl || ''),
+    messagePrefix: String(row.messagePrefix || ''),
+    status: formatRelayStatus(row.status),
+    serviceStatus: String(row.serviceStatus || ''),
+    lastHeartbeat: formatDateTime(row.lastHeartbeat),
+  })) as SmsRelayDeviceRow[];
+}
+
+export async function updateSmsRelayDevice(deviceId: string, body: Pick<SmsRelayDeviceRow, 'receiverPhone' | 'serverUrl' | 'messagePrefix'>) {
+  const row = await request<Record<string, unknown>>(`/api/sms-relay/admin/devices/${encodeURIComponent(deviceId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  return {
+    deviceId: String(row.deviceId || ''),
+    receiverPhone: String(row.receiverPhone || ''),
+    serverUrl: String(row.serverUrl || ''),
+    messagePrefix: String(row.messagePrefix || ''),
+    status: formatRelayStatus(row.status),
+    serviceStatus: String(row.serviceStatus || ''),
+    lastHeartbeat: formatDateTime(row.lastHeartbeat),
+  } as SmsRelayDeviceRow;
+}
+
+export async function fetchSmsRelayRecords() {
+  const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/records');
+  return rows.map((row) => ({
+    id: String(row.id || ''),
+    deviceId: String(row.deviceId || ''),
+    receiverPhone: String(row.receiverPhone || ''),
+    senderPhone: String(row.senderPhone || ''),
+    messageBody: String(row.messageBody || ''),
+    receivedAt: formatDateTime(row.receivedAt),
+    uploadedAt: formatDateTime(row.uploadedAt),
+    status: formatRelayStatus(row.status),
+  })) as SmsRelayRecordRow[];
+}
+
+export async function fetchSmsRelaySessions() {
+  const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/sessions');
+  return rows.map((row) => ({
+    sessionId: String(row.sessionId || ''),
+    elderId: String(row.elderId || ''),
+    target: String(row.target || ''),
+    relayDeviceId: String(row.relayDeviceId || ''),
+    receiverPhone: String(row.receiverPhone || ''),
+    messageBody: String(row.messageBody || ''),
+    status: formatRelayStatus(row.status),
+    expiresAt: formatDateTime(row.expiresAt),
+    verifiedAt: formatDateTime(row.verifiedAt),
+    senderPhoneMasked: String(row.senderPhoneMasked || '-'),
+    createdAt: formatDateTime(row.createdAt),
+  })) as SmsRelaySessionRow[];
 }

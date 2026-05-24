@@ -8,6 +8,21 @@ interface ApiEnvelope<T> {
   data?: T;
 }
 
+function normalizeErrorMessage(raw: string) {
+  if (!raw) return '请求失败';
+  if (raw.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw) as ApiEnvelope<unknown> & { error?: string };
+      if (parsed.message) return parsed.message;
+      if (parsed.error) return parsed.error;
+    } catch {
+      return '请求失败';
+    }
+    return '请求失败';
+  }
+  return raw;
+}
+
 export function setAuthToken(t: string) {
   token = t;
   localStorage.setItem('sl_token', t);
@@ -36,7 +51,7 @@ export async function http<T>(path: string, options?: RequestInit): Promise<T> {
   }
   if (!res.ok) {
     const text = await res.text().catch(() => '请求失败');
-    throw new Error(text);
+    throw new Error(normalizeErrorMessage(text));
   }
   const json = (await res.json()) as ApiEnvelope<T> | T;
   if (json && typeof json === 'object' && 'code' in json && 'data' in json) {

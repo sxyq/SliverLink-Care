@@ -15,6 +15,7 @@ import java.util.*;
 public class InvitationService {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final int MAX_ELDERS_PER_FAMILY_ACCOUNT = 4;
 
     private final JdbcTemplate jdbc;
     private final SilverLinkDataService data;
@@ -65,16 +66,46 @@ public class InvitationService {
             return new RegisterResultDto(false, null, "验证码错误或已过期");
         }
 
-        String familyId = "family-" + System.currentTimeMillis();
-        jdbc.update("insert into app_user (id, account, password_hash, name_enc, phone_enc, role, status) values (?,?,?,?,?,'FAMILY','ACTIVE')",
-                familyId, req.getPhone(), req.getPassword(), data.enc(req.getName()), data.enc(req.getPhone()));
+        String elderId = data.str(row.get("elder_id"));
+        String familyId;
+        List<Map<String, Object>> existingUsers = jdbc.queryForList(
+                "select * from app_user where account=? and role='FAMILY' and status='ACTIVE'",
+                req.getPhone());
+
+        if (existingUsers.isEmpty()) {
+            familyId = "family-" + System.currentTimeMillis();
+            jdbc.update("insert into app_user (id, account, password_hash, name_enc, phone_enc, role, status) values (?,?,?,?,?,'FAMILY','ACTIVE')",
+                    familyId, req.getPhone(), req.getPassword(), data.enc(req.getName()), data.enc(req.getPhone()));
+        } else {
+            Map<String, Object> existingUser = existingUsers.get(0);
+            if (!data.str(existingUser.get("password_hash")).equals(req.getPassword())) {
+                return new RegisterResultDto(false, null, "该手机号已注册，请输入原登录密码完成绑定");
+            }
+            familyId = data.str(existingUser.get("id"));
+
+            Integer alreadyBound = jdbc.queryForObject("""
+                    select count(*) from family_binding
+                    where family_user_id=? and elder_id=? and status='ACTIVE'
+                    """, Integer.class, familyId, elderId);
+            if (alreadyBound != null && alreadyBound > 0) {
+                return new RegisterResultDto(false, null, "该家属账号已绑定此老人");
+            }
+
+            Integer activeBindingCount = jdbc.queryForObject("""
+                    select count(*) from family_binding
+                    where family_user_id=? and status='ACTIVE'
+                    """, Integer.class, familyId);
+            if (activeBindingCount != null && activeBindingCount >= MAX_ELDERS_PER_FAMILY_ACCOUNT) {
+                return new RegisterResultDto(false, null, "一个家属账号最多绑定4位老人");
+            }
+        }
 
         String bindingId = "bind-" + System.currentTimeMillis();
         jdbc.update("""
                 insert into family_binding (id, family_user_id, family_name_enc, family_phone_enc, relationship, elder_id, invitation_code, bound_at, status)
                 values (?,?,?,?,?,?,?,?, 'ACTIVE')
                 """, bindingId, familyId, data.enc(req.getName()), data.enc(req.getPhone()), req.getRelationship(),
-                data.str(row.get("elder_id")), code, LocalDateTime.now().format(FMT));
+                elderId, code, LocalDateTime.now().format(FMT));
         jdbc.update("update invitation set used_count=used_count+1 where code=?", code);
         String token = jwtTokenProvider.generateToken(req.getPhone(), "FAMILY", 86400000L);
         return new RegisterResultDto(true, token, "注册成功");
@@ -92,7 +123,7 @@ public class InvitationService {
 
     public InvitationAdminDto create(CreateInvitationRequest req) {
         Map<String, Object> elder = data.one("select * from elder where id=?", req.getElderId());
-        String code = generateCode();
+        String code = generateCodeUnique();
         String now = LocalDateTime.now().format(FMT);
         String expiresAt = LocalDateTime.now().plusDays(req.getExpiresInDays() == null ? 7 : req.getExpiresInDays()).format(FMT);
         String id = "invite-" + System.currentTimeMillis();
@@ -101,6 +132,7 @@ public class InvitationService {
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", id);
         row.put("code", code);
+        row.put("elder_id", req.getElderId());
         row.put("name_enc", elder.get("name_enc"));
         row.put("archive_no", elder.get("archive_no"));
         row.put("expires_at", expiresAt);
@@ -112,7 +144,10 @@ public class InvitationService {
     }
 
     public void disable(String id) {
-        jdbc.update("update invitation set status='DISABLED' where id=?", id);
+        Map<String, Object> invitation = data.one("select status from invitation where id=?", id);
+        String currentStatus = data.str(invitation.get("status"));
+        String nextStatus = "DISABLED".equalsIgnoreCase(currentStatus) ? "ACTIVE" : "DISABLED";
+        jdbc.update("update invitation set status=? where id=?", nextStatus, id);
     }
 
     public void delete(String id) {
@@ -123,6 +158,7 @@ public class InvitationService {
         InvitationAdminDto dto = new InvitationAdminDto();
         dto.setId(data.str(row.get("id")));
         dto.setCode(data.str(row.get("code")));
+        dto.setElderId(data.str(row.get("elder_id")));
         dto.setElderName(data.dec(row.get("name_enc")));
         dto.setArchiveNo(data.str(row.get("archive_no")));
         dto.setExpiresAt(data.str(row.get("expires_at")));
@@ -133,7 +169,18 @@ public class InvitationService {
         return dto;
     }
 
-    private String generateCode() {
+    private String generateCodeUnique() {
+        for (int attempt = 0; attempt < 20; attempt++) {
+            String code = randomAlphaNumericCode();
+            Integer count = jdbc.queryForObject("select count(*) from invitation where code=?", Integer.class, code);
+            if (count == null || count == 0) {
+                return code;
+            }
+        }
+        throw new BizException(500, "邀请码生成失败，请稍后重试");
+    }
+
+    private String randomAlphaNumericCode() {
         String chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         Random random = new Random();
         StringBuilder sb = new StringBuilder();

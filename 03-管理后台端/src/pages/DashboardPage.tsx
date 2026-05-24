@@ -3,10 +3,8 @@ import {
   BarChart3,
   ClipboardList,
   EyeOff,
-  RotateCcw,
   ShieldCheck,
   UsersRound,
-  X,
 } from 'lucide-react';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
 import {
@@ -47,9 +45,7 @@ type DashboardWidgetId =
   | 'latest-audits';
 
 type WidgetKind = 'metric' | 'panel';
-type MetricSizePreset = 'compact' | 'standard' | 'wide';
-type PanelSizePreset = 'standard' | 'wide' | 'tall' | 'large';
-type WidgetSizePreset = MetricSizePreset | PanelSizePreset;
+type WidgetSizePreset = 'compact' | 'standard' | 'wide' | 'tall' | 'large';
 
 type DashboardWidgetConfig = {
   id: DashboardWidgetId;
@@ -72,11 +68,8 @@ type DashboardSnapshot = {
 };
 
 type DashboardLayoutState = {
-  order: DashboardWidgetId[];
   hidden: DashboardWidgetId[];
 };
-
-type DashboardSizeMap = Record<DashboardWidgetId, WidgetSizePreset>;
 
 const DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
   { id: 'metric-elders', title: '老人档案', kind: 'metric', defaultSize: 'compact' },
@@ -86,16 +79,14 @@ const DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
   { id: 'metric-scales', title: '量表记录', kind: 'metric', defaultSize: 'compact' },
   { id: 'elder-overview', title: '老人管理概览', kind: 'panel', defaultSize: 'standard' },
   { id: 'health-overview', title: '健康记录概览', kind: 'panel', defaultSize: 'standard' },
-  { id: 'scale-overview', title: '量表结果统计', kind: 'panel', defaultSize: 'standard' },
   { id: 'qr-family-overview', title: '二维码与家属协管', kind: 'panel', defaultSize: 'standard' },
   { id: 'people-overview', title: '人员与权限概览', kind: 'panel', defaultSize: 'standard' },
-  { id: 'visitor-overview', title: '访问人员统计', kind: 'panel', defaultSize: 'standard' },
-  { id: 'audit-overview', title: '操作日志概览', kind: 'panel', defaultSize: 'standard' },
+  { id: 'scale-overview', title: '量表结果统计', kind: 'panel', defaultSize: 'wide' },
+  { id: 'visitor-overview', title: '访问人员统计', kind: 'panel', defaultSize: 'wide' },
+  { id: 'audit-overview', title: '操作日志概览', kind: 'panel', defaultSize: 'wide' },
   { id: 'latest-audits', title: '最近操作记录', kind: 'panel', defaultSize: 'wide' },
 ];
 
-const DASHBOARD_LAYOUT_KEY = 'sl_admin_dashboard_layout_v2';
-const DASHBOARD_SIZE_KEY = 'sl_admin_dashboard_size_v2';
 const DASHBOARD_SNAPSHOT_KEY = 'sl_admin_dashboard_snapshot_v1';
 
 const dashboardAuditColumnOptions: TableColumnOption<DashboardAuditColumnKey>[] = [
@@ -104,9 +95,6 @@ const dashboardAuditColumnOptions: TableColumnOption<DashboardAuditColumnKey>[] 
   { key: 'action', label: '类型', defaultVisible: true },
   { key: 'result', label: '结果', defaultVisible: true },
 ];
-
-const metricSizePresets: MetricSizePreset[] = ['compact', 'standard', 'wide'];
-const panelSizePresets: PanelSizePreset[] = ['standard', 'wide', 'tall', 'large'];
 
 function groupCount<T>(items: T[], keyGetter: (item: T) => string) {
   return items.reduce<Record<string, number>>((acc, item) => {
@@ -170,6 +158,8 @@ function getScaleRiskLabel(scaleName: string, score: number) {
 }
 
 function getVisitorPhone(log: AuditLog) {
+  if (log.visitorPhoneMasked) return log.visitorPhoneMasked;
+  if (log.visitorPhone) return log.visitorPhone;
   const phonePattern = /1[3-9]\d{9}|1[3-9]\d\*{4}\d{4}/;
   const operatorMatch = log.operator.match(phonePattern);
   if (operatorMatch) return operatorMatch[0];
@@ -190,59 +180,46 @@ function actionLabel(action: string) {
     LOGIN: '登录',
     LOGOUT: '退出登录',
     SCAN_QR: '扫码访问',
+    IDENTITY_VERIFY: '身份登记验证',
+    SMS_RELAY_START: '短信验证发起',
+    SMS_RELAY_STATUS: '短信验证状态检查',
     SMS_SEND: '短信验证',
+    VIEW_BASIC_INFO: '查看完整基础信息',
+    VIEW_ARCHIVE: '查看健康档案',
+    VIEW_MEDICATIONS: '查看主要用药',
+    VIEW_SCALES: '查看量表记录',
     GENERATE_QR: '生成二维码',
     DISABLE_QR: '停用二维码',
     REGENERATE_QR: '重新生成二维码',
+    CREATE_ELDER: '新增老人档案',
+    UPDATE_ELDER: '修改老人档案',
+    DELETE_ELDER: '删除老人档案',
+    UPDATE_ELDER_STATUS: '变更老人状态',
     CREATE_VOLUNTEER: '新增志愿者',
+    UPDATE_VOLUNTEER: '修改志愿者',
+    DELETE_VOLUNTEER: '删除志愿者',
     UPDATE_VOLUNTEER_SCOPE: '调整负责老人',
+    UPDATE_BASIC: '修改基本信息',
+    SAVE_HEALTH_RECORD: '保存健康档案',
+    SAVE_MEDICATIONS: '保存用药信息',
     SAVE_SCALE_RECORDS: '保存量表记录',
+    UPDATE_CONTACTS: '修改联系人',
+    VIEW_MY_ELDERS: '查看我的老人',
+    VIEW_FAMILY_ELDER: '查看老人详情',
+    VIEW_FAMILY_MEDICATIONS: '查看家属用药',
+    ADD_FAMILY_MEDICATION: '家属新增用药',
+    UPDATE_FAMILY_MEDICATION: '家属修改用药',
+    DELETE_FAMILY_MEDICATION: '家属删除用药',
+    VIEW_FAMILY_QRCODE: '查看家属二维码',
+    UNBIND_FAMILY: '解绑家属',
+    INVITATION_SEND_SMS: '邀请短信验证',
+    INVITATION_REGISTER: '邀请码注册',
+    CREATE_INVITATION: '新增邀请码',
+    DISABLE_INVITATION: '停用邀请码',
+    DELETE_INVITATION: '删除邀请码',
+    SEED_DATA: '初始化数据',
   };
   return map[action] || action;
-}
-
-function buildDefaultLayout(): DashboardLayoutState {
-  return {
-    order: DASHBOARD_WIDGETS.map((item) => item.id),
-    hidden: [],
-  };
-}
-
-function readDashboardLayout(): DashboardLayoutState {
-  try {
-    const raw = window.localStorage.getItem(DASHBOARD_LAYOUT_KEY);
-    if (!raw) return buildDefaultLayout();
-
-    const parsed = JSON.parse(raw) as Partial<DashboardLayoutState>;
-    const validIds = new Set(DASHBOARD_WIDGETS.map((item) => item.id));
-    const order = Array.isArray(parsed.order) ? parsed.order.filter((item): item is DashboardWidgetId => validIds.has(item)) : [];
-    const hidden = Array.isArray(parsed.hidden)
-      ? parsed.hidden.filter((item): item is DashboardWidgetId => validIds.has(item))
-      : [];
-    const missing = DASHBOARD_WIDGETS.map((item) => item.id).filter((item) => !order.includes(item));
-
-    return {
-      order: [...order, ...missing],
-      hidden,
-    };
-  } catch {
-    return buildDefaultLayout();
-  }
-}
-
-function readDashboardSizes(): DashboardSizeMap {
-  const defaults = Object.fromEntries(DASHBOARD_WIDGETS.map((item) => [item.id, item.defaultSize])) as DashboardSizeMap;
-  try {
-    const raw = window.localStorage.getItem(DASHBOARD_SIZE_KEY);
-    if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as Partial<DashboardSizeMap>;
-    return {
-      ...defaults,
-      ...parsed,
-    };
-  } catch {
-    return defaults;
-  }
 }
 
 function readDashboardSnapshot(): DashboardSnapshot | null {
@@ -257,14 +234,6 @@ function readDashboardSnapshot(): DashboardSnapshot | null {
 
 function getWidgetConfig(widgetId: DashboardWidgetId) {
   return DASHBOARD_WIDGETS.find((item) => item.id === widgetId)!;
-}
-
-function getNextSize(current: WidgetSizePreset, kind: WidgetKind, direction: 'smaller' | 'larger'): WidgetSizePreset {
-  const presets = kind === 'metric' ? metricSizePresets : panelSizePresets;
-  const index = presets.indexOf(current as never);
-  if (index === -1) return presets[0];
-  if (direction === 'smaller') return presets[Math.max(index - 1, 0)];
-  return presets[Math.min(index + 1, presets.length - 1)];
 }
 
 function getSlotClassName(kind: WidgetKind, size: WidgetSizePreset) {
@@ -306,26 +275,7 @@ export function DashboardPage() {
   const [scales, setScales] = useState<ScaleRecordRow[]>(() => snapshot?.scales || []);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => snapshot?.auditLogs || []);
   const [error, setError] = useState('');
-  const [widgetOrder, setWidgetOrder] = useState<DashboardWidgetId[]>(() => readDashboardLayout().order);
-  const [hiddenWidgets, setHiddenWidgets] = useState<DashboardWidgetId[]>(() => readDashboardLayout().hidden);
-  const [widgetSizes, setWidgetSizes] = useState<DashboardSizeMap>(() => readDashboardSizes());
-  const [draggingWidget, setDraggingWidget] = useState<DashboardWidgetId | null>(null);
-  const [dragOverWidget, setDragOverWidget] = useState<DashboardWidgetId | null>(null);
   const dashboardAuditColumns = useTableColumnVisibility('sl_columns_dashboard_latest_audits', dashboardAuditColumnOptions);
-
-  useEffect(() => {
-    window.localStorage.setItem(
-      DASHBOARD_LAYOUT_KEY,
-      JSON.stringify({
-        order: widgetOrder,
-        hidden: hiddenWidgets,
-      }),
-    );
-  }, [hiddenWidgets, widgetOrder]);
-
-  useEffect(() => {
-    window.localStorage.setItem(DASHBOARD_SIZE_KEY, JSON.stringify(widgetSizes));
-  }, [widgetSizes]);
 
   useEffect(() => {
     window.sessionStorage.setItem(
@@ -455,43 +405,32 @@ export function DashboardPage() {
   const latestAudits = useMemo(() => auditLogs.slice(0, 8), [auditLogs]);
   const activeFamilyBindingCount = useMemo(() => familyBindings.filter((item) => item.status === '已绑定').length, [familyBindings]);
 
-  const visibleWidgets = useMemo(
-    () => widgetOrder.filter((widgetId) => !hiddenWidgets.includes(widgetId)),
-    [hiddenWidgets, widgetOrder],
+  const visibleWidgets = useMemo(() => DASHBOARD_WIDGETS.map((item) => item.id), []);
+  const visiblePanelWidgets = useMemo(
+    () => visibleWidgets.filter((widgetId) => getWidgetConfig(widgetId).kind === 'panel'),
+    [visibleWidgets],
   );
 
-  function hideWidget(widgetId: DashboardWidgetId) {
-    setHiddenWidgets((current) => (current.includes(widgetId) ? current : [...current, widgetId]));
-  }
-
-  function resetLayout() {
-    setWidgetOrder(DASHBOARD_WIDGETS.map((item) => item.id));
-    setHiddenWidgets([]);
-    setWidgetSizes(Object.fromEntries(DASHBOARD_WIDGETS.map((item) => [item.id, item.defaultSize])) as DashboardSizeMap);
-  }
-
-  function moveWidgetToPosition(sourceId: DashboardWidgetId, targetId: DashboardWidgetId) {
-    if (sourceId === targetId) return;
-    setWidgetOrder((current) => {
-      const sourceIndex = current.indexOf(sourceId);
-      const targetIndex = current.indexOf(targetId);
-      if (sourceIndex === -1 || targetIndex === -1) return current;
-      const next = [...current];
-      const [moved] = next.splice(sourceIndex, 1);
-      next.splice(targetIndex, 0, moved);
-      return next;
-    });
-  }
-
-  function resizeWidget(widgetId: DashboardWidgetId, direction: 'smaller' | 'larger') {
-    const config = getWidgetConfig(widgetId);
-    setWidgetSizes((current) => {
-      const currentSize = current[widgetId] || config.defaultSize;
-      return {
-        ...current,
-        [widgetId]: getNextSize(currentSize, config.kind, direction),
-      };
-    });
+  function renderMetricOverview() {
+    return (
+      <section className="panel analytics-card dashboard-metric-overview">
+        <div className="panel-title">
+          <BarChart3 size={18} />
+          <h3>核心数据总览</h3>
+        </div>
+        <div className="dashboard-metric-overview-scroll">
+          <div className="dashboard-metric-overview-grid">
+            {dashboardMetrics.map((metric) => (
+              <article key={metric.label} className="dashboard-metric-overview-item">
+                <p className="dashboard-metric-overview-label">{metric.label}</p>
+                <strong className="dashboard-metric-overview-value">{metric.value}</strong>
+                <span className="dashboard-metric-overview-trend">{metric.trend}</span>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
   }
 
   function renderMetricCard(metricLabel: string) {
@@ -771,68 +710,19 @@ export function DashboardPage() {
 
       {error && <p className="form-error">{error}</p>}
 
+      {renderMetricOverview()}
+
       <section className="dashboard-module-grid">
-        {visibleWidgets.map((widgetId) => {
+        {visiblePanelWidgets.map((widgetId) => {
           const config = getWidgetConfig(widgetId);
-          const widgetSize = widgetSizes[widgetId] || config.defaultSize;
-          const isDragging = draggingWidget === widgetId;
-          const isDropTarget = dragOverWidget === widgetId && draggingWidget !== widgetId;
 
           return (
-            <section
-              key={widgetId}
-              className={`${getSlotClassName(config.kind, widgetSize)}${isDragging ? ' dashboard-module-slot--dragging' : ''}${isDropTarget ? ' dashboard-module-slot--drop-target' : ''}`}
-              draggable
-              onDragStart={() => {
-                setDraggingWidget(widgetId);
-                setDragOverWidget(widgetId);
-              }}
-              onDragEnd={() => {
-                setDraggingWidget(null);
-                setDragOverWidget(null);
-              }}
-              onDragOver={(event) => event.preventDefault()}
-              onDragEnter={() => {
-                if (!draggingWidget || draggingWidget === widgetId) return;
-                setDragOverWidget(widgetId);
-                moveWidgetToPosition(draggingWidget, widgetId);
-              }}
-              onDrop={() => {
-                setDraggingWidget(null);
-                setDragOverWidget(null);
-              }}
-            >
-              <div className="dashboard-module-actions">
-                <button className="secondary" type="button" onClick={() => hideWidget(widgetId)} title="隐藏模块">
-                  <X size={14} />
-                </button>
-              </div>
+            <section key={widgetId} className={getSlotClassName(config.kind, config.defaultSize)}>
               {renderWidget(widgetId)}
-              <button
-                className="dashboard-resize-handle dashboard-resize-handle--left"
-                type="button"
-                title="缩小一档"
-                aria-label="缩小一档"
-                onClick={() => resizeWidget(widgetId, 'smaller')}
-                disabled={getNextSize(widgetSize, config.kind, 'smaller') === widgetSize}
-              />
-              <button
-                className="dashboard-resize-handle dashboard-resize-handle--right"
-                type="button"
-                title="放大一档"
-                aria-label="放大一档"
-                onClick={() => resizeWidget(widgetId, 'larger')}
-                disabled={getNextSize(widgetSize, config.kind, 'larger') === widgetSize}
-              />
             </section>
           );
         })}
       </section>
-
-      <button className="dashboard-floating-reset" type="button" onClick={resetLayout}>
-        <RotateCcw size={16} />
-        重置布局
-      </button>
     </>
   );
 }

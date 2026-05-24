@@ -1,28 +1,28 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
-import { AlertTriangle, ClipboardList, RotateCcw, X } from 'lucide-react';
+import { AlertTriangle, ClipboardList } from 'lucide-react';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
 import { fetchAuditLogs, fetchElders } from '../api/adminApi';
 import { exportAuditLogs } from '../features/audit/auditExport';
 import type { AuditLog, ElderRow } from '../types';
 
-type AuditCategory = 'admin' | 'medical' | 'visitor';
+type AuditCategory = 'admin' | 'medical' | 'family' | 'visitor';
 type AuditColumnKey = 'time' | 'operator' | 'action' | 'target' | 'ip' | 'result';
-type VisitorSummaryColumnKey = 'time' | 'operator' | 'action' | 'result';
+type VisitorDetailColumnKey = 'time' | 'name' | 'phone' | 'idCard' | 'verificationMethod' | 'action' | 'target' | 'ip' | 'result';
+type VisitorSummaryColumnKey = 'time' | 'name' | 'phone' | 'verificationMethod' | 'result';
 type VisitorWidgetId =
   | 'metric-total'
   | 'metric-success'
   | 'metric-fail'
   | 'metric-ip'
+  | 'verification-distribution'
   | 'action-distribution'
   | 'target-distribution'
   | 'daily-distribution'
   | 'recent-visitor'
   | 'visitor-table';
 type WidgetKind = 'metric' | 'panel';
-type MetricSizePreset = 'compact' | 'standard' | 'wide';
-type PanelSizePreset = 'standard' | 'wide' | 'tall' | 'large';
-type WidgetSizePreset = MetricSizePreset | PanelSizePreset;
+type WidgetSizePreset = 'compact' | 'standard' | 'wide' | 'tall' | 'large';
 
 type VisitorWidgetConfig = {
   id: VisitorWidgetId;
@@ -30,13 +30,6 @@ type VisitorWidgetConfig = {
   kind: WidgetKind;
   defaultSize: WidgetSizePreset;
 };
-
-type VisitorLayoutState = {
-  order: VisitorWidgetId[];
-  hidden: VisitorWidgetId[];
-};
-
-type VisitorSizeMap = Record<VisitorWidgetId, WidgetSizePreset>;
 
 const auditColumnOptions: TableColumnOption<AuditColumnKey>[] = [
   { key: 'time', label: '时间', defaultVisible: true },
@@ -49,8 +42,21 @@ const auditColumnOptions: TableColumnOption<AuditColumnKey>[] = [
 
 const visitorSummaryColumnOptions: TableColumnOption<VisitorSummaryColumnKey>[] = [
   { key: 'time', label: '时间', defaultVisible: true },
-  { key: 'operator', label: '手机号', defaultVisible: true },
+  { key: 'name', label: '登记姓名', defaultVisible: true },
+  { key: 'phone', label: '登记手机号', defaultVisible: true },
+  { key: 'verificationMethod', label: '验证方式', defaultVisible: true },
+  { key: 'result', label: '结果', defaultVisible: true },
+];
+
+const visitorDetailColumnOptions: TableColumnOption<VisitorDetailColumnKey>[] = [
+  { key: 'time', label: '时间', defaultVisible: true },
+  { key: 'name', label: '登记姓名', defaultVisible: true },
+  { key: 'phone', label: '登记手机号', defaultVisible: true },
+  { key: 'idCard', label: '身份证信息', defaultVisible: true },
+  { key: 'verificationMethod', label: '验证方式', defaultVisible: true },
   { key: 'action', label: '类型', defaultVisible: true },
+  { key: 'target', label: '对象', defaultVisible: true },
+  { key: 'ip', label: '来源 IP', defaultVisible: true },
   { key: 'result', label: '结果', defaultVisible: true },
 ];
 
@@ -59,23 +65,26 @@ const VISITOR_WIDGETS: VisitorWidgetConfig[] = [
   { id: 'metric-success', title: '成功访问', kind: 'metric', defaultSize: 'compact' },
   { id: 'metric-fail', title: '失败访问', kind: 'metric', defaultSize: 'compact' },
   { id: 'metric-ip', title: '来源 IP 数', kind: 'metric', defaultSize: 'compact' },
-  { id: 'action-distribution', title: '访问类型分布', kind: 'panel', defaultSize: 'standard' },
+  { id: 'recent-visitor', title: '最近访问记录', kind: 'panel', defaultSize: 'wide' },
+  { id: 'visitor-table', title: '访问人员记录', kind: 'panel', defaultSize: 'wide' },
+  { id: 'verification-distribution', title: '验证方式分布', kind: 'panel', defaultSize: 'standard' },
   { id: 'target-distribution', title: '访问对象分布', kind: 'panel', defaultSize: 'standard' },
   { id: 'daily-distribution', title: '按日期统计', kind: 'panel', defaultSize: 'standard' },
-  { id: 'recent-visitor', title: '最近访问记录', kind: 'panel', defaultSize: 'standard' },
-  { id: 'visitor-table', title: '访问人员记录', kind: 'panel', defaultSize: 'wide' },
+  { id: 'action-distribution', title: '访问类型分布', kind: 'panel', defaultSize: 'wide' },
 ];
-
-const VISITOR_LAYOUT_KEY = 'sl_audit_visitor_layout_v1';
-const VISITOR_SIZE_KEY = 'sl_audit_visitor_size_v1';
-const metricSizePresets: MetricSizePreset[] = ['compact', 'standard', 'wide'];
-const panelSizePresets: PanelSizePreset[] = ['standard', 'wide', 'tall', 'large'];
 
 const actionLabelMap: Record<string, string> = {
   LOGIN: '登录',
   LOGOUT: '退出登录',
   SCAN_QR: '扫码访问',
+  IDENTITY_VERIFY: '身份登记验证',
+  SMS_RELAY_START: '短信验证发起',
+  SMS_RELAY_STATUS: '短信验证状态检查',
   SMS_SEND: '短信验证',
+  VIEW_BASIC_INFO: '查看完整基础信息',
+  VIEW_ARCHIVE: '查看健康档案',
+  VIEW_MEDICATIONS: '查看主要用药',
+  VIEW_SCALES: '查看量表记录',
   GENERATE_QR: '生成二维码',
   DISABLE_QR: '停用二维码',
   REGENERATE_QR: '重新生成二维码',
@@ -92,9 +101,13 @@ const actionLabelMap: Record<string, string> = {
   SAVE_MEDICATIONS: '保存用药信息',
   SAVE_SCALE_RECORDS: '保存量表记录',
   UPDATE_CONTACTS: '修改联系人',
+  VIEW_MY_ELDERS: '查看我的老人',
+  VIEW_FAMILY_ELDER: '查看老人详情',
+  VIEW_FAMILY_MEDICATIONS: '查看家属用药',
   ADD_FAMILY_MEDICATION: '家属新增用药',
   UPDATE_FAMILY_MEDICATION: '家属修改用药',
   DELETE_FAMILY_MEDICATION: '家属删除用药',
+  VIEW_FAMILY_QRCODE: '查看家属二维码',
   UNBIND_FAMILY: '解绑家属',
   INVITATION_SEND_SMS: '邀请短信验证',
   INVITATION_REGISTER: '邀请码注册',
@@ -115,17 +128,20 @@ function getLogGroup(log: AuditLog): AuditCategory {
   const role = (log.role || '').toUpperCase();
   if (role === 'SYSTEM_ADMIN') return 'admin';
   if (role === 'VOLUNTEER') return 'medical';
+  if (role === 'FAMILY') return 'family';
   if (role === 'VISITOR' || role === 'SCAN_USER' || role === 'ANONYMOUS' || role === 'FAMILY') return 'visitor';
 
   const operator = (log.operator || '').toLowerCase();
   if (operator.includes('admin') || operator.includes('audit') || operator.includes('管理')) return 'admin';
   if (operator.includes('volunteer') || operator.includes('志愿者') || operator.includes('医护')) return 'medical';
+  if (operator.includes('family') || operator.includes('家属')) return 'family';
   return 'visitor';
 }
 
 function categoryTitle(category: AuditCategory) {
   if (category === 'admin') return '管理员操作';
   if (category === 'medical') return '医护/志愿者操作';
+  if (category === 'family') return '家属操作';
   return '访问人员记录';
 }
 
@@ -143,6 +159,12 @@ function formatPercent(value: number, total: number) {
 }
 
 function getVisitorPhone(log: AuditLog) {
+  if (log.visitorPhoneMasked) {
+    return log.visitorPhoneMasked;
+  }
+  if (log.visitorPhone) {
+    return log.visitorPhone;
+  }
   const operator = log.operator || '';
   const target = log.target || '';
   const phonePattern = /1\d{2}\*{0,4}\d{0,4}/;
@@ -154,6 +176,22 @@ function getVisitorPhone(log: AuditLog) {
     return target.match(phonePattern)?.[0] || '-';
   }
   return '-';
+}
+
+function getVisitorName(log: AuditLog) {
+  return log.visitorName || '-';
+}
+
+function getVisitorIdCard(log: AuditLog) {
+  return log.visitorIdCardMasked || log.visitorIdCard || '-';
+}
+
+function getVerificationMethodLabel(method: string | undefined) {
+  const normalized = (method || '').trim().toUpperCase();
+  if (normalized === 'IDENTITY') return '身份登记';
+  if (normalized === 'SMS_RELAY') return '短信中转';
+  if (normalized === 'DIRECT_SMS') return '短信验证码';
+  return method || '-';
 }
 
 function getDisplayOperator(log: AuditLog, category: AuditCategory) {
@@ -191,56 +229,8 @@ function resolveVisitorTarget(log: AuditLog, elders: ElderRow[]) {
   };
 }
 
-function buildVisitorLayout(): VisitorLayoutState {
-  return {
-    order: VISITOR_WIDGETS.map((item) => item.id),
-    hidden: [],
-  };
-}
-
-function readVisitorLayout(): VisitorLayoutState {
-  try {
-    const raw = window.localStorage.getItem(VISITOR_LAYOUT_KEY);
-    if (!raw) return buildVisitorLayout();
-    const parsed = JSON.parse(raw) as Partial<VisitorLayoutState>;
-    const validIds = new Set(VISITOR_WIDGETS.map((item) => item.id));
-    const order = Array.isArray(parsed.order) ? parsed.order.filter((item): item is VisitorWidgetId => validIds.has(item)) : [];
-    const hidden = Array.isArray(parsed.hidden)
-      ? parsed.hidden.filter((item): item is VisitorWidgetId => validIds.has(item))
-      : [];
-    const missing = VISITOR_WIDGETS.map((item) => item.id).filter((item) => !order.includes(item));
-    return { order: [...order, ...missing], hidden };
-  } catch {
-    return buildVisitorLayout();
-  }
-}
-
-function readVisitorSizes(): VisitorSizeMap {
-  const defaults = Object.fromEntries(VISITOR_WIDGETS.map((item) => [item.id, item.defaultSize])) as VisitorSizeMap;
-  try {
-    const raw = window.localStorage.getItem(VISITOR_SIZE_KEY);
-    if (!raw) return defaults;
-    const parsed = JSON.parse(raw) as Partial<VisitorSizeMap>;
-    return { ...defaults, ...parsed };
-  } catch {
-    return defaults;
-  }
-}
-
-function getVisitorWidgetConfig(widgetId: VisitorWidgetId) {
-  return VISITOR_WIDGETS.find((item) => item.id === widgetId)!;
-}
-
 function getSlotClassName(kind: WidgetKind, size: WidgetSizePreset) {
   return `dashboard-module-slot dashboard-module-slot--${kind}-${size}`;
-}
-
-function getNextSize(current: WidgetSizePreset, kind: WidgetKind, direction: 'smaller' | 'larger') {
-  const presets = kind === 'metric' ? metricSizePresets : panelSizePresets;
-  const index = presets.indexOf(current as never);
-  if (index === -1) return current;
-  if (direction === 'smaller') return presets[Math.max(0, index - 1)];
-  return presets[Math.min(presets.length - 1, index + 1)];
 }
 
 export function AuditLogPage({ category }: { category: AuditCategory }) {
@@ -248,6 +238,7 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   const [elders, setElders] = useState<ElderRow[]>([]);
   const [filterResult, setFilterResult] = useState<string>('全部');
   const [filterAction, setFilterAction] = useState<string>('全部');
+  const [filterVerificationMethod, setFilterVerificationMethod] = useState<string>('全部');
   const [filterOperator, setFilterOperator] = useState('');
   const [filterTarget, setFilterTarget] = useState('');
   const [filterIp, setFilterIp] = useState('');
@@ -255,11 +246,8 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [selectedVisitorTarget, setSelectedVisitorTarget] = useState<{ log: AuditLog; elder: ElderRow } | null>(null);
-  const [visitorLayout, setVisitorLayout] = useState<VisitorLayoutState>(() => (category === 'visitor' ? readVisitorLayout() : buildVisitorLayout()));
-  const [visitorSizes, setVisitorSizes] = useState<VisitorSizeMap>(() => readVisitorSizes());
-  const [draggingWidget, setDraggingWidget] = useState<VisitorWidgetId | null>(null);
-  const [dragOverWidget, setDragOverWidget] = useState<VisitorWidgetId | null>(null);
   const columns = useTableColumnVisibility(`sl_columns_audit_${category}`, auditColumnOptions);
+  const visitorDetailColumns = useTableColumnVisibility('sl_columns_audit_visitor_detail', visitorDetailColumnOptions);
   const visitorSummaryColumns = useTableColumnVisibility('sl_columns_audit_visitor_summary', visitorSummaryColumnOptions);
 
   useEffect(() => {
@@ -270,16 +258,6 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
       })
       .catch(() => undefined);
   }, []);
-
-  useEffect(() => {
-    if (category !== 'visitor') return;
-    window.localStorage.setItem(VISITOR_LAYOUT_KEY, JSON.stringify(visitorLayout));
-  }, [category, visitorLayout]);
-
-  useEffect(() => {
-    if (category !== 'visitor') return;
-    window.localStorage.setItem(VISITOR_SIZE_KEY, JSON.stringify(visitorSizes));
-  }, [category, visitorSizes]);
 
   const actions = Array.from(new Set(logs.map((item) => item.action).filter(Boolean)));
 
@@ -293,17 +271,34 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
       const matchCategory = getLogGroup(log) === category;
       const matchResult = filterResult === '全部' || log.result === filterResult;
       const matchAction = filterAction === '全部' || log.action === filterAction;
+      const matchVerificationMethod =
+        filterVerificationMethod === '全部' || getVerificationMethodLabel(log.verificationMethod) === filterVerificationMethod;
 
       const logDate = log.time.slice(0, 10);
       const matchFrom = !dateFrom || logDate >= dateFrom;
       const matchTo = !dateTo || logDate <= dateTo;
 
       const displayOperator = getDisplayOperator(log, category).toLowerCase();
-      const matchOperator = !operatorKeyword || displayOperator.includes(operatorKeyword);
+      const visitorName = getVisitorName(log).toLowerCase();
+      const matchOperator = !operatorKeyword || displayOperator.includes(operatorKeyword) || visitorName.includes(operatorKeyword);
       const matchTarget = !targetKeyword || (log.target || '').toLowerCase().includes(targetKeyword);
       const matchIp = !ipKeyword || (log.ip || '').toLowerCase().includes(ipKeyword);
 
-      const combinedSearch = [log.operator, displayOperator, log.action, log.target, log.ip, log.result, log.role || '']
+      const combinedSearch = [
+        log.operator,
+        displayOperator,
+        getVisitorName(log),
+        log.visitorPhone || '',
+        log.visitorPhoneMasked || '',
+        log.visitorIdCard || '',
+        log.visitorIdCardMasked || '',
+        log.verificationMethod || '',
+        log.action,
+        log.target,
+        log.ip,
+        log.result,
+        log.role || '',
+      ]
         .join(' ')
         .toLowerCase();
       const matchKeyword = !searchKeyword || combinedSearch.includes(searchKeyword);
@@ -312,6 +307,7 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
         matchCategory &&
         matchResult &&
         matchAction &&
+        matchVerificationMethod &&
         matchFrom &&
         matchTo &&
         matchOperator &&
@@ -320,12 +316,16 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
         matchKeyword
       );
     });
-  }, [category, dateFrom, dateTo, filterAction, filterIp, filterOperator, filterResult, filterTarget, keyword, logs]);
+  }, [category, dateFrom, dateTo, filterAction, filterIp, filterOperator, filterResult, filterTarget, filterVerificationMethod, keyword, logs]);
 
   const abnormalCount = filtered.filter((item) => item.result === '失败').length;
   const successCount = filtered.filter((item) => item.result === '成功').length;
   const uniqueIpCount = new Set(filtered.map((item) => item.ip).filter(Boolean)).size;
   const visitorActionCounts = useMemo(() => groupCount(filtered, (item) => getActionLabel(item.action || '')), [filtered]);
+  const visitorVerificationCounts = useMemo(
+    () => groupCount(filtered, (item) => getVerificationMethodLabel(item.verificationMethod)),
+    [filtered],
+  );
   const visitorTargetCounts = useMemo(
     () => groupCount(filtered, (item) => resolveVisitorTarget(item, elders).label || '未标记对象'),
     [elders, filtered],
@@ -340,6 +340,7 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   function resetFilters() {
     setFilterResult('全部');
     setFilterAction('全部');
+    setFilterVerificationMethod('全部');
     setFilterOperator('');
     setFilterTarget('');
     setFilterIp('');
@@ -348,48 +349,12 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
     setDateTo('');
   }
 
-  function resetVisitorLayout() {
-    setVisitorLayout(buildVisitorLayout());
-    setVisitorSizes(readVisitorSizes());
-    setDraggingWidget(null);
-    setDragOverWidget(null);
-  }
-
-  function hideVisitorWidget(widgetId: VisitorWidgetId) {
-    setVisitorLayout((current) =>
-      current.hidden.includes(widgetId) ? current : { ...current, hidden: [...current.hidden, widgetId] },
-    );
-  }
-
-  function resizeVisitorWidget(widgetId: VisitorWidgetId, direction: 'smaller' | 'larger') {
-    const config = getVisitorWidgetConfig(widgetId);
-    setVisitorSizes((current) => ({
-      ...current,
-      [widgetId]: getNextSize(current[widgetId], config.kind, direction),
-    }));
-  }
-
-  function moveVisitorWidget(dragId: VisitorWidgetId, targetId: VisitorWidgetId) {
-    if (dragId === targetId) return;
-    setVisitorLayout((current) => {
-      const visibleOrder = current.order.filter((item) => !current.hidden.includes(item));
-      const sourceIndex = visibleOrder.indexOf(dragId);
-      const targetIndex = visibleOrder.indexOf(targetId);
-      if (sourceIndex === -1 || targetIndex === -1) return current;
-      const nextVisible = [...visibleOrder];
-      nextVisible.splice(sourceIndex, 1);
-      nextVisible.splice(targetIndex, 0, dragId);
-      const hiddenSet = new Set(current.hidden);
-      const nextOrder = [...nextVisible, ...current.order.filter((item) => hiddenSet.has(item))];
-      return { ...current, order: nextOrder };
-    });
-  }
-
-  const operatorHeader = category === 'visitor' ? '手机号' : '操作人';
-  const operatorPlaceholder = category === 'visitor' ? '筛选手机号' : '筛选操作人';
+  const operatorHeader = category === 'visitor' ? '手机号' : category === 'family' ? '家属账号' : '操作人';
+  const operatorPlaceholder = category === 'visitor' ? '筛选手机号或姓名' : category === 'family' ? '筛选家属账号' : '筛选操作人';
   const mainColSpan = auditColumnOptions.filter((option) => columns.isVisible(option.key)).length;
+  const visitorDetailColSpan = visitorDetailColumnOptions.filter((option) => visitorDetailColumns.isVisible(option.key)).length;
   const visitorSummaryColSpan = visitorSummaryColumnOptions.filter((option) => visitorSummaryColumns.isVisible(option.key)).length;
-  const visibleVisitorWidgets = visitorLayout.order.filter((widgetId) => !visitorLayout.hidden.includes(widgetId));
+  const visibleVisitorWidgets = VISITOR_WIDGETS.filter((item) => !item.id.startsWith('metric-')).map((item) => item.id);
 
   function renderVisitorWidget(widgetId: VisitorWidgetId): ReactNode {
     switch (widgetId) {
@@ -425,6 +390,32 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
             <span className="metric-trend">按当前访问记录去重</span>
           </article>
         );
+      case 'verification-distribution':
+        return (
+          <article className="panel analytics-card dashboard-module audit-scroll-panel">
+            <div className="panel-title">
+              <ClipboardList size={18} />
+              <h3>验证方式分布</h3>
+            </div>
+            <div className="audit-scroll-content">
+              <div className="bar-list">
+                {Object.entries(visitorVerificationCounts)
+                  .sort(([, a], [, b]) => b - a)
+                  .map(([label, value]) => (
+                    <div key={label} className="bar-row">
+                      <div className="bar-meta">
+                        <span>{label}</span>
+                        <strong>{value}</strong>
+                      </div>
+                      <div className="bar-track">
+                        <div className="bar-fill bar-fill--teal" style={{ width: formatPercent(value, filtered.length) }} />
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          </article>
+        );
       case 'action-distribution':
         return (
           <article className="panel analytics-card dashboard-module audit-scroll-panel">
@@ -432,7 +423,8 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
               <ClipboardList size={18} />
               <h3>访问类型分布</h3>
             </div>
-            <div className="bar-list">
+            <div className="audit-scroll-content">
+              <div className="bar-list">
               {Object.entries(visitorActionCounts).map(([label, value]) => (
                 <div key={label} className="bar-row">
                   <div className="bar-meta">
@@ -444,17 +436,19 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </article>
         );
       case 'target-distribution':
         return (
-          <article className="panel analytics-card dashboard-module">
+          <article className="panel analytics-card dashboard-module audit-scroll-panel">
             <div className="panel-title">
               <ClipboardList size={18} />
               <h3>访问对象分布</h3>
             </div>
-            <div className="bar-list">
+            <div className="audit-scroll-content">
+              <div className="bar-list">
               {Object.entries(visitorTargetCounts).slice(0, 8).map(([label, value]) => (
                 <div key={label} className="bar-row">
                   <div className="bar-meta">
@@ -466,17 +460,19 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </article>
         );
       case 'daily-distribution':
         return (
-          <article className="panel analytics-card dashboard-module">
+          <article className="panel analytics-card dashboard-module audit-scroll-panel">
             <div className="panel-title">
               <ClipboardList size={18} />
               <h3>按日期统计</h3>
             </div>
-            <div className="bar-list">
+            <div className="audit-scroll-content">
+              <div className="bar-list">
               {Object.entries(visitorDailyCounts)
                 .sort(([a], [b]) => a.localeCompare(b))
                 .slice(-7)
@@ -491,12 +487,13 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                     </div>
                   </div>
                 ))}
+              </div>
             </div>
           </article>
         );
       case 'recent-visitor':
         return (
-          <article className="panel analytics-card dashboard-module">
+          <article className="panel analytics-card dashboard-module audit-scroll-panel">
             <div className="panel-title">
               <ClipboardList size={18} />
               <h3>最近访问记录</h3>
@@ -514,8 +511,9 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
               <thead>
                 <tr>
                   {visitorSummaryColumns.isVisible('time') && <th>时间</th>}
-                  {visitorSummaryColumns.isVisible('operator') && <th>{operatorHeader}</th>}
-                  {visitorSummaryColumns.isVisible('action') && <th>类型</th>}
+                  {visitorSummaryColumns.isVisible('name') && <th>登记姓名</th>}
+                  {visitorSummaryColumns.isVisible('phone') && <th>登记手机号</th>}
+                  {visitorSummaryColumns.isVisible('verificationMethod') && <th>验证方式</th>}
                   {visitorSummaryColumns.isVisible('result') && <th>结果</th>}
                 </tr>
               </thead>
@@ -530,8 +528,9 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                   latestVisitorLogs.map((log, index) => (
                     <tr key={`visitor-summary-${log.time}-${index}`}>
                       {visitorSummaryColumns.isVisible('time') && <td>{formatTime(log.time)}</td>}
-                      {visitorSummaryColumns.isVisible('operator') && <td>{getDisplayOperator(log, category)}</td>}
-                      {visitorSummaryColumns.isVisible('action') && <td>{getActionLabel(log.action)}</td>}
+                      {visitorSummaryColumns.isVisible('name') && <td>{getVisitorName(log)}</td>}
+                      {visitorSummaryColumns.isVisible('phone') && <td>{getVisitorPhone(log)}</td>}
+                      {visitorSummaryColumns.isVisible('verificationMethod') && <td>{getVerificationMethodLabel(log.verificationMethod)}</td>}
                       {visitorSummaryColumns.isVisible('result') && (
                         <td>
                           <StatusTag status={log.result} />
@@ -553,53 +552,65 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
               <h3>访问人员记录</h3>
             </div>
             <p style={{ margin: '0 0 12px', color: 'var(--color-text-secondary)', fontSize: 13 }}>共 {filtered.length} 条记录</p>
+            <div className="toolbar" style={{ marginBottom: 10 }}>
+              <TableColumnMenu
+                options={visitorDetailColumnOptions}
+                isVisible={visitorDetailColumns.isVisible}
+                onToggle={visitorDetailColumns.toggle}
+                onReset={visitorDetailColumns.reset}
+              />
+            </div>
             <div className="rbac-summary-table-wrap audit-scroll-table-wrap audit-scroll-table-wrap--main">
               <table className="data-table">
                 <thead>
                   <tr>
-                    {columns.isVisible('time') && <th>时间</th>}
-                    {columns.isVisible('operator') && <th>{operatorHeader}</th>}
-                    {columns.isVisible('action') && <th>类型</th>}
-                    {columns.isVisible('target') && <th>对象</th>}
-                    {columns.isVisible('ip') && <th>来源 IP</th>}
-                    {columns.isVisible('result') && <th>结果</th>}
+                    {visitorDetailColumns.isVisible('time') && <th>时间</th>}
+                    {visitorDetailColumns.isVisible('name') && <th>登记姓名</th>}
+                    {visitorDetailColumns.isVisible('phone') && <th>登记手机号</th>}
+                    {visitorDetailColumns.isVisible('idCard') && <th>身份证信息</th>}
+                    {visitorDetailColumns.isVisible('verificationMethod') && <th>验证方式</th>}
+                    {visitorDetailColumns.isVisible('action') && <th>类型</th>}
+                    {visitorDetailColumns.isVisible('target') && <th>对象</th>}
+                    {visitorDetailColumns.isVisible('ip') && <th>来源 IP</th>}
+                    {visitorDetailColumns.isVisible('result') && <th>结果</th>}
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={mainColSpan} style={{ color: 'var(--color-text-secondary)' }}>
+                      <td colSpan={visitorDetailColSpan} style={{ color: 'var(--color-text-secondary)' }}>
                         暂无记录
                       </td>
                     </tr>
                   ) : (
                     filtered.map((log, index) => (
                       <tr key={`${category}-${log.time}-${index}`}>
-                        {columns.isVisible('time') && <td>{formatTime(log.time)}</td>}
-                        {columns.isVisible('operator') && <td>{getDisplayOperator(log, category)}</td>}
-                        {columns.isVisible('action') && <td>{getActionLabel(log.action)}</td>}
-                        {columns.isVisible('target') && (
+                        {visitorDetailColumns.isVisible('time') && <td>{formatTime(log.time)}</td>}
+                        {visitorDetailColumns.isVisible('name') && <td>{getVisitorName(log)}</td>}
+                        {visitorDetailColumns.isVisible('phone') && <td>{getVisitorPhone(log)}</td>}
+                        {visitorDetailColumns.isVisible('idCard') && <td>{getVisitorIdCard(log)}</td>}
+                        {visitorDetailColumns.isVisible('verificationMethod') && <td>{getVerificationMethodLabel(log.verificationMethod)}</td>}
+                        {visitorDetailColumns.isVisible('action') && <td>{getActionLabel(log.action)}</td>}
+                        {visitorDetailColumns.isVisible('target') && (
                           <td>
-                            {category === 'visitor'
-                              ? (() => {
-                                  const targetInfo = resolveVisitorTarget(log, elders);
-                                  return targetInfo.elder ? (
-                                    <button
-                                      className="secondary"
-                                      style={{ padding: '4px 8px' }}
-                                      onClick={() => setSelectedVisitorTarget({ log, elder: targetInfo.elder as ElderRow })}
-                                    >
-                                      {targetInfo.label}
-                                    </button>
-                                  ) : (
-                                    targetInfo.label
-                                  );
-                                })()
-                              : log.target}
+                            {(() => {
+                              const targetInfo = resolveVisitorTarget(log, elders);
+                              return targetInfo.elder ? (
+                                <button
+                                  className="secondary"
+                                  style={{ padding: '4px 8px' }}
+                                  onClick={() => setSelectedVisitorTarget({ log, elder: targetInfo.elder as ElderRow })}
+                                >
+                                  {targetInfo.label}
+                                </button>
+                              ) : (
+                                targetInfo.label
+                              );
+                            })()}
                           </td>
                         )}
-                        {columns.isVisible('ip') && <td>{log.ip}</td>}
-                        {columns.isVisible('result') && (
+                        {visitorDetailColumns.isVisible('ip') && <td>{log.ip}</td>}
+                        {visitorDetailColumns.isVisible('result') && (
                           <td>
                             <StatusTag status={log.result} />
                           </td>
@@ -619,162 +630,143 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
 
   return (
     <>
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">审计与合规</p>
-          <h2>{categoryTitle(category)}</h2>
-        </div>
-      </header>
-
-      <section className={category === 'visitor' ? 'panel audit-visitor-shell' : 'panel'} style={{ marginTop: 14 }}>
-        {abnormalCount > 0 && (
-          <div className="alert-bar">
-            <AlertTriangle size={16} />
-            <span>当前分类下有 {abnormalCount} 条失败记录，请重点检查来源 IP 和操作内容。</span>
+      <div className="audit-page-shell">
+        <header className="topbar">
+          <div>
+            <p className="eyebrow">审计与合规</p>
+            <h2>{categoryTitle(category)}</h2>
           </div>
-        )}
+        </header>
 
-        <div className="toolbar">
-          <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
-          <span>至</span>
-          <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
-          <input placeholder={operatorPlaceholder} value={filterOperator} onChange={(event) => setFilterOperator(event.target.value)} />
-          <input placeholder="筛选操作对象" value={filterTarget} onChange={(event) => setFilterTarget(event.target.value)} />
-          <input placeholder="筛选来源 IP" value={filterIp} onChange={(event) => setFilterIp(event.target.value)} />
-          <select value={filterAction} onChange={(event) => setFilterAction(event.target.value)}>
-            <option>全部</option>
-            {actions.map((action) => (
-              <option key={action} value={action}>
-                {getActionLabel(action)}
-              </option>
-            ))}
-          </select>
-          <select value={filterResult} onChange={(event) => setFilterResult(event.target.value)}>
-            <option>全部</option>
-            <option>成功</option>
-            <option>失败</option>
-          </select>
-          <input placeholder="关键词搜索" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
-          <button onClick={() => undefined}>查询</button>
-          <button className="secondary" onClick={resetFilters}>重置</button>
-          <button className="secondary" onClick={handleExport}>导出</button>
-          <TableColumnMenu options={auditColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
-        </div>
+        <section className={category === 'visitor' ? 'panel audit-visitor-shell' : 'panel audit-log-shell'}>
+          {abnormalCount > 0 && (
+            <div className="alert-bar">
+              <AlertTriangle size={16} />
+              <span>当前分类下有 {abnormalCount} 条失败记录，请重点检查来源 IP 和操作内容。</span>
+            </div>
+          )}
 
-        {category === 'visitor' ? (
-          <>
-            <section className="dashboard-module-grid audit-visitor-grid">
-              {visibleVisitorWidgets.map((widgetId) => {
-                const config = getVisitorWidgetConfig(widgetId);
-                const widgetSize = visitorSizes[widgetId];
-                const isDragging = draggingWidget === widgetId;
-                const isDropTarget = dragOverWidget === widgetId && draggingWidget !== widgetId;
-                return (
-                  <section
-                    key={widgetId}
-                    className={`${getSlotClassName(config.kind, widgetSize)}${isDragging ? ' dashboard-module-slot--dragging' : ''}${isDropTarget ? ' dashboard-module-slot--drop-target' : ''}`}
-                    draggable
-                    onDragStart={() => {
-                      setDraggingWidget(widgetId);
-                      setDragOverWidget(widgetId);
-                    }}
-                    onDragEnd={() => {
-                      setDraggingWidget(null);
-                      setDragOverWidget(null);
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDragEnter={() => {
-                      if (!draggingWidget || draggingWidget === widgetId) return;
-                      setDragOverWidget(widgetId);
-                      moveVisitorWidget(draggingWidget, widgetId);
-                    }}
-                    onDrop={() => {
-                      setDraggingWidget(null);
-                      setDragOverWidget(null);
-                    }}
-                  >
-                    <div className="dashboard-module-actions">
-                      <button className="secondary" type="button" onClick={() => hideVisitorWidget(widgetId)} title="隐藏模块">
-                        <X size={14} />
-                      </button>
-                    </div>
-                    {renderVisitorWidget(widgetId)}
-                    <button
-                      className="dashboard-resize-handle dashboard-resize-handle--left"
-                      type="button"
-                      title="缩小一档"
-                      aria-label="缩小一档"
-                      onClick={() => resizeVisitorWidget(widgetId, 'smaller')}
-                      disabled={getNextSize(widgetSize, config.kind, 'smaller') === widgetSize}
-                    />
-                    <button
-                      className="dashboard-resize-handle dashboard-resize-handle--right"
-                      type="button"
-                      title="放大一档"
-                      aria-label="放大一档"
-                      onClick={() => resizeVisitorWidget(widgetId, 'larger')}
-                      disabled={getNextSize(widgetSize, config.kind, 'larger') === widgetSize}
-                    />
+          <div className="toolbar">
+            <input type="date" value={dateFrom} onChange={(event) => setDateFrom(event.target.value)} />
+            <span>至</span>
+            <input type="date" value={dateTo} onChange={(event) => setDateTo(event.target.value)} />
+            <input placeholder={operatorPlaceholder} value={filterOperator} onChange={(event) => setFilterOperator(event.target.value)} />
+            <input placeholder="筛选操作对象" value={filterTarget} onChange={(event) => setFilterTarget(event.target.value)} />
+            <input placeholder="筛选来源 IP" value={filterIp} onChange={(event) => setFilterIp(event.target.value)} />
+            <select value={filterAction} onChange={(event) => setFilterAction(event.target.value)}>
+              <option>全部</option>
+              {actions.map((action) => (
+                <option key={action} value={action}>
+                  {getActionLabel(action)}
+                </option>
+              ))}
+            </select>
+            {category === 'visitor' ? (
+              <select value={filterVerificationMethod} onChange={(event) => setFilterVerificationMethod(event.target.value)}>
+                <option>全部</option>
+                <option>身份登记</option>
+                <option>短信中转</option>
+                <option>短信验证码</option>
+              </select>
+            ) : null}
+            <select value={filterResult} onChange={(event) => setFilterResult(event.target.value)}>
+              <option>全部</option>
+              <option>成功</option>
+              <option>失败</option>
+            </select>
+            <input placeholder="关键词搜索" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
+            <button onClick={() => undefined}>查询</button>
+            <button className="secondary" onClick={resetFilters}>重置</button>
+            <button className="secondary" onClick={handleExport}>导出</button>
+            {category !== 'visitor' ? (
+              <TableColumnMenu options={auditColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
+            ) : null}
+          </div>
+
+          {category === 'visitor' ? (
+            <>
+              <article className="panel audit-visitor-summary-panel">
+                <div className="audit-visitor-summary-grid">
+                  <section className="audit-visitor-summary-card">
+                    <p className="audit-visitor-summary-label">访问记录数</p>
+                    <strong className="audit-visitor-summary-value">{filtered.length}</strong>
+                    <span className="audit-visitor-summary-meta">当前筛选条件下的访问行为</span>
                   </section>
-                );
-              })}
-            </section>
+                  <section className="audit-visitor-summary-card">
+                    <p className="audit-visitor-summary-label">成功访问</p>
+                    <strong className="audit-visitor-summary-value">{successCount}</strong>
+                    <span className="audit-visitor-summary-meta">{formatPercent(successCount, filtered.length)} 成功率</span>
+                  </section>
+                  <section className="audit-visitor-summary-card">
+                    <p className="audit-visitor-summary-label">失败访问</p>
+                    <strong className="audit-visitor-summary-value">{abnormalCount}</strong>
+                    <span className="audit-visitor-summary-meta">{formatPercent(abnormalCount, filtered.length)} 失败占比</span>
+                  </section>
+                  <section className="audit-visitor-summary-card">
+                    <p className="audit-visitor-summary-label">来源 IP 数</p>
+                    <strong className="audit-visitor-summary-value">{uniqueIpCount}</strong>
+                    <span className="audit-visitor-summary-meta">按当前访问记录去重</span>
+                  </section>
+                </div>
+              </article>
 
-            <button className="dashboard-floating-reset" type="button" onClick={resetVisitorLayout}>
-              <RotateCcw size={16} />
-              重置布局
-            </button>
-          </>
+              <section className="dashboard-module-grid audit-visitor-grid">
+                {visibleVisitorWidgets.map((widgetId) => {
+                  const config = VISITOR_WIDGETS.find((item) => item.id === widgetId)!;
+                  return (
+                    <section key={widgetId} className={getSlotClassName(config.kind, config.defaultSize)}>
+                      {renderVisitorWidget(widgetId)}
+                    </section>
+                  );
+                })}
+              </section>
+            </>
         ) : (
           <>
-            <div className="panel-title">
-              <ClipboardList size={18} />
-              <h3>{categoryTitle(category)}</h3>
-            </div>
-
             <p style={{ margin: '0 0 12px', color: 'var(--color-text-secondary)', fontSize: 13 }}>共 {filtered.length} 条记录</p>
 
-            <div className="rbac-summary-table-wrap">
+            <div className="rbac-summary-table-wrap audit-scroll-table-wrap audit-scroll-table-wrap--main">
               <table className="data-table">
-                <thead>
-                  <tr>
-                    {columns.isVisible('time') && <th>时间</th>}
-                    {columns.isVisible('operator') && <th>{operatorHeader}</th>}
-                    {columns.isVisible('action') && <th>类型</th>}
-                    {columns.isVisible('target') && <th>对象</th>}
-                    {columns.isVisible('ip') && <th>来源 IP</th>}
-                    {columns.isVisible('result') && <th>结果</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.length === 0 ? (
+                  <thead>
                     <tr>
-                      <td colSpan={mainColSpan} style={{ color: 'var(--color-text-secondary)' }}>
-                        暂无记录
-                      </td>
+                      {columns.isVisible('time') && <th>时间</th>}
+                      {columns.isVisible('operator') && <th>{operatorHeader}</th>}
+                      {columns.isVisible('action') && <th>类型</th>}
+                      {columns.isVisible('target') && <th>对象</th>}
+                      {columns.isVisible('ip') && <th>来源 IP</th>}
+                      {columns.isVisible('result') && <th>结果</th>}
                     </tr>
-                  ) : (
-                    filtered.map((log, index) => (
-                      <tr key={`${category}-${log.time}-${index}`}>
-                        {columns.isVisible('time') && <td>{formatTime(log.time)}</td>}
-                        {columns.isVisible('operator') && <td>{getDisplayOperator(log, category)}</td>}
-                        {columns.isVisible('action') && <td>{getActionLabel(log.action)}</td>}
-                        {columns.isVisible('target') && <td>{log.target}</td>}
-                        {columns.isVisible('ip') && <td>{log.ip}</td>}
-                        {columns.isVisible('result') && (
-                          <td>
-                            <StatusTag status={log.result} />
-                          </td>
-                        )}
+                  </thead>
+                  <tbody>
+                    {filtered.length === 0 ? (
+                      <tr>
+                        <td colSpan={mainColSpan} style={{ color: 'var(--color-text-secondary)' }}>
+                          暂无记录
+                        </td>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </section>
+                    ) : (
+                      filtered.map((log, index) => (
+                        <tr key={`${category}-${log.time}-${index}`}>
+                          {columns.isVisible('time') && <td>{formatTime(log.time)}</td>}
+                          {columns.isVisible('operator') && <td>{getDisplayOperator(log, category)}</td>}
+                          {columns.isVisible('action') && <td>{getActionLabel(log.action)}</td>}
+                          {columns.isVisible('target') && <td>{log.target}</td>}
+                          {columns.isVisible('ip') && <td>{log.ip}</td>}
+                          {columns.isVisible('result') && (
+                            <td>
+                              <StatusTag status={log.result} />
+                            </td>
+                          )}
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
 
       {selectedVisitorTarget ? (
         <div className="modal-overlay">
@@ -804,6 +796,22 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
               <label>
                 <span>访问类型</span>
                 <input value={getActionLabel(selectedVisitorTarget.log.action)} readOnly />
+              </label>
+              <label>
+                <span>验证方式</span>
+                <input value={getVerificationMethodLabel(selectedVisitorTarget.log.verificationMethod)} readOnly />
+              </label>
+              <label>
+                <span>登记姓名</span>
+                <input value={getVisitorName(selectedVisitorTarget.log)} readOnly />
+              </label>
+              <label>
+                <span>登记手机号</span>
+                <input value={getVisitorPhone(selectedVisitorTarget.log)} readOnly />
+              </label>
+              <label>
+                <span>身份证信息</span>
+                <input value={getVisitorIdCard(selectedVisitorTarget.log)} readOnly />
               </label>
               <label>
                 <span>访问时间</span>
