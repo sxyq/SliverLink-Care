@@ -115,6 +115,7 @@ export function FamilyBindingManagePage() {
           <TableColumnMenu options={familyBindingColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
         </div>
 
+        <div className="table-shell">
         <table className="data-table">
           <thead>
             <tr>
@@ -164,6 +165,7 @@ export function FamilyBindingManagePage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
     </>
   );

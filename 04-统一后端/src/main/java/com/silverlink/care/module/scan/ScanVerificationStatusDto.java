@@ -2,6 +2,7 @@ package com.silverlink.care.module.scan;
 
 public class ScanVerificationStatusDto {
     private String sessionId;
+    private String elderId;
     private String status;
     private boolean verified;
     private String verifiedAt;
@@ -13,6 +14,14 @@ public class ScanVerificationStatusDto {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getElderId() {
+        return elderId;
+    }
+
+    public void setElderId(String elderId) {
+        this.elderId = elderId;
     }
 
     public String getStatus() {

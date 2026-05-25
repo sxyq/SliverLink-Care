@@ -86,6 +86,14 @@ public class SilverLinkDataService {
         return Optional.of(user);
     }
 
+    public Optional<Map<String, Object>> findUser(String account, String role) {
+        List<Map<String, Object>> users = jdbc.queryForList(
+                "select * from app_user where account=? and role=?",
+                account, role
+        );
+        return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
+    }
+
     public Map<String, Object> dashboard() {
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("elderCount", count("elder", "1=1"));

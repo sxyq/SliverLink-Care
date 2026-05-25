@@ -1,10 +1,19 @@
 import { http } from './httpClient';
 import type { AssignedElder, CreateAssignedElderInput, VolunteerQrCodeInfo } from '../types';
+import type { InvitationPreview } from '../family-entry/types';
 
 export interface LoginResult {
   ok: boolean;
   token: string;
   name?: string;
+}
+
+export interface VolunteerRegisterInput {
+  invitationCode: string;
+  account: string;
+  password: string;
+  name: string;
+  phone: string;
 }
 
 export interface VolunteerProfileResult {
@@ -25,6 +34,18 @@ export async function loginVolunteer(account: string, password: string): Promise
   const res = await http<{ token: string; name?: string }>('/api/volunteer/login', {
     method: 'POST',
     body: JSON.stringify({ account, password }),
+  });
+  return { ok: Boolean(res.token), token: res.token, name: res.name };
+}
+
+export async function previewVolunteerInvitation(code: string): Promise<InvitationPreview> {
+  return http<InvitationPreview>(`/api/invitations/${encodeURIComponent(code)}/preview`);
+}
+
+export async function registerVolunteer(input: VolunteerRegisterInput): Promise<LoginResult> {
+  const res = await http<{ token: string; name?: string }>('/api/volunteer/register', {
+    method: 'POST',
+    body: JSON.stringify(input),
   });
   return { ok: Boolean(res.token), token: res.token, name: res.name };
 }

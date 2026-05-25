@@ -45,6 +45,13 @@ public class VolunteerController {
         return ApiResponse.fail(401, "账号或密码错误");
     }
 
+    @PostMapping("/register")
+    public ApiResponse<Map<String, String>> register(@RequestBody VolunteerRegisterRequest req, HttpServletRequest request) {
+        Map<String, String> result = volunteerService.registerWithInvitation(req);
+        auditLogService.record(result.get("account"), "VOLUNTEER", request, result.get("invitationCode"), "INVITATION_REGISTER", "SUCCESS", null, null);
+        return ApiResponse.ok(result);
+    }
+
     @PostMapping("/logout")
     public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request) {
         auditLogService.record(authentication, request, "绯荤粺", "LOGOUT", "SUCCESS");
@@ -113,8 +120,8 @@ public class VolunteerController {
             Authentication authentication,
             HttpServletRequest request
     ) {
-        Map<String, Object> result = volunteerService.disableMyElderQrCode(authentication.getName(), elderId);
-        auditLogService.record(authentication, request, elderId, "DISABLE_QR", "SUCCESS");
+        Map<String, Object> result = volunteerService.requestDisableMyElderQrCode(authentication.getName(), elderId);
+        auditLogService.record(authentication, request, elderId, "REQUEST_DISABLE_QR", "SUCCESS");
         return ApiResponse.ok(result);
     }
 }

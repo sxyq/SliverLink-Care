@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { fetchBasicInfo } from '../api/scanApi';
+import { clearResolvedScanContext, fetchBasicInfo } from '../api/scanApi';
 import type { ElderBasicInfo } from '../types';
 
 export function useScanBasicInfo(qrToken: string | null) {
@@ -9,9 +9,14 @@ export function useScanBasicInfo(qrToken: string | null) {
 
   useEffect(() => {
     if (!qrToken) {
+      clearResolvedScanContext();
+      setData(null);
+      setLoading(false);
       setError('二维码参数缺失');
       return;
     }
+    setData(null);
+    setError(null);
     setLoading(true);
     fetchBasicInfo(qrToken)
       .then(setData)

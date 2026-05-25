@@ -664,6 +664,7 @@ export function DashboardPage() {
                 onReset={dashboardAuditColumns.reset}
               />
             </div>
+            <div className="table-shell">
             <table className="data-table">
               <thead>
                 <tr>
@@ -692,6 +693,7 @@ export function DashboardPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </>,
         );
       }

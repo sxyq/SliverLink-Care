@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import { getElderDetail } from '../api/familyElderApi';
 import type { ElderInfo } from '../types';
 import { SubjectDetailPage } from '@shared/SubjectDetailPage';
 import type { CareActionCard, CareSubject } from '@shared/types';
+import { downloadNameplatePdf } from '../../shared-workbench/nameplateExport';
 
 function toCareSubject(elder: ElderInfo): CareSubject {
   return {
@@ -25,6 +27,7 @@ export default function ElderBasicManagePage() {
   const navigate = useNavigate();
   const [elder, setElder] = useState<ElderInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     if (!elderId) return;
@@ -43,6 +46,24 @@ export default function ElderBasicManagePage() {
         <p>未找到老人信息</p>
       </div>
     );
+  }
+
+  const currentElder = elder;
+
+  async function handleExport() {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      await downloadNameplatePdf({
+        elderId: currentElder.id,
+        archiveNo: currentElder.archiveNo,
+        tokenStorageKey: 'family_token',
+      });
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '导出失败，请稍后重试');
+    } finally {
+      setExporting(false);
+    }
   }
 
   const actions: CareActionCard[] = [
@@ -73,6 +94,19 @@ export default function ElderBasicManagePage() {
         subject={toCareSubject(elder)}
         onBack={() => navigate('/')}
         actions={actions}
+        headerAction={
+          <button
+            type="button"
+            className="sl-page-header-icon sl-page-header-icon-label"
+            onClick={handleExport}
+            disabled={exporting}
+            aria-label="导出名牌 PDF"
+            title="导出名牌 PDF"
+          >
+            <Download size={18} />
+            <span>{exporting ? '导出中' : '导出'}</span>
+          </button>
+        }
       />
     </div>
   );

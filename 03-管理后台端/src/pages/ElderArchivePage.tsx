@@ -230,35 +230,36 @@ export function ElderArchivePage() {
             新增档案
           </button>
         </div>
-        <table className="data-table">
+        <div className="table-shell elder-archive-table-shell">
+        <table className="data-table elder-archive-table">
           <thead>
             <tr>
-              {columns.isVisible('archiveNo') && <th>档案编号</th>}
-              {columns.isVisible('name') && <th>姓名</th>}
-              {columns.isVisible('age') && <th>年龄</th>}
-              {columns.isVisible('residence') && <th>住址</th>}
-              {columns.isVisible('phone') && <th>联系电话</th>}
-              {columns.isVisible('volunteer') && <th>负责志愿者</th>}
-              {columns.isVisible('status') && <th>状态</th>}
-              {columns.isVisible('actions') && <th>操作</th>}
+              {columns.isVisible('archiveNo') && <th className="col-elder-archive-no">档案编号</th>}
+              {columns.isVisible('name') && <th className="col-elder-name">姓名</th>}
+              {columns.isVisible('age') && <th className="col-elder-age">年龄</th>}
+              {columns.isVisible('residence') && <th className="col-elder-residence">住址</th>}
+              {columns.isVisible('phone') && <th className="col-elder-phone">联系电话</th>}
+              {columns.isVisible('volunteer') && <th className="col-elder-volunteer">负责志愿者</th>}
+              {columns.isVisible('status') && <th className="col-elder-status">状态</th>}
+              {columns.isVisible('actions') && <th className="col-elder-actions">操作</th>}
             </tr>
           </thead>
           <tbody>
             {filtered.map((row) => (
               <tr key={row.id || row.archiveNo}>
-                {columns.isVisible('archiveNo') && <td>{row.archiveNo}</td>}
-                {columns.isVisible('name') && <td>{row.name}</td>}
-                {columns.isVisible('age') && <td>{row.age}</td>}
-                {columns.isVisible('residence') && <td>{row.residence || '-'}</td>}
-                {columns.isVisible('phone') && <td>{row.phoneMasked}</td>}
-                {columns.isVisible('volunteer') && <td>{row.volunteer}</td>}
+                {columns.isVisible('archiveNo') && <td className="col-elder-archive-no">{row.archiveNo}</td>}
+                {columns.isVisible('name') && <td className="col-elder-name">{row.name}</td>}
+                {columns.isVisible('age') && <td className="col-elder-age">{row.age}</td>}
+                {columns.isVisible('residence') && <td className="col-elder-residence">{row.residence || '-'}</td>}
+                {columns.isVisible('phone') && <td className="col-elder-phone">{row.phoneMasked}</td>}
+                {columns.isVisible('volunteer') && <td className="col-elder-volunteer">{row.volunteer}</td>}
                 {columns.isVisible('status') && (
-                  <td>
+                  <td className="col-elder-status">
                     <StatusTag status={row.status} />
                   </td>
                 )}
                 {columns.isVisible('actions') && (
-                  <td>
+                  <td className="col-elder-actions">
                     <div className="table-actions">
                       <button className="secondary" onClick={() => openMedicationEditor(row)}>
                         用药信息
@@ -279,6 +280,7 @@ export function ElderArchivePage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       {showCreateDialog && (

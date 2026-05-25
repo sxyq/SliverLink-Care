@@ -2,6 +2,7 @@ export type VerificationState = 'none' | 'pending' | 'verified';
 
 export interface SmsVerificationSession {
   sessionId: string;
+  elderId?: string;
   receiverPhone: string;
   receiverPhoneMasked: string;
   messageBody?: string;
@@ -13,6 +14,7 @@ export interface SmsVerificationSession {
 
 export interface SmsVerificationStatus {
   sessionId: string;
+  elderId?: string;
   status: 'PENDING' | 'VERIFIED' | 'EXPIRED';
   verified: boolean;
   verifiedAt?: string;

@@ -1,4 +1,4 @@
-import type { AuditLog, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
+import type { AdminReviewRequest, AuditLog, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const GET_CACHE_TTL_MS = 15_000;
@@ -407,6 +407,51 @@ export async function fetchFamilyBindings() {
 
 export async function unbindFamily(id: string) {
   return request<void>(`/api/admin/family-bindings/${id}/disable`, { method: 'PUT' });
+}
+
+function mapReviewRequest(row: Record<string, unknown>): AdminReviewRequest {
+  return {
+    id: String(row.id || ''),
+    type: String(row.type || ''),
+    title: String(row.title || '审核消息'),
+    summary: String(row.summary || ''),
+    targetId: String(row.targetId || ''),
+    targetLabel: String(row.targetLabel || ''),
+    elderId: String(row.elderId || ''),
+    elderName: String(row.elderName || ''),
+    archiveNo: String(row.archiveNo || ''),
+    qrCodeId: String(row.qrCodeId || ''),
+    qrStatus: String(row.qrStatus || ''),
+    requesterAccount: String(row.requesterAccount || ''),
+    requesterRole: String(row.requesterRole || ''),
+    requesterRoleLabel: String(row.requesterRoleLabel || ''),
+    requesterNote: String(row.requesterNote || ''),
+    status: String(row.status || 'PENDING'),
+    createdAt: String(row.createdAt || ''),
+    handledAt: String(row.handledAt || ''),
+    handledBy: String(row.handledBy || ''),
+    resultNote: String(row.resultNote || ''),
+  };
+}
+
+export async function fetchAdminReviewRequests(status = 'PENDING') {
+  const rows = await request<Array<Record<string, unknown>>>(`/api/admin/review-requests?status=${encodeURIComponent(status)}`);
+  return rows.map(mapReviewRequest);
+}
+
+export async function approveAdminReviewRequest(id: string) {
+  const row = await request<Record<string, unknown>>(`/api/admin/review-requests/${encodeURIComponent(id)}/approve`, {
+    method: 'POST',
+  });
+  return mapReviewRequest(row);
+}
+
+export async function rejectAdminReviewRequest(id: string, note = '') {
+  const row = await request<Record<string, unknown>>(`/api/admin/review-requests/${encodeURIComponent(id)}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ note }),
+  });
+  return mapReviewRequest(row);
 }
 
 export async function fetchAuditLogs() {

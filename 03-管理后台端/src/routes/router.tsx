@@ -13,6 +13,7 @@ import { AuditLogPage } from '../pages/AuditLogPage';
 import { InvitationManagePage } from '../pages/InvitationManagePage';
 import { FamilyBindingManagePage } from '../pages/FamilyBindingManagePage';
 import { SmsRelayManagePage } from '../pages/SmsRelayManagePage';
+import { AdminMessageCenter } from '../components/AdminMessageCenter';
 import { hasMenuPermission } from '../features/rbac/permissionGuard';
 import { defaultRoles } from '../features/rbac/rolePermissionModel';
 

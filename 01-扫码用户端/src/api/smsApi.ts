@@ -1,4 +1,5 @@
 import {
+  ALLOW_LOCAL_VERIFICATION_FALLBACK,
   DEV_FIXED_SMS_CODE,
   DEV_SMS_RELAY_PREFIX,
   DEV_SMS_RELAY_RECEIVER_PHONE,
@@ -10,6 +11,7 @@ import type { IdentityVerificationPayload, SmsVerificationSession, SmsVerificati
 
 interface StartVerificationDto {
   sessionId: string;
+  elderId?: string;
   receiverPhone: string;
   receiverPhoneMasked?: string;
   messageBody: string;
@@ -20,6 +22,7 @@ interface StartVerificationDto {
 
 interface VerificationStatusDto {
   sessionId: string;
+  elderId?: string;
   status: 'PENDING' | 'VERIFIED' | 'EXPIRED';
   verified?: boolean;
   verifiedAt?: string;
@@ -53,7 +56,7 @@ function randomAlphaNumeric(length: number) {
 }
 
 export async function startRelayVerification(target: string): Promise<SmsVerificationSession> {
-  if (DEV_FIXED_SMS_CODE) {
+  if (ALLOW_LOCAL_VERIFICATION_FALLBACK) {
     try {
       const res = await httpClient<StartVerificationDto>(ENDPOINTS.scanVerificationStart, {
         method: 'POST',
@@ -64,6 +67,7 @@ export async function startRelayVerification(target: string): Promise<SmsVerific
       });
       return {
         sessionId: res.sessionId,
+        elderId: res.elderId,
         receiverPhone: res.receiverPhone,
         receiverPhoneMasked: res.receiverPhoneMasked || maskPhone(res.receiverPhone),
         messageBody: res.messageBody,
@@ -89,6 +93,7 @@ export async function startRelayVerification(target: string): Promise<SmsVerific
     });
     return {
       sessionId,
+      elderId: getResolvedElderId(),
       receiverPhone,
       receiverPhoneMasked,
       messageBody,
@@ -109,6 +114,7 @@ export async function startRelayVerification(target: string): Promise<SmsVerific
 
   return {
     sessionId: res.sessionId,
+    elderId: res.elderId,
     receiverPhone: res.receiverPhone,
     receiverPhoneMasked: res.receiverPhoneMasked || maskPhone(res.receiverPhone),
     messageBody: res.messageBody,
@@ -143,6 +149,7 @@ export async function getRelayVerificationStatus(sessionId: string): Promise<Sms
 
   return {
     sessionId: res.sessionId,
+    elderId: res.elderId,
     status: res.status,
     verified: Boolean(res.verified ?? res.status === 'VERIFIED'),
     verifiedAt: res.verifiedAt,
@@ -166,19 +173,21 @@ export async function verifyIdentityAccess(
 
     return {
       sessionId: res.sessionId,
+      elderId: res.elderId,
       status: res.status,
       verified: Boolean(res.verified ?? res.status === 'VERIFIED'),
       verifiedAt: res.verifiedAt,
       senderPhoneMasked: res.senderPhoneMasked,
     };
   } catch (error) {
-    if (!DEV_FIXED_SMS_CODE) {
+    if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) {
       throw error;
     }
 
     const sessionId = `local-identity-${Date.now()}`;
     const nextStatus = {
       sessionId,
+      elderId: getResolvedElderId(),
       status: 'VERIFIED' as const,
       verified: true,
       verifiedAt: new Date().toISOString(),

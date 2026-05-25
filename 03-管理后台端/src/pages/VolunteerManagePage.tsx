@@ -509,42 +509,46 @@ export function VolunteerManagePage() {
 
         {tab !== 'invitation' && (
         <div className="toolbar volunteer-manage-toolbar">
-          <input
-            placeholder={tab === 'volunteer' ? '搜索姓名、账号、ID、邀请码' : '搜索家属、老人姓名、档案编号'}
-            value={keyword}
-            onChange={(event) => setKeyword(event.target.value)}
-          />
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option>{ALL_STATUS}</option>
-            <option>{ACTIVE_STATUS}</option>
-            <option>{DISABLED_STATUS}</option>
-            <option>{BOUND_STATUS}</option>
-            <option>{UNBOUND_STATUS}</option>
-          </select>
-          <button onClick={() => setKeyword(keyword.trim())}>查询</button>
-          <button className="secondary" onClick={handleExport}>
-            导出
-          </button>
-          {tab === 'volunteer' ? (
-            <TableColumnMenu
-              options={volunteerColumnOptions}
-              isVisible={volunteerColumns.isVisible}
-              onToggle={volunteerColumns.toggle}
-              onReset={volunteerColumns.reset}
+          <div className="volunteer-manage-toolbar__search">
+            <input
+              placeholder={tab === 'volunteer' ? '搜索姓名、账号、ID、邀请码' : '搜索家属、老人姓名、档案编号'}
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
             />
-          ) : (
-            <TableColumnMenu
-              options={familyColumnOptions}
-              isVisible={familyColumns.isVisible}
-              onToggle={familyColumns.toggle}
-              onReset={familyColumns.reset}
-            />
-          )}
-          {tab === 'volunteer' && (
-            <button className="secondary" onClick={openCreateDialog}>
-              新增志愿者账号
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option>{ALL_STATUS}</option>
+              <option>{ACTIVE_STATUS}</option>
+              <option>{DISABLED_STATUS}</option>
+              <option>{BOUND_STATUS}</option>
+              <option>{UNBOUND_STATUS}</option>
+            </select>
+            <button onClick={() => setKeyword(keyword.trim())}>查询</button>
+          </div>
+          <div className="volunteer-manage-toolbar__actions">
+            <button className="secondary" onClick={handleExport}>
+              导出
             </button>
-          )}
+            {tab === 'volunteer' ? (
+              <TableColumnMenu
+                options={volunteerColumnOptions}
+                isVisible={volunteerColumns.isVisible}
+                onToggle={volunteerColumns.toggle}
+                onReset={volunteerColumns.reset}
+              />
+            ) : (
+              <TableColumnMenu
+                options={familyColumnOptions}
+                isVisible={familyColumns.isVisible}
+                onToggle={familyColumns.toggle}
+                onReset={familyColumns.reset}
+              />
+            )}
+            {tab === 'volunteer' && (
+              <button className="secondary" onClick={openCreateDialog}>
+                新增志愿者账号
+              </button>
+            )}
+          </div>
         </div>
         )}
 

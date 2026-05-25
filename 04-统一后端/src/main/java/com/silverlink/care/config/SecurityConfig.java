@@ -33,6 +33,7 @@ public class SecurityConfig {
                         "/api/audit-logs/report",
                         "/api/admin/login",
                         "/api/volunteer/login",
+                        "/api/volunteer/register",
                         "/api/invitations/**",
                         "/api/family/login"
                 ).permitAll()

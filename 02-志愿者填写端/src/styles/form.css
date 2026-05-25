@@ -918,42 +918,21 @@
 }
 
 .sl-detail-action-card {
-  flex-direction: column;
   align-items: stretch;
   justify-content: space-between;
-  min-height: 0;
+  min-height: 112px;
   padding: 16px 14px;
   border-radius: 16px;
-  gap: 12px;
-}
-
-.sl-detail-action-body {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.sl-detail-action-icon-bg {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--sl-primary) 0%, var(--sl-primary-deep) 100%);
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgb(13 162 173 / 22%);
 }
 
 .sl-detail-action-copy {
   display: grid;
-  gap: 4px;
+  gap: 8px;
   min-width: 0;
 }
 
 .sl-detail-action-copy strong {
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.2;
 }
 
@@ -963,13 +942,13 @@
   line-height: 1.35;
 }
 
-.sl-detail-action-arrow {
+.sl-detail-action-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   align-self: flex-end;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   color: var(--sl-primary-deep);
   background: #eef8fa;
   border-radius: 999px;

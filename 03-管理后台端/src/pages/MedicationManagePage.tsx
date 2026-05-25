@@ -217,6 +217,7 @@ export function MedicationManagePage() {
           )}
         </div>
         {error && <p className="form-error">{error}</p>}
+        <div className="table-shell">
         <table className="data-table">
           <thead>
             <tr>
@@ -261,6 +262,7 @@ export function MedicationManagePage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       {editor && (

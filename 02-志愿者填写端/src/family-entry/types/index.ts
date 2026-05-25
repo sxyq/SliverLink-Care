@@ -47,4 +47,7 @@ export interface QrCodeInfo {
   status: '启用' | '已停用' | string;
   createdAt: string;
   pdfUrl: string;
+  disableReviewStatus?: string;
+  disableReviewId?: string;
+  reviewMessage?: string;
 }

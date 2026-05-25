@@ -37,6 +37,30 @@ function buildStableUrl(row: QrCodeRow) {
   return row.url ? String(row.url) : '';
 }
 
+function legacyCopyText(text: string) {
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', 'true');
+  textarea.style.position = 'fixed';
+  textarea.style.opacity = '0';
+  textarea.style.pointerEvents = 'none';
+  textarea.style.top = '0';
+  textarea.style.left = '0';
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, text.length);
+
+  let copied = false;
+  try {
+    copied = document.execCommand('copy');
+  } catch {
+    copied = false;
+  }
+
+  document.body.removeChild(textarea);
+  return copied;
+}
+
 export function QrCodeManagePage() {
   const [rows, setRows] = useState<QrCodeRow[]>([]);
   const [relayDevices, setRelayDevices] = useState<SmsRelayDeviceRow[]>([]);
@@ -176,8 +200,28 @@ export function QrCodeManagePage() {
 
   async function handleCopyUrl() {
     if (!previewUrl) return;
-    await navigator.clipboard.writeText(previewUrl);
-    setActionMessage('扫码访问链接已复制。');
+    try {
+      if (window.isSecureContext && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(previewUrl);
+      } else if (!legacyCopyText(previewUrl)) {
+        throw new Error('当前环境不支持自动复制');
+      }
+      setActionMessage('扫码访问链接已复制。');
+    } catch {
+      setActionMessage('当前浏览器限制了自动复制，请长按或手动复制上方链接。');
+    }
+  }
+
+  function handleOpenPreviewUrl() {
+    if (!previewUrl) return;
+
+    const nextWindow = window.open(previewUrl, '_blank', 'noopener,noreferrer');
+    if (nextWindow) {
+      setActionMessage('扫码页已在新窗口打开。');
+      return;
+    }
+
+    window.location.assign(previewUrl);
   }
 
   async function handleSaveRelayDevice() {
@@ -244,18 +288,22 @@ export function QrCodeManagePage() {
       </header>
 
       <section className="panel" style={{ marginTop: 14 }}>
-        <div className="toolbar">
-          <input placeholder="搜索二维码 ID、档案编号、老人姓名" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
-            <option>{ALL_STATUS}</option>
-            <option>启用</option>
-            <option>已停用</option>
-            <option>已重新生成</option>
-          </select>
-          <button className="secondary" onClick={handleExport} disabled={filtered.length === 0}>
-            导出
-          </button>
-          <TableColumnMenu options={qrColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
+        <div className="toolbar qr-manage-toolbar">
+          <div className="qr-manage-toolbar__search">
+            <input placeholder="搜索二维码 ID、档案编号、老人姓名" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}>
+              <option>{ALL_STATUS}</option>
+              <option>启用</option>
+              <option>已停用</option>
+              <option>已重新生成</option>
+            </select>
+          </div>
+          <div className="qr-manage-toolbar__actions">
+            <button className="secondary" onClick={handleExport} disabled={filtered.length === 0}>
+              导出
+            </button>
+            <TableColumnMenu options={qrColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
+          </div>
         </div>
 
         <div className="panel-title">
@@ -263,20 +311,21 @@ export function QrCodeManagePage() {
           <h3>二维码列表</h3>
         </div>
 
-        <table className="data-table">
+        <div className="table-shell qr-manage-table-shell">
+        <table className="data-table qr-manage-table">
           <thead>
             <tr>
-              {columns.isVisible('basic') && <th>老人基本信息</th>}
-              {columns.isVisible('status') && <th>状态</th>}
-              {columns.isVisible('createdAt') && <th>创建时间</th>}
-              {columns.isVisible('actions') && <th>操作</th>}
+              {columns.isVisible('basic') && <th className="col-qr-basic">老人基本信息</th>}
+              {columns.isVisible('status') && <th className="col-qr-status">状态</th>}
+              {columns.isVisible('createdAt') && <th className="col-qr-created">创建时间</th>}
+              {columns.isVisible('actions') && <th className="col-qr-actions">操作</th>}
             </tr>
           </thead>
           <tbody>
             {filtered.map((row) => (
               <tr key={row.id}>
                 {columns.isVisible('basic') && (
-                  <td>
+                  <td className="col-qr-basic">
                     <div style={{ display: 'grid', gap: 6 }}>
                       <strong>{row.elderName || '未命名老人'}</strong>
                       <span style={{ color: 'var(--color-text-secondary)', fontSize: 13 }}>{renderBasicInfo(row)}</span>
@@ -293,13 +342,13 @@ export function QrCodeManagePage() {
                   </td>
                 )}
                 {columns.isVisible('status') && (
-                  <td>
+                  <td className="col-qr-status">
                     <StatusTag status={row.status} />
                   </td>
                 )}
-                {columns.isVisible('createdAt') && <td>{formatTime(row.createdAt)}</td>}
+                {columns.isVisible('createdAt') && <td className="col-qr-created">{formatTime(row.createdAt)}</td>}
                 {columns.isVisible('actions') && (
-                  <td>
+                  <td className="col-qr-actions">
                     <div className="table-actions">
                       <button className="secondary" onClick={() => setSelectedRow(row)}>
                         查看与管理
@@ -311,6 +360,7 @@ export function QrCodeManagePage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       {selectedRow && (
@@ -346,7 +396,7 @@ export function QrCodeManagePage() {
                       <button className="secondary" onClick={handleCopyUrl}>
                         复制链接
                       </button>
-                      <button className="secondary" onClick={() => window.open(previewUrl, '_blank', 'noopener,noreferrer')}>
+                      <button className="secondary" onClick={handleOpenPreviewUrl}>
                         打开扫码页
                       </button>
                     </div>

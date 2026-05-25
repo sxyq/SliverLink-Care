@@ -141,6 +141,29 @@ export interface FamilyBindingRow {
   createMethod?: string;
 }
 
+export interface AdminReviewRequest {
+  id: string;
+  type: string;
+  title: string;
+  summary: string;
+  targetId: string;
+  targetLabel: string;
+  elderId: string;
+  elderName: string;
+  archiveNo: string;
+  qrCodeId: string;
+  qrStatus: string;
+  requesterAccount: string;
+  requesterRole: string;
+  requesterRoleLabel: string;
+  requesterNote: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+  createdAt: string;
+  handledAt: string;
+  handledBy: string;
+  resultNote: string;
+}
+
 export interface SmsRelayDeviceRow {
   deviceId: string;
   receiverPhone: string;

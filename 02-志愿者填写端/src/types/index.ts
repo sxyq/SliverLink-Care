@@ -60,6 +60,9 @@ export interface VolunteerQrCodeInfo {
   token: string;
   url: string;
   securityNote?: string;
+  disableReviewStatus?: string;
+  disableReviewId?: string;
+  reviewMessage?: string;
 }
 
 export interface ScaleAnswer {

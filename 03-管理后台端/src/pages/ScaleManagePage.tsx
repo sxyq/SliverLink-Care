@@ -218,6 +218,7 @@ export function ScaleManagePage() {
 
         {error && <p className="form-error">{error}</p>}
 
+        <div className="table-shell">
         <table className="data-table">
           <thead>
             <tr>
@@ -256,6 +257,7 @@ export function ScaleManagePage() {
             ))}
           </tbody>
         </table>
+        </div>
       </section>
 
       {editor && (
@@ -275,6 +277,7 @@ export function ScaleManagePage() {
               <TableColumnMenu options={scaleEditorColumnOptions} isVisible={editorColumns.isVisible} onToggle={editorColumns.toggle} onReset={editorColumns.reset} />
             </div>
 
+            <div className="table-shell">
             <table className="data-table">
               <thead>
                 <tr>
@@ -321,6 +324,7 @@ export function ScaleManagePage() {
                 ))}
               </tbody>
             </table>
+            </div>
 
             <div className="form-actions" style={{ marginTop: 16, justifyContent: 'space-between' }}>
               <button className="secondary" onClick={addEditorRow} disabled={saving}>

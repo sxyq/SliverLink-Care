@@ -2,6 +2,9 @@ package com.silverlink.care.module.family;
 
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import com.silverlink.care.module.qrcode.QrCodeEntity;
+import com.silverlink.care.module.qrcode.QrCodeService;
+import com.silverlink.care.module.review.AdminReviewRequestService;
 import com.silverlink.care.security.JwtTokenProvider;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,11 +21,15 @@ public class FamilyService {
     private final JdbcTemplate jdbc;
     private final SilverLinkDataService data;
     private final JwtTokenProvider jwtTokenProvider;
+    private final QrCodeService qrCodeService;
+    private final AdminReviewRequestService reviewRequestService;
 
-    public FamilyService(JdbcTemplate jdbc, SilverLinkDataService data, JwtTokenProvider jwtTokenProvider) {
+    public FamilyService(JdbcTemplate jdbc, SilverLinkDataService data, JwtTokenProvider jwtTokenProvider, QrCodeService qrCodeService, AdminReviewRequestService reviewRequestService) {
         this.jdbc = jdbc;
         this.data = data;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.qrCodeService = qrCodeService;
+        this.reviewRequestService = reviewRequestService;
     }
 
     public FamilyLoginResultDto login(FamilyLoginRequest req) {
@@ -137,9 +144,31 @@ public class FamilyService {
         Map<String, Object> row = rows.get(0);
         FamilyQrCodeDto dto = new FamilyQrCodeDto();
         dto.setToken(data.str(row.get("qr_token")));
-        dto.setStatus(data.str(row.get("status")));
+        dto.setStatus("DISABLED".equalsIgnoreCase(data.str(row.get("status"))) ? "已停用" : "启用");
         dto.setCreatedAt(data.str(row.get("created_at")));
         dto.setPdfUrl("/api/nameplates/" + elderId + "/pdf");
+        Map<String, Object> pendingReview = reviewRequestService.findPendingByQrCode(data.str(row.get("id")));
+        if (pendingReview != null) {
+            dto.setDisableReviewStatus(data.str(pendingReview.get("status")));
+            dto.setDisableReviewId(data.str(pendingReview.get("id")));
+            dto.setReviewMessage("停用申请审核中。审核通过前二维码仍保持启用。");
+        }
+        return dto;
+    }
+
+    public FamilyQrCodeDto requestDisableQrCode(String elderId, String auth) {
+        String familyUserId = resolveFamilyUserId(auth);
+        checkBinding(familyUserId, elderId);
+        QrCodeEntity current = qrCodeService.findCurrentByElder(elderId);
+        if (current == null) {
+            throw new BizException(404, "当前老人暂无二维码");
+        }
+        String account = resolveFamilyOperator(auth);
+        Map<String, Object> review = reviewRequestService.createQrDisableRequest(account, "FAMILY", elderId, current);
+        FamilyQrCodeDto dto = qrcode(elderId, auth);
+        dto.setDisableReviewStatus(data.str(review.get("status")));
+        dto.setDisableReviewId(data.str(review.get("id")));
+        dto.setReviewMessage("停用申请已提交，等待管理员审核。审核通过前二维码仍保持启用。");
         return dto;
     }
 

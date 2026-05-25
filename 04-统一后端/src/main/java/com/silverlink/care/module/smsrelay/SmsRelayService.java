@@ -498,6 +498,7 @@ public class SmsRelayService {
     private ScanVerificationSessionDto mapSession(Map<String, Object> row) {
         ScanVerificationSessionDto dto = new ScanVerificationSessionDto();
         dto.setSessionId(str(row.get("session_id")));
+        dto.setElderId(str(row.get("elder_id")));
         dto.setReceiverPhone(str(row.get("receiver_phone")));
         dto.setReceiverPhoneMasked(maskPhone(str(row.get("receiver_phone"))));
         dto.setMessageBody(str(row.get("message_body")));
@@ -510,6 +511,7 @@ public class SmsRelayService {
     private ScanVerificationStatusDto mapStatus(Map<String, Object> row) {
         ScanVerificationStatusDto dto = new ScanVerificationStatusDto();
         dto.setSessionId(str(row.get("session_id")));
+        dto.setElderId(str(row.get("elder_id")));
         dto.setStatus(str(row.get("status")));
         dto.setVerified(bool(row.get("verified")));
         dto.setVerifiedAt(str(row.get("verified_at")));
@@ -618,8 +620,8 @@ public class SmsRelayService {
 
     private String normalizeVisitorPhone(String visitorPhone) {
         String normalized = normalizePhone(visitorPhone);
-        if (!normalized.matches("\\d{13}")) {
-            throw new BizException(400, "手机号必须为 13 位数字");
+        if (!normalized.matches("1\\d{10}")) {
+            throw new BizException(400, "手机号必须为 11 位数字");
         }
         return normalized;
     }

@@ -1,5 +1,5 @@
 import type { ElderInfo, QrCodeInfo } from '../types';
-import { get, put } from './httpClient';
+import { get, post, put } from './httpClient';
 
 export async function getBoundElders(): Promise<ElderInfo[]> {
   return get<ElderInfo[]>('/api/family/me/elders');
@@ -28,4 +28,8 @@ export async function updateElderContacts(
 
 export async function getElderQrCode(elderId: string): Promise<QrCodeInfo | null> {
   return get<QrCodeInfo>(`/api/family/elders/${encodeURIComponent(elderId)}/qrcode`);
+}
+
+export async function requestDisableElderQrCode(elderId: string): Promise<QrCodeInfo> {
+  return post<QrCodeInfo>(`/api/family/elders/${encodeURIComponent(elderId)}/qrcode/disable-request`);
 }

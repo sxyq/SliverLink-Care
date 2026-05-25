@@ -70,6 +70,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
   const [busy, setBusy] = useState<'disable' | 'regenerate' | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const disableReviewPending = info?.disableReviewStatus === 'PENDING';
 
   async function renderPreview(url: string) {
     if (!url) {
@@ -122,7 +123,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
       const next = await disableVolunteerElderQrCode(elder.id);
       setInfo(next);
       await renderPreview(next.url);
-      setMessage('二维码已停用，扫码查看将不再生效。');
+      setMessage(next.reviewMessage || '停用申请已提交，等待管理员审核。');
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : '停用失败');
     } finally {
@@ -197,9 +198,9 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
               <div className="sl-qr-action-icon"><RefreshCcw size={18} /></div>
             </div>
           </button>
-          <button type="button" className="sl-action-card sl-action-card-warning" onClick={() => void handleDisable()} disabled={busy !== null || info.status === '已停用'}>
+          <button type="button" className="sl-action-card sl-action-card-warning" onClick={() => void handleDisable()} disabled={busy !== null || info.status === '已停用' || disableReviewPending}>
             <div className="sl-action-card-head">
-              <strong>{busy === 'disable' ? '停用中' : info.status === '已停用' ? '已停用' : '停用二维码'}</strong>
+              <strong>{busy === 'disable' ? '提交中' : info.status === '已停用' ? '已停用' : disableReviewPending ? '审核中' : '停用二维码'}</strong>
               <div className="sl-qr-action-icon"><Ban size={18} /></div>
             </div>
           </button>

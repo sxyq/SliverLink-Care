@@ -6,8 +6,9 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { confirmRelayVerificationSent, getRelayVerificationStatus, startRelayVerification, verifyIdentityAccess } from '../api/smsApi';
 import { useSecurity } from '../app/SecurityProvider';
-import { DEV_FIXED_SMS_CODE } from '../config/env';
+import { ALLOW_LOCAL_VERIFICATION_FALLBACK } from '../config/env';
 import { useVerificationStore } from '../features/verification/verificationStore';
+import { getResolvedElderId } from '../api/scanApi';
 import type { IdentityVerificationPayload, SmsVerificationSession } from '../types/verification';
 
 type VerifyMode = 'sms' | 'identity';
@@ -54,8 +55,8 @@ function buildIdentityError(form: IdentityVerificationPayload) {
   if (!name) {
     return '请输入姓名';
   }
-  if (!/^\d{13}$/.test(phone)) {
-    return '请输入 13 位数字手机号';
+  if (!/^1\d{10}$/.test(phone)) {
+    return '请输入 11 位数字手机号';
   }
   if (!isValidIdCard(idCard)) {
     return '请输入符合规范的身份证号';
@@ -143,7 +144,7 @@ export function SmsVerifyPage() {
   }
 
   function handleDemoBypassTap() {
-    if (!DEV_FIXED_SMS_CODE) return;
+    if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
 
     setDemoTapCount((current) => {
       const nextCount = current + 1;
@@ -151,7 +152,7 @@ export function SmsVerifyPage() {
 
       const demoSessionId = `local-relay-demo-${Date.now()}`;
       setError('');
-      setGlobalVerified(demoSessionId);
+      setGlobalVerified(demoSessionId, getResolvedElderId());
       startAuthTimer();
       navigate('/health');
       return 0;
@@ -164,13 +165,19 @@ export function SmsVerifyPage() {
     setError('');
 
     try {
-      if (DEV_FIXED_SMS_CODE) {
+      if (ALLOW_LOCAL_VERIFICATION_FALLBACK) {
         await confirmRelayVerificationSent(session.sessionId);
       }
 
       const status = await getRelayVerificationStatus(session.sessionId);
       if (status.verified) {
-        setGlobalVerified(session.sessionId);
+        const currentElderId = getResolvedElderId();
+        const verifiedElderId = status.elderId || session.elderId || currentElderId;
+        if (verifiedElderId && currentElderId && verifiedElderId !== currentElderId) {
+          setError('验证会话与当前二维码不一致，请重新扫码后再试');
+          return;
+        }
+        setGlobalVerified(session.sessionId, verifiedElderId);
         startAuthTimer();
         navigate('/health');
         return;
@@ -212,7 +219,12 @@ export function SmsVerifyPage() {
         setError('身份信息校验未通过，请稍后重试');
         return;
       }
-      setGlobalVerified(status.sessionId);
+      const currentElderId = getResolvedElderId();
+      if (status.elderId && currentElderId && status.elderId !== currentElderId) {
+        setError('验证会话与当前二维码不一致，请重新扫码后再试');
+        return;
+      }
+      setGlobalVerified(status.sessionId, status.elderId || currentElderId);
       startAuthTimer();
       navigate('/health');
     } catch (reason) {
@@ -243,10 +255,10 @@ export function SmsVerifyPage() {
         <div
           className="sl-verify-hero-icon"
           onClick={handleDemoBypassTap}
-          role={DEV_FIXED_SMS_CODE ? 'button' : undefined}
-          tabIndex={DEV_FIXED_SMS_CODE ? 0 : undefined}
+          role={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 'button' : undefined}
+          tabIndex={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 0 : undefined}
           onKeyDown={(event) => {
-            if (!DEV_FIXED_SMS_CODE) return;
+            if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
             if (event.key === 'Enter' || event.key === ' ') {
               event.preventDefault();
               handleDemoBypassTap();
@@ -345,8 +357,9 @@ export function SmsVerifyPage() {
                 <Phone size={16} />
                 <input
                   className="sl-code-input sl-identity-input"
-                  placeholder="请输入 13 位数字手机号"
+                  placeholder="请输入 11 位数字手机号"
                   inputMode="numeric"
+                  maxLength={11}
                   value={identityForm.phone}
                   onChange={(event) => setIdentityForm((current) => ({ ...current, phone: event.target.value }))}
                 />

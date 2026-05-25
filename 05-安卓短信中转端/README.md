@@ -2,82 +2,98 @@
 
 ## 当前定位
 
-`05-安卓短信中转端` 已经从目录骨架推进为可编译 Android 应用，用于承接本项目当前正式版本的短信验证链路：
+`05-安卓短信中转端` 已经是本项目短信验证链路中的正式组成部分，不再是占位工程。
 
-- 用户向固定接收手机号发送随机验证码短信
-- 安卓设备接收短信并解析发送方手机号、短信正文、接收时间
-- 安卓端回传统一后端
-- 后端校验验证码会话、记录查询手机号和访问审计日志
+当前链路是：
 
-这不是演示占位页，而是当前正式实现的一部分。
+- 扫码端向统一后端申请短信验证会话
+- 后端决定本次验证应发送到哪台安卓短信接收设备
+- 用户向该设备绑定的手机号发送指定短信内容
+- 安卓端后台接收短信、解析格式、回传统一后端
+- 后端校验会话并决定是否放行敏感信息访问
 
-## 当前完成状态
+## 当前已完成
 
-已完成：
+- Android Gradle 工程、Wrapper、调试包构建链路
+- Material 3 三页主界面：总览 / 记录 / 设置
+- `SmsReceiver` 接收短信广播
+- `SmsParser` 前缀与验证码格式过滤接入
+- 短信上传链路：前台服务优先，Worker 兜底
+- 设备心跳链路：前台服务定时心跳
+- 开机恢复后台服务
+- 首次打开应用启动后台服务
+- 本地配置、记录、统计、服务状态持久化
+- 设备配置同步与占位配置保护
+- 运行时短信权限引导
+- 电池优化白名单引导
+- 息屏保活支持：前台服务 + `PARTIAL_WAKE_LOCK`
+- 请求签名能力：安卓端对 `inbound / heartbeat / config` 请求生成签名
+- 总览页与设置页展示后台服务状态
+- 单元测试与基础仪器测试入口
 
-- Android Gradle 工程和 Wrapper
-- `app` 模块构建配置
-- Material 3 风格三页主界面
-- 短信接收广播 `SmsReceiver`
-- 短信格式过滤与前缀解析接入 `SmsParser`
-- 上传 Worker `InboundSmsUploadWorker`
-- 心跳 Worker `HeartbeatWorker`
-- 本地配置与状态持久化
-- 中转回传接口封装
-- 调试包产物输出
+## 当前界面能力
 
-当前 APK 产物：
-
-- [app-debug.apk](</D:/Project/SilverLink Care/05-安卓短信中转端/app/build/outputs/apk/debug/app-debug.apk>)
-
-## 设计基准
-
-本端 UI 以这张图为正式设计基准：
-
-![安卓短信中转端 Google 风格设计图](D:/Project/SilverLink Care/ui_overview_images/android_sms_relay_google_style.png)
-
-要求：
-
-- Google 最新 Material 3 风格
-- 卡片化信息分区
-- 底部导航三页结构
-- 状态色清晰
-- 手机竖屏优先
-
-## 当前界面结构
-
-### 总览
+### 总览页
 
 - 设备在线状态
+- 后台服务状态
 - 固定接收手机号
 - 回传服务器地址
-- 设备 ID
-- 设备密钥
+- 设备 ID / 密钥摘要
 - 今日接收 / 上传成功 / 上传失败 / 待重试
-- 最近同步 / 运行时长
+- 最近同步
 - 最近短信记录
 
-### 记录
+### 记录页
 
-- 全部 / 已上传 / 上传失败 / 待重试 筛选
-- 短信记录列表
+- 全部 / 已上传 / 上传失败 / 待重试筛选
 - 发件手机号
-- 短信摘要
+- 短信内容
 - 接收时间
 - 上传状态
 
-### 设置
+### 设置页
 
 - 固定接收手机号
 - 服务器地址
 - 设备 ID
 - 设备密钥
 - 短信前缀规则
-- 最后心跳时间
-- 最后同步时间
-- 版本信息
+- 申请短信权限
+- 允许息屏后台运行
+- 同步服务端配置
+- 设备状态 / 后台服务状态 / 权限状态 / 息屏保活状态
+- 最后心跳 / 最后同步 / 版本信息
 
-## 目录结构
+## 当前后台运行机制
+
+当前主链路已经不再依赖单纯的 `WorkManager` 轮询，而是改为：
+
+- `RelayForegroundService` 作为前台常驻服务
+- 服务内每 15 分钟自动发送一次心跳
+- 收到短信后优先由前台服务直接上传
+- `InboundSmsUploadWorker` 作为兜底重试路径保留
+- `BootCompletedReceiver` 在重启后恢复服务
+- `BatteryOptimizationHelper` 提供系统电池优化白名单跳转
+
+这套实现的目标是让安卓设备在亮屏、退到后台、息屏后都能继续承担短信中转任务。
+
+## 当前验证结果
+
+已完成的验证包括：
+
+- `bash ./gradlew testDebugUnitTest` 通过
+- `bash ./gradlew installDebug` 通过
+- 真机已完成应用启动验证
+- 真机已完成前台服务启动验证
+- 真机已完成息屏后服务仍在运行的验证
+- 真机已完成短信权限授予
+- 真机已完成系统省电白名单加入
+- 统一后端心跳接口已联通
+
+当前真机配置口径以应用内设置页和统一后端设备配置为准。
+
+## 当前目录结构
 
 ```text
 05-安卓短信中转端/
@@ -87,8 +103,6 @@
   build.gradle.kts
   gradle.properties
   local.properties
-  gradle/
-    wrapper/
   app/
     build.gradle.kts
     开发说明.md
@@ -98,6 +112,7 @@
         java/com/silverlink/smsrelay/
           RelayApplication.kt
           MainActivity.kt
+          service/
           receiver/
           worker/
           repository/
@@ -106,9 +121,7 @@
           util/
           开发说明.md
         res/
-          drawable/
           layout/
-          menu/
           values/
           xml/
           开发说明.md
@@ -122,30 +135,22 @@
 
 ### Android Studio
 
-1. 打开 [05-安卓短信中转端](</D:/Project/SilverLink Care/05-安卓短信中转端>)
+1. 打开 `05-安卓短信中转端`
 2. 连接真机或启动模拟器
 3. 运行 `app` 模块
 
 ### 命令行
 
-```powershell
-Set-Location "D:\Project\SilverLink Care\05-安卓短信中转端"
-.\gradlew.bat installDebug
+```bash
+cd "05-安卓短信中转端"
+bash ./gradlew installDebug
 adb shell am start -n com.silverlink.smsrelay/.MainActivity
 ```
 
-## 当前验证结果
+## 当前仍待推进
 
-- `gradlew assembleDebug` 已构建通过
-- 三页主界面已实现
-- 假数据与本地配置可渲染
-- 接收 -> 解析过滤 -> 入列 -> 上传 -> 状态更新 代码链条已接通
-
-## 仍待补齐
-
-- 真机 SIM 卡短信接收实测
-- 与已部署统一后端的真实 HTTP 联调
-- 自定义重试退避策略
-- 首次启动时心跳任务自动调度
-- Android 6.0+ 运行时权限引导
-- 单元测试与仪器测试代码补齐
+- 真实短信“发送到设备手机号 -> 安卓接收 -> 上传后端 -> 后台可见”的完整闭环留档
+- 更多自动化测试，尤其是设置页、权限流、服务恢复流
+- Worker 自定义退避策略
+- 后台服务状态与失败原因的更细粒度展示
+- 多设备部署场景下更完整的运维说明

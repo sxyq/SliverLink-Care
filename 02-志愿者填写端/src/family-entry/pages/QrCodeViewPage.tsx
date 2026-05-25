@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { QrCodeInfo } from '../types';
-import { getElderQrCode } from '../api/familyElderApi';
+import { getElderQrCode, requestDisableElderQrCode } from '../api/familyElderApi';
 import TopBar from '../components/TopBar';
 
 export default function QrCodeViewPage() {
   const { elderId } = useParams<{ elderId: string }>();
   const [qrInfo, setQrInfo] = useState<QrCodeInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     if (!elderId) return;
@@ -24,6 +26,24 @@ export default function QrCodeViewPage() {
       window.open(qrInfo.pdfUrl, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const handleDisableRequest = async () => {
+    if (!elderId) return;
+    setSubmitting(true);
+    setError('');
+    setMessage('');
+    try {
+      const next = await requestDisableElderQrCode(elderId);
+      setQrInfo(next);
+      setMessage(next.reviewMessage || '停用申请已提交，等待管理员审核。');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '停用申请提交失败');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const disableReviewPending = qrInfo?.disableReviewStatus === 'PENDING';
 
   return (
     <div>
@@ -64,10 +84,23 @@ export default function QrCodeViewPage() {
               >
                 下载名牌 PDF
               </button>
+              <button
+                className="btn btn-secondary btn-block mt-12"
+                onClick={() => void handleDisableRequest()}
+                disabled={submitting || qrInfo.status === '已停用' || qrInfo.status === 'DISABLED' || disableReviewPending}
+              >
+                {submitting ? '提交中...' : disableReviewPending ? '停用审核中' : '申请停用二维码'}
+              </button>
             </div>
 
+            {message ? (
+              <div className="info-banner mt-16">
+                <span>{message}</span>
+              </div>
+            ) : null}
+
             <div className="info-banner mt-16">
-              <span>二维码由后台生成，家属端仅可查看状态和下载名牌 PDF。</span>
+              <span>二维码停用需要管理员审核，通过后才会正式停用。</span>
             </div>
           </>
         ) : (

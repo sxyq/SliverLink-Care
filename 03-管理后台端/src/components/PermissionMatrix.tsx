@@ -17,6 +17,7 @@ export function PermissionMatrix({ roles }: { roles: RolePermission[] }) {
   return (
     <div className="panel" style={{ marginTop: 14 }}>
       <h4 style={{ margin: '0 0 12px' }}>菜单权限</h4>
+      <div className="table-shell rbac-summary-table-wrap">
       <table className="data-table permission-matrix" style={{ marginBottom: 18 }}>
         <thead>
           <tr>
@@ -37,8 +38,10 @@ export function PermissionMatrix({ roles }: { roles: RolePermission[] }) {
           ))}
         </tbody>
       </table>
+      </div>
 
       <h4 style={{ margin: '0 0 12px' }}>接口权限</h4>
+      <div className="table-shell rbac-summary-table-wrap">
       <table className="data-table permission-matrix" style={{ marginBottom: 18 }}>
         <thead>
           <tr>
@@ -59,8 +62,10 @@ export function PermissionMatrix({ roles }: { roles: RolePermission[] }) {
           ))}
         </tbody>
       </table>
+      </div>
 
       <h4 style={{ margin: '0 0 12px' }}>导出权限</h4>
+      <div className="table-shell rbac-summary-table-wrap">
       <table className="data-table permission-matrix">
         <thead>
           <tr>
@@ -81,6 +86,7 @@ export function PermissionMatrix({ roles }: { roles: RolePermission[] }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }

@@ -252,7 +252,7 @@ export function RbacPage() {
             onReset={columns.reset}
           />
         </div>
-        <div style={{ overflowX: 'auto' }}>
+        <div className="table-shell rbac-summary-table-wrap">
           <table className="data-table">
             <thead>
               <tr>

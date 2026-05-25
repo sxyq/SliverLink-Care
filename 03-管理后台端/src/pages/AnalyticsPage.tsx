@@ -240,6 +240,7 @@ export function AnalyticsPage() {
             <BarChart3 size={18} />
             <h3>最近量表记录</h3>
           </div>
+          <div className="table-shell">
           <table className="data-table">
             <thead>
               <tr>
@@ -260,6 +261,7 @@ export function AnalyticsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </article>
       </section>
 

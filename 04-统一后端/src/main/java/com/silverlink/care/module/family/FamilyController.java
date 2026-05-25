@@ -97,6 +97,13 @@ public class FamilyController {
         return ApiResponse.ok(result);
     }
 
+    @PostMapping("/family/elders/{elderId}/qrcode/disable-request")
+    public ApiResponse<FamilyQrCodeDto> requestDisableQrcode(@PathVariable String elderId, @RequestHeader("Authorization") String auth, HttpServletRequest request) {
+        FamilyQrCodeDto result = familyService.requestDisableQrCode(elderId, auth);
+        auditLogService.record(familyService.resolveFamilyOperator(auth), "FAMILY", request, elderId, "REQUEST_DISABLE_QR", "SUCCESS", null, null);
+        return ApiResponse.ok(result);
+    }
+
     @GetMapping("/admin/family-bindings")
     public ApiResponse<List<FamilyBindingAdminDto>> listBindings() {
         return ApiResponse.ok(familyService.listBindings());

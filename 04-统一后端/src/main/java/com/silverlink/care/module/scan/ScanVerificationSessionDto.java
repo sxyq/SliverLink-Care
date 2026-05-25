@@ -2,6 +2,7 @@ package com.silverlink.care.module.scan;
 
 public class ScanVerificationSessionDto {
     private String sessionId;
+    private String elderId;
     private String receiverPhone;
     private String receiverPhoneMasked;
     private String messageBody;
@@ -15,6 +16,14 @@ public class ScanVerificationSessionDto {
 
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    public String getElderId() {
+        return elderId;
+    }
+
+    public void setElderId(String elderId) {
+        this.elderId = elderId;
     }
 
     public String getReceiverPhone() {

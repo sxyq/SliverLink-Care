@@ -1,14 +1,7 @@
 import type { ReactNode } from 'react';
-import { ArrowRight, User, Pill, ClipboardList, QrCode, LucideIcon } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import type { CareActionCard, CareSubject } from './types';
 import { PageHeader } from '../components/PageHeader';
-
-const iconMap: Record<string, LucideIcon> = {
-  User,
-  Pill,
-  ClipboardList,
-  QrCode,
-};
 
 interface SubjectDetailPageProps {
   title: string;
@@ -62,30 +55,22 @@ export function SubjectDetailPage({ title, subject, onBack, actions, headerActio
       </section>
 
       <section className="sl-action-grid">
-        {actions.map((action) => {
-          const IconComp = action.icon ? iconMap[action.icon] : undefined;
-          return (
-            <button
-              key={action.key}
-              type="button"
-              className={`sl-action-card sl-detail-action-card${action.tone === 'warning' ? ' sl-action-card-warning' : ''}`}
-              onClick={action.onClick}
-            >
-              <div className="sl-detail-action-body">
-                <div className="sl-detail-action-icon-bg" aria-hidden="true">
-                  {IconComp ? <IconComp size={20} /> : <ArrowRight size={20} />}
-                </div>
-                <div className="sl-detail-action-copy">
-                  <strong>{action.title}</strong>
-                  <span>{action.description}</span>
-                </div>
-              </div>
-              <div className="sl-detail-action-arrow" aria-hidden="true">
-                <ArrowRight size={16} />
-              </div>
-            </button>
-          );
-        })}
+        {actions.map((action) => (
+          <button
+            key={action.key}
+            type="button"
+            className={`sl-action-card sl-detail-action-card${action.tone === 'warning' ? ' sl-action-card-warning' : ''}`}
+            onClick={action.onClick}
+          >
+            <div className="sl-detail-action-copy">
+              <strong>{action.title}</strong>
+              <span>{action.description}</span>
+            </div>
+            <div className="sl-detail-action-icon" aria-hidden="true">
+              <ArrowRight size={18} />
+            </div>
+          </button>
+        ))}
       </section>
     </div>
   );
