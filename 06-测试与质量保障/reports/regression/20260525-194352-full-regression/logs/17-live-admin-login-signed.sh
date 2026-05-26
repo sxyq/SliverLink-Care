@@ -1,0 +1,1 @@
+curl -sS -w '\nHTTP_STATUS:%{http_code}\nTOTAL_TIME:%{time_total}\n' -H 'Content-Type: application/json' -H 'X-Timestamp: 1779710190' -H 'X-Nonce: 5d7d9437-311e-43cd-ab97-0331c7ed2321' -H 'X-Signature: a650225b749856cd743e8e94e23187c7c2590610eabf955773b8323abc7a9432' -X POST 'undefined/api/admin/login' -d '{"account":"admin","password":"admin"}'

@@ -1,0 +1,214 @@
+{
+  "generatedAt": "2026-05-25T15:18:33.763Z",
+  "url": "http://sxyq27.online/silverlink/",
+  "iterations": 40,
+  "concurrency": 6,
+  "successCount": 40,
+  "failureCount": 0,
+  "p50Ms": 48,
+  "p95Ms": 109,
+  "p99Ms": 124,
+  "maxMs": 124,
+  "samples": [
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 124
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 108
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 108
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 109
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 108
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 109
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 51
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 55
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 55
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 55
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 51
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 51
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 49
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 49
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 49
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 46
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 47
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 49
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 48
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 50
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 47
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 49
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "item": {
+    "name": "volunteer-login",
+    "method": "POST",
+    "path": "/api/volunteer/login",
+    "status": 200,
+    "durationMs": 105,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "token": "[REDACTED_JWT]",
+      "name": "医护测试账号"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "token": "[REDACTED_JWT]",
+      "name": "医护测试账号"
+    }
+  }
+}

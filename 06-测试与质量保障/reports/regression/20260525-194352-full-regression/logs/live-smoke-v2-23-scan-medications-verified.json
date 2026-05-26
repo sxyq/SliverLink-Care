@@ -1,0 +1,59 @@
+{
+  "item": {
+    "name": "scan-medications-verified",
+    "method": "GET",
+    "path": "/api/scan/medications?elderId=elder-002&sessionId=scan-session-1779710424666",
+    "status": 200,
+    "durationMs": 56,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 3,
+      "first": {
+        "id": "med-1779472837111-863295375",
+        "name": "厄贝沙坦片",
+        "dosage": "150mg",
+        "usage": "口服",
+        "time": "每日1次，早餐后",
+        "timing": "每日1次，早餐后",
+        "updatedAt": "2026-05-22 18:00:37.0"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "med-1779472837111-863295375",
+        "name": "厄贝沙坦片",
+        "dosage": "150mg",
+        "usage": "口服",
+        "time": "每日1次，早餐后",
+        "timing": "每日1次，早餐后",
+        "updatedAt": "2026-05-22 18:00:37.0"
+      },
+      {
+        "id": "med-1779472837115-948969816",
+        "name": "阿托伐他汀钙片",
+        "dosage": "20mg",
+        "usage": "口服",
+        "time": "每日1次，晚间",
+        "timing": "每日1次，晚间",
+        "updatedAt": "2026-05-22 18:00:37.0"
+      },
+      {
+        "id": "med-1779472837118-1242282938",
+        "name": "钙尔奇D片",
+        "dosage": "1片",
+        "usage": "口服",
+        "time": "每日1次，午餐后",
+        "timing": "每日1次，午餐后",
+        "updatedAt": "2026-05-22 18:00:37.0"
+      }
+    ]
+  }
+}

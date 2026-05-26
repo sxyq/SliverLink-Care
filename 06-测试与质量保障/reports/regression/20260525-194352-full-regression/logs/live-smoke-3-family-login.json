@@ -1,0 +1,27 @@
+{
+  "item": {
+    "name": "family-login",
+    "method": "POST",
+    "path": "/api/family/login",
+    "status": 200,
+    "durationMs": 50,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "ok": true,
+      "token": "[REDACTED_JWT]",
+      "message": "登录成功"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "ok": true,
+      "token": "[REDACTED_JWT]",
+      "message": "登录成功"
+    }
+  }
+}

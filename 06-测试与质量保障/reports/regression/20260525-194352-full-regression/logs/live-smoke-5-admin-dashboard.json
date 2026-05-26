@@ -1,0 +1,33 @@
+{
+  "item": {
+    "name": "admin-dashboard",
+    "method": "GET",
+    "path": "/api/admin/dashboard",
+    "status": 200,
+    "durationMs": 51,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "elderCount": 16,
+      "activeElderCount": 13,
+      "volunteerCount": 9,
+      "qrCodeCount": 16,
+      "familyCount": 6,
+      "auditCount": 514
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "elderCount": 16,
+      "activeElderCount": 13,
+      "volunteerCount": 9,
+      "qrCodeCount": 16,
+      "familyCount": 6,
+      "auditCount": 514
+    }
+  }
+}

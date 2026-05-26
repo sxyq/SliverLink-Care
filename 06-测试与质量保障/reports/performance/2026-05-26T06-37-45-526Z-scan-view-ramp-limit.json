@@ -1,0 +1,134 @@
+{
+  "title": "SilverLink 扫码查看链路并发极限阶梯测试",
+  "generatedAt": "2026-05-26T06:37:45.525Z",
+  "apiBaseUrl": "http://sxyq27.online/silverlink-api",
+  "steps": [
+    {
+      "concurrency": 60,
+      "iterations": 200
+    },
+    {
+      "concurrency": 80,
+      "iterations": 250
+    },
+    {
+      "concurrency": 120,
+      "iterations": 300
+    },
+    {
+      "concurrency": 160,
+      "iterations": 300
+    }
+  ],
+  "runs": [
+    {
+      "concurrency": 60,
+      "iterationsPerTarget": 200,
+      "childExitCode": 0,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-32-109Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-32-109Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 1000,
+        "successCount": 1000,
+        "failureCount": 0,
+        "avgMs": 90,
+        "p50Ms": 65,
+        "p95Ms": 315,
+        "p99Ms": 376,
+        "maxMs": 440,
+        "avgBytes": 443,
+        "totalBytes": 443000,
+        "statuses": {
+          "200": 1000
+        }
+      },
+      "evaluation": {
+        "status": "passed",
+        "reason": "未出现失败，且延迟保持在阈值内"
+      }
+    },
+    {
+      "concurrency": 80,
+      "iterationsPerTarget": 250,
+      "childExitCode": 0,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-35-262Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-35-262Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 1250,
+        "successCount": 1250,
+        "failureCount": 0,
+        "avgMs": 113,
+        "p50Ms": 72,
+        "p95Ms": 354,
+        "p99Ms": 603,
+        "maxMs": 975,
+        "avgBytes": 443,
+        "totalBytes": 553750,
+        "statuses": {
+          "200": 1250
+        }
+      },
+      "evaluation": {
+        "status": "passed",
+        "reason": "未出现失败，且延迟保持在阈值内"
+      }
+    },
+    {
+      "concurrency": 120,
+      "iterationsPerTarget": 300,
+      "childExitCode": 0,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-40-346Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-40-346Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 1500,
+        "successCount": 1500,
+        "failureCount": 0,
+        "avgMs": 177,
+        "p50Ms": 116,
+        "p95Ms": 451,
+        "p99Ms": 649,
+        "maxMs": 1109,
+        "avgBytes": 443,
+        "totalBytes": 664500,
+        "statuses": {
+          "200": 1500
+        }
+      },
+      "evaluation": {
+        "status": "passed",
+        "reason": "未出现失败，且延迟保持在阈值内"
+      }
+    },
+    {
+      "concurrency": 160,
+      "iterationsPerTarget": 300,
+      "childExitCode": 0,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-45-516Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-37-45-516Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 1500,
+        "successCount": 1500,
+        "failureCount": 0,
+        "avgMs": 217,
+        "p50Ms": 137,
+        "p95Ms": 700,
+        "p99Ms": 1151,
+        "maxMs": 2095,
+        "avgBytes": 443,
+        "totalBytes": 664500,
+        "statuses": {
+          "200": 1500
+        }
+      },
+      "evaluation": {
+        "status": "degraded",
+        "reason": "P95=700ms 超过 500ms"
+      }
+    }
+  ],
+  "limitConclusion": {
+    "highestStableConcurrency": 120,
+    "firstDegradedConcurrency": 160,
+    "firstFailedConcurrency": null
+  }
+}

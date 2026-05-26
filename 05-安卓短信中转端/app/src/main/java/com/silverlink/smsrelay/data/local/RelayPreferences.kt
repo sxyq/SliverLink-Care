@@ -1,6 +1,7 @@
 package com.silverlink.smsrelay.data.local
 
 import android.content.Context
+import com.silverlink.smsrelay.util.RelayServerUrlNormalizer
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -31,7 +32,7 @@ class RelayPreferences(context: Context) {
 
     fun readConfig(): RelayConfig {
         return RelayConfig(
-            serverBaseUrl = prefs.getString(KEY_SERVER_BASE_URL, "") ?: "",
+            serverBaseUrl = RelayServerUrlNormalizer.normalize(prefs.getString(KEY_SERVER_BASE_URL, "") ?: ""),
             deviceId = prefs.getString(KEY_DEVICE_ID, "") ?: "",
             deviceSecret = prefs.getString(KEY_DEVICE_SECRET, "") ?: "",
             receiverPhone = prefs.getString(KEY_RECEIVER_PHONE, "") ?: "",
@@ -47,7 +48,7 @@ class RelayPreferences(context: Context) {
         messagePrefix: String,
     ) {
         prefs.edit()
-            .putString(KEY_SERVER_BASE_URL, serverBaseUrl)
+            .putString(KEY_SERVER_BASE_URL, RelayServerUrlNormalizer.normalize(serverBaseUrl))
             .putString(KEY_DEVICE_ID, deviceId)
             .putString(KEY_DEVICE_SECRET, deviceSecret)
             .putString(KEY_RECEIVER_PHONE, receiverPhone)

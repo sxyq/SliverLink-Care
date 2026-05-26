@@ -1,0 +1,23 @@
+{
+  "item": {
+    "name": "scan-scales-verified",
+    "method": "GET",
+    "path": "/api/scan/scales?elderId=elder-002&sessionId=scan-session-1779710424666",
+    "status": 200,
+    "durationMs": 54,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 0,
+      "first": null
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": []
+  }
+}

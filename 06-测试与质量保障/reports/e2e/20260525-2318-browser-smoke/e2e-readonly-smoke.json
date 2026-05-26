@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-05-25T15:18:31.525Z",
+  "mode": "e2e-readonly-fetch-fallback",
+  "playwrightCli": "blocked:npx-missing",
+  "checks": [
+    {
+      "url": "http://sxyq27.online/silverlink/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 203,
+      "hasHtml": true,
+      "hasRoot": false,
+      "bytes": 552
+    },
+    {
+      "url": "http://sxyq27.online/silverlink/admin/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 50,
+      "hasHtml": true,
+      "hasRoot": true,
+      "bytes": 446
+    },
+    {
+      "url": "http://sxyq27.online/silverlink/volunteer/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 49,
+      "hasHtml": true,
+      "hasRoot": true,
+      "bytes": 454
+    }
+  ],
+  "passed": true
+}

@@ -63,10 +63,10 @@ public class NameplateService {
             resp.setBackHint("扫码查看基础信息");
             return resp;
         }
-        Map<String, Object> elder = data.elderDetail(elderId, true);
+        Map<String, Object> elder = data.elderDetail(elderId, false);
         resp.setFrontName(stringValue(elder.get("name"), "未填写"));
         resp.setFrontAge(stringValue(elder.get("age"), "未填写"));
-        resp.setFrontPhone(stringValue(elder.get("emergencyPhoneMasked"), "未填写"));
+        resp.setFrontPhone(stringValue(elder.get("emergencyContactPhone"), "未填写"));
         resp.setBackQrToken(resolvePublicQrUrl(elderId, stringValue(elder.get("archiveNo"), "未生成")));
         resp.setBackArchiveNo(stringValue(elder.get("archiveNo"), "未生成"));
         resp.setBackHint("扫码查看基础信息");
@@ -131,10 +131,9 @@ public class NameplateService {
         addRoundRect(content, x, y, width, height, 18f);
         content.fill();
 
-        content.setStrokingColor(BORDER);
-        content.setLineWidth(1.1f);
+        content.saveGraphicsState();
         addRoundRect(content, x, y, width, height, 18f);
-        content.stroke();
+        content.clip();
 
         content.setNonStrokingColor(MINT);
         if (mirrored) {
@@ -143,6 +142,12 @@ public class NameplateService {
             drawTopLeftWave(content, x, y, width, height);
         }
         drawBottomWave(content, x, y, width, height);
+        content.restoreGraphicsState();
+
+        content.setStrokingColor(BORDER);
+        content.setLineWidth(1.1f);
+        addRoundRect(content, x, y, width, height, 18f);
+        content.stroke();
 
         content.setNonStrokingColor(new Color(216, 211, 202));
         addRoundRect(content, x + width * 0.445f, y + height - 27f, width * 0.12f, 14f, 7f);
@@ -169,7 +174,7 @@ public class NameplateService {
         float valueX = x + width * 0.33f;
         drawLabeledValue(content, font, "姓名：", safe(preview.getFrontName()), labelX, valueX, y + height * 0.43f, 17f, 86f);
         drawLabeledValue(content, font, "年龄：", formatAge(preview.getFrontAge()), labelX, valueX, y + height * 0.30f, 17f, 86f);
-        drawLabeledValue(content, font, "联系电话：", safe(preview.getFrontPhone()), labelX, x + width * 0.42f, y + height * 0.17f, 17f, 110f);
+        drawLabeledValue(content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f);
 
         drawCareMark(content, x + width * 0.76f, y + height * 0.075f);
         drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, MUTED_INK);

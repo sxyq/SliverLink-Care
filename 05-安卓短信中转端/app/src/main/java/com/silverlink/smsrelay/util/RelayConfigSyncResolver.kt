@@ -17,7 +17,7 @@ object RelayConfigSyncResolver {
 
     fun fromJson(remote: JSONObject): RemoteRelayConfig {
         return RemoteRelayConfig(
-            serverBaseUrl = remote.optString("serverUrl", "").trim(),
+            serverBaseUrl = RelayServerUrlNormalizer.normalize(remote.optString("serverUrl", "").trim()),
             deviceId = remote.optString("deviceId", "").trim(),
             receiverPhone = remote.optString("receiverPhone", "").trim(),
             messagePrefix = remote.optString("messagePrefix", "").trim(),
@@ -37,7 +37,7 @@ object RelayConfigSyncResolver {
     private fun chooseServerUrl(localValue: String, remoteValue: String): String {
         if (remoteValue.isBlank()) return localValue
         if (remoteValue.contains(PLACEHOLDER_SERVER_URL, ignoreCase = true)) return localValue
-        return remoteValue
+        return RelayServerUrlNormalizer.normalize(remoteValue)
     }
 
     private fun chooseReceiverPhone(localValue: String, remoteValue: String): String {

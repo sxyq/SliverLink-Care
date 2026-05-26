@@ -1,0 +1,769 @@
+{
+  "generatedAt": "2026-05-25T12:00:25.372Z",
+  "base": "http://sxyq27.online/silverlink-api",
+  "total": 33,
+  "passed": 33,
+  "failed": 0,
+  "qrResolvedElderId": "elder-002",
+  "sessionId": "scan-session-1779710424666",
+  "volunteerElderId": "elder-1779595988004",
+  "familyElderId": "elder-001",
+  "results": [
+    {
+      "name": "admin-login-signed",
+      "method": "POST",
+      "path": "/api/admin/login",
+      "status": 200,
+      "durationMs": 176,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "token": "[REDACTED_JWT]",
+        "role": "系统管理员"
+      }
+    },
+    {
+      "name": "volunteer-login",
+      "method": "POST",
+      "path": "/api/volunteer/login",
+      "status": 200,
+      "durationMs": 105,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "token": "[REDACTED_JWT]",
+        "name": "医护测试账号"
+      }
+    },
+    {
+      "name": "family-login",
+      "method": "POST",
+      "path": "/api/family/login",
+      "status": 200,
+      "durationMs": 56,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "ok": true,
+        "token": "[REDACTED_JWT]",
+        "message": "登录成功"
+      }
+    },
+    {
+      "name": "admin-dashboard-unauthorized-denied",
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "status": 403,
+      "durationMs": 51,
+      "pass": true,
+      "error": null,
+      "dataPreview": null
+    },
+    {
+      "name": "admin-dashboard",
+      "method": "GET",
+      "path": "/api/admin/dashboard",
+      "status": 200,
+      "durationMs": 55,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "elderCount": 16,
+        "activeElderCount": 13,
+        "volunteerCount": 9,
+        "qrCodeCount": 16,
+        "familyCount": 6,
+        "auditCount": 523
+      }
+    },
+    {
+      "name": "admin-elders",
+      "method": "GET",
+      "path": "/api/admin/elders",
+      "status": 200,
+      "durationMs": 56,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 16,
+        "first": {
+          "id": "elder-1779457729049",
+          "elderId": "elder-1779457729049",
+          "archiveNo": "A1779457729065",
+          "name": "陈德明",
+          "gender": "男",
+          "age": 70,
+          "emergencyContactName": "陈慧",
+          "emergencyContact": "陈慧",
+          "emergencyPhoneMasked": "138****0000",
+          "emergencyPhoneDial": "[REDACTED_PHONE]",
+          "emergencyContactPhone": "[REDACTED_PHONE]",
+          "phone": "[REDACTED_PHONE]",
+          "backupContactName": "",
+          "backupContactPhone": "",
+          "backupContactRelation": "",
+          "phoneMasked": "138****0000",
+          "relationship": "家属",
+          "residence": "滨江社区 6 栋 2 单元 114 室",
+          "aboType": "A",
+          "rhType": "阳性",
+          "bloodType": "A",
+          "allergySummary": "待补充",
+          "allergyHistory": "待补充",
+          "status": "DISABLED"
+        }
+      }
+    },
+    {
+      "name": "admin-volunteers",
+      "method": "GET",
+      "path": "/api/admin/volunteers",
+      "status": 200,
+      "durationMs": 58,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 9,
+        "first": {
+          "id": "vol-1779674739304",
+          "name": "邓良静",
+          "phone": "[REDACTED_PHONE]",
+          "phoneMasked": "157****7612",
+          "account": "2025122001",
+          "role": "VOLUNTEER",
+          "status": "ACTIVE",
+          "scopeCount": 1
+        }
+      }
+    },
+    {
+      "name": "admin-family-bindings",
+      "method": "GET",
+      "path": "/api/admin/family-bindings",
+      "status": 200,
+      "durationMs": 52,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 6,
+        "first": {
+          "id": "family-bind-seed-005",
+          "familyName": "马会兰",
+          "familyPhoneMasked": "138****0005",
+          "relationship": "邻居",
+          "elderName": "张建国",
+          "elderArchiveNo": "A202604300001",
+          "invitationCode": "INVITE001",
+          "boundAt": "2026-05-24 11:30:00",
+          "status": "ACTIVE"
+        }
+      }
+    },
+    {
+      "name": "admin-invitations",
+      "method": "GET",
+      "path": "/api/admin/invitations",
+      "status": 200,
+      "durationMs": 54,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 7,
+        "first": {
+          "id": "invite-seed-005",
+          "code": "FAMILY005",
+          "elderId": "elder-002",
+          "elderName": "李淑兰",
+          "archiveNo": "A202604300002",
+          "expiresAt": "2026-07-20 23:59:59",
+          "maxUses": 1,
+          "usedCount": 0,
+          "status": "DISABLED",
+          "createdAt": "2026-05-24 10:30:00"
+        }
+      }
+    },
+    {
+      "name": "admin-audit-logs",
+      "method": "GET",
+      "path": "/api/admin/audit-logs",
+      "status": 200,
+      "durationMs": 199,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 500,
+        "first": {
+          "id": "9f51088a-97a6-4897-8551-17bc39e570f0",
+          "time": "2026-05-25T12:00:22.992281485Z",
+          "operator": "[REDACTED_PHONE]",
+          "role": "FAMILY",
+          "sourceIp": "183.230.12.151",
+          "target": "系统",
+          "action": "LOGIN",
+          "verificationMethod": "",
+          "visitorName": "",
+          "visitorPhone": "",
+          "visitorPhoneMasked": "****",
+          "visitorIdCard": "",
+          "visitorIdCardMasked": "",
+          "result": "SUCCESS",
+          "failReason": null,
+          "requestId": null
+        }
+      }
+    },
+    {
+      "name": "admin-review-requests",
+      "method": "GET",
+      "path": "/api/admin/review-requests",
+      "status": 200,
+      "durationMs": 55,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 0,
+        "first": null
+      }
+    },
+    {
+      "name": "admin-sms-relay-records",
+      "method": "GET",
+      "path": "/api/sms-relay/admin/records",
+      "status": 200,
+      "durationMs": 53,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 0,
+        "first": null
+      }
+    },
+    {
+      "name": "admin-sms-relay-devices",
+      "method": "GET",
+      "path": "/api/sms-relay/admin/devices",
+      "status": 200,
+      "durationMs": 53,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 1,
+        "first": {
+          "deviceId": "relay-android-01",
+          "receiverPhone": "[REDACTED_PHONE]",
+          "serverUrl": "http://sxyq27.online/silverlink-api",
+          "messagePrefix": "SL",
+          "status": "离线",
+          "serviceStatus": "等待设备连接",
+          "lastHeartbeat": ""
+        }
+      }
+    },
+    {
+      "name": "admin-sms-relay-sessions",
+      "method": "GET",
+      "path": "/api/sms-relay/admin/sessions",
+      "status": 200,
+      "durationMs": 57,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 54,
+        "first": {
+          "sessionId": "scan-session-1779710312844",
+          "elderId": "elder-1779457729049",
+          "target": "health",
+          "relayDeviceId": "",
+          "receiverPhone": "[REDACTED_VISITOR_PHONE]",
+          "messageBody": "",
+          "status": "VERIFIED",
+          "expiresAt": "2026-05-25T12:03:32.845429568Z",
+          "verified": true,
+          "verifiedAt": "2026-05-25T11:58:32.845369972Z",
+          "senderPhoneMasked": "158****6543",
+          "createdAt": "2026-05-25 11:58:32.0"
+        }
+      }
+    },
+    {
+      "name": "rbac-roles",
+      "method": "GET",
+      "path": "/api/rbac/roles",
+      "status": 200,
+      "durationMs": 51,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 4,
+        "first": {
+          "id": "r1",
+          "code": "VOLUNTEER",
+          "name": "志愿者",
+          "dataScope": "SELF_ELDER"
+        }
+      }
+    },
+    {
+      "name": "rbac-permissions",
+      "method": "GET",
+      "path": "/api/rbac/permissions",
+      "status": 200,
+      "durationMs": 50,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 5,
+        "first": {
+          "id": "p1",
+          "code": "ELDER_READ",
+          "name": "老人档案查看",
+          "type": "MENU"
+        }
+      }
+    },
+    {
+      "name": "admin-qrcodes",
+      "method": "GET",
+      "path": "/api/admin/qrcodes",
+      "status": 200,
+      "durationMs": 711,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 16,
+        "first": {
+          "id": "e1e43885-53d7-4860-be9a-567d8aba0c24",
+          "qrId": "QR1779689263208",
+          "elderId": "elder-002",
+          "archiveNo": "A202604300002",
+          "elderName": "李淑兰",
+          "elderAge": 81,
+          "elderPhone": "[REDACTED_PHONE]",
+          "relayDeviceId": "",
+          "relayReceiverPhone": "",
+          "status": "ENABLED",
+          "createdAt": "2026-05-25T06:07:43.209426357Z",
+          "url": "http://sxyq27.online/silverlink/scan/?token=[REDACTED_QR_TOKEN]"
+        }
+      }
+    },
+    {
+      "name": "scan-resolve-token",
+      "method": "POST",
+      "path": "/api/scan/resolve",
+      "status": 200,
+      "durationMs": 56,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "id": "elder-002",
+        "elderId": "elder-002",
+        "archiveNo": "A202604300002",
+        "name": "李**",
+        "gender": "女",
+        "age": 81,
+        "emergencyContactName": "李婷",
+        "emergencyContact": "李婷",
+        "emergencyPhoneMasked": "138****3333",
+        "emergencyPhoneDial": "[REDACTED_PHONE]",
+        "emergencyContactPhone": "138****3333",
+        "phone": "138****3333",
+        "backupContactName": "",
+        "backupContactPhone": "****",
+        "backupContactRelation": "",
+        "phoneMasked": "138****3333",
+        "relationship": "女儿",
+        "residence": "",
+        "aboType": "O",
+        "rhType": "阳性",
+        "bloodType": "O",
+        "allergySummary": "无",
+        "allergyHistory": "无",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "name": "scan-identity-verify",
+      "method": "POST",
+      "path": "/api/scan/verification/identity",
+      "status": 200,
+      "durationMs": 60,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "sessionId": "scan-session-1779710424666",
+        "elderId": "elder-002",
+        "status": "VERIFIED",
+        "verified": true,
+        "verifiedAt": "2026-05-25T12:00:24.666921323Z",
+        "senderPhoneMasked": "158****6543"
+      }
+    },
+    {
+      "name": "scan-basic-info-verified-same-elder",
+      "method": "GET",
+      "path": "/api/scan/basic-info?elderId=elder-002&sessionId=scan-session-1779710424666",
+      "status": 200,
+      "durationMs": 57,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "id": "elder-002",
+        "elderId": "elder-002",
+        "archiveNo": "A202604300002",
+        "name": "李淑兰",
+        "gender": "女",
+        "age": 81,
+        "emergencyContactName": "李婷",
+        "emergencyContact": "李婷",
+        "emergencyPhoneMasked": "138****3333",
+        "emergencyPhoneDial": "[REDACTED_PHONE]",
+        "emergencyContactPhone": "[REDACTED_PHONE]",
+        "phone": "[REDACTED_PHONE]",
+        "backupContactName": "",
+        "backupContactPhone": "",
+        "backupContactRelation": "",
+        "phoneMasked": "138****3333",
+        "relationship": "女儿",
+        "residence": "æ»¨æ±Ÿç¤¾åŒº 2 æ ‹ 3 å•å…ƒ",
+        "aboType": "O",
+        "rhType": "阳性",
+        "bloodType": "O",
+        "allergySummary": "无",
+        "allergyHistory": "无",
+        "status": "ACTIVE"
+      }
+    },
+    {
+      "name": "scan-resolve-verify-basic-elder-consistency",
+      "method": "ASSERT",
+      "path": "elder-002",
+      "status": 200,
+      "durationMs": 0,
+      "pass": true,
+      "error": null
+    },
+    {
+      "name": "scan-archive-verified",
+      "method": "GET",
+      "path": "/api/scan/archive?elderId=elder-002&sessionId=scan-session-1779710424666",
+      "status": 200,
+      "durationMs": 63,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "date": "2026-04-30",
+        "volunteer": "社区护理志愿者",
+        "heightCm": 158,
+        "weightKg": 58,
+        "waistCm": 78,
+        "bmi": 23.2,
+        "healthSelfAssessment": "满意",
+        "selfCareAssessment": "部分自理",
+        "cognitiveScreening": "粗筛阴性",
+        "emotionScreening": "粗筛阴性"
+      }
+    },
+    {
+      "name": "scan-medications-verified",
+      "method": "GET",
+      "path": "/api/scan/medications?elderId=elder-002&sessionId=scan-session-1779710424666",
+      "status": 200,
+      "durationMs": 56,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 3,
+        "first": {
+          "id": "med-1779472837111-863295375",
+          "name": "厄贝沙坦片",
+          "dosage": "150mg",
+          "usage": "口服",
+          "time": "每日1次，早餐后",
+          "timing": "每日1次，早餐后",
+          "updatedAt": "2026-05-22 18:00:37.0"
+        }
+      }
+    },
+    {
+      "name": "scan-scales-verified",
+      "method": "GET",
+      "path": "/api/scan/scales?elderId=elder-002&sessionId=scan-session-1779710424666",
+      "status": 200,
+      "durationMs": 54,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 0,
+        "first": null
+      }
+    },
+    {
+      "name": "scan-session-cross-elder-denied",
+      "method": "GET",
+      "path": "/api/scan/basic-info?elderId=not-current-elder&sessionId=scan-session-1779710424666",
+      "status": 403,
+      "durationMs": 50,
+      "pass": true,
+      "error": null,
+      "apiCode": 403,
+      "message": "Verification session elder mismatch",
+      "dataPreview": null
+    },
+    {
+      "name": "invitation-preview",
+      "method": "GET",
+      "path": "/api/invitations/INVITE001/preview",
+      "status": 200,
+      "durationMs": 53,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "code": "INVITE001",
+        "elderName": "张**",
+        "elderAge": 76,
+        "elderArchiveNo": "A202****001",
+        "status": "ACTIVE",
+        "expiresAt": "2026-06-30 23:59:59",
+        "maxUses": 1,
+        "usedCount": 2
+      }
+    },
+    {
+      "name": "volunteer-profile",
+      "method": "GET",
+      "path": "/api/volunteer/me/profile",
+      "status": 200,
+      "durationMs": 51,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "account": "admin",
+        "name": "医护测试账号",
+        "phone": "[REDACTED_PHONE]"
+      }
+    },
+    {
+      "name": "volunteer-my-elders",
+      "method": "GET",
+      "path": "/api/volunteer/me/elders",
+      "status": 200,
+      "durationMs": 53,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 1,
+        "first": {
+          "id": "elder-1779595988004",
+          "elderId": "elder-1779595988004",
+          "archiveNo": "A202605240104",
+          "name": "郑文昌",
+          "gender": "男",
+          "age": 88,
+          "emergencyContactName": "郑立军",
+          "emergencyContact": "郑立军",
+          "emergencyPhoneMasked": "139****0241",
+          "emergencyPhoneDial": "[REDACTED_PHONE]",
+          "emergencyContactPhone": "[REDACTED_PHONE]",
+          "phone": "[REDACTED_PHONE]",
+          "backupContactName": "郑雪",
+          "backupContactPhone": "[REDACTED_PHONE]",
+          "backupContactRelation": "",
+          "phoneMasked": "139****0241",
+          "relationship": "儿子",
+          "residence": "滨江社区 6 栋 3 单元 107 室",
+          "aboType": "AB",
+          "rhType": "阴性",
+          "bloodType": "AB",
+          "allergySummary": "无明确过敏史",
+          "allergyHistory": "无明确过敏史",
+          "status": "ACTIVE",
+          "lastVisitDate": "2026-05-23 16:20:00",
+          "scopeHint": "仅显示本人负责老人"
+        }
+      }
+    },
+    {
+      "name": "volunteer-qr-manage-own-elder",
+      "method": "GET",
+      "path": "/api/volunteer/me/elders/elder-1779595988004/qr-manage",
+      "status": 200,
+      "durationMs": 54,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "id": "b7a9a167-9195-4009-aa95-1391ecb244ef",
+        "qrId": "QR1779595988009",
+        "elderId": "elder-1779595988004",
+        "archiveNo": "A202605240104",
+        "elderName": "郑文昌",
+        "elderAge": 88,
+        "elderPhone": "[REDACTED_PHONE]",
+        "status": "启用",
+        "createdAt": "2026-05-24T04:13:08.009987291Z",
+        "disabledAt": "",
+        "token": "[REDACTED_QR_TOKEN]",
+        "url": "http://sxyq27.online/silverlink/scan/?token=[REDACTED_QR_TOKEN]",
+        "securityNote": "二维码不包含明文身份与健康信息，仅保存加密访问令牌。"
+      }
+    },
+    {
+      "name": "family-my-elders",
+      "method": "GET",
+      "path": "/api/family/me/elders",
+      "status": 200,
+      "durationMs": 57,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 1,
+        "first": {
+          "id": "elder-001",
+          "name": "张**",
+          "age": 76,
+          "archiveNo": "A202604300001",
+          "lastUpdate": "2026-05-24 11:00:00"
+        }
+      }
+    },
+    {
+      "name": "family-elder-detail-own-elder",
+      "method": "GET",
+      "path": "/api/family/elders/elder-001",
+      "status": 200,
+      "durationMs": 61,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "id": "elder-001",
+        "name": "张建国",
+        "age": 76,
+        "gender": "男",
+        "bloodType": "A",
+        "allergyHistory": "青霉素过敏",
+        "emergencyContactName": "测试联系人",
+        "emergencyContactPhone": "[REDACTED_PHONE]",
+        "emergencyContactRelation": "女儿",
+        "backupContactName": "测试备用",
+        "backupContactPhone": "[REDACTED_PHONE]",
+        "backupContactRelation": "备用联系人"
+      }
+    },
+    {
+      "name": "family-medications-own-elder",
+      "method": "GET",
+      "path": "/api/family/elders/elder-001/medications",
+      "status": 200,
+      "durationMs": 60,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "type": "array",
+        "count": 3,
+        "first": {
+          "id": "med-001",
+          "name": "阿司匹林肠溶片",
+          "dosage": "100mg",
+          "usage": "口服",
+          "timing": "每日1次，早餐后",
+          "updatedAt": "2026-05-22 13:24:17.0"
+        }
+      }
+    },
+    {
+      "name": "family-qrcode-own-elder",
+      "method": "GET",
+      "path": "/api/family/elders/elder-001/qrcode",
+      "status": 200,
+      "durationMs": 62,
+      "pass": true,
+      "error": null,
+      "apiCode": 200,
+      "message": "success",
+      "dataPreview": {
+        "token": "[REDACTED_QR_TOKEN]",
+        "status": "启用",
+        "createdAt": "2026-05-23T05:33:55.316216343Z",
+        "pdfUrl": "/api/nameplates/elder-001/pdf",
+        "disableReviewStatus": null,
+        "disableReviewId": null,
+        "reviewMessage": null
+      }
+    }
+  ]
+}

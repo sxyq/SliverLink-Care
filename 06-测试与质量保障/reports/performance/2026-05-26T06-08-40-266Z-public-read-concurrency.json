@@ -1,0 +1,1166 @@
+{
+  "title": "SilverLink 公开页面与只读资源并发读取性能报告",
+  "generatedAt": "2026-05-26T06:08:40.262Z",
+  "webBaseUrl": "http://sxyq27.online/silverlink",
+  "apiBaseUrl": "http://sxyq27.online",
+  "iterationsPerTarget": 24,
+  "concurrencyPerTarget": 6,
+  "summary": {
+    "requestCount": 144,
+    "successCount": 72,
+    "failureCount": 72,
+    "avgMs": 52,
+    "p50Ms": 49,
+    "p95Ms": 98,
+    "p99Ms": 132,
+    "maxMs": 132,
+    "avgBytes": 484,
+    "totalBytes": 34848,
+    "statuses": {
+      "200": 72,
+      "404": 72
+    }
+  },
+  "targets": [
+    {
+      "name": "scan-web-home",
+      "type": "page",
+      "url": "http://sxyq27.online/silverlink/",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 24,
+        "failureCount": 0,
+        "avgMs": 61,
+        "p50Ms": 49,
+        "p95Ms": 105,
+        "p99Ms": 132,
+        "maxMs": 132,
+        "avgBytes": 552,
+        "totalBytes": 13248,
+        "statuses": {
+          "200": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 98
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 102
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 132
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 105
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 41
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 41
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 41
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 552,
+          "durationMs": 51
+        }
+      ]
+    },
+    {
+      "name": "admin-web-home",
+      "type": "page",
+      "url": "http://sxyq27.online/silverlink/admin/",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 24,
+        "failureCount": 0,
+        "avgMs": 47,
+        "p50Ms": 47,
+        "p95Ms": 52,
+        "p99Ms": 53,
+        "maxMs": 53,
+        "avgBytes": 446,
+        "totalBytes": 10704,
+        "statuses": {
+          "200": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 51
+        }
+      ]
+    },
+    {
+      "name": "volunteer-web-home",
+      "type": "page",
+      "url": "http://sxyq27.online/silverlink/volunteer/",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 24,
+        "failureCount": 0,
+        "avgMs": 47,
+        "p50Ms": 48,
+        "p95Ms": 51,
+        "p99Ms": 52,
+        "maxMs": 52,
+        "avgBytes": 454,
+        "totalBytes": 10896,
+        "statuses": {
+          "200": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 42
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 46
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 48
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 49
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 49
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 52
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 41
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 45
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 47
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 49
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 51
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 50
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 40
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 46
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 47
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 50
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 49
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 51
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 41
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 46
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 48
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 48
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 49
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 50
+        }
+      ]
+    },
+    {
+      "name": "invitation-preview",
+      "type": "api",
+      "url": "http://sxyq27.online/api/invitations/INVITE001/preview",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 0,
+        "failureCount": 24,
+        "avgMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "p99Ms": 0,
+        "maxMs": 0,
+        "avgBytes": 0,
+        "totalBytes": 0,
+        "statuses": {
+          "404": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 42
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 52
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 54
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 41
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 48
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 54
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 53
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 42
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 46
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 49
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 54
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 42
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 48
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 51
+        },
+        {
+          "target": "invitation-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 172,
+          "durationMs": 52
+        }
+      ]
+    },
+    {
+      "name": "nameplate-preview",
+      "type": "api",
+      "url": "http://sxyq27.online/api/nameplates/elder-001/preview?blank=false",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 0,
+        "failureCount": 24,
+        "avgMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "p99Ms": 0,
+        "maxMs": 0,
+        "avgBytes": 0,
+        "totalBytes": 0,
+        "statuses": {
+          "404": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 43
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 49
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 55
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 43
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 70
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 73
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 69
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 42
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 43
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 53
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 41
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-preview",
+          "ok": false,
+          "status": 404,
+          "bytes": 171,
+          "durationMs": 51
+        }
+      ]
+    },
+    {
+      "name": "nameplate-pdf",
+      "type": "api",
+      "url": "http://sxyq27.online/api/nameplates/elder-001/pdf",
+      "summary": {
+        "requestCount": 24,
+        "successCount": 0,
+        "failureCount": 24,
+        "avgMs": 0,
+        "p50Ms": 0,
+        "p95Ms": 0,
+        "p99Ms": 0,
+        "maxMs": 0,
+        "avgBytes": 0,
+        "totalBytes": 0,
+        "statuses": {
+          "404": 24
+        }
+      },
+      "samples": [
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 41
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 49
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 53
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 42
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 48
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 42
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 46
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 49
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 41
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 47
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 46
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 51
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 50
+        },
+        {
+          "target": "nameplate-pdf",
+          "ok": false,
+          "status": 404,
+          "bytes": 167,
+          "durationMs": 51
+        }
+      ]
+    }
+  ]
+}

@@ -60,8 +60,9 @@ export default function SmsVerifyPage() {
   };
 
   const handleSwitchBackup = async () => {
+    const nextPhone = vState.backupPhone || vState.phone;
     switchToBackup();
-    await sendCurrentSms(vState.phone);
+    await sendCurrentSms(nextPhone);
   };
 
   const handleComplete = async (code: string) => {

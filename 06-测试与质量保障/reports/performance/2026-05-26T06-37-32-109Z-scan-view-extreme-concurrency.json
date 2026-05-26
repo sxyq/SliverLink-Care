@@ -1,0 +1,7147 @@
+{
+  "title": "SilverLink 扫码查看与登记信息详细查看极限并发报告",
+  "generatedAt": "2026-05-26T06:37:32.106Z",
+  "apiBaseUrl": "http://sxyq27.online/silverlink-api",
+  "seed": {
+    "qrCodeId": "e1e43885-53d7-4860-be9a-567d8aba0c24",
+    "archiveNo": "A202604300002",
+    "elderId": "elder-002"
+  },
+  "sessionSetup": {
+    "verificationMethod": "IDENTITY",
+    "sessionIdHint": "scan-session-177..."
+  },
+  "loadProfile": {
+    "resolveIterations": 200,
+    "resolveConcurrency": 60,
+    "detailIterations": 200,
+    "detailConcurrency": 60
+  },
+  "summary": {
+    "requestCount": 1000,
+    "successCount": 1000,
+    "failureCount": 0,
+    "avgMs": 90,
+    "p50Ms": 65,
+    "p95Ms": 315,
+    "p99Ms": 376,
+    "maxMs": 440,
+    "avgBytes": 443,
+    "totalBytes": 443000,
+    "statuses": {
+      "200": 1000
+    }
+  },
+  "targets": [
+    {
+      "name": "scan-resolve",
+      "path": "/api/scan/resolve",
+      "displayPath": "/api/scan/resolve",
+      "summary": {
+        "requestCount": 200,
+        "successCount": 200,
+        "failureCount": 0,
+        "avgMs": 81,
+        "p50Ms": 62,
+        "p95Ms": 147,
+        "p99Ms": 152,
+        "maxMs": 153,
+        "avgBytes": 596,
+        "totalBytes": 119200,
+        "statuses": {
+          "200": 200
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 100
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 101
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 102
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 103
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 104
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 111
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 114
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 113
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 119
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 122
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 119
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 119
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 120
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 122
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 126
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 125
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 125
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 126
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 130
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 129
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 130
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 133
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 132
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 131
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 131
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 135
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 132
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 136
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 137
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 137
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 138
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 135
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 136
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 139
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 140
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 138
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 141
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 144
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 139
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 143
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 141
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 146
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 144
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 147
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 145
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 149
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 147
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 147
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 150
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 148
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 148
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 149
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 153
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 152
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 152
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 152
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 102
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 108
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 97
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 108
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-resolve",
+          "ok": true,
+          "status": 200,
+          "bytes": 596,
+          "durationMs": 59
+        }
+      ]
+    },
+    {
+      "name": "scan-basic-info",
+      "path": "/api/scan/basic-info?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "displayPath": "/api/scan/basic-info?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "summary": {
+        "requestCount": 200,
+        "successCount": 200,
+        "failureCount": 0,
+        "avgMs": 106,
+        "p50Ms": 72,
+        "p95Ms": 359,
+        "p99Ms": 412,
+        "maxMs": 431,
+        "avgBytes": 647,
+        "totalBytes": 129400,
+        "statuses": {
+          "200": 200
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 74
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 74
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 74
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 84
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 84
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 92
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 96
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 96
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 96
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 96
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 97
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 98
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 97
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 101
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 103
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 103
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 84
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 74
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 112
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 109
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 190
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 199
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 185
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 198
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 190
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 211
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 192
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 221
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 227
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 318
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 314
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 309
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 315
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 296
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 352
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 360
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 359
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 368
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 358
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 341
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 359
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 357
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 365
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 401
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 386
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 412
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 425
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 401
+        },
+        {
+          "target": "scan-basic-info",
+          "ok": true,
+          "status": 200,
+          "bytes": 647,
+          "durationMs": 431
+        }
+      ]
+    },
+    {
+      "name": "scan-archive",
+      "path": "/api/scan/archive?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "displayPath": "/api/scan/archive?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "summary": {
+        "requestCount": 200,
+        "successCount": 200,
+        "failureCount": 0,
+        "avgMs": 64,
+        "p50Ms": 60,
+        "p95Ms": 91,
+        "p99Ms": 99,
+        "maxMs": 104,
+        "avgBytes": 298,
+        "totalBytes": 59600,
+        "statuses": {
+          "200": 200
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 84
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 88
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 92
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 86
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 99
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 101
+        },
+        {
+          "target": "scan-archive",
+          "ok": true,
+          "status": 200,
+          "bytes": 298,
+          "durationMs": 104
+        }
+      ]
+    },
+    {
+      "name": "scan-medications",
+      "path": "/api/scan/medications?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "displayPath": "/api/scan/medications?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "summary": {
+        "requestCount": 200,
+        "successCount": 200,
+        "failureCount": 0,
+        "avgMs": 137,
+        "p50Ms": 83,
+        "p95Ms": 363,
+        "p99Ms": 391,
+        "maxMs": 440,
+        "avgBytes": 632,
+        "totalBytes": 126400,
+        "statuses": {
+          "200": 200
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 86
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 88
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 98
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 98
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 101
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 102
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 103
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 104
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 104
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 104
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 106
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 106
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 105
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 108
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 110
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 109
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 110
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 112
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 118
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 117
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 118
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 117
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 120
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 120
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 122
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 123
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 124
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 128
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 129
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 129
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 131
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 131
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 135
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 135
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 143
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 94
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 95
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 79
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 141
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 126
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 213
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 208
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 211
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 201
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 46
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 242
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 222
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 237
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 232
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 219
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 48
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 255
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 208
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 230
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 243
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 274
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 313
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 327
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 328
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 315
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 343
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 363
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 326
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 348
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 354
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 346
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 351
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 354
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 354
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 313
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 344
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 324
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 376
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 336
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 353
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 322
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 358
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 339
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 377
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 332
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 321
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 367
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 368
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 359
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 355
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 391
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 375
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 372
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 427
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 363
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 440
+        },
+        {
+          "target": "scan-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 632,
+          "durationMs": 347
+        }
+      ]
+    },
+    {
+      "name": "scan-scales",
+      "path": "/api/scan/scales?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "displayPath": "/api/scan/scales?elderId=elder-002&sessionId=[REDACTED_SESSION]",
+      "summary": {
+        "requestCount": 200,
+        "successCount": 200,
+        "failureCount": 0,
+        "avgMs": 63,
+        "p50Ms": 60,
+        "p95Ms": 86,
+        "p99Ms": 91,
+        "maxMs": 93,
+        "avgBytes": 42,
+        "totalBytes": 8400,
+        "statuses": {
+          "200": 200
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 73
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 74
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 77
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 75
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 76
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 80
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 82
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 81
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 84
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 83
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 85
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 86
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 87
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 90
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 89
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 88
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 91
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 93
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 44
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 53
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 45
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 65
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 71
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 78
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 70
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 55
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 69
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 72
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 66
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 63
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 67
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 57
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 62
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 64
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 61
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 59
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 68
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 60
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 51
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 58
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 52
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 54
+        },
+        {
+          "target": "scan-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 56
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "item": {
+    "name": "admin-sms-relay-records",
+    "method": "GET",
+    "path": "/api/sms-relay/admin/records",
+    "status": 200,
+    "durationMs": 53,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 0,
+      "first": null
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": []
+  }
+}

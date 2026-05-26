@@ -1,0 +1,1790 @@
+{
+  "title": "SilverLink 管理后台只读 API 并发性能报告",
+  "generatedAt": "2026-05-26T06:11:08.770Z",
+  "apiBaseUrl": "http://sxyq27.online/silverlink-api",
+  "iterationsPerTarget": 18,
+  "concurrencyPerTarget": 4,
+  "adminAccount": "admin",
+  "elderId": "elder-1779457729049",
+  "summary": {
+    "requestCount": 216,
+    "successCount": 216,
+    "failureCount": 0,
+    "avgMs": 315,
+    "p50Ms": 50,
+    "p95Ms": 2164,
+    "p99Ms": 4845,
+    "maxMs": 7649,
+    "avgBytes": 20496,
+    "totalBytes": 4427136,
+    "statuses": {
+      "200": 216
+    }
+  },
+  "targets": [
+    {
+      "name": "admin-dashboard",
+      "path": "/api/admin/dashboard",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 60,
+        "p50Ms": 50,
+        "p95Ms": 100,
+        "p99Ms": 100,
+        "maxMs": 100,
+        "avgBytes": 148,
+        "totalBytes": 2664,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 91
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 91
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 100
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-dashboard",
+          "ok": true,
+          "status": 200,
+          "bytes": 148,
+          "durationMs": 53
+        }
+      ]
+    },
+    {
+      "name": "admin-elders",
+      "path": "/api/admin/elders",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 49,
+        "p50Ms": 49,
+        "p95Ms": 53,
+        "p99Ms": 53,
+        "maxMs": 53,
+        "avgBytes": 10456,
+        "totalBytes": 188208,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-elders",
+          "ok": true,
+          "status": 200,
+          "bytes": 10456,
+          "durationMs": 50
+        }
+      ]
+    },
+    {
+      "name": "admin-volunteers",
+      "path": "/api/admin/volunteers",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 53,
+        "p50Ms": 53,
+        "p95Ms": 58,
+        "p99Ms": 58,
+        "maxMs": 58,
+        "avgBytes": 1564,
+        "totalBytes": 28152,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 55
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 58
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 56
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 58
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 57
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-volunteers",
+          "ok": true,
+          "status": 200,
+          "bytes": 1564,
+          "durationMs": 55
+        }
+      ]
+    },
+    {
+      "name": "admin-qrcodes",
+      "path": "/api/admin/qrcodes",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 52,
+        "p50Ms": 50,
+        "p95Ms": 68,
+        "p99Ms": 68,
+        "maxMs": 68,
+        "avgBytes": 8722,
+        "totalBytes": 156996,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 61
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 68
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 66
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-qrcodes",
+          "ok": true,
+          "status": 200,
+          "bytes": 8722,
+          "durationMs": 60
+        }
+      ]
+    },
+    {
+      "name": "admin-audit-logs",
+      "path": "/api/admin/audit-logs",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 3038,
+        "p50Ms": 2246,
+        "p95Ms": 7649,
+        "p99Ms": 7649,
+        "maxMs": 7649,
+        "avgBytes": 198931,
+        "totalBytes": 3580758,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 1661
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 2164
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 4533
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 1800
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 7537
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 7649
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 4054
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 2275
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 1122
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 2301
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 2246
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 1373
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 1674
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 995
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 4845
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 3066
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 3361
+        },
+        {
+          "target": "admin-audit-logs",
+          "ok": true,
+          "status": 200,
+          "bytes": 198931,
+          "durationMs": 2019
+        }
+      ]
+    },
+    {
+      "name": "admin-family-bindings",
+      "path": "/api/admin/family-bindings",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 102,
+        "p50Ms": 50,
+        "p95Ms": 356,
+        "p99Ms": 356,
+        "maxMs": 356,
+        "avgBytes": 1550,
+        "totalBytes": 27900,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 340
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 341
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 356
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 81
+        },
+        {
+          "target": "admin-family-bindings",
+          "ok": true,
+          "status": 200,
+          "bytes": 1550,
+          "durationMs": 81
+        }
+      ]
+    },
+    {
+      "name": "admin-invitations",
+      "path": "/api/admin/invitations",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 108,
+        "p50Ms": 50,
+        "p95Ms": 384,
+        "p99Ms": 384,
+        "maxMs": 384,
+        "avgBytes": 1645,
+        "totalBytes": 29610,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 82
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 97
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 105
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 338
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 346
+        },
+        {
+          "target": "admin-invitations",
+          "ok": true,
+          "status": 200,
+          "bytes": 1645,
+          "durationMs": 384
+        }
+      ]
+    },
+    {
+      "name": "admin-medications",
+      "path": "/api/admin/medications?elderId=elder-1779457729049",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 50,
+        "p50Ms": 48,
+        "p95Ms": 92,
+        "p99Ms": 92,
+        "maxMs": 92,
+        "avgBytes": 42,
+        "totalBytes": 756,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 92
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-medications",
+          "ok": true,
+          "status": 200,
+          "bytes": 42,
+          "durationMs": 46
+        }
+      ]
+    },
+    {
+      "name": "admin-scales",
+      "path": "/api/admin/scales?elderId=elder-1779457729049",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 48,
+        "p50Ms": 47,
+        "p95Ms": 52,
+        "p99Ms": 52,
+        "maxMs": 52,
+        "avgBytes": 1662,
+        "totalBytes": 29916,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-scales",
+          "ok": true,
+          "status": 200,
+          "bytes": 1662,
+          "durationMs": 45
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-devices",
+      "path": "/api/sms-relay/admin/devices",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 46,
+        "p50Ms": 46,
+        "p95Ms": 49,
+        "p99Ms": 49,
+        "maxMs": 49,
+        "avgBytes": 248,
+        "totalBytes": 4464,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-devices",
+          "ok": true,
+          "status": 200,
+          "bytes": 248,
+          "durationMs": 48
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-records",
+      "path": "/api/sms-relay/admin/records",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 47,
+        "p50Ms": 47,
+        "p95Ms": 54,
+        "p99Ms": 54,
+        "maxMs": 54,
+        "avgBytes": 275,
+        "totalBytes": 4950,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-records",
+          "ok": true,
+          "status": 200,
+          "bytes": 275,
+          "durationMs": 49
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-sessions",
+      "path": "/api/sms-relay/admin/sessions",
+      "summary": {
+        "requestCount": 18,
+        "successCount": 18,
+        "failureCount": 0,
+        "avgMs": 123,
+        "p50Ms": 102,
+        "p95Ms": 193,
+        "p99Ms": 193,
+        "maxMs": 193,
+        "avgBytes": 20709,
+        "totalBytes": 372762,
+        "statuses": {
+          "200": 18
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 102
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 173
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 178
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 193
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 126
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 127
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 94
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 181
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 91
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 123
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 128
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 139
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 87
+        },
+        {
+          "target": "admin-smsrelay-sessions",
+          "ok": true,
+          "status": 200,
+          "bytes": 20709,
+          "durationMs": 93
+        }
+      ]
+    }
+  ]
+}

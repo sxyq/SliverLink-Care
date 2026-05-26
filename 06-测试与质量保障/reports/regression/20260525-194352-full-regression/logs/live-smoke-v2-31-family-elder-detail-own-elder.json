@@ -1,0 +1,45 @@
+{
+  "item": {
+    "name": "family-elder-detail-own-elder",
+    "method": "GET",
+    "path": "/api/family/elders/elder-001",
+    "status": 200,
+    "durationMs": 61,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "id": "elder-001",
+      "name": "张建国",
+      "age": 76,
+      "gender": "男",
+      "bloodType": "A",
+      "allergyHistory": "青霉素过敏",
+      "emergencyContactName": "测试联系人",
+      "emergencyContactPhone": "[REDACTED_PHONE]",
+      "emergencyContactRelation": "女儿",
+      "backupContactName": "测试备用",
+      "backupContactPhone": "[REDACTED_PHONE]",
+      "backupContactRelation": "备用联系人"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "id": "elder-001",
+      "name": "张建国",
+      "age": 76,
+      "gender": "男",
+      "bloodType": "A",
+      "allergyHistory": "青霉素过敏",
+      "emergencyContactName": "测试联系人",
+      "emergencyContactPhone": "[REDACTED_PHONE]",
+      "emergencyContactRelation": "女儿",
+      "backupContactName": "测试备用",
+      "backupContactPhone": "[REDACTED_PHONE]",
+      "backupContactRelation": "备用联系人"
+    }
+  }
+}

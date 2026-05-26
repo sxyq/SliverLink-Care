@@ -1,0 +1,127 @@
+{
+  "item": {
+    "name": "admin-scales-by-elder",
+    "method": "GET",
+    "path": "/api/admin/scales?elderId=elder-1779457729049",
+    "status": 200,
+    "durationMs": 54,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 7,
+      "first": {
+        "id": "scale-1779511004325-1347351252",
+        "name": "PHQ-9",
+        "scale": "PHQ-9",
+        "score": 6,
+        "updatedAt": "2026-05-10",
+        "date": "2026-05-10",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "PHQ-9"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "scale-1779511004325-1347351252",
+        "name": "PHQ-9",
+        "scale": "PHQ-9",
+        "score": 6,
+        "updatedAt": "2026-05-10",
+        "date": "2026-05-10",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "PHQ-9"
+      },
+      {
+        "id": "scale-1779511004330-1338585063",
+        "name": "GAD-7",
+        "scale": "GAD-7",
+        "score": 4,
+        "updatedAt": "2026-05-10",
+        "date": "2026-05-10",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "GAD-7"
+      },
+      {
+        "id": "scale-1779511004333-1269404295",
+        "name": "UCLA",
+        "scale": "UCLA",
+        "score": 31,
+        "updatedAt": "2026-05-10",
+        "date": "2026-05-10",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "UCLA"
+      },
+      {
+        "id": "scale-1779511004335-1347351230",
+        "name": "PHQ-9",
+        "scale": "PHQ-9",
+        "score": 9,
+        "updatedAt": "2026-05-20",
+        "date": "2026-05-20",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "PHQ-9"
+      },
+      {
+        "id": "scale-1779511004338-1347351231",
+        "name": "PHQ-9",
+        "scale": "PHQ-9",
+        "score": 12,
+        "updatedAt": "2026-05-22",
+        "date": "2026-05-22",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "PHQ-9"
+      },
+      {
+        "id": "scale-1779511004341-1338585036",
+        "name": "GAD-7",
+        "scale": "GAD-7",
+        "score": 8,
+        "updatedAt": "2026-05-22",
+        "date": "2026-05-22",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "GAD-7"
+      },
+      {
+        "id": "scale-1779511004343-1269404305",
+        "name": "UCLA",
+        "scale": "UCLA",
+        "score": 36,
+        "updatedAt": "2026-05-22",
+        "date": "2026-05-22",
+        "volunteer": "admin",
+        "answers": [],
+        "archiveNo": "A1779457729065",
+        "elderName": "陈德明",
+        "scaleName": "UCLA"
+      }
+    ]
+  }
+}

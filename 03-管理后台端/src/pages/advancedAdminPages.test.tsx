@@ -1,0 +1,270 @@
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { VolunteerManagePage } from './VolunteerManagePage';
+import { AuditLogPage } from './AuditLogPage';
+
+const fetchVolunteers = vi.fn();
+const fetchElders = vi.fn();
+const fetchFamilyBindings = vi.fn();
+const createVolunteer = vi.fn();
+const updateVolunteer = vi.fn();
+const deleteVolunteer = vi.fn();
+const updateVolunteerScope = vi.fn();
+const unbindFamily = vi.fn();
+const fetchAuditLogs = vi.fn();
+const exportToCsv = vi.fn();
+const exportAuditLogs = vi.fn();
+
+vi.mock('../api/adminApi', () => ({
+  fetchVolunteers: (...args: unknown[]) => fetchVolunteers(...args),
+  fetchElders: (...args: unknown[]) => fetchElders(...args),
+  fetchFamilyBindings: (...args: unknown[]) => fetchFamilyBindings(...args),
+  createVolunteer: (...args: unknown[]) => createVolunteer(...args),
+  updateVolunteer: (...args: unknown[]) => updateVolunteer(...args),
+  deleteVolunteer: (...args: unknown[]) => deleteVolunteer(...args),
+  updateVolunteerScope: (...args: unknown[]) => updateVolunteerScope(...args),
+  unbindFamily: (...args: unknown[]) => unbindFamily(...args),
+  fetchAuditLogs: (...args: unknown[]) => fetchAuditLogs(...args),
+}));
+
+vi.mock('../utils/exportCsv', () => ({
+  exportToCsv: (...args: unknown[]) => exportToCsv(...args),
+}));
+
+vi.mock('../features/audit/auditExport', () => ({
+  exportAuditLogs: (...args: unknown[]) => exportAuditLogs(...args),
+}));
+
+vi.mock('../components/StatusTag', () => ({
+  StatusTag: ({ status }: { status: string }) => <span>{status}</span>,
+}));
+
+vi.mock('../components/InvitationManageSection', () => ({
+  InvitationManageSection: ({ embedded }: { embedded?: boolean }) => <div>InvitationManageSection-{embedded ? 'embedded' : 'plain'}</div>,
+}));
+
+describe('VolunteerManagePage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
+
+    fetchVolunteers.mockResolvedValue([
+      {
+        id: 'vol-1',
+        name: '王志愿者',
+        account: 'vol001',
+        phone: '13800000000',
+        elderCount: 1,
+        status: '启用',
+        createMethod: '后台创建',
+        createdAt: '2026/05/26 09:00:00',
+        invitationCode: '',
+        lastSubmit: '2026/05/26 10:00:00',
+      },
+    ]);
+    fetchElders.mockResolvedValue([
+      { id: 'elder-1', archiveNo: 'A-001', name: '李奶奶', age: 72, status: '启用' },
+      { id: 'elder-2', archiveNo: 'A-002', name: '赵爷爷', age: 80, status: '启用' },
+    ]);
+    fetchFamilyBindings.mockResolvedValue([
+      {
+        id: 'binding-1',
+        familyName: '张家属',
+        familyPhoneMasked: '138****0000',
+        relationship: '女儿',
+        elderName: '李奶奶',
+        elderArchiveNo: 'A-001',
+        invitationCode: 'INV-001',
+        createMethod: '',
+        boundAt: '2026-05-26 10:00:00',
+        status: '已绑定',
+      },
+    ]);
+    createVolunteer.mockResolvedValue({ id: 'vol-2' });
+    updateVolunteer.mockResolvedValue(undefined);
+    deleteVolunteer.mockResolvedValue(undefined);
+    updateVolunteerScope.mockResolvedValue(undefined);
+    unbindFamily.mockResolvedValue(undefined);
+  });
+
+  it('covers create, edit, scope assignment, export, family review and delete flows', async () => {
+    render(<VolunteerManagePage />);
+
+    expect(await screen.findByRole('heading', { name: '志愿者、家属与邀请码管理' })).toBeInTheDocument();
+    expect(await screen.findByText('王志愿者')).toBeInTheDocument();
+    expect(screen.getByText('账号：vol001')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '导出' }));
+    expect(exportToCsv).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: '新增志愿者账号' }));
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+    expect(await screen.findByText('请填写志愿者姓名和账号')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('姓名'), { target: { value: '新志愿者' } });
+    fireEvent.change(screen.getByLabelText('账号'), { target: { value: 'vol002' } });
+    fireEvent.change(screen.getByLabelText('手机号'), { target: { value: '13900000000' } });
+    fireEvent.change(screen.getByLabelText('初始密码'), { target: { value: 'Pass@123456' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+
+    await waitFor(() => {
+      expect(createVolunteer).toHaveBeenCalledWith({
+        name: '新志愿者',
+        account: 'vol002',
+        phone: '13900000000',
+        password: 'Pass@123456',
+      });
+    });
+
+    const volunteerRow = screen.getByText('王志愿者').closest('tr');
+    expect(volunteerRow).not.toBeNull();
+    const volunteerActions = within(volunteerRow as HTMLElement);
+
+    fireEvent.click(volunteerActions.getByRole('button', { name: '编辑' }));
+    fireEvent.change(screen.getByLabelText('手机号'), { target: { value: '13711112222' } });
+    fireEvent.change(screen.getByLabelText('修改密码'), { target: { value: 'new-password' } });
+    fireEvent.click(screen.getByRole('button', { name: '保存修改' }));
+
+    await waitFor(() => {
+      expect(updateVolunteer).toHaveBeenCalledWith('vol-1', {
+        name: '王志愿者',
+        account: 'vol001',
+        phone: '13711112222',
+        status: 'ACTIVE',
+        password: 'new-password',
+      });
+    });
+
+    fireEvent.click(volunteerActions.getByRole('button', { name: '负责老人' }));
+    expect(await screen.findByRole('heading', { name: '负责老人管理 - 王志愿者' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '添加老人' }));
+    fireEvent.click(screen.getByRole('button', { name: '添加' }));
+    fireEvent.click(screen.getByRole('button', { name: '保存负责老人' }));
+
+    await waitFor(() => {
+      expect(updateVolunteerScope).toHaveBeenCalledWith('vol-1', ['elder-1', 'elder-2']);
+    });
+
+    fireEvent.click(volunteerActions.getByRole('button', { name: '停用' }));
+    await waitFor(() => {
+      expect(updateVolunteer).toHaveBeenCalledWith('vol-1', {
+        name: '王志愿者',
+        account: 'vol001',
+        status: 'DISABLED',
+      });
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '家属协管' }));
+    expect(await screen.findByText('张家属')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '查看绑定老人' }));
+    expect(await screen.findByRole('heading', { name: '家属绑定老人审查' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '解绑' }));
+    await waitFor(() => {
+      expect(unbindFamily).toHaveBeenCalledWith('binding-1');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '志愿者' }));
+    expect(await screen.findByText('账号：vol001')).toBeInTheDocument();
+    const refreshedVolunteerRow = screen.getByText('王志愿者').closest('tr');
+    fireEvent.click(within(refreshedVolunteerRow as HTMLElement).getByRole('button', { name: '删除' }));
+    await waitFor(() => {
+      expect(deleteVolunteer).toHaveBeenCalledWith('vol-1');
+    });
+  });
+});
+
+describe('AuditLogPage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    fetchAuditLogs.mockResolvedValue([
+      {
+        time: '2026-05-26T09:00:00Z',
+        operator: 'visitor-13800001111',
+        action: 'IDENTITY_VERIFY',
+        target: 'A-001',
+        ip: '127.0.0.1',
+        result: '成功',
+        role: 'VISITOR',
+        verificationMethod: 'IDENTITY',
+        visitorName: '张三',
+        visitorPhone: '13800001111',
+        visitorIdCard: '110101199001011234',
+      },
+      {
+        time: '2026-05-26T10:00:00Z',
+        operator: 'visitor-13900002222',
+        action: 'SMS_RELAY_START',
+        target: '138****0000',
+        ip: '127.0.0.2',
+        result: '失败',
+        role: 'VISITOR',
+        verificationMethod: 'SMS_RELAY',
+        visitorName: '李四',
+        visitorPhoneMasked: '139****2222',
+        visitorIdCardMasked: '320***********1234',
+      },
+      {
+        time: '2026-05-26T11:00:00Z',
+        operator: 'admin',
+        action: 'LOGIN',
+        target: 'system',
+        ip: '127.0.0.3',
+        result: '成功',
+        role: 'SYSTEM_ADMIN',
+      },
+    ]);
+    fetchElders.mockResolvedValue([
+      {
+        id: 'elder-1',
+        archiveNo: 'A-001',
+        name: '李奶奶',
+        age: 72,
+        phoneMasked: '138****9999',
+        volunteer: '王志愿者',
+      },
+    ]);
+  });
+
+  it('covers visitor metrics, filters, target detail and export', async () => {
+    render(<AuditLogPage category="visitor" />);
+
+    expect((await screen.findAllByRole('heading', { name: '访问人员记录' })).length).toBeGreaterThan(0);
+    expect(await screen.findByText('当前分类下有 1 条失败记录，请重点检查来源 IP 和操作内容。')).toBeInTheDocument();
+    expect(screen.getByText('访问记录数')).toBeInTheDocument();
+    expect(screen.getAllByText('身份登记').length).toBeGreaterThan(0);
+
+    fireEvent.change(screen.getByPlaceholderText('筛选手机号或姓名'), { target: { value: '张三' } });
+    const visitorSelects = screen.getAllByRole('combobox');
+    fireEvent.change(visitorSelects[1], { target: { value: '身份登记' } });
+    fireEvent.change(visitorSelects[2], { target: { value: '成功' } });
+
+    expect((await screen.findAllByText('张三')).length).toBeGreaterThan(0);
+    expect(screen.queryAllByText('李四')).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: '李奶奶（A-001）' }));
+    expect(await screen.findByRole('heading', { name: '访问对象详情' })).toBeInTheDocument();
+    expect(screen.getByDisplayValue('李奶奶')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('王志愿者')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
+
+    fireEvent.click(screen.getByRole('button', { name: '重置' }));
+    await waitFor(() => {
+      expect(screen.getAllByDisplayValue('全部').length).toBeGreaterThan(0);
+      expect(screen.getAllByText('李四').length).toBeGreaterThan(0);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '导出' }));
+    expect(exportAuditLogs).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders admin category table rows', async () => {
+    render(<AuditLogPage category="admin" />);
+
+    expect(await screen.findByRole('heading', { name: '管理员操作' })).toBeInTheDocument();
+    const auditTable = screen.getByRole('table');
+    expect(within(auditTable).getByText('登录')).toBeInTheDocument();
+    expect(within(auditTable).getByText('admin')).toBeInTheDocument();
+    expect(within(auditTable).getByText('system')).toBeInTheDocument();
+  });
+});

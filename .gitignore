@@ -18,6 +18,7 @@ tmp*.py
 # Frontend dependencies and build outputs
 node_modules/
 dist/
+coverage/
 *.tsbuildinfo
 
 # Java backend build outputs

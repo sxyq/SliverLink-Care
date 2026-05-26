@@ -1,0 +1,43 @@
+{
+  "generatedAt": "2026-05-25T15:18:33.316Z",
+  "mode": "negative-read-only",
+  "apiBaseUrl": "http://sxyq27.online",
+  "checks": [
+    {
+      "name": "admin dashboard rejects missing token",
+      "url": "http://sxyq27.online/api/admin/dashboard",
+      "status": 401,
+      "durationMs": 133,
+      "ok": true,
+      "acceptedStatuses": [
+        401,
+        403
+      ]
+    },
+    {
+      "name": "scan resolve rejects malformed token",
+      "url": "http://sxyq27.online/api/scan/resolve",
+      "status": 404,
+      "durationMs": 99,
+      "ok": true,
+      "acceptedStatuses": [
+        400,
+        401,
+        403,
+        404
+      ]
+    },
+    {
+      "name": "admin elders rejects missing signature or token",
+      "url": "http://sxyq27.online/api/admin/elders",
+      "status": 401,
+      "durationMs": 45,
+      "ok": true,
+      "acceptedStatuses": [
+        401,
+        403
+      ]
+    }
+  ],
+  "passed": true
+}

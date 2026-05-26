@@ -1,0 +1,19 @@
+{
+  "item": {
+    "name": "family-elder-detail",
+    "method": "GET",
+    "path": "/api/family/elders/elder-1779457729049",
+    "status": 403,
+    "durationMs": 54,
+    "pass": false,
+    "error": "HTTP 403, expected 200",
+    "apiCode": 403,
+    "message": "无权访问该老人信息",
+    "dataPreview": null
+  },
+  "raw": {
+    "code": 403,
+    "message": "无权访问该老人信息",
+    "data": null
+  }
+}

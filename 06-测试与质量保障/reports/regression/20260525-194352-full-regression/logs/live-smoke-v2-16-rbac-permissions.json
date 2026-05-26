@@ -1,0 +1,59 @@
+{
+  "item": {
+    "name": "rbac-permissions",
+    "method": "GET",
+    "path": "/api/rbac/permissions",
+    "status": 200,
+    "durationMs": 50,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 5,
+      "first": {
+        "id": "p1",
+        "code": "ELDER_READ",
+        "name": "老人档案查看",
+        "type": "MENU"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "p1",
+        "code": "ELDER_READ",
+        "name": "老人档案查看",
+        "type": "MENU"
+      },
+      {
+        "id": "p2",
+        "code": "ELDER_WRITE",
+        "name": "老人档案编辑",
+        "type": "MENU"
+      },
+      {
+        "id": "p3",
+        "code": "QR_MANAGE",
+        "name": "二维码管理",
+        "type": "MENU"
+      },
+      {
+        "id": "p4",
+        "code": "VOLUNTEER_MANAGE",
+        "name": "志愿者管理",
+        "type": "MENU"
+      },
+      {
+        "id": "p5",
+        "code": "AUDIT_LOG_READ",
+        "name": "审计日志查看",
+        "type": "MENU"
+      }
+    ]
+  }
+}

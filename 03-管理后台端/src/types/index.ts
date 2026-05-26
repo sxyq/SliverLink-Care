@@ -25,6 +25,8 @@ export interface VolunteerRow {
   account: string;
   phone?: string;
   elderCount: number;
+  assignedElderIds?: string[];
+  assignedElders?: ElderScopeOption[];
   status: string;
   lastSubmit: string;
   createdAt?: string;

@@ -8,11 +8,11 @@ interface ApiEnvelope<T> {
 
 export async function httpClient<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE_URL}${url}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...((options?.headers as Record<string, string>) || {}),
     },
-    ...options,
   });
 
   if (!res.ok) {

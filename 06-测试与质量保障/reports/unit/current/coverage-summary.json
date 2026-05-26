@@ -1,0 +1,110 @@
+{
+  "scan-client": {
+    "available": true,
+    "statements": {
+      "covered": 673,
+      "total": 770,
+      "pct": 87.4
+    },
+    "functions": {
+      "covered": 158,
+      "total": 174,
+      "pct": 90.8
+    },
+    "branches": {
+      "covered": 476,
+      "total": 621,
+      "pct": 76.65
+    },
+    "lines": {
+      "covered": 198,
+      "total": 212,
+      "pct": 93.4
+    }
+  },
+  "volunteer-client": {
+    "available": true,
+    "statements": {
+      "covered": 1070,
+      "total": 1257,
+      "pct": 85.12
+    },
+    "functions": {
+      "covered": 357,
+      "total": 428,
+      "pct": 83.41
+    },
+    "branches": {
+      "covered": 683,
+      "total": 908,
+      "pct": 75.22
+    },
+    "lines": {
+      "covered": 192,
+      "total": 213,
+      "pct": 90.14
+    }
+  },
+  "admin-console": {
+    "available": true,
+    "statements": {
+      "covered": 1809,
+      "total": 2128,
+      "pct": 85.01
+    },
+    "functions": {
+      "covered": 689,
+      "total": 767,
+      "pct": 89.83
+    },
+    "branches": {
+      "covered": 1633,
+      "total": 2178,
+      "pct": 74.98
+    },
+    "lines": {
+      "covered": 525,
+      "total": 555,
+      "pct": 94.59
+    }
+  },
+  "backend": {
+    "available": true,
+    "source": "04-统一后端/target/site/jacoco/jacoco.xml",
+    "instruction": {
+      "covered": 8282,
+      "total": 17497,
+      "pct": 47.33
+    },
+    "branch": {
+      "covered": 281,
+      "total": 802,
+      "pct": 35.04
+    },
+    "line": {
+      "covered": 1729,
+      "total": 3130,
+      "pct": 55.24
+    },
+    "complexity": {
+      "covered": 777,
+      "total": 1269,
+      "pct": 61.23
+    },
+    "method": {
+      "covered": 682,
+      "total": 867,
+      "pct": 78.66
+    },
+    "class": {
+      "covered": 75,
+      "total": 88,
+      "pct": 85.23
+    }
+  },
+  "android": {
+    "available": true,
+    "unit_test_report": "05-安卓短信中转端/app/build/reports/tests/testDebugUnitTest/index.html",
+    "coverage_note": "Android JVM test report exists; JaCoCo XML aggregation is pending in a later coverage task."
+  }
+}

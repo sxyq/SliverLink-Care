@@ -1,0 +1,78 @@
+{
+  "title": "SilverLink 扫码查看链路并发极限阶梯测试",
+  "generatedAt": "2026-05-26T06:50:39.691Z",
+  "apiBaseUrl": "http://sxyq27.online/silverlink-api",
+  "steps": [
+    {
+      "concurrency": 2000,
+      "iterations": 2000
+    },
+    {
+      "concurrency": 4000,
+      "iterations": 4000
+    }
+  ],
+  "runs": [
+    {
+      "concurrency": 2000,
+      "iterationsPerTarget": 2000,
+      "childExitCode": 1,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-46-55-509Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-46-55-509Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 10000,
+        "successCount": 9998,
+        "failureCount": 2,
+        "avgMs": 3259,
+        "p50Ms": 2702,
+        "p95Ms": 9598,
+        "p99Ms": 10053,
+        "maxMs": 19239,
+        "avgBytes": 443,
+        "totalBytes": 4429055,
+        "statuses": {
+          "0": 2,
+          "200": 9998
+        }
+      },
+      "evaluation": {
+        "status": "degraded",
+        "reason": "P95=9598ms 超过 500ms",
+        "successRate": 99.98
+      }
+    },
+    {
+      "concurrency": 4000,
+      "iterationsPerTarget": 4000,
+      "childExitCode": 1,
+      "jsonPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-50-39-646Z-scan-view-extreme-concurrency.json",
+      "mdPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/06-测试与质量保障/reports/performance/2026-05-26T06-50-39-646Z-scan-view-extreme-concurrency.md",
+      "summary": {
+        "requestCount": 20000,
+        "successCount": 19961,
+        "failureCount": 39,
+        "avgMs": 7573,
+        "p50Ms": 6587,
+        "p95Ms": 19883,
+        "p99Ms": 20871,
+        "maxMs": 40190,
+        "avgBytes": 443,
+        "totalBytes": 8841243,
+        "statuses": {
+          "0": 39,
+          "200": 19961
+        }
+      },
+      "evaluation": {
+        "status": "degraded",
+        "reason": "P95=19883ms 超过 500ms",
+        "successRate": 99.8
+      }
+    }
+  ],
+  "limitConclusion": {
+    "highestStableConcurrency": 0,
+    "firstDegradedConcurrency": 2000,
+    "firstBelowThresholdConcurrency": null
+  }
+}

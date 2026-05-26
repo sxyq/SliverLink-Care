@@ -47,7 +47,7 @@ silverlink:
     session-ttl-seconds: ${SILVERLINK_SMSRELAY_SESSION_TTL_SECONDS:300}
     authorization-window-seconds: ${SILVERLINK_SMSRELAY_AUTHORIZATION_WINDOW_SECONDS:1200}
     signature-window-seconds: ${SILVERLINK_SMSRELAY_SIGNATURE_WINDOW_SECONDS:300}
-    server-url: ${SILVERLINK_SMSRELAY_SERVER_URL:http://sxyq27.online/silverlink-api}
+    server-url: ${SILVERLINK_SMSRELAY_SERVER_URL:https://sxyq27.online/silverlink-api}
     default-device-id: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_ID:relay-android-01}
     default-device-secret: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_SECRET:secret-001}
   wechat:

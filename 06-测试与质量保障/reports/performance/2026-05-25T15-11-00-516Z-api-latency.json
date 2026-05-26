@@ -1,0 +1,114 @@
+{
+  "generatedAt": "2026-05-25T15:11:00.516Z",
+  "url": "http://sxyq27.online/silverlink/",
+  "iterations": 20,
+  "concurrency": 4,
+  "successCount": 20,
+  "failureCount": 0,
+  "p50Ms": 45,
+  "p95Ms": 94,
+  "p99Ms": 110,
+  "maxMs": 110,
+  "samples": [
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 91
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 92
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 94
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 110
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 41
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 46
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 47
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 42
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 40
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 46
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 45
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 41
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 46
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 44
+    },
+    {
+      "ok": true,
+      "status": 200,
+      "durationMs": 46
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "item": {
+    "name": "admin-login-signed",
+    "method": "POST",
+    "path": "/api/admin/login",
+    "status": 200,
+    "durationMs": 122,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "token": "[REDACTED_JWT]",
+      "role": "系统管理员"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "token": "[REDACTED_JWT]",
+      "role": "系统管理员"
+    }
+  }
+}

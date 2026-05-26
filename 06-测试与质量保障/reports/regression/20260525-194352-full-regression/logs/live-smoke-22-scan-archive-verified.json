@@ -1,0 +1,19 @@
+{
+  "item": {
+    "name": "scan-archive-verified",
+    "method": "GET",
+    "path": "/api/scan/archive?elderId=elder-1779457729049&sessionId=scan-session-1779710312844",
+    "status": 200,
+    "durationMs": 56,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {}
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {}
+  }
+}

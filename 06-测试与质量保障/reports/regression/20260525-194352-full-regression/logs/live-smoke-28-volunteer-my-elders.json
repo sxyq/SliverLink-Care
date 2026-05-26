@@ -1,0 +1,79 @@
+{
+  "item": {
+    "name": "volunteer-my-elders",
+    "method": "GET",
+    "path": "/api/volunteer/me/elders",
+    "status": 200,
+    "durationMs": 54,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 1,
+      "first": {
+        "id": "elder-1779595988004",
+        "elderId": "elder-1779595988004",
+        "archiveNo": "A202605240104",
+        "name": "郑文昌",
+        "gender": "男",
+        "age": 88,
+        "emergencyContactName": "郑立军",
+        "emergencyContact": "郑立军",
+        "emergencyPhoneMasked": "139****0241",
+        "emergencyPhoneDial": "[REDACTED_PHONE]",
+        "emergencyContactPhone": "[REDACTED_PHONE]",
+        "phone": "[REDACTED_PHONE]",
+        "backupContactName": "郑雪",
+        "backupContactPhone": "[REDACTED_PHONE]",
+        "backupContactRelation": "",
+        "phoneMasked": "139****0241",
+        "relationship": "儿子",
+        "residence": "滨江社区 6 栋 3 单元 107 室",
+        "aboType": "AB",
+        "rhType": "阴性",
+        "bloodType": "AB",
+        "allergySummary": "无明确过敏史",
+        "allergyHistory": "无明确过敏史",
+        "status": "ACTIVE",
+        "lastVisitDate": "2026-05-23 16:20:00",
+        "scopeHint": "仅显示本人负责老人"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "elder-1779595988004",
+        "elderId": "elder-1779595988004",
+        "archiveNo": "A202605240104",
+        "name": "郑文昌",
+        "gender": "男",
+        "age": 88,
+        "emergencyContactName": "郑立军",
+        "emergencyContact": "郑立军",
+        "emergencyPhoneMasked": "139****0241",
+        "emergencyPhoneDial": "[REDACTED_PHONE]",
+        "emergencyContactPhone": "[REDACTED_PHONE]",
+        "phone": "[REDACTED_PHONE]",
+        "backupContactName": "郑雪",
+        "backupContactPhone": "[REDACTED_PHONE]",
+        "backupContactRelation": "",
+        "phoneMasked": "139****0241",
+        "relationship": "儿子",
+        "residence": "滨江社区 6 栋 3 单元 107 室",
+        "aboType": "AB",
+        "rhType": "阴性",
+        "bloodType": "AB",
+        "allergySummary": "无明确过敏史",
+        "allergyHistory": "无明确过敏史",
+        "status": "ACTIVE",
+        "lastVisitDate": "2026-05-23 16:20:00",
+        "scopeHint": "仅显示本人负责老人"
+      }
+    ]
+  }
+}

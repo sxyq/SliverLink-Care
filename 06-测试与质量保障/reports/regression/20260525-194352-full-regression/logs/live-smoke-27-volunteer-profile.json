@@ -1,0 +1,27 @@
+{
+  "item": {
+    "name": "volunteer-profile",
+    "method": "GET",
+    "path": "/api/volunteer/me/profile",
+    "status": 200,
+    "durationMs": 49,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "account": "admin",
+      "name": "医护测试账号",
+      "phone": "[REDACTED_PHONE]"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "account": "admin",
+      "name": "医护测试账号",
+      "phone": "[REDACTED_PHONE]"
+    }
+  }
+}

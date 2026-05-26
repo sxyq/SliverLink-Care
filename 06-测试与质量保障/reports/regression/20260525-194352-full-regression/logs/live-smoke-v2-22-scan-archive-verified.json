@@ -1,0 +1,41 @@
+{
+  "item": {
+    "name": "scan-archive-verified",
+    "method": "GET",
+    "path": "/api/scan/archive?elderId=elder-002&sessionId=scan-session-1779710424666",
+    "status": 200,
+    "durationMs": 63,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "date": "2026-04-30",
+      "volunteer": "社区护理志愿者",
+      "heightCm": 158,
+      "weightKg": 58,
+      "waistCm": 78,
+      "bmi": 23.2,
+      "healthSelfAssessment": "满意",
+      "selfCareAssessment": "部分自理",
+      "cognitiveScreening": "粗筛阴性",
+      "emotionScreening": "粗筛阴性"
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": {
+      "date": "2026-04-30",
+      "volunteer": "社区护理志愿者",
+      "heightCm": 158,
+      "weightKg": 58,
+      "waistCm": 78,
+      "bmi": 23.2,
+      "healthSelfAssessment": "满意",
+      "selfCareAssessment": "部分自理",
+      "cognitiveScreening": "粗筛阴性",
+      "emotionScreening": "粗筛阴性"
+    }
+  }
+}

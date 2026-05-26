@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-05-26T00:50:16.993Z",
+  "mode": "readonly-entry-smoke-node-fetch",
+  "note": "Playwright CLI unavailable because npx is missing; this is not full browser E2E.",
+  "checks": [
+    {
+      "url": "http://sxyq27.online/silverlink/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 126,
+      "hasHtml": true,
+      "hasRoot": false,
+      "bodyBytes": 552
+    },
+    {
+      "url": "http://sxyq27.online/silverlink/admin/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 52,
+      "hasHtml": true,
+      "hasRoot": true,
+      "bodyBytes": 446
+    },
+    {
+      "url": "http://sxyq27.online/silverlink/volunteer/",
+      "status": 200,
+      "ok": true,
+      "durationMs": 52,
+      "hasHtml": true,
+      "hasRoot": true,
+      "bodyBytes": 454
+    }
+  ],
+  "passed": true
+}

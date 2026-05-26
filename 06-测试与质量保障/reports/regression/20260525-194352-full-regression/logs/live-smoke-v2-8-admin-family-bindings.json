@@ -1,0 +1,100 @@
+{
+  "item": {
+    "name": "admin-family-bindings",
+    "method": "GET",
+    "path": "/api/admin/family-bindings",
+    "status": 200,
+    "durationMs": 52,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 6,
+      "first": {
+        "id": "family-bind-seed-005",
+        "familyName": "马会兰",
+        "familyPhoneMasked": "138****0005",
+        "relationship": "邻居",
+        "elderName": "张建国",
+        "elderArchiveNo": "A202604300001",
+        "invitationCode": "INVITE001",
+        "boundAt": "2026-05-24 11:30:00",
+        "status": "ACTIVE"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "family-bind-seed-005",
+        "familyName": "马会兰",
+        "familyPhoneMasked": "138****0005",
+        "relationship": "邻居",
+        "elderName": "张建国",
+        "elderArchiveNo": "A202604300001",
+        "invitationCode": "INVITE001",
+        "boundAt": "2026-05-24 11:30:00",
+        "status": "ACTIVE"
+      },
+      {
+        "id": "family-bind-seed-004",
+        "familyName": "孙建平",
+        "familyPhoneMasked": "138****0004",
+        "relationship": "侄子",
+        "elderName": "李淑兰",
+        "elderArchiveNo": "A202604300002",
+        "invitationCode": "FAMILY005",
+        "boundAt": "2026-05-24 11:25:00",
+        "status": "DISABLED"
+      },
+      {
+        "id": "family-bind-seed-003",
+        "familyName": "周桂芬",
+        "familyPhoneMasked": "138****0003",
+        "relationship": "外孙女",
+        "elderName": "李淑兰",
+        "elderArchiveNo": "A202604300002",
+        "invitationCode": "FAMILY003",
+        "boundAt": "2026-05-24 11:20:00",
+        "status": "ACTIVE"
+      },
+      {
+        "id": "family-bind-seed-002",
+        "familyName": "郭建华",
+        "familyPhoneMasked": "138****0002",
+        "relationship": "儿子",
+        "elderName": "张建国",
+        "elderArchiveNo": "A202604300001",
+        "invitationCode": "FAMILY001",
+        "boundAt": "2026-05-24 11:10:00",
+        "status": "ACTIVE"
+      },
+      {
+        "id": "family-bind-seed-001",
+        "familyName": "赵美琴",
+        "familyPhoneMasked": "138****0001",
+        "relationship": "女儿",
+        "elderName": "张建国",
+        "elderArchiveNo": "A202604300001",
+        "invitationCode": "FAMILY001",
+        "boundAt": "2026-05-24 11:00:00",
+        "status": "ACTIVE"
+      },
+      {
+        "id": "family-bind-admin-001",
+        "familyName": "家属测试账号",
+        "familyPhoneMasked": "138****9999",
+        "relationship": "女儿",
+        "elderName": "张建国",
+        "elderArchiveNo": "A202604300001",
+        "invitationCode": "INVITE001",
+        "boundAt": "2026-05-23 00:00:00",
+        "status": "ACTIVE"
+      }
+    ]
+  }
+}

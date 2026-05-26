@@ -1,0 +1,9 @@
+04-统一后端/target/surefire-reports/TEST-com.silverlink.care.SilverLinkCareApplicationTests.xml
+04-统一后端/target/surefire-reports/TEST-com.silverlink.care.module.scan.WeChatAuthServiceTest.xml
+04-统一后端/target/surefire-reports/TEST-com.silverlink.care.security.SignatureInterceptorTest.xml
+04-统一后端/target/surefire-reports/com.silverlink.care.SilverLinkCareApplicationTests.txt
+04-统一后端/target/surefire-reports/com.silverlink.care.module.scan.WeChatAuthServiceTest.txt
+04-统一后端/target/surefire-reports/com.silverlink.care.security.SignatureInterceptorTest.txt
+05-安卓短信中转端/app/build/test-results/testDebugUnitTest/TEST-com.silverlink.smsrelay.data.network.RelayRequestSignerTest.xml
+05-安卓短信中转端/app/build/test-results/testDebugUnitTest/TEST-com.silverlink.smsrelay.util.RelayConfigSyncResolverTest.xml
+05-安卓短信中转端/app/build/test-results/testDebugUnitTest/TEST-com.silverlink.smsrelay.util.SmsParserTest.xml

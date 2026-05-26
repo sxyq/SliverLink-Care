@@ -1,0 +1,37 @@
+{
+  "item": {
+    "name": "family-my-elders",
+    "method": "GET",
+    "path": "/api/family/me/elders",
+    "status": 200,
+    "durationMs": 57,
+    "pass": true,
+    "error": null,
+    "apiCode": 200,
+    "message": "success",
+    "dataPreview": {
+      "type": "array",
+      "count": 1,
+      "first": {
+        "id": "elder-001",
+        "name": "张**",
+        "age": 76,
+        "archiveNo": "A202604300001",
+        "lastUpdate": "2026-05-24 11:00:00"
+      }
+    }
+  },
+  "raw": {
+    "code": 200,
+    "message": "success",
+    "data": [
+      {
+        "id": "elder-001",
+        "name": "张**",
+        "age": 76,
+        "archiveNo": "A202604300001",
+        "lastUpdate": "2026-05-24 11:00:00"
+      }
+    ]
+  }
+}

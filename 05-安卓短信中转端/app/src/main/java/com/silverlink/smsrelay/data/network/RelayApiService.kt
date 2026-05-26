@@ -1,6 +1,7 @@
 package com.silverlink.smsrelay.data.network
 
 import com.silverlink.smsrelay.data.model.InboundSmsPayload
+import com.silverlink.smsrelay.util.RelayServerUrlNormalizer
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,7 +17,8 @@ class RelayApiService(
         deviceSecret: String,
         payload: InboundSmsPayload,
     ): Result<Unit> {
-        if (baseUrl.isBlank()) {
+        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
 
@@ -43,7 +45,7 @@ class RelayApiService(
         )
 
         val request = Request.Builder()
-            .url(baseUrl.trimEnd('/') + path)
+            .url(normalizedBaseUrl.trimEnd('/') + path)
             .addHeader("X-Relay-Device-Secret", deviceSecret)
             .addHeader("X-Relay-Timestamp", signed.timestamp)
             .addHeader("X-Relay-Nonce", signed.nonce)
@@ -59,7 +61,8 @@ class RelayApiService(
     }
 
     fun sendHeartbeat(baseUrl: String, deviceId: String, deviceSecret: String): Result<Unit> {
-        if (baseUrl.isBlank()) {
+        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
 
@@ -75,7 +78,7 @@ class RelayApiService(
         )
 
         val request = Request.Builder()
-            .url(baseUrl.trimEnd('/') + path)
+            .url(normalizedBaseUrl.trimEnd('/') + path)
             .addHeader("X-Relay-Device-Secret", deviceSecret)
             .addHeader("X-Relay-Timestamp", signed.timestamp)
             .addHeader("X-Relay-Nonce", signed.nonce)
@@ -91,7 +94,8 @@ class RelayApiService(
     }
 
     fun fetchDeviceConfig(baseUrl: String, deviceId: String, deviceSecret: String): Result<JSONObject> {
-        if (baseUrl.isBlank()) {
+        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
         val path = "/api/sms-relay/devices/$deviceId/config"
@@ -103,7 +107,7 @@ class RelayApiService(
         )
 
         val request = Request.Builder()
-            .url(baseUrl.trimEnd('/') + path)
+            .url(normalizedBaseUrl.trimEnd('/') + path)
             .addHeader("X-Relay-Device-Secret", deviceSecret)
             .addHeader("X-Relay-Timestamp", signed.timestamp)
             .addHeader("X-Relay-Nonce", signed.nonce)

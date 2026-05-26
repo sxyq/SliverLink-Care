@@ -573,16 +573,29 @@ button, input, select {
   display: grid;
   gap: 8px;
   padding: 14px;
-  display: grid;
-  grid-template-columns: minmax(260px, 1.8fr) minmax(148px, 0.7fr) auto auto auto auto;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #f8fbfc;
+}
+
 .score-chip strong {
+  font-size: 22px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
 .toolbar > input {
   flex: 1 1 240px;
-.volunteer-manage-toolbar > input:first-child {
+}
+
 .toolbar > input:first-child {
   flex: 1.6 1 360px;
   max-width: 460px;
-  flex: 0 0 auto;
 }
 
 .toolbar > .column-menu {
@@ -592,6 +605,29 @@ button, input, select {
 .toolbar input,
 .toolbar select {
   min-height: 34px;
+}
+
+.volunteer-manage-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.volunteer-manage-toolbar__search,
+.volunteer-manage-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.volunteer-manage-toolbar__search {
+  flex: 1 1 520px;
+}
+
 .volunteer-manage-toolbar__actions {
   flex: 0 1 auto;
   justify-content: flex-end;
@@ -1989,9 +2025,11 @@ button, input, select {
     font-size: 13px;
   }
 
-    display: block;
-    overflow-x: auto;
   .topbar {
+    display: grid;
+    gap: 8px;
+  }
+
   .eyebrow {
     font-size: 11px;
   }
