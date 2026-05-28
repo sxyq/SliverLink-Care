@@ -2,6 +2,9 @@ package com.silverlink.care.module.smsrelay;
 
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import com.silverlink.care.module.scan.ScanVerificationSessionDto;
+import com.silverlink.care.module.scan.ScanVerificationStatusDto;
+import com.silverlink.care.module.sms.SmsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,6 +22,9 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class SmsRelayServiceTest {
 
@@ -68,6 +74,19 @@ class SmsRelayServiceTest {
         assertEquals("13800000000", context.getVisitorPhone());
         assertThrows(BizException.class, () -> service.authorizeVerifiedSession("verified", "elder-2", "health"));
         assertThrows(BizException.class, () -> service.authorizeVerifiedSession("verified", "elder-1", "medication"));
+    }
+
+    @Test
+    void authorizeVerifiedSessionUsesCacheWhenEnabled() {
+        ReflectionTestUtils.setField(service, "authorizedSessionCacheTtlMs", 60_000L);
+        jdbc.sessions.put("verified", new HashMap<>(sessionRow("verified", "elder-1", "health", "VERIFIED", true, Instant.now().plusSeconds(60))));
+
+        SmsRelayService.VerifiedSessionContext first = service.authorizeVerifiedSession("verified", "elder-1", "health");
+        SmsRelayService.VerifiedSessionContext second = service.authorizeVerifiedSession("verified", "elder-1", "health");
+
+        assertEquals("verified", first.getSessionId());
+        assertEquals("verified", second.getSessionId());
+        assertEquals(1, jdbc.sessionLookupCount);
     }
 
     @Test
@@ -121,6 +140,50 @@ class SmsRelayServiceTest {
         assertMessage("身份证号校验失败", () -> service.createIdentityVerificationSession("elder-1", "health", "访客", "13800000000", "500102200212180837"));
     }
 
+    @Test
+    void getScanVerificationStatusMarksExpiredPendingSession() {
+        jdbc.sessions.put("expired", new HashMap<>(sessionRow("expired", "elder-1", "health", "PENDING", false, Instant.now().minusSeconds(5))));
+
+        ScanVerificationStatusDto result = service.getScanVerificationStatus("expired");
+
+        assertEquals("EXPIRED", result.getStatus());
+        assertEquals(false, result.isVerified());
+    }
+
+    @Test
+    void directSmsVerificationCreatesSessionAndUpdatesStatusWhenCodeMatches() {
+        SmsService smsService = mock(SmsService.class);
+        when(smsService.verify("13800000000", "123456", "SCAN:session-direct")).thenReturn(true);
+
+        SmsRelayService directService = new SmsRelayService(jdbc, smsService, new StubDataService());
+        ReflectionTestUtils.setField(directService, "sessionTtlSeconds", 300L);
+
+        ScanVerificationSessionDto created = directService.createDirectSmsVerificationSession("elder-1", "health", "13800000000");
+        String createdSessionId = created.getSessionId();
+        when(smsService.verify("13800000000", "123456", "SCAN:" + createdSessionId)).thenReturn(true);
+
+        ScanVerificationStatusDto verified = directService.verifyDirectSmsVerificationSession(createdSessionId, "13800000000", "123456");
+
+        assertEquals("VERIFIED", verified.getStatus());
+        assertTrue(verified.isVerified());
+        verify(smsService).sendCode("13800000000", "SCAN:" + createdSessionId);
+        verify(smsService).verify("13800000000", "123456", "SCAN:" + createdSessionId);
+    }
+
+    @Test
+    void directSmsVerificationRejectsPhoneMismatchAndExpiresGracefully() {
+        SmsService smsService = mock(SmsService.class);
+        SmsRelayService directService = new SmsRelayService(jdbc, smsService, new StubDataService());
+
+        jdbc.sessions.put("mismatch", new HashMap<>(directSessionRow("mismatch", "elder-1", "health", "13800000000", "PENDING", Instant.now().plusSeconds(60))));
+        assertMessage("Verification phone mismatch", () -> directService.verifyDirectSmsVerificationSession("mismatch", "13900000000", "123456"));
+
+        jdbc.sessions.put("expired-direct", new HashMap<>(directSessionRow("expired-direct", "elder-1", "health", "13800000000", "PENDING", Instant.now().minusSeconds(5))));
+        ScanVerificationStatusDto expired = directService.verifyDirectSmsVerificationSession("expired-direct", "13800000000", "123456");
+        assertEquals("EXPIRED", expired.getStatus());
+        assertEquals(false, expired.isVerified());
+    }
+
     private static Map<String, Object> deviceRow(String deviceId, String secret) {
         return Map.of(
                 "device_id", deviceId,
@@ -154,6 +217,30 @@ class SmsRelayServiceTest {
                 Map.entry("visitor_phone_enc", "phone-enc"),
                 Map.entry("visitor_id_card_enc", "id-enc"),
                 Map.entry("sender_phone_masked", "138****0000")
+        );
+    }
+
+    private static Map<String, Object> directSessionRow(
+            String sessionId,
+            String elderId,
+            String target,
+            String receiverPhone,
+            String status,
+            Instant expiresAt
+    ) {
+        return Map.ofEntries(
+                Map.entry("session_id", sessionId),
+                Map.entry("elder_id", elderId),
+                Map.entry("target", target),
+                Map.entry("receiver_phone", receiverPhone),
+                Map.entry("message_body", ""),
+                Map.entry("message_prefix", "DIRECT_SMS"),
+                Map.entry("status", status),
+                Map.entry("verified", false),
+                Map.entry("expires_at", expiresAt.toString()),
+                Map.entry("verified_at", ""),
+                Map.entry("verification_method", "DIRECT_SMS"),
+                Map.entry("sender_phone_masked", "")
         );
     }
 
@@ -202,6 +289,7 @@ class SmsRelayServiceTest {
     private static class FakeJdbcTemplate extends JdbcTemplate {
         private final Map<String, Map<String, Object>> devices = new HashMap<>();
         private final Map<String, Map<String, Object>> sessions = new HashMap<>();
+        private int sessionLookupCount;
 
         @Override
         public int update(String sql, Object... args) {
@@ -221,19 +309,59 @@ class SmsRelayServiceTest {
                 row.put("session_id", args[0]);
                 row.put("elder_id", args[1]);
                 row.put("target", args[2]);
-                row.put("verification_method", args[3]);
-                row.put("receiver_phone", args[4]);
-                row.put("message_body", args[5]);
-                row.put("message_prefix", args[6]);
-                row.put("status", args[7]);
-                row.put("expires_at", args[8]);
-                row.put("verified", args[9]);
-                row.put("verified_at", args[10]);
-                row.put("sender_phone_masked", args[11]);
-                row.put("visitor_name_enc", args[12]);
-                row.put("visitor_phone_enc", args[13]);
-                row.put("visitor_id_card_enc", args[14]);
+                if (args.length == 15) {
+                    row.put("verification_method", args[3]);
+                    row.put("receiver_phone", args[4]);
+                    row.put("message_body", args[5]);
+                    row.put("message_prefix", args[6]);
+                    row.put("status", args[7]);
+                    row.put("expires_at", args[8]);
+                    row.put("verified", args[9]);
+                    row.put("verified_at", args[10]);
+                    row.put("sender_phone_masked", args[11]);
+                    row.put("visitor_name_enc", args[12]);
+                    row.put("visitor_phone_enc", args[13]);
+                    row.put("visitor_id_card_enc", args[14]);
+                } else if (args.length == 10) {
+                    row.put("relay_device_id", args[3]);
+                    row.put("receiver_phone", args[4]);
+                    row.put("message_body", args[5]);
+                    row.put("message_prefix", args[6]);
+                    row.put("status", args[7]);
+                    row.put("expires_at", args[8]);
+                    row.put("verified", args[9]);
+                } else if (args.length == 9) {
+                    row.put("receiver_phone", args[3]);
+                    row.put("message_body", args[4]);
+                    row.put("message_prefix", args[5]);
+                    row.put("status", args[6]);
+                    row.put("expires_at", args[7]);
+                    row.put("verified", args[8]);
+                    row.put("verification_method", "DIRECT_SMS");
+                }
                 sessions.put(String.valueOf(args[0]), row);
+                return 1;
+            }
+            if (sql.contains("update scan_verification_session") && sql.contains("set status='VERIFIED'")) {
+                String sessionId = String.valueOf(args[2]);
+                Map<String, Object> row = sessions.get(sessionId);
+                if (row == null) {
+                    return 0;
+                }
+                row.put("status", "VERIFIED");
+                row.put("verified", true);
+                row.put("verified_at", args[0]);
+                row.put("sender_phone_masked", args[1]);
+                return 1;
+            }
+            if (sql.contains("update scan_verification_session") && sql.contains("set status='EXPIRED'")) {
+                String sessionId = String.valueOf(args[0]);
+                Map<String, Object> row = sessions.get(sessionId);
+                if (row == null) {
+                    return 0;
+                }
+                row.put("status", "EXPIRED");
+                row.put("verified", false);
                 return 1;
             }
             return 1;
@@ -257,6 +385,7 @@ class SmsRelayServiceTest {
                 return row == null ? List.of() : List.of(row);
             }
             if (sql.contains("from scan_verification_session where session_id=?")) {
+                sessionLookupCount++;
                 Map<String, Object> row = sessions.get(String.valueOf(args[0]));
                 return row == null ? List.of() : List.of(row);
             }
