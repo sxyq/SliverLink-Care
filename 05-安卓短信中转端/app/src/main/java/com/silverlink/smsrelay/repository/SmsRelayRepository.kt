@@ -1,6 +1,8 @@
 package com.silverlink.smsrelay.repository
 
 import android.content.Context
+import android.provider.Telephony
+import android.util.Log
 import com.silverlink.smsrelay.data.local.RelayPreferences
 import com.silverlink.smsrelay.data.local.TodayStats
 import com.silverlink.smsrelay.data.model.InboundSmsPayload
@@ -8,11 +10,14 @@ import com.silverlink.smsrelay.data.model.SmsRecord
 import com.silverlink.smsrelay.data.model.UploadStatus
 import com.silverlink.smsrelay.data.network.ApiClientFactory
 import com.silverlink.smsrelay.data.network.RelayApiService
+import com.silverlink.smsrelay.util.SmsParser
+import com.silverlink.smsrelay.util.SmsPermissionHelper
 import org.json.JSONArray
 import org.json.JSONObject
+import java.util.concurrent.TimeUnit
 
 class SmsRelayRepository(
-    context: Context,
+    private val context: Context,
     private val relayPreferences: RelayPreferences = RelayPreferences(context),
     private val apiService: RelayApiService = RelayApiService(ApiClientFactory.create()),
 ) {
@@ -20,11 +25,29 @@ class SmsRelayRepository(
     private val prefs = context.getSharedPreferences("sms-relay-records", Context.MODE_PRIVATE)
 
     fun uploadInboundSms(senderPhone: String, messageBody: String, receivedAt: Long): Result<Unit> {
+        return uploadInboundSms(senderPhone, messageBody, receivedAt, advisoryMessage = null)
+    }
+
+    fun uploadInboundSms(
+        senderPhone: String,
+        messageBody: String,
+        receivedAt: Long,
+        advisoryMessage: String? = null,
+    ): Result<Unit> {
         val config = relayPreferences.readConfig()
         val recordId = "sms-${System.currentTimeMillis()}"
 
         // 保存为PENDING状态
-        saveRecord(SmsRecord(recordId, senderPhone, messageBody, receivedAt, UploadStatus.PENDING))
+        saveRecord(
+            SmsRecord(
+                id = recordId,
+                senderPhone = senderPhone,
+                messageBody = messageBody,
+                receivedAt = receivedAt,
+                status = UploadStatus.PENDING,
+                advisoryMessage = advisoryMessage,
+            ),
+        )
         incrementStatsReceived()
 
         val payload = InboundSmsPayload(
@@ -67,6 +90,7 @@ class SmsRelayRepository(
                 status = UploadStatus.valueOf(obj.getString("status")),
                 uploadedAt = obj.optLong("uploadedAt", 0).let { if (it == 0L) null else it },
                 failReason = obj.optString("failReason", ""),
+                advisoryMessage = obj.optString("advisoryMessage", "").ifBlank { null },
             )
         }.sortedByDescending { it.receivedAt }
     }
@@ -81,6 +105,92 @@ class SmsRelayRepository(
 
     fun getTodayStats(): TodayStats {
         return relayPreferences.readTodayStats()
+    }
+
+    fun syncMissedVerificationSmsFromInbox(): Result<Int> {
+        if (!SmsPermissionHelper.hasSmsPermissions(context)) {
+            Log.w(TAG, "Inbox sync skipped: SMS permissions missing")
+            return Result.failure(IllegalStateException("SMS permissions missing"))
+        }
+
+        val config = relayPreferences.readConfig()
+        val existingFingerprints = getAllRecords()
+            .asSequence()
+            .filter { it.status != UploadStatus.FAILED }
+            .map(::fingerprintOf)
+            .toMutableSet()
+        val lastScanTimestamp = relayPreferences.getLastInboxScanTimestamp()
+        val now = System.currentTimeMillis()
+        val queryStartTimestamp = maxOf(
+            0L,
+            if (lastScanTimestamp > 0L) {
+                lastScanTimestamp - INBOX_SCAN_OVERLAP_MS
+            } else {
+                now - INITIAL_INBOX_LOOKBACK_MS
+            },
+        )
+
+        val projection = arrayOf(
+            Telephony.Sms._ID,
+            Telephony.Sms.ADDRESS,
+            Telephony.Sms.BODY,
+            Telephony.Sms.DATE,
+        )
+        val selection = "${Telephony.Sms.DATE} >= ?"
+        val selectionArgs = arrayOf(queryStartTimestamp.toString())
+        val sortOrder = "${Telephony.Sms.DATE} DESC LIMIT $INBOX_SCAN_LIMIT"
+
+        var newestTimestamp = lastScanTimestamp
+        var uploadedCount = 0
+
+        context.contentResolver.query(
+            Telephony.Sms.Inbox.CONTENT_URI,
+            projection,
+            selection,
+            selectionArgs,
+            sortOrder,
+        )?.use { cursor ->
+            val addressIndex = cursor.getColumnIndexOrThrow(Telephony.Sms.ADDRESS)
+            val bodyIndex = cursor.getColumnIndexOrThrow(Telephony.Sms.BODY)
+            val dateIndex = cursor.getColumnIndexOrThrow(Telephony.Sms.DATE)
+
+            while (cursor.moveToNext()) {
+                val senderPhone = cursor.getString(addressIndex).orEmpty()
+                val messageBody = cursor.getString(bodyIndex).orEmpty()
+                val receivedAt = cursor.getLong(dateIndex)
+                newestTimestamp = maxOf(newestTimestamp, receivedAt)
+
+                val parsed = SmsParser.parse(messageBody, config.messagePrefix)
+                if (!parsed.matched) {
+                    continue
+                }
+
+                val fingerprint = fingerprintOf(
+                    senderPhone = senderPhone,
+                    messageBody = parsed.rawBody,
+                    receivedAt = receivedAt,
+                )
+                if (!existingFingerprints.add(fingerprint)) {
+                    continue
+                }
+
+                val uploadResult = uploadInboundSms(
+                    senderPhone = senderPhone,
+                    messageBody = parsed.rawBody,
+                    receivedAt = receivedAt,
+                    advisoryMessage = buildInboxRecoveryAdvisory(now = now, receivedAt = receivedAt),
+                )
+                uploadResult.onSuccess {
+                    uploadedCount += 1
+                }
+            }
+        }
+
+        relayPreferences.saveLastInboxScan(maxOf(newestTimestamp, now))
+        if (uploadedCount > 0) {
+            Log.i(TAG, "Inbox sync uploaded $uploadedCount missed verification SMS messages")
+        }
+        return Result.success(uploadedCount)
     }
 
     private fun saveRecord(record: SmsRecord) {
@@ -113,6 +223,7 @@ class SmsRelayRepository(
             obj.put("status", record.status.name)
             record.uploadedAt?.let { obj.put("uploadedAt", it) }
             record.failReason?.let { obj.put("failReason", it) }
+            record.advisoryMessage?.let { obj.put("advisoryMessage", it) }
             array.put(obj)
         }
         prefs.edit().putString(KEY_RECORDS, array.toString()).apply()
@@ -135,5 +246,27 @@ class SmsRelayRepository(
 
     companion object {
         private const val KEY_RECORDS = "records_json"
+        private const val TAG = "SmsRelayInboxSync"
+        private const val INBOX_SCAN_LIMIT = 30
+        private val INITIAL_INBOX_LOOKBACK_MS = TimeUnit.HOURS.toMillis(12)
+        private val INBOX_SCAN_OVERLAP_MS = TimeUnit.MINUTES.toMillis(10)
+        private val VERIFICATION_SESSION_TTL_MS = TimeUnit.MINUTES.toMillis(5)
+
+        private fun fingerprintOf(record: SmsRecord): String {
+            return fingerprintOf(record.senderPhone, record.messageBody, record.receivedAt)
+        }
+
+        private fun fingerprintOf(senderPhone: String, messageBody: String, receivedAt: Long): String {
+            return "$receivedAt|$senderPhone|$messageBody"
+        }
+
+        internal fun buildInboxRecoveryAdvisory(now: Long, receivedAt: Long): String? {
+            val ageMs = now - receivedAt
+            if (ageMs < VERIFICATION_SESSION_TTL_MS) {
+                return null
+            }
+            val ageMinutes = TimeUnit.MILLISECONDS.toMinutes(ageMs).coerceAtLeast(1)
+            return "这条验证码是从收件箱补扫上传的，已晚于收到后约${ageMinutes}分钟，验证会话可能已过期，请重新发起一次验证码。"
+        }
     }
 }

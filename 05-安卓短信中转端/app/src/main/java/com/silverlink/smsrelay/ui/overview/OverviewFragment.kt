@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,8 +27,8 @@ class OverviewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        relayPreferences = RelayPreferences(requireContext())
-        repository = SmsRelayRepository(requireContext())
+        relayPreferences = preferencesFactory?.invoke(requireContext()) ?: RelayPreferences(requireContext())
+        repository = repositoryFactory?.invoke(requireContext()) ?: SmsRelayRepository(requireContext())
 
         setupDeviceStatus(view)
         setupConfigCards(view)
@@ -115,13 +116,22 @@ class OverviewFragment : Fragment() {
         val records = repository.getRecentRecords(5)
         val emptyView = view.findViewById<TextView>(R.id.emptyRecentSms)
         val recyclerView = view.findViewById<RecyclerView>(R.id.recentSmsList)
+        val advisoryView = view.findViewById<TextView>(R.id.recentSmsAdvisory)
+        val advisoryMessage = records.firstOrNull { !it.advisoryMessage.isNullOrBlank() }?.advisoryMessage
 
         if (records.isEmpty()) {
             emptyView?.visibility = View.VISIBLE
             recyclerView?.visibility = View.GONE
+            advisoryView?.visibility = View.GONE
         } else {
             emptyView?.visibility = View.GONE
             recyclerView?.visibility = View.VISIBLE
+            advisoryView?.isVisible = !advisoryMessage.isNullOrBlank()
+            advisoryView?.text = if (advisoryMessage.isNullOrBlank()) {
+                ""
+            } else {
+                getString(R.string.recent_sms_advisory_prefix) + "：" + advisoryMessage
+            }
             recentSmsAdapter = RecentSmsAdapter(records)
             recyclerView?.layoutManager = LinearLayoutManager(requireContext())
             recyclerView?.adapter = recentSmsAdapter
@@ -136,6 +146,7 @@ class OverviewFragment : Fragment() {
             val body: TextView = view.findViewById(R.id.recordBody)
             val time: TextView = view.findViewById(R.id.recordTime)
             val status: TextView = view.findViewById(R.id.recordStatus)
+            val advisory: TextView = view.findViewById(R.id.recordAdvisory)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -150,6 +161,8 @@ class OverviewFragment : Fragment() {
             holder.body.text = record.messageBody
             holder.time.text = formatTime(record.receivedAt)
             bindStatus(holder.status, record.status)
+            holder.advisory.isVisible = !record.advisoryMessage.isNullOrBlank()
+            holder.advisory.text = record.advisoryMessage.orEmpty()
         }
 
         override fun getItemCount() = records.size
@@ -177,6 +190,16 @@ class OverviewFragment : Fragment() {
                     textView.setBackgroundResource(R.color.sl_warning_bg)
                 }
             }
+        }
+    }
+
+    companion object {
+        internal var preferencesFactory: ((android.content.Context) -> RelayPreferences)? = null
+        internal var repositoryFactory: ((android.content.Context) -> SmsRelayRepository)? = null
+
+        internal fun resetTestHooks() {
+            preferencesFactory = null
+            repositoryFactory = null
         }
     }
 }

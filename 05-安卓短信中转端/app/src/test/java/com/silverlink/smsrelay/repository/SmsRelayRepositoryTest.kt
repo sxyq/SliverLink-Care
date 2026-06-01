@@ -10,6 +10,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -88,5 +90,39 @@ class SmsRelayRepositoryTest {
         assertEquals(0, repository.getTodayStats().uploaded)
         assertEquals(1, repository.getTodayStats().failed)
         assertEquals(0, repository.getTodayStats().pending)
+    }
+
+    @Test
+    fun buildInboxRecoveryAdvisoryReturnsExpiryHintForOldRecoveredSms() {
+        val oldReceivedAt = System.currentTimeMillis() - 6 * 60 * 1000
+        val advisory = SmsRelayRepository.buildInboxRecoveryAdvisory(System.currentTimeMillis(), oldReceivedAt)
+
+        assertNotNull(advisory)
+        assertTrue(advisory!!.contains("可能已过期"))
+    }
+
+    @Test
+    fun buildInboxRecoveryAdvisorySkipsHintForFreshRecoveredSms() {
+        val freshReceivedAt = System.currentTimeMillis() - 60 * 1000
+        val advisory = SmsRelayRepository.buildInboxRecoveryAdvisory(System.currentTimeMillis(), freshReceivedAt)
+
+        assertNull(advisory)
+    }
+
+    @Test
+    fun uploadInboundSmsPersistsAdvisoryMessageWhenProvided() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody("""{"code":200}"""))
+
+        val result = repository.uploadInboundSms(
+            senderPhone = "13900000000",
+            messageBody = "SL OLD123",
+            receivedAt = 1770000000002L,
+            advisoryMessage = "这条验证码可能已过期",
+        )
+
+        assertTrue(result.isSuccess)
+        val record = repository.getAllRecords().first()
+        assertEquals(UploadStatus.UPLOADED, record.status)
+        assertEquals("这条验证码可能已过期", record.advisoryMessage)
     }
 }

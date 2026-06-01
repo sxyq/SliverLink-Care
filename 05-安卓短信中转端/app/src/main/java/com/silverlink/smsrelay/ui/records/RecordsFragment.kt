@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -27,7 +28,7 @@ class RecordsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        repository = SmsRelayRepository(requireContext())
+        repository = repositoryFactory?.invoke(requireContext()) ?: SmsRelayRepository(requireContext())
 
         setupFilterChips(view)
         setupRecordsList(view)
@@ -92,6 +93,7 @@ class RecordsFragment : Fragment() {
             val body: TextView = view.findViewById(R.id.recordBody)
             val time: TextView = view.findViewById(R.id.recordTime)
             val status: TextView = view.findViewById(R.id.recordStatus)
+            val advisory: TextView = view.findViewById(R.id.recordAdvisory)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -106,6 +108,8 @@ class RecordsFragment : Fragment() {
             holder.body.text = record.messageBody
             holder.time.text = formatTime(record.receivedAt)
             bindStatus(holder.status, record.status)
+            holder.advisory.isVisible = !record.advisoryMessage.isNullOrBlank()
+            holder.advisory.text = record.advisoryMessage.orEmpty()
         }
 
         override fun getItemCount() = records.size
@@ -138,6 +142,14 @@ class RecordsFragment : Fragment() {
                     textView.setBackgroundResource(R.color.sl_warning_bg)
                 }
             }
+        }
+    }
+
+    companion object {
+        internal var repositoryFactory: ((android.content.Context) -> SmsRelayRepository)? = null
+
+        internal fun resetTestHooks() {
+            repositoryFactory = null
         }
     }
 }

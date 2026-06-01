@@ -8,4 +8,5 @@ data class SmsRecord(
     val status: UploadStatus,
     val uploadedAt: Long? = null,
     val failReason: String? = null,
+    val advisoryMessage: String? = null,
 )

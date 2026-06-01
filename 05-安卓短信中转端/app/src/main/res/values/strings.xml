@@ -24,6 +24,7 @@
     <string name="uptime">运行时长</string>
     <string name="recent_sms_title">最近短信记录</string>
     <string name="no_recent_sms">暂无短信记录</string>
+    <string name="recent_sms_advisory_prefix">补扫提醒</string>
     <string name="secret_masked">••••••••</string>
     <string name="not_configured">未配置</string>
 
@@ -49,12 +50,22 @@
     <string name="service_status_label">后台服务状态</string>
     <string name="permission_status_label">短信权限</string>
     <string name="battery_optimization_label">息屏保活</string>
+    <string name="exact_alarm_label">精确闹钟</string>
+    <string name="protection_summary_label">强化保护</string>
+    <string name="non_root_protection_label">非 Root 强保护</string>
+    <string name="media_keepalive_label">媒体保活</string>
+    <string name="root_protection_label">Root 强保护</string>
     <string name="last_heartbeat">最后心跳</string>
     <string name="last_sync_time">最后同步时间</string>
     <string name="version_info">版本信息</string>
     <string name="save_config">保存配置</string>
     <string name="request_sms_permission">申请短信权限</string>
     <string name="request_battery_optimization">允许息屏后台运行</string>
+    <string name="request_enhanced_protection">一键开启非 Root 强保护</string>
+    <string name="request_unified_keepalive">开启联合保活</string>
+    <string name="enable_media_keepalive">开启媒体保活模式</string>
+    <string name="disable_media_keepalive">关闭媒体保活模式</string>
+    <string name="request_root_force_protection">开启 Root 保活</string>
     <string name="sync_remote_config">同步服务端配置</string>
     <string name="config_saved">配置已保存</string>
     <string name="config_synced">已同步服务端配置</string>
@@ -66,8 +77,24 @@
     <string name="sms_permission_denied">短信权限未完全授权</string>
     <string name="battery_optimization_ready">已允许息屏后台运行</string>
     <string name="battery_optimization_missing">未加入电池优化白名单，息屏后可能被系统限制</string>
+    <string name="exact_alarm_ready">已允许精确闹钟唤醒</string>
+    <string name="exact_alarm_missing">未允许精确闹钟，熄屏后唤醒可能被延后</string>
     <string name="battery_optimization_opened">已打开电池优化设置，请允许本应用后台运行</string>
     <string name="battery_optimization_open_failed">无法打开电池优化设置，请手动在系统设置中关闭限制</string>
+    <string name="enhanced_protection_opened">已打开非 Root 强保护入口，请继续允许精确闹钟、自启动、无限制后台与电池白名单</string>
+    <string name="enhanced_protection_open_failed">无法打开非 Root 强保护入口，请手动完成电池白名单、精确闹钟和厂商后台保护</string>
+    <string name="unified_keepalive_enabled">联合强保活已开启：已启用媒体保活，并尝试完成系统与 root 强保护</string>
+    <string name="unified_keepalive_partial">联合强保活已部分开启：媒体保活已启用，请继续完成系统授权</string>
+    <string name="non_root_protection_ready">已开启更强的非 Root 保活能力</string>
+    <string name="non_root_protection_missing">仍建议开启电池白名单和精确闹钟以增强后台保活</string>
+    <string name="media_keepalive_enabled">媒体保活模式已开启</string>
+    <string name="media_keepalive_disabled">媒体保活模式已关闭</string>
+    <string name="media_keepalive_ready">已启用音乐类前台保活</string>
+    <string name="media_keepalive_missing">未启用音乐类前台保活</string>
+    <string name="root_protection_enabled">Root 强保护已开启</string>
+    <string name="root_protection_failed">Root 强保护开启失败</string>
+    <string name="root_protection_ready">已开启 Root 强保护能力</string>
+    <string name="root_protection_missing">未开启 Root 强保护</string>
 
     <!-- 后台服务 -->
     <string name="relay_service_channel_name">短信中转后台服务</string>
@@ -79,6 +106,7 @@
     <string name="relay_service_uploading">正在后台上传短信</string>
     <string name="relay_service_retrying">后台服务运行中，等待重试或下次心跳</string>
     <string name="relay_service_stopped">后台服务未运行</string>
+    <string name="relay_service_media_keepalive">媒体保活中 · %1$s</string>
 
     <!-- 提示 -->
     <string name="server_base_url_hint">服务器地址，例如 https://example.com</string>

@@ -51,5 +51,13 @@
             android:layout_marginTop="4dp"
             android:textSize="12sp"
             android:textColor="@color/sl_text_secondary" />
+        <TextView
+            android:id="@+id/recordAdvisory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="12sp"
+            android:textColor="@color/sl_warning"
+            android:visibility="gone" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
