@@ -181,4 +181,142 @@ describe('scanApi', () => {
     const result = await fetchScaleSummaries('session-1', 'elder-001');
     expect(result[0].name).toBe('PHQ-9');
   });
+
+  it('returns empty elder id when no qr token in url', () => {
+    window.history.pushState({}, '', '/silverlink/scan/');
+    window.sessionStorage.setItem('silverlink.scan.qrToken', 'qr-token-123456');
+    window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
+
+    expect(getResolvedElderId()).toBe('');
+    expect(getResolvedEmergencyPhone()).toBe('');
+    expect(getResolvedEmergencyPhoneMasked()).toBe('');
+  });
+
+  it('returns empty when resolved token does not match current token', () => {
+    window.sessionStorage.setItem('silverlink.scan.qrToken', 'old-token');
+    window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
+    window.sessionStorage.setItem('silverlink.scan.emergencyPhone', '13800000000');
+    window.sessionStorage.setItem('silverlink.scan.emergencyPhoneMasked', '138****0000');
+
+    expect(getResolvedElderId()).toBe('');
+    expect(getResolvedEmergencyPhone()).toBe('');
+    expect(getResolvedEmergencyPhoneMasked()).toBe('');
+  });
+
+  it('returns resolved values when tokens match', () => {
+    window.sessionStorage.setItem('silverlink.scan.qrToken', 'qr-token-123456');
+    window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
+    window.sessionStorage.setItem('silverlink.scan.emergencyPhone', '13800000000');
+    window.sessionStorage.setItem('silverlink.scan.emergencyPhoneMasked', '138****0000');
+
+    expect(getResolvedElderId()).toBe('elder-001');
+    expect(getResolvedEmergencyPhone()).toBe('13800000000');
+    expect(getResolvedEmergencyPhoneMasked()).toBe('138****0000');
+  });
+
+  it('clearResolvedScanContext removes all stored keys', async () => {
+    mockFetchData(resolvedDto);
+    await fetchBasicInfo('qr-token-123456');
+
+    expect(getResolvedElderId()).toBe('elder-001');
+    clearResolvedScanContext();
+    expect(window.sessionStorage.getItem('silverlink.scan.qrToken')).toBeNull();
+    expect(window.sessionStorage.getItem('silverlink.scan.elderId')).toBeNull();
+    expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhone')).toBeNull();
+    expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhoneMasked')).toBeNull();
+  });
+
+  it('fetchBasicInfo defaults age to 0 when missing', async () => {
+    mockFetchData({ ...resolvedDto, age: undefined });
+
+    const result = await fetchBasicInfo('qr-token-123456');
+    expect(result.age).toBe(0);
+  });
+
+  it('fetchBasicInfo defaults residence to empty string when missing', async () => {
+    mockFetchData({ ...resolvedDto, residence: undefined });
+
+    const result = await fetchBasicInfo('qr-token-123456');
+    expect(result.residence).toBe('');
+  });
+
+  it('fetchVerifiedBasicInfo defaults emergencyPhoneDial to empty string when missing', async () => {
+    mockFetchData({ ...resolvedDto, emergencyPhoneDial: undefined });
+
+    const result = await fetchVerifiedBasicInfo('session-1', 'elder-001');
+    expect(result.emergencyPhoneDial).toBe('');
+  });
+
+  it('fetchVerifiedBasicInfo defaults age to 0 and residence to empty when missing', async () => {
+    mockFetchData({ ...resolvedDto, age: undefined, residence: undefined });
+
+    const result = await fetchVerifiedBasicInfo('session-1', 'elder-001');
+    expect(result.age).toBe(0);
+    expect(result.residence).toBe('');
+  });
+
+  it('fetchHealthRecord returns all defaults when dto is empty', async () => {
+    mockFetchData({});
+
+    const result = await fetchHealthRecord('session-1', 'elder-001');
+    expect(result).toEqual({
+      date: '',
+      volunteer: '',
+      heightCm: 0,
+      weightKg: 0,
+      waistCm: 0,
+      bmi: 0,
+      healthSelfAssessment: '',
+      selfCareAssessment: '',
+      cognitiveScreening: '',
+      emotionScreening: '',
+    });
+  });
+
+  it('fetchScaleSummaries handles answers not being an array', async () => {
+    mockFetchData([{ name: 'PHQ-9', score: 5, updatedAt: '2026-05-25', answers: null }]);
+
+    const result = await fetchScaleSummaries('session-1', 'elder-001');
+    expect(result[0].answers).toEqual([]);
+  });
+
+  it('fetchScaleSummaries falls back updatedAt to date when updatedAt is missing', async () => {
+    mockFetchData([{ name: 'PHQ-9', score: 5, date: '2026-05-20' }]);
+
+    const result = await fetchScaleSummaries('session-1', 'elder-001');
+    expect(result[0].updatedAt).toBe('2026-05-20');
+  });
+
+  it('fetchScaleSummaries handles answer with numeric value directly', async () => {
+    mockFetchData([{
+      name: 'PHQ-9',
+      score: 5,
+      updatedAt: '2026-05-25',
+      answers: [{ question: 'Q1', value: 2 }],
+    }]);
+
+    const result = await fetchScaleSummaries('session-1', 'elder-001');
+    expect(result[0].answers).toEqual([{ question: 'Q1', value: 2 }]);
+  });
+
+  it('fetchScaleSummaries handles answer with undefined value', async () => {
+    mockFetchData([{
+      name: 'PHQ-9',
+      score: 5,
+      updatedAt: '2026-05-25',
+      answers: [{ question: 'Q1', value: undefined }],
+    }]);
+
+    const result = await fetchScaleSummaries('session-1', 'elder-001');
+    expect(result[0].answers).toEqual([{ question: 'Q1', value: null }]);
+  });
+
+  it('fetchBasicInfo does not store phone keys when dial and masked are absent', async () => {
+    const dto = { ...resolvedDto, emergencyPhoneDial: undefined, emergencyPhoneMasked: undefined };
+    mockFetchData(dto);
+
+    await fetchBasicInfo('qr-token-123456');
+    expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhone')).toBeNull();
+    expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhoneMasked')).toBeNull();
+  });
 });

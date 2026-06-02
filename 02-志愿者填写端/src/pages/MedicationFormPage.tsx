@@ -39,9 +39,13 @@ export function MedicationFormPage({ elder, onBack }: MedicationFormPageProps) {
       onBack={onBack}
       saveLabel="提交保存"
       onSaveBatch={async (records) => {
-        await saveMedications(elder.id, records);
-        alert('用药记录已保存');
-        onBack();
+        try {
+          await saveMedications(elder.id, records);
+          alert('用药记录已保存');
+          onBack();
+        } catch (e) {
+          alert('保存失败，请重试');
+        }
       }}
     />
   );

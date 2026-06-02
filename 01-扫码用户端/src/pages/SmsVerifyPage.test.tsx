@@ -303,6 +303,220 @@ describe('SmsVerifyPage', () => {
     expect(screen.getByText('未生成短信内容')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /复制内容/ })).toBeDisabled();
   });
+
+  it('validates 15-digit id card as valid', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-15id',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL 15ID',
+      status: 'PENDING',
+    });
+    verifyIdentityAccess.mockResolvedValue({
+      sessionId: 'id-15',
+      elderId: 'elder-1',
+      status: 'VERIFIED',
+      verified: true,
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '测试');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '123456789012345');
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+    expect(screen.queryByText('请输入符合规范的身份证号')).not.toBeInTheDocument();
+  });
+
+  it('rejects 18-digit id card with invalid checksum', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-badid',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL BADID',
+      status: 'PENDING',
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '测试');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '500102200212180830');
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+    expect(screen.getByText('请输入符合规范的身份证号')).toBeInTheDocument();
+  });
+
+  it('rejects id card with wrong length format', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-wronglen',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL LEN',
+      status: 'PENDING',
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '测试');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '12345678');
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+    expect(screen.getByText('请输入符合规范的身份证号')).toBeInTheDocument();
+  });
+
+  it('normalizes id card to uppercase on submit', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-upper',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL UPPER',
+      status: 'PENDING',
+    });
+    verifyIdentityAccess.mockResolvedValue({
+      sessionId: 'id-upper',
+      elderId: 'elder-1',
+      status: 'VERIFIED',
+      verified: true,
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '测试');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '11010119900307803x');
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+
+    await waitFor(() => expect(verifyIdentityAccess).toHaveBeenCalledWith('health', expect.objectContaining({
+      idCard: '11010119900307803X',
+    })));
+  });
+
+  it('normalizes phone by stripping non-digits on submit', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-normphone',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL NORM',
+      status: 'PENDING',
+    });
+    verifyIdentityAccess.mockResolvedValue({
+      sessionId: 'id-normphone',
+      elderId: 'elder-1',
+      status: 'VERIFIED',
+      verified: true,
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '测试');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '11010119900307803X');
+
+    const phoneInput = screen.getByPlaceholderText('请输入 11 位数字手机号');
+    expect(phoneInput).toHaveValue('15826216543');
+
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+
+    await waitFor(() => expect(verifyIdentityAccess).toHaveBeenCalledWith('health', expect.objectContaining({
+      phone: '15826216543',
+    })));
+  });
+
+  it('trims name whitespace on submit', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-trim',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL TRIM',
+      status: 'PENDING',
+    });
+    verifyIdentityAccess.mockResolvedValue({
+      sessionId: 'id-trim',
+      elderId: 'elder-1',
+      status: 'VERIFIED',
+      verified: true,
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    await user.type(screen.getByPlaceholderText('请输入真实姓名'), '  测试  ');
+    await user.type(screen.getByPlaceholderText('请输入 11 位数字手机号'), '15826216543');
+    await user.type(screen.getByPlaceholderText('请输入符合规范的身份证号'), '500102200212180836');
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+
+    await waitFor(() => expect(verifyIdentityAccess).toHaveBeenCalledWith('health', expect.objectContaining({
+      name: '测试',
+    })));
+  });
+
+  it('shows non-Error message when identity submit throws string', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-strerr',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL STR',
+      status: 'PENDING',
+    });
+    verifyIdentityAccess.mockRejectedValue('string error');
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+    await fillValidIdentity(user);
+
+    await user.click(screen.getByRole('button', { name: /登记信息并查看/ }));
+    expect(await screen.findByText('提交身份信息失败，请稍后重试')).toBeInTheDocument();
+  });
+
+  it('renders identity mode without loading state', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-idmode',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL IDMODE',
+      status: 'PENDING',
+    });
+
+    renderVerifyPage();
+    await user.click(await screen.findByRole('button', { name: '切换到证件登记验证' }));
+
+    expect(screen.queryByText(/正在生成验证短信内容/)).not.toBeInTheDocument();
+    expect(screen.getByText('身份登记')).toBeInTheDocument();
+  });
+
+  it('uses default target when no target param', async () => {
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-notarget',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL NOTARGET',
+      status: 'PENDING',
+    });
+
+    render(
+      <MemoryRouter initialEntries={['/verify']}>
+        <Routes>
+          <Route path="/verify" element={<SmsVerifyPage />} />
+          <Route path="/health" element={<p>health page</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await waitFor(() => expect(startRelayVerification).toHaveBeenCalledWith('health'));
+  });
 });
 
 function renderVerifyPage() {

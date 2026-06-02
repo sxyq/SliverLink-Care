@@ -1,0 +1,7 @@
+{
+  "projectname": "智联名牌",
+  "description": "本文件用于本地微信开发者工具私有配置占位。后续可由开发者工具自动改写。",
+  "setting": {
+    "compileHotReLoad": true
+  }
+}

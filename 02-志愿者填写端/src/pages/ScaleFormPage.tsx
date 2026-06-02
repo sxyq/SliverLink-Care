@@ -128,6 +128,8 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
       await loadScaleData();
       setEditing(false);
       alert(`${scaleLabels[activeScale]} 量表已保存，总分 ${totalScore}`);
+    } catch (e) {
+      alert('提交失败，请重试');
     } finally {
       setSaving(false);
     }

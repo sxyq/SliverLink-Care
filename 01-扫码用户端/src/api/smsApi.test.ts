@@ -12,6 +12,15 @@ function mockFetchData(data: unknown) {
   return fetchMock;
 }
 
+const envMockBase = {
+  API_BASE_URL: '',
+  DEV_DEFAULT_QR_TOKEN: '',
+  ALLOW_LOCAL_VERIFICATION_FALLBACK: true,
+  DEV_FIXED_SMS_CODE: '1234',
+  DEV_SMS_RELAY_RECEIVER_PHONE: '13800001111',
+  DEV_SMS_RELAY_PREFIX: 'SL',
+};
+
 describe('smsApi', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -74,12 +83,7 @@ describe('smsApi', () => {
   });
 
   it('starts relay verification with local fallback when backend fails', async () => {
-    vi.doMock('../config/env', () => ({
-      ALLOW_LOCAL_VERIFICATION_FALLBACK: true,
-      DEV_FIXED_SMS_CODE: '1234',
-      DEV_SMS_RELAY_RECEIVER_PHONE: '13800001111',
-      DEV_SMS_RELAY_PREFIX: 'SL',
-    }));
+    vi.doMock('../config/env', () => envMockBase);
 
     const { startRelayVerification: fallbackStart } = await import('./smsApi');
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
@@ -95,12 +99,7 @@ describe('smsApi', () => {
   });
 
   it('confirms relay verification sent for local sessions', async () => {
-    vi.doMock('../config/env', () => ({
-      ALLOW_LOCAL_VERIFICATION_FALLBACK: true,
-      DEV_FIXED_SMS_CODE: '1234',
-      DEV_SMS_RELAY_RECEIVER_PHONE: '13800001111',
-      DEV_SMS_RELAY_PREFIX: 'SL',
-    }));
+    vi.doMock('../config/env', () => envMockBase);
 
     const { startRelayVerification: fallbackStart, confirmRelayVerificationSent: fallbackConfirm, getRelayVerificationStatus: fallbackStatus } = await import('./smsApi');
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
@@ -115,12 +114,7 @@ describe('smsApi', () => {
   });
 
   it('verifies identity access with local fallback when backend fails', async () => {
-    vi.doMock('../config/env', () => ({
-      ALLOW_LOCAL_VERIFICATION_FALLBACK: true,
-      DEV_FIXED_SMS_CODE: '1234',
-      DEV_SMS_RELAY_RECEIVER_PHONE: '13800001111',
-      DEV_SMS_RELAY_PREFIX: 'SL',
-    }));
+    vi.doMock('../config/env', () => envMockBase);
 
     const { verifyIdentityAccess: fallbackVerify } = await import('./smsApi');
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
@@ -145,5 +139,154 @@ describe('smsApi', () => {
 
     const result = await getRelayVerificationStatus('session-derived');
     expect(result.verified).toBe(true);
+  });
+
+  it('maskPhone returns **** for short phone via backend', async () => {
+    mockFetchData({
+      sessionId: 'session-short',
+      elderId: 'elder-001',
+      receiverPhone: '138',
+      messageBody: 'SL TEST',
+    });
+
+    const result = await startRelayVerification('health');
+    expect(result.receiverPhoneMasked).toBe('****');
+  });
+
+  it('maskPhone masks full-length phone via backend', async () => {
+    mockFetchData({
+      sessionId: 'session-full',
+      elderId: 'elder-001',
+      receiverPhone: '13812345678',
+      messageBody: 'SL TEST',
+    });
+
+    const result = await startRelayVerification('health');
+    expect(result.receiverPhoneMasked).toBe('138****5678');
+  });
+
+  it('maskPhone returns **** for empty phone via backend', async () => {
+    mockFetchData({
+      sessionId: 'session-empty',
+      elderId: 'elder-001',
+      receiverPhone: '',
+      messageBody: 'SL TEST',
+    });
+
+    const result = await startRelayVerification('health');
+    expect(result.receiverPhoneMasked).toBe('****');
+  });
+
+  it('randomAlphaNumeric generates code of correct length in local fallback', async () => {
+    vi.doMock('../config/env', () => envMockBase);
+
+    const { startRelayVerification: fallbackStart } = await import('./smsApi');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+
+    const result = await fallbackStart('health');
+    const code = result.messageBody.replace('SL ', '');
+    expect(code).toHaveLength(10);
+    expect(code).toMatch(/^[A-HJ-NP-Z2-9]+$/);
+
+    vi.doUnmock('../config/env');
+  });
+
+  it('startRelayVerification uses backend receiverPhoneMasked when provided', async () => {
+    mockFetchData({
+      sessionId: 'session-masked',
+      elderId: 'elder-001',
+      receiverPhone: '13800000000',
+      receiverPhoneMasked: '138****custom',
+      messageBody: 'SL TEST',
+      messagePrefix: 'CUSTOM',
+      status: 'VERIFIED',
+      expiresAt: '2026-12-31T00:00:00Z',
+    });
+
+    const result = await startRelayVerification('health');
+    expect(result.receiverPhoneMasked).toBe('138****custom');
+    expect(result.messagePrefix).toBe('CUSTOM');
+    expect(result.status).toBe('VERIFIED');
+    expect(result.expiresAt).toBe('2026-12-31T00:00:00Z');
+  });
+
+  it('getRelayVerificationStatus returns verified false when status is PENDING and verified is undefined', async () => {
+    mockFetchData({
+      sessionId: 'session-pending',
+      elderId: 'elder-001',
+      status: 'PENDING',
+    });
+
+    const result = await getRelayVerificationStatus('session-pending');
+    expect(result.verified).toBe(false);
+  });
+
+  it('getRelayVerificationStatus uses verified field when present', async () => {
+    mockFetchData({
+      sessionId: 'session-explicit',
+      elderId: 'elder-001',
+      status: 'PENDING',
+      verified: true,
+    });
+
+    const result = await getRelayVerificationStatus('session-explicit');
+    expect(result.verified).toBe(true);
+  });
+
+  it('verifyIdentityAccess throws error when local fallback is disabled', async () => {
+    vi.resetModules();
+    vi.doMock('../config/env', () => ({
+      ...envMockBase,
+      ALLOW_LOCAL_VERIFICATION_FALLBACK: false,
+      DEV_FIXED_SMS_CODE: '',
+    }));
+
+    const { verifyIdentityAccess: strictVerify } = await import('./smsApi');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+
+    await expect(strictVerify('health', {
+      name: '测试',
+      phone: '13800001111',
+      idCard: '500102200212180836',
+    })).rejects.toThrow('network');
+
+    vi.doUnmock('../config/env');
+  });
+
+  it('verifyIdentityAccess returns verified status from backend', async () => {
+    mockFetchData({
+      sessionId: 'identity-ok',
+      elderId: 'elder-001',
+      status: 'VERIFIED',
+      verified: true,
+      verifiedAt: '2026-05-26T10:00:00Z',
+      senderPhoneMasked: '158****6543',
+    });
+
+    const result = await verifyIdentityAccess('health', {
+      name: '测试',
+      phone: '13800001111',
+      idCard: '500102200212180836',
+    });
+    expect(result.verified).toBe(true);
+    expect(result.verifiedAt).toBe('2026-05-26T10:00:00Z');
+    expect(result.senderPhoneMasked).toBe('158****6543');
+  });
+
+  it('confirmRelayVerificationSent does nothing for unknown session', async () => {
+    await expect(confirmRelayVerificationSent('nonexistent')).resolves.toBeUndefined();
+  });
+
+  it('startRelayVerification local fallback includes localDev flag and expiresAt', async () => {
+    vi.doMock('../config/env', () => envMockBase);
+
+    const { startRelayVerification: fallbackStart } = await import('./smsApi');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+
+    const result = await fallbackStart('health');
+    expect(result.localDev).toBe(true);
+    expect(result.expiresAt).toBeTruthy();
+
+    vi.doUnmock('../config/env');
   });
 });

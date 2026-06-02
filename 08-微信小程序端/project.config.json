@@ -1,0 +1,15 @@
+{
+  "appid": "your-appid-here",
+  "projectname": "智联名牌",
+  "compileType": "miniprogram",
+  "miniprogramRoot": "dist",
+  "srcMiniprogramRoot": "dist",
+  "setting": {
+    "es6": true,
+    "enhance": true,
+    "minified": true,
+    "packNpmManually": false,
+    "ignoreUploadUnusedFiles": true
+  },
+  "condition": {}
+}

@@ -119,22 +119,24 @@ describe('family verification store', () => {
     vi.useFakeTimers();
     initVerification('13800006666');
 
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 61; i++) {
       vi.advanceTimersByTime(1000);
     }
     expect(getVerificationState().countdown).toBe(0);
     expect(getVerificationState().canResend).toBe(true);
+    vi.useRealTimers();
   });
 
-  it('backup countdown timer ticks down to zero and enables switch', () => {
+  it('backup countdown timer ticks down and canSwitchBackup becomes true', () => {
     vi.useFakeTimers();
     initVerification('13800006666', '13900007777');
 
-    for (let i = 0; i < 120; i++) {
+    for (let i = 0; i < 121; i++) {
       vi.advanceTimersByTime(1000);
     }
     expect(getVerificationState().backupCountdown).toBe(0);
     expect(getVerificationState().canSwitchBackup).toBe(true);
+    vi.useRealTimers();
   });
 
   it('resetCountdown restarts the countdown timer', () => {
@@ -150,5 +152,92 @@ describe('family verification store', () => {
 
     vi.advanceTimersByTime(1000);
     expect(getVerificationState().countdown).toBe(59);
+  });
+
+  it('initVerification clears previous timers', () => {
+    vi.useFakeTimers();
+    initVerification('13800006666');
+
+    vi.advanceTimersByTime(30000);
+    expect(getVerificationState().countdown).toBe(30);
+
+    initVerification('13900007777');
+    expect(getVerificationState().countdown).toBe(60);
+    expect(getVerificationState().phone).toBe('13900007777');
+  });
+
+  it('setVerified updates verified state', () => {
+    initVerification('13800006666');
+    expect(getVerificationState().verified).toBe(false);
+
+    setVerified(true);
+    expect(getVerificationState().verified).toBe(true);
+
+    setVerified(false);
+    expect(getVerificationState().verified).toBe(false);
+  });
+
+  it('initVerification without backup phone sets backupPhone to null', () => {
+    initVerification('13800006666');
+    expect(getVerificationState().backupPhone).toBeNull();
+    expect(getVerificationState().backupCountdown).toBe(120);
+  });
+
+  it('switchToBackup resets countdown and disables resend', () => {
+    vi.useFakeTimers();
+    initVerification('13800006666', '13900007777');
+
+    vi.advanceTimersByTime(121000);
+    expect(getVerificationState().canSwitchBackup).toBe(true);
+
+    switchToBackup();
+    expect(getVerificationState().countdown).toBe(60);
+    expect(getVerificationState().canResend).toBe(false);
+    expect(getVerificationState().canSwitchBackup).toBe(false);
+    expect(getVerificationState().backupCountdown).toBe(0);
+  });
+
+  it('resetCountdown countdown timer ticks down after reset', () => {
+    vi.useFakeTimers();
+    initVerification('13800006666');
+
+    vi.advanceTimersByTime(60000);
+    expect(getVerificationState().canResend).toBe(true);
+
+    resetCountdown();
+    vi.advanceTimersByTime(61000);
+    expect(getVerificationState().countdown).toBe(0);
+    expect(getVerificationState().canResend).toBe(true);
+  });
+
+  it('multiple subscribers all receive notifications', () => {
+    const listener1 = vi.fn();
+    const listener2 = vi.fn();
+    subscribe(listener1);
+    subscribe(listener2);
+
+    initVerification('13800006666');
+    expect(listener1).toHaveBeenCalledTimes(1);
+    expect(listener2).toHaveBeenCalledTimes(1);
+
+    setVerified(true);
+    expect(listener1).toHaveBeenCalledTimes(2);
+    expect(listener2).toHaveBeenCalledTimes(2);
+  });
+
+  it('initVerification masks 11-digit phone', () => {
+    initVerification('13812345678');
+    expect(getVerificationState().maskedPhone).toBe('138****5678');
+  });
+
+  it('backup countdown timer stops at zero', () => {
+    vi.useFakeTimers();
+    initVerification('13800006666', '13900007777');
+
+    for (let i = 0; i < 122; i++) {
+      vi.advanceTimersByTime(1000);
+    }
+    expect(getVerificationState().backupCountdown).toBe(0);
+    expect(getVerificationState().canSwitchBackup).toBe(true);
   });
 });

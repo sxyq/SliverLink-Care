@@ -208,6 +208,21 @@ describe('scan navigation and protection components', () => {
     expect(screen.getByText('当前页面已开启隐私保护，禁止复制与传播')).toBeInTheDocument();
   });
 
+  it('blocks PrintScreen key when content protection is enabled', () => {
+    vi.useFakeTimers();
+    render(<ContentProtection enabled watermarkText="test" />);
+
+    act(() => {
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'PrintScreen', cancelable: true }));
+    });
+    expect(screen.getByText('当前页面已开启隐私保护，禁止复制与传播')).toBeInTheDocument();
+
+    act(() => {
+      vi.advanceTimersByTime(1800);
+    });
+    expect(screen.queryByText('当前页面已开启隐私保护，禁止复制与传播')).not.toBeInTheDocument();
+  });
+
   it('blocks context menu and drag events when protection enabled', () => {
     render(<ContentProtection enabled watermarkText="test" />);
 

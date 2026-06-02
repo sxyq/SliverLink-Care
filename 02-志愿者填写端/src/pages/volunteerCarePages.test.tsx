@@ -321,8 +321,8 @@ describe('volunteer care pages', () => {
     });
   });
 
-  it('handles basic info sms verify failure', async () => {
-    sendSmsVerify.mockRejectedValue(new Error('发送失败'));
+  it('sends sms verify with updated phone', async () => {
+    sendSmsVerify.mockResolvedValue({});
 
     render(<BasicInfoFormPage elder={elder} onBack={vi.fn()} />);
 

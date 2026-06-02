@@ -58,8 +58,12 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
 
   async function handleSendSms() {
     if (!form.emergencyContactPhone) return;
-    await sendSmsVerify(form.emergencyContactPhone);
-    setSmsSent(true);
+    try {
+      await sendSmsVerify(form.emergencyContactPhone);
+      setSmsSent(true);
+    } catch (e) {
+      alert('发送失败，请重试');
+    }
   }
 
   async function handleSubmit() {

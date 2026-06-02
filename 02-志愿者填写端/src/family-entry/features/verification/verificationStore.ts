@@ -67,10 +67,10 @@ export function initVerification(phone: string, backupPhone?: string) {
 
   countdownTimer = setInterval(() => {
     if (state.countdown > 0) {
-      state = { ...state, countdown: state.countdown - 1 };
+      state.countdown = state.countdown - 1;
       notify();
     } else {
-      state = { ...state, canResend: true };
+      state.canResend = true;
       if (countdownTimer) clearInterval(countdownTimer);
       notify();
     }
@@ -78,10 +78,10 @@ export function initVerification(phone: string, backupPhone?: string) {
 
   backupCountdownTimer = setInterval(() => {
     if (state.backupCountdown > 0) {
-      state = { ...state, backupCountdown: state.backupCountdown - 1 };
+      state.backupCountdown = state.backupCountdown - 1;
       notify();
     } else {
-      state = { ...state, canSwitchBackup: true };
+      state.canSwitchBackup = true;
       if (backupCountdownTimer) clearInterval(backupCountdownTimer);
       notify();
     }
@@ -95,10 +95,10 @@ export function resetCountdown() {
   if (countdownTimer) clearInterval(countdownTimer);
   countdownTimer = setInterval(() => {
     if (state.countdown > 0) {
-      state = { ...state, countdown: state.countdown - 1 };
+      state.countdown = state.countdown - 1;
       notify();
     } else {
-      state = { ...state, canResend: true };
+      state.canResend = true;
       if (countdownTimer) clearInterval(countdownTimer);
       notify();
     }
@@ -121,10 +121,10 @@ export function switchToBackup() {
     if (countdownTimer) clearInterval(countdownTimer);
     countdownTimer = setInterval(() => {
       if (state.countdown > 0) {
-        state = { ...state, countdown: state.countdown - 1 };
+        state.countdown = state.countdown - 1;
         notify();
       } else {
-        state = { ...state, canResend: true };
+        state.canResend = true;
         if (countdownTimer) clearInterval(countdownTimer);
         notify();
       }

@@ -149,4 +149,64 @@ describe('volunteer and elder api', () => {
     await expect(sendSmsVerify('13800000000')).resolves.toEqual({ maskedPhone: '138****0000' });
     await expect(verifySmsCode('13800000000', '123456')).resolves.toEqual({ ok: true, message: '验证成功' });
   });
+
+  it('fetchAssignedElders maps elderId fallback and missing fields', async () => {
+    queueFetch([{
+      elderId: 'e-fallback',
+      emergencyPhoneDial: '13800001111',
+      emergencyContactRelation: '儿子',
+      allergyHistory: '花粉',
+    }]);
+
+    const result = await fetchAssignedElders();
+    expect(result[0]).toMatchObject({
+      id: 'e-fallback',
+      emergencyContactPhone: '13800001111',
+      emergencyContactRelation: '儿子',
+      allergySummary: '花粉',
+    });
+  });
+
+  it('fetchAssignedElders defaults missing fields to empty/zero', async () => {
+    queueFetch([{}]);
+
+    const result = await fetchAssignedElders();
+    expect(result[0]).toMatchObject({
+      id: '',
+      archiveNo: '',
+      name: '',
+      gender: '',
+      age: 0,
+      residence: '',
+      emergencyContactName: '',
+      emergencyContactPhone: '',
+      emergencyContactRelation: '',
+      aboType: '',
+      rhType: '',
+      allergySummary: '',
+      lastVisitDate: '',
+      status: '在档',
+    });
+  });
+
+  it('loginVolunteer returns ok false when token is empty', async () => {
+    queueFetch({ token: '', name: undefined });
+
+    const result = await loginVolunteer('vol', 'pass');
+    expect(result.ok).toBe(false);
+    expect(result.token).toBe('');
+  });
+
+  it('registerVolunteer returns ok false when token is empty', async () => {
+    queueFetch({ token: '', name: undefined });
+
+    const result = await registerVolunteer({
+      invitationCode: 'code',
+      account: 'vol',
+      password: 'pass',
+      name: '志愿者',
+      phone: '13800000000',
+    });
+    expect(result.ok).toBe(false);
+  });
 });

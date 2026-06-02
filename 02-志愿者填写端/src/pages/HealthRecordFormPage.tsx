@@ -44,6 +44,8 @@ export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProp
       await saveHealthRecord(elder.id, form);
       alert('健康档案已保存');
       onBack();
+    } catch (e) {
+      alert('保存失败，请重试');
     } finally {
       setSaving(false);
     }
