@@ -1,12 +1,27 @@
-/*
-  环境变量读取工具规划
+const FALLBACK_API_BASE_URL = 'https://sxyq27.online/silverlink-api';
 
-  用途：
-  - 区分开发、测试、生产环境
-  - 提供 API Base URL
-  - 提供功能开关
+export type AppEnvName = 'development' | 'production';
 
-  注意：
-  - 小程序构建环境和 Vite 不同
-  - 不要直接复用 import.meta.env 写法
-*/
+export function getAppEnvName(): AppEnvName {
+  if (typeof __APP_ENV__ !== 'undefined') {
+    return __APP_ENV__;
+  }
+
+  return process.env.NODE_ENV === 'production' ? 'production' : 'development';
+}
+
+export function getApiBaseUrl() {
+  return process.env.TARO_APP_API_BASE_URL || FALLBACK_API_BASE_URL;
+}
+
+export function isDevelopmentEnv() {
+  return getAppEnvName() === 'development';
+}
+
+export function getEnvConfig() {
+  return {
+    appEnv: getAppEnvName(),
+    apiBaseUrl: getApiBaseUrl(),
+    debugEnabled: isDevelopmentEnv(),
+  };
+}

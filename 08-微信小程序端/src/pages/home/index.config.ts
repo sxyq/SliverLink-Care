@@ -1,12 +1,4 @@
-/*
-  首页页面配置规划
-
-  页面职责：
-  - 作为小程序默认首页
-  - 展示两个主入口：扫码查看、志愿者 / 家属登录
-  - 不承载复杂业务逻辑
-
-  导航栏建议：
-  - 标题：智联名牌
-  - 开启下拉刷新：否
-*/
+export default {
+  navigationBarTitleText: '智联名牌',
+  enablePullDownRefresh: false,
+};

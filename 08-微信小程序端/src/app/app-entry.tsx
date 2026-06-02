@@ -1,19 +1,20 @@
-/*
-  小程序应用入口规划
+import type { PropsWithChildren } from 'react';
+import { useDidHide, useDidShow, useLaunch } from '@tarojs/taro';
 
-  该文件后续负责：
-  - 注入全局样式
-  - 组合全局 Provider
-  - 绑定应用启动、显示、隐藏时的公共行为
-  - 初始化登录态恢复、环境变量、埋点、错误上报
+import { createLaunchContext, persistLaunchContext } from './app.lifecycle';
 
-  建议接入顺序：
-  1. 挂载基础样式
-  2. 恢复本地 token 与角色信息
-  3. 初始化全局会话状态
-  4. 初始化请求客户端
-  5. 初始化隐私同意状态
+export default function App({ children }: PropsWithChildren) {
+  useLaunch((options) => {
+    persistLaunchContext(createLaunchContext(options?.query));
+  });
 
-  不要在此文件中堆放业务逻辑。
-  业务跳转和角色分流应下沉到页面或 hooks 中完成。
-*/
+  useDidShow(() => {
+    // 预留登录态恢复与会话保鲜逻辑。
+  });
+
+  useDidHide(() => {
+    // 预留短时敏感态清理逻辑。
+  });
+
+  return children;
+}

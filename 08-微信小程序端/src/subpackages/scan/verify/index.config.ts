@@ -1,3 +1,3 @@
-/*
-  验证页配置规划
-*/
+export default {
+  navigationBarTitleText: '访问验证',
+};

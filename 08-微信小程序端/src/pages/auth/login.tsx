@@ -1,23 +1,26 @@
-/*
-  统一登录页开发说明
+import { Button, Input, Text, View } from '@tarojs/components';
 
-  页面目标：
-  - 一个登录页承载志愿者与家属账号登录
-  - 登录成功后由角色决定工作台展示范围
+export default function LoginPage() {
+  return (
+    <View className='sl-page'>
+      <View className='sl-card' style={{ padding: '32rpx' }}>
+        <View className='sl-section-title'>统一登录</View>
+        <View className='sl-section-desc' style={{ marginTop: '12rpx' }}>
+          第 1 批先接入工程底座与页面骨架，真实登录联调将在后续批次接入。
+        </View>
 
-  建议字段：
-  - 账号
-  - 密码
-  - 登录按钮
-  - 可选：邀请码注册入口
+        <View style={{ marginTop: '28rpx', display: 'flex', flexDirection: 'column', gap: '20rpx' }}>
+          <Input placeholder='账号' disabled />
+          <Input placeholder='密码' password disabled />
+          <Button className='sl-primary-button' disabled>
+            登录能力开发中
+          </Button>
+        </View>
 
-  登录成功后流程：
-  1. 保存 token
-  2. 拉取本人 profile
-  3. 识别 role
-  4. 跳转 auth-role-redirect 页
-
-  注意：
-  - 不建议首页直接塞太多登录表单
-  - 登录页与扫码流保持分离
-*/
+        <Text style={{ marginTop: '20rpx', display: 'block', fontSize: '24rpx', color: 'var(--sl-color-text-secondary)' }}>
+          后续这里会接入志愿者 / 家属统一账号登录与角色分流。
+        </Text>
+      </View>
+    </View>
+  );
+}

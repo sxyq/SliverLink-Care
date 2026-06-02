@@ -1,13 +1,32 @@
-/*
-  应用生命周期说明文件
+import type { LaunchRouteParams } from '@/utils/routeParams';
+import { hasScanContext, mergeLaunchRouteParams, parseQueryParams, parseSceneString } from '@/utils/routeParams';
+import { getStorageValue, setStorageValue } from '@/utils/storage';
+import { STORAGE_KEYS } from './app.constants';
 
-  后续建议在这里封装：
-  - onLaunch：读取启动参数，识别是否来自实体卡扫码、小程序码、普通首页进入
-  - onShow：恢复会话、处理重新回前台后的状态检查
-  - onHide：必要时清理临时敏感态
-  - onError：统一错误上报
+export type LaunchMode = 'home' | 'scan';
 
-  重点：
-  - 扫码直达需要在启动阶段识别二维码参数
-  - 工作台登录态恢复需要在 onShow 时补做失效校验
-*/
+export interface AppLaunchContext {
+  launchMode: LaunchMode;
+  params: LaunchRouteParams;
+  openedAt: number;
+}
+
+export function createLaunchContext(query?: Record<string, unknown>) {
+  const queryParams = parseQueryParams(query);
+  const sceneParams = parseSceneString(queryParams.rawScene);
+  const params = mergeLaunchRouteParams(queryParams, sceneParams);
+
+  return {
+    launchMode: hasScanContext(params) ? 'scan' : 'home',
+    params,
+    openedAt: Date.now(),
+  } satisfies AppLaunchContext;
+}
+
+export function persistLaunchContext(context: AppLaunchContext) {
+  setStorageValue(STORAGE_KEYS.launchContext, context);
+}
+
+export function readLaunchContext() {
+  return getStorageValue<AppLaunchContext | null>(STORAGE_KEYS.launchContext, null);
+}

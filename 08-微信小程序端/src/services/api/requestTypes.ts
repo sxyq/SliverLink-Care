@@ -1,9 +1,17 @@
-/*
-  请求与响应基础类型规划
+export interface ApiEnvelope<T> {
+  code?: number;
+  message?: string;
+  data?: T;
+}
 
-  目标：
-  - 统一后端响应结构定义
-  - 统一分页结构
-  - 统一错误结构
-  - 统一下载结果结构
-*/
+export interface ApiRequestOptions {
+  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  data?: Record<string, unknown> | string;
+  headers?: Record<string, string>;
+  timeout?: number;
+}
+
+export interface DownloadResult {
+  tempFilePath: string;
+  statusCode: number;
+}

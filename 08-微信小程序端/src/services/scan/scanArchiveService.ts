@@ -1,14 +1,25 @@
-/*
-  扫码档案查看服务规划
+import { httpClient } from '@/services/api/httpClient';
 
-  对接范围：
-  - 获取基础信息
-  - 获取健康档案
-  - 获取用药信息
-  - 获取量表摘要
-  - 下载名牌 PDF
+export async function fetchVerifiedBasicInfo(elderId: string, sessionId: string) {
+  return httpClient.get<Record<string, unknown>>(
+    `/api/scan/basic-info?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+  );
+}
 
-  说明：
-  - 必须区分“公开基础信息”与“验证后敏感信息”
-  - 页面侧只消费服务层返回的统一结构
-*/
+export async function fetchArchive(elderId: string, sessionId: string) {
+  return httpClient.get<Record<string, unknown>>(
+    `/api/scan/archive?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+  );
+}
+
+export async function fetchMedications(elderId: string, sessionId: string) {
+  return httpClient.get<Array<Record<string, unknown>>>(
+    `/api/scan/medications?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+  );
+}
+
+export async function fetchScales(elderId: string, sessionId: string) {
+  return httpClient.get<Array<Record<string, unknown>>>(
+    `/api/scan/scales?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+  );
+}

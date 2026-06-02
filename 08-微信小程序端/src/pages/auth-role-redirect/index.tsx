@@ -1,12 +1,14 @@
-/*
-  角色分流页开发说明
+import { View } from '@tarojs/components';
 
-  页面职责：
-  - 读取当前登录账号角色
-  - VOLUNTEER -> 进入工作台老人列表
-  - FAMILY -> 进入家属视角工作台老人列表
-
-  注意：
-  - 该页应尽量无 UI，偏向中转页
-  - 若角色缺失，应回退到登录页并提示
-*/
+export default function AuthRoleRedirectPage() {
+  return (
+    <View className='sl-page'>
+      <View className='sl-card' style={{ padding: '32rpx' }}>
+        <View className='sl-section-title'>角色分流准备中</View>
+        <View className='sl-section-desc' style={{ marginTop: '12rpx' }}>
+          当前阶段已预留分流页路径，后续会在登录完成后按 `VOLUNTEER / FAMILY` 自动跳转。
+        </View>
+      </View>
+    </View>
+  );
+}

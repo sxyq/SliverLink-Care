@@ -1,7 +1,3 @@
-/*
-  统一登录页配置规划
-
-  页面职责：
-  - 志愿者与家属统一登录入口
-  - 不在该页做扫码查看逻辑
-*/
+export default {
+  navigationBarTitleText: '统一登录',
+};

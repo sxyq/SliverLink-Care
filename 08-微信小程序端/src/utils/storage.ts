@@ -1,11 +1,31 @@
-/*
-  小程序存储工具规划
+import Taro from '@tarojs/taro';
 
-  用途：
-  - 包装同步 / 异步存储
-  - 管理 token、role、当前老人上下文
-  - 管理短时验证态
+export function getStorageValue<T>(key: string, fallback: T): T {
+  try {
+    const value = Taro.getStorageSync<T>(key);
+    return value === '' || value == null ? fallback : value;
+  } catch {
+    return fallback;
+  }
+}
 
-  说明：
-  - 替代 H5 中的 localStorage / sessionStorage
-*/
+export function setStorageValue<T>(key: string, value: T) {
+  Taro.setStorageSync(key, value);
+}
+
+export function removeStorageValue(key: string) {
+  Taro.removeStorageSync(key);
+}
+
+export async function getStorageValueAsync<T>(key: string, fallback: T): Promise<T> {
+  try {
+    const result = await Taro.getStorage<T>({ key });
+    return result.data ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export async function setStorageValueAsync<T>(key: string, value: T) {
+  await Taro.setStorage({ key, data: value });
+}

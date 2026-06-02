@@ -19,6 +19,7 @@ tmp*.py
 node_modules/
 dist/
 coverage/
+.swc/
 *.tsbuildinfo
 
 # Java backend build outputs

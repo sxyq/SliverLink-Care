@@ -1,0 +1,71 @@
+:root {
+  --sl-color-bg: #f4f8fb;
+  --sl-color-surface: #ffffff;
+  --sl-color-primary: #1479b8;
+  --sl-color-primary-strong: #0e5f95;
+  --sl-color-accent: #26a69a;
+  --sl-color-text: #17324a;
+  --sl-color-text-secondary: #5f7387;
+  --sl-color-border: #d9e6f0;
+  --sl-color-danger: #cf5b5b;
+  --sl-radius-card: 24rpx;
+  --sl-radius-button: 999rpx;
+  --sl-shadow-card: 0 10rpx 40rpx rgba(20, 121, 184, 0.08);
+}
+
+page {
+  min-height: 100%;
+  background: linear-gradient(180deg, #edf6fb 0%, #f8fbfd 100%);
+  color: var(--sl-color-text);
+  font-family: 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+
+view,
+text,
+button {
+  box-sizing: border-box;
+}
+
+.sl-page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 48rpx;
+}
+
+.sl-card {
+  background: var(--sl-color-surface);
+  border: 1rpx solid var(--sl-color-border);
+  border-radius: var(--sl-radius-card);
+  box-shadow: var(--sl-shadow-card);
+}
+
+.sl-section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--sl-color-text);
+}
+
+.sl-section-desc {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--sl-color-text-secondary);
+}
+
+.sl-primary-button {
+  height: 88rpx;
+  border: none;
+  border-radius: var(--sl-radius-button);
+  background: linear-gradient(135deg, var(--sl-color-primary) 0%, var(--sl-color-accent) 100%);
+  color: #ffffff;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.sl-secondary-button {
+  height: 88rpx;
+  border: 1rpx solid rgba(20, 121, 184, 0.18);
+  border-radius: var(--sl-radius-button);
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--sl-color-primary);
+  font-size: 30rpx;
+  font-weight: 600;
+}
