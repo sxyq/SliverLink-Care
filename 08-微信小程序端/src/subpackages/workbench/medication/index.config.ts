@@ -1,3 +1,4 @@
-/*
-  用药维护页配置规划
-*/
+export default {
+  navigationBarTitleText: '用药信息',
+  navigationStyle: 'custom',
+};

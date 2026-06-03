@@ -1,3 +1,4 @@
-/*
-  工作台老人列表页配置规划
-*/
+export default {
+  navigationBarTitleText: '老人列表',
+  navigationStyle: 'custom',
+};

@@ -1,7 +1,66 @@
-/*
-  量表页样式占位文件
+.workbench-scale-page {
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 量表列表、详情、填写操作分层
-  - 兼顾历史记录回看与当前填写态
-*/
+.workbench-scale-tabs {
+  margin-top: 18rpx;
+  display: flex;
+  gap: 12rpx;
+}
+
+.workbench-scale-tab {
+  flex: 1;
+  min-height: 78rpx;
+  border-radius: 20rpx;
+  background: rgba(13, 162, 173, 0.08);
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+}
+
+.workbench-scale-tab.is-active {
+  background: linear-gradient(135deg, var(--sl-primary) 0%, var(--sl-primary-deep) 100%);
+  color: #ffffff;
+}
+
+.workbench-scale-question-list {
+  margin-top: 18rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.workbench-scale-question {
+  padding: 18rpx;
+  border-radius: 20rpx;
+  background: #f8fbfd;
+}
+
+.workbench-scale-question__title {
+  font-size: 24rpx;
+  line-height: 1.65;
+  color: var(--sl-text);
+}
+
+.workbench-scale-question__options {
+  margin-top: 14rpx;
+  display: flex;
+  gap: 10rpx;
+}
+
+.workbench-scale-option {
+  flex: 1;
+  min-height: 72rpx;
+  border-radius: 18rpx;
+  background: rgba(13, 162, 173, 0.06);
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+}
+
+.workbench-scale-option.is-active {
+  background: rgba(13, 162, 173, 0.16);
+  color: var(--sl-primary-deep);
+}
+
+.workbench-scale-save-button {
+  width: 100%;
+}

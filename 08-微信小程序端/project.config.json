@@ -1,15 +1,117 @@
 {
-  "appid": "your-appid-here",
+  "appid": "wxd6f1eb971f5d4bc5",
   "projectname": "智联名牌",
   "compileType": "miniprogram",
-  "miniprogramRoot": "dist",
-  "srcMiniprogramRoot": "dist",
+  "miniprogramRoot": "dist/",
+  "srcMiniprogramRoot": "dist/",
   "setting": {
     "es6": true,
     "enhance": true,
     "minified": true,
     "packNpmManually": false,
-    "ignoreUploadUnusedFiles": true
+    "ignoreUploadUnusedFiles": true,
+    "postcss": false,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
-  "condition": {}
+  "condition": {
+    "miniprogram": {
+      "current": 0,
+      "list": [
+        {
+          "name": "scan-landing",
+          "path": "subpackages/scan/landing/index",
+          "query": "elderId=ELDER_DEMO_001&archiveNo=A2026001&source=devtools-verify",
+          "scene": null
+        },
+        {
+          "name": "scan-verify",
+          "path": "subpackages/scan/verify/index",
+          "query": "elderId=ELDER_DEMO_001&source=devtools-verify",
+          "scene": null
+        },
+        {
+          "name": "scan-archive",
+          "path": "subpackages/scan/archive/index",
+          "query": "elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "scan-medications",
+          "path": "subpackages/scan/medications/index",
+          "query": "elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "scan-scales",
+          "path": "subpackages/scan/scales/index",
+          "query": "elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "scan-nameplate",
+          "path": "subpackages/scan/nameplate/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "workbench-elder-list",
+          "path": "subpackages/workbench/elder-list/index",
+          "query": "",
+          "scene": null
+        },
+        {
+          "name": "workbench-elder-detail",
+          "path": "subpackages/workbench/elder-detail/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "workbench-basic",
+          "path": "subpackages/workbench/basic/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "workbench-medication",
+          "path": "subpackages/workbench/medication/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "workbench-scale",
+          "path": "subpackages/workbench/scale/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        },
+        {
+          "name": "workbench-qrcode",
+          "path": "subpackages/workbench/qrcode/index",
+          "query": "elderId=ELDER_DEMO_001",
+          "scene": null
+        }
+      ]
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [],
+    "include": []
+  },
+  "editorSetting": {}
 }

@@ -1,7 +1,90 @@
-/*
-  扫码用药页样式占位文件
+.scan-medications-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 以只读信息卡片为主
-  - 剂量、频次、注意事项要有明显层级
-*/
+.scan-medications-item {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 22rpx 20rpx;
+}
+
+.scan-medications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.scan-medications-actions {
+  flex-direction: column;
+}
+
+.scan-medications-item__icon {
+  width: 72rpx;
+  height: 72rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, rgba(13, 162, 173, 0.12) 0%, rgba(8, 123, 144, 0.18) 100%);
+  color: var(--sl-primary-deep);
+  font-size: 28rpx;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.scan-medications-item__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.scan-medications-item__title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.scan-medications-item__meta {
+  margin-top: 14rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  font-size: 24rpx;
+  color: var(--sl-text-secondary);
+}
+
+.scan-medications-panel__button {
+  margin-top: 18rpx;
+}
+
+.scan-medications-warning {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background: linear-gradient(180deg, #fffaf5 0%, #fffdf9 100%);
+}
+
+.scan-medications-warning__icon {
+  width: 42rpx;
+  height: 42rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: #ffe7c2;
+  color: #b56b17;
+  font-size: 24rpx;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.scan-medications-warning__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #9b6723;
+}

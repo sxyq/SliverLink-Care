@@ -7,23 +7,50 @@ import { resolveScanToken } from '@/services/scan/scanAuthService';
 import type { ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
 
+import './index.scss';
+
+function formatEmergencyContact(info: ScanBasicInfo) {
+  const relation = info.relationship ? `（${info.relationship}）` : '';
+  return `${info.emergencyContactName || '未提供'}${relation}  ${info.emergencyPhoneMasked || '未提供'}`;
+}
+
+function ScanLandingHeader() {
+  return (
+    <View className='sl-page-header-bar'>
+      <View className='sl-page-header-action'>
+        <View className='sl-page-header-icon' onClick={() => Taro.switchTab({ url: APP_ROUTES.home })}>
+          首页
+        </View>
+      </View>
+      <View className='sl-page-header-copy'>
+        <View className='sl-page-header-copy__title'>智联名牌</View>
+      </View>
+      <View className='sl-page-header-placeholder' />
+    </View>
+  );
+}
+
 export default function ScanLandingPage() {
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const [basicInfo, setBasicInfo] = useState<ScanBasicInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorText, setErrorText] = useState('');
+  const hasDirectEntry = Boolean(params.elderId && !params.qrToken);
 
   useEffect(() => {
     const qrToken = params.qrToken;
 
     if (!qrToken) {
+      if (params.elderId) {
+        setLoading(false);
+        setErrorText('');
+        return;
+      }
       setLoading(false);
       setErrorText(ERROR_MESSAGES.invalidQr);
       return;
     }
-
-    const resolvedQrToken = qrToken;
 
     let cancelled = false;
 
@@ -31,7 +58,7 @@ export default function ScanLandingPage() {
       try {
         setLoading(true);
         setErrorText('');
-        const result = await resolveScanToken({ token: resolvedQrToken });
+        const result = await resolveScanToken({ token: qrToken || '' });
         if (!cancelled) {
           setBasicInfo(result);
         }
@@ -51,76 +78,116 @@ export default function ScanLandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [params.qrToken]);
+  }, [params.elderId, params.qrToken]);
+
+  function handleContinueVerify(nextElderId: string) {
+    void Taro.navigateTo({
+      url: `${APP_ROUTES.scanVerify}?elderId=${encodeURIComponent(nextElderId)}&source=${encodeURIComponent(params.source || 'scan-landing')}`,
+    });
+  }
 
   return (
-    <View className='sl-page'>
-      <View className='sl-card' style={{ padding: '32rpx', display: 'flex', flexDirection: 'column', gap: '16rpx' }}>
-        <View className='sl-section-title'>扫码落地页</View>
-        <View className='sl-section-desc'>
-          当前页面已接入真实扫码解析接口，后续批次继续补验证页、健康档案、用药与量表查看。
-        </View>
+    <View className='sl-stage'>
+      <View className='sl-app-shell'>
+        <View className='sl-phone-shell'>
+          <View className='sl-phone-content'>
+            <View className='sl-page scan-landing-page'>
+              <ScanLandingHeader />
 
-        <View>
-          <Text>qrToken：</Text>
-          <Text>{params.qrToken || '未识别到'}</Text>
-        </View>
-        <View>
-          <Text>source：</Text>
-          <Text>{params.source || '未识别到'}</Text>
-        </View>
+              {loading ? (
+                <View className='sl-card'>
+                  <View className='sl-empty-state'>正在解析二维码，请稍候。</View>
+                </View>
+              ) : errorText ? (
+                <View className='sl-card sl-form-panel'>
+                  <View className='sl-error-card'>{errorText}</View>
+                  <Button className='sl-secondary-button scan-landing-panel__button' onClick={() => Taro.switchTab({ url: APP_ROUTES.home })}>
+                    返回首页
+                  </Button>
+                </View>
+              ) : hasDirectEntry ? (
+                <>
+                  <View className='sl-section-heading'>
+                    <Text className='scan-landing-heading__title'>基本信息</Text>
+                    <Text className='scan-landing-heading__badge'>盾</Text>
+                  </View>
 
-        {loading ? (
-          <View className='sl-section-desc'>正在解析二维码并拉取基础信息...</View>
-        ) : errorText ? (
-          <View style={{ display: 'flex', flexDirection: 'column', gap: '16rpx' }}>
-            <View style={{ color: 'var(--sl-color-danger)', fontSize: '26rpx' }}>{errorText}</View>
-            <Button className='sl-secondary-button' onClick={() => Taro.navigateTo({ url: APP_ROUTES.home })}>
-              返回首页
-            </Button>
+                  <View className='sl-card scan-landing-profile-panel'>
+                    <View className='scan-landing-profile-hero'>
+                      <View className='scan-landing-profile-avatar'>人</View>
+                      <View className='scan-landing-profile-lines'>
+                        <Text>姓名： 未提供</Text>
+                        <Text>性别： 未提供</Text>
+                        <Text>年龄： 未提供</Text>
+                      </View>
+                    </View>
+                    <View className='scan-landing-archive-line'>健康档案编号： {params.archiveNo || '未透传'}</View>
+                  </View>
+
+                  <Button className='sl-primary-button' onClick={() => handleContinueVerify(params.elderId || '')}>
+                    查看健康档案
+                  </Button>
+                </>
+              ) : basicInfo ? (
+                <>
+                  <View className='sl-section-heading'>
+                    <Text className='scan-landing-heading__title'>基本信息</Text>
+                    <Text className='scan-landing-heading__badge'>盾</Text>
+                  </View>
+
+                  <View className='sl-card scan-landing-profile-panel'>
+                    <View className='scan-landing-profile-hero'>
+                      <View className='scan-landing-profile-avatar'>人</View>
+                      <View className='scan-landing-profile-lines'>
+                        <Text>姓名： {basicInfo.name || '未提供'}</Text>
+                        <Text>性别： {basicInfo.gender || '未提供'}</Text>
+                        <Text>年龄： {basicInfo.age ? `${basicInfo.age} 岁` : '未提供'}</Text>
+                      </View>
+                    </View>
+                    <View className='scan-landing-archive-line'>健康档案编号： {basicInfo.archiveNo || '未提供'}</View>
+                  </View>
+
+                  <View className='sl-card scan-landing-address-panel'>
+                    <View className='scan-landing-mini-heading'>
+                      <Text className='scan-landing-mini-heading__title'>住址信息</Text>
+                      <Text className='scan-landing-mini-heading__icon'>盾</Text>
+                    </View>
+                    <View className='scan-landing-address-line'>完成验证后可查看老人详细住址信息</View>
+                  </View>
+
+                  <View className='sl-card scan-landing-contact-panel'>
+                    <View className='scan-landing-contact-line'>
+                      <Text>紧急联系人： {formatEmergencyContact(basicInfo)}</Text>
+                    </View>
+                    <Button className='sl-secondary-button scan-landing-contact-button'>
+                      一键拨打
+                    </Button>
+                  </View>
+
+                  <View className='sl-card scan-landing-medical-panel'>
+                    <View className='scan-landing-mini-heading'>
+                      <Text className='scan-landing-mini-heading__title'>医疗信息</Text>
+                      <Text className='scan-landing-mini-heading__icon'>十</Text>
+                    </View>
+                    <View className='scan-landing-medical-list'>
+                      <Text>ABO 血型： {basicInfo.aboType || '未提供'}</Text>
+                      <Text>Rh 血型： {basicInfo.rhType || '未提供'}</Text>
+                      <Text>过敏史摘要： {basicInfo.allergySummary || '未提供'}</Text>
+                    </View>
+                  </View>
+
+                  <Button className='sl-primary-button' onClick={() => handleContinueVerify(basicInfo.elderId || '')}>
+                    查看健康档案
+                  </Button>
+                </>
+              ) : (
+                <View className='sl-card'>
+                  <View className='sl-empty-state'>暂未识别到老人信息，请重新扫码。</View>
+                </View>
+              )}
+            </View>
           </View>
-        ) : basicInfo ? (
-          <View style={{ display: 'flex', flexDirection: 'column', gap: '14rpx' }}>
-            <View>
-              <Text>老人姓名：</Text>
-              <Text>{basicInfo.name || '未提供'}</Text>
-            </View>
-            <View>
-              <Text>档案编号：</Text>
-              <Text>{basicInfo.archiveNo || '未提供'}</Text>
-            </View>
-            <View>
-              <Text>性别 / 年龄：</Text>
-              <Text>
-                {basicInfo.gender || '未提供'} / {basicInfo.age || 0}
-              </Text>
-            </View>
-            <View>
-              <Text>紧急联系人：</Text>
-              <Text>{basicInfo.emergencyContactName || '未提供'}</Text>
-            </View>
-            <View>
-              <Text>联系电话：</Text>
-              <Text>{basicInfo.emergencyPhoneMasked || '未提供'}</Text>
-            </View>
-            <View>
-              <Text>过敏史：</Text>
-              <Text>{basicInfo.allergySummary || '未提供'}</Text>
-            </View>
-            <Button
-              className='sl-primary-button'
-              onClick={() =>
-                Taro.navigateTo({
-                  url: `${APP_ROUTES.scanVerify}?elderId=${encodeURIComponent(basicInfo.elderId || '')}&source=${encodeURIComponent(
-                    params.source || 'scan-landing',
-                  )}`,
-                })
-              }
-            >
-              继续验证查看敏感信息
-            </Button>
-          </View>
-        ) : null}
+        </View>
       </View>
     </View>
   );

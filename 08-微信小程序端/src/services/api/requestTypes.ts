@@ -6,7 +6,7 @@ export interface ApiEnvelope<T> {
 
 export interface ApiRequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  data?: Record<string, unknown> | string;
+  data?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
 }

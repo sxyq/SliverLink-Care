@@ -1,20 +1,46 @@
-/*
-  通用页面容器组件规划
+import type { ReactNode } from 'react';
+import { Button, Text, View } from '@tarojs/components';
 
-  用途：
-  - 统一页面的外边距、内容宽度、底部安全区
-  - 统一处理标题区和滚动内容区的结构
-  - 为扫码端和工作台端提供一致的移动端页面骨架
+export interface PageContainerProps {
+  title?: string;
+  subtitle?: string;
+  children: ReactNode;
+  showBack?: boolean;
+  backText?: string;
+  onBack?: () => void;
+  footer?: ReactNode;
+}
 
-  后续建议支持的 props：
-  - title
-  - subtitle
-  - showBack
-  - onBack
-  - fixedFooter
-  - safeAreaBottom
+export function PageContainer({
+  title,
+  subtitle,
+  children,
+  showBack = false,
+  backText = '返回',
+  onBack,
+  footer,
+}: PageContainerProps) {
+  return (
+    <View className='sl-page' style={{ display: 'flex', flexDirection: 'column', gap: '24rpx' }}>
+      {title || subtitle || showBack ? (
+        <View className='sl-card' style={{ padding: '30rpx 26rpx', display: 'flex', flexDirection: 'column', gap: '14rpx' }}>
+          {showBack ? (
+            <View style={{ display: 'flex', justifyContent: 'flex-start' }}>
+              <Button className='sl-secondary-button' style={{ minWidth: '180rpx' }} onClick={onBack}>
+                {backText}
+              </Button>
+            </View>
+          ) : null}
+          {title ? <View style={{ fontSize: '40rpx', fontWeight: '700', color: 'var(--sl-color-text)' }}>{title}</View> : null}
+          {subtitle ? (
+            <Text style={{ fontSize: '24rpx', lineHeight: '1.7', color: 'var(--sl-color-text-secondary)' }}>{subtitle}</Text>
+          ) : null}
+        </View>
+      ) : null}
+      {children}
+      {footer ? <View style={{ paddingBottom: '8rpx' }}>{footer}</View> : null}
+    </View>
+  );
+}
 
-  不负责：
-  - 业务数据获取
-  - 角色权限判断
-*/
+export default PageContainer;

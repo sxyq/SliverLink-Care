@@ -3,7 +3,11 @@ export default {
   subpackages: [
     {
       root: 'subpackages/scan',
-      pages: ['landing/index', 'verify/index'],
+      pages: ['landing/index', 'verify/index', 'archive/index', 'medications/index', 'scales/index', 'nameplate/index'],
+    },
+    {
+      root: 'subpackages/workbench',
+      pages: ['elder-list/index', 'elder-detail/index', 'basic/index', 'medication/index', 'scale/index', 'qrcode/index'],
     },
   ],
   window: {

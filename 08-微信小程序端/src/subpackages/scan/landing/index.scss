@@ -1,8 +1,96 @@
-/*
-  扫码落地页样式占位文件
+.scan-landing-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 首屏优先展示老人基础信息
-  - 入口卡片清晰区分“查看档案 / 用药 / 量表 / 名牌”
-  - 验证前后的按钮态层级明确
-*/
+.scan-landing-heading__title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.scan-landing-heading__badge,
+.scan-landing-mini-heading__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36rpx;
+  height: 36rpx;
+  border-radius: 999rpx;
+  background: rgba(13, 162, 173, 0.12);
+  color: var(--sl-primary-deep);
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.scan-landing-profile-panel,
+.scan-landing-address-panel,
+.scan-landing-contact-panel,
+.scan-landing-medical-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.scan-landing-profile-hero {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16rpx;
+  align-items: center;
+}
+
+.scan-landing-profile-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 26rpx;
+  background: linear-gradient(135deg, var(--sl-primary) 0%, var(--sl-primary-deep) 100%);
+  color: #ffffff;
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.scan-landing-profile-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.55;
+  color: var(--sl-text);
+}
+
+.scan-landing-archive-line,
+.scan-landing-address-line,
+.scan-landing-contact-line,
+.scan-landing-medical-list {
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--sl-text);
+}
+
+.scan-landing-mini-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+}
+
+.scan-landing-mini-heading__title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.scan-landing-contact-button,
+.scan-landing-panel__button {
+  margin-top: 4rpx;
+}
+
+.scan-landing-medical-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}

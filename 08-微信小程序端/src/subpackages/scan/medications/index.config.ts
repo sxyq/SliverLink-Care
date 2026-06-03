@@ -1,3 +1,3 @@
-/*
-  用药信息页配置规划
-*/
+export default definePageConfig({
+  navigationBarTitleText: '主要用药',
+});

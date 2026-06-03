@@ -1,12 +1,47 @@
-/*
-  登录后按角色分流 hook 规划
+import { useEffect, useState } from 'react';
+import Taro, { useDidShow } from '@tarojs/taro';
 
-  用途：
-  - 读取当前 token 对应角色
-  - 判断跳转到工作台首页还是家属工作台首页
-  - 未登录时跳回统一登录页
+import { APP_ROUTES } from '@/app/app.constants';
+import { getAuthSession } from '@/store/auth/authStore';
+import { shouldRedirectToLogin } from '@/store/auth/authSelectors';
 
-  说明：
-  - 志愿者与家属是一个小程序内的两种账号模式
-  - 分流逻辑应统一收口，不要散落在多个页面重复判断
-*/
+export interface RoleRedirectState {
+  loading: boolean;
+  targetLabel: string;
+}
+
+export function useRoleRedirect(): RoleRedirectState {
+  const [state, setState] = useState<RoleRedirectState>({
+    loading: true,
+    targetLabel: '正在识别账号角色',
+  });
+
+  const redirect = () => {
+    const session = getAuthSession();
+
+    if (shouldRedirectToLogin(session)) {
+      setState({
+        loading: true,
+        targetLabel: '未检测到有效登录态，正在返回登录页',
+      });
+      void Taro.redirectTo({ url: APP_ROUTES.login });
+      return;
+    }
+
+    setState({
+      loading: true,
+      targetLabel: session?.role === 'VOLUNTEER' ? '正在进入志愿者工作台' : '正在进入家属工作台',
+    });
+    void Taro.redirectTo({ url: APP_ROUTES.workbenchElderList });
+  };
+
+  useEffect(() => {
+    redirect();
+  }, []);
+
+  useDidShow(() => {
+    redirect();
+  });
+
+  return state;
+}

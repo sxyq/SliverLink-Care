@@ -1,3 +1,4 @@
-/*
-  二维码管理页配置规划
-*/
+export default {
+  navigationBarTitleText: '二维码与名牌',
+  navigationStyle: 'custom',
+};

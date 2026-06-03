@@ -1,7 +1,120 @@
-/*
-  验证页样式占位文件
+.scan-verify-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 手机号、验证码、身份登记等表单区域清楚分段
-  - 错误态、倒计时态、成功态必须明显
-*/
+.scan-verify-section-title {
+  margin-bottom: -2rpx;
+}
+
+.scan-verify-hero-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16rpx;
+  align-items: center;
+  padding: 20rpx 18rpx;
+}
+
+.scan-verify-hero-card__icon {
+  width: 72rpx;
+  height: 72rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, var(--sl-primary) 0%, var(--sl-primary-deep) 100%);
+  color: #ffffff;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.scan-verify-hero-card__copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
+  color: var(--sl-text);
+  font-weight: 700;
+}
+
+.scan-verify-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.scan-verify-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.scan-verify-tabs {
+  display: flex;
+  gap: 12rpx;
+}
+
+.scan-verify-tab {
+  flex: 1;
+  height: 78rpx;
+  border: 1rpx solid var(--sl-border);
+  border-radius: 999rpx;
+  background: var(--sl-surface-soft);
+  color: var(--sl-text-secondary);
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.scan-verify-tab--active {
+  border-color: rgba(13, 162, 173, 0.24);
+  background: rgba(13, 162, 173, 0.1);
+  color: var(--sl-primary-deep);
+}
+
+.scan-verify-field__help {
+  font-size: 22rpx;
+  line-height: 1.6;
+  color: var(--sl-color-text-secondary);
+}
+
+.scan-verify-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.scan-verify-step-item {
+  padding: 16rpx 18rpx;
+  border: 1rpx solid var(--sl-border);
+  border-radius: 16rpx;
+  background: var(--sl-surface-soft);
+  font-size: 23rpx;
+  line-height: 1.55;
+  color: var(--sl-text);
+}
+
+.scan-verify-data-card {
+  padding: 18rpx 20rpx;
+  border: 1rpx solid var(--sl-border);
+  border-radius: 18rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
+  color: var(--sl-primary-ink);
+  font-size: 26rpx;
+  line-height: 1.55;
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.scan-verify-data-card--message {
+  font-size: 23rpx;
+  color: var(--sl-text);
+  font-weight: 600;
+}
+
+.scan-verify-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}

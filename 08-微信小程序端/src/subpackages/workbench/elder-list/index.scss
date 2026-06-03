@@ -1,7 +1,68 @@
-/*
-  老人列表页样式占位文件
+.workbench-elder-list-page {
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 列表卡片应兼顾姓名、状态、操作入口
-  - 小屏幕下保证信息不挤压错位
-*/
+.workbench-elder-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.workbench-elder-list-item {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #fafdff 100%);
+  border: 1rpx solid #dceef6;
+  box-shadow: 0 12rpx 28rpx rgba(19, 121, 160, 0.08);
+}
+
+.workbench-elder-list-item__main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.workbench-elder-list-item__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.workbench-elder-list-item__name {
+  min-width: 0;
+  color: #17334b;
+  font-size: 32rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.workbench-elder-list-item__status {
+  flex-shrink: 0;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+  background: #edf8fc;
+  color: #1786a0;
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.workbench-elder-list-item__meta,
+.workbench-elder-list-item__desc {
+  color: #7c93a5;
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+
+.workbench-elder-list-item__arrow {
+  flex-shrink: 0;
+  color: #1794ac;
+  font-size: 36rpx;
+  font-weight: 700;
+  line-height: 1;
+}

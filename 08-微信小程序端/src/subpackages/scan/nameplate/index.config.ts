@@ -1,3 +1,4 @@
-/*
-  名牌预览与导出页配置规划
-*/
+export default {
+  navigationBarTitleText: '名牌预览',
+  navigationStyle: 'custom',
+};

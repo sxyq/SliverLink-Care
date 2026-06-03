@@ -1,9 +1,74 @@
-/*
-  角色分流页样式占位文件
+.auth-role-redirect-page {
+  align-content: center;
+}
 
-  该页原则上不强调视觉展示，但仍保留独立样式文件以满足页面目录规范。
+.auth-role-redirect-hero {
+  display: grid;
+  gap: 12rpx;
+  padding: 6rpx 4rpx 0;
+}
 
-  后续若需要临时反馈态，可只保留：
-  - 居中 loading
-  - 轻提示文案
-*/
+.auth-role-redirect-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40rpx;
+  padding: 0 18rpx;
+  border-radius: 999rpx;
+  background: #edf9fb;
+  color: var(--sl-primary-deep);
+  font-size: 20rpx;
+  font-weight: 700;
+}
+
+.auth-role-redirect-hero__title {
+  color: var(--sl-primary-ink);
+  font-size: 38rpx;
+  line-height: 1.2;
+  font-weight: 800;
+}
+
+.auth-role-redirect-hero__desc {
+  display: block;
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+  line-height: 1.65;
+}
+
+.auth-role-redirect-card {
+  align-items: center;
+  padding: 48rpx 28rpx 44rpx;
+  text-align: center;
+}
+
+.auth-role-redirect-spinner {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  border: 8rpx solid rgba(13, 162, 173, 0.14);
+  border-top-color: var(--sl-primary);
+  animation: sl-spin 1s linear infinite;
+}
+
+.auth-role-redirect-title {
+  margin-top: 24rpx;
+  font-size: 34rpx;
+  font-weight: 800;
+  color: var(--sl-primary-ink);
+}
+
+.auth-role-redirect-desc {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  line-height: 1.7;
+  color: var(--sl-text-secondary);
+}
+
+@keyframes sl-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}

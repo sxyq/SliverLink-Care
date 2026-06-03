@@ -1,3 +1,4 @@
-/*
-  老人详情页配置规划
-*/
+export default {
+  navigationBarTitleText: '老人详情',
+  navigationStyle: 'custom',
+};

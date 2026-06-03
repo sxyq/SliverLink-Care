@@ -1,14 +1,82 @@
-/*
-  登录状态存储规划
+import { ROLE_TYPES, STORAGE_KEYS, type RoleType } from '@/app/app.constants';
+import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
 
-  建议维护：
-  - token
-  - role
-  - accountId
-  - displayName
-  - loginStatus
+export interface AuthSession {
+  token: string;
+  role: RoleType;
+  accountId: string;
+  displayName: string;
+  loggedInAt: number;
+  cookieBacked: boolean;
+}
 
-  注意：
-  - 小程序端不要直接依赖浏览器 localStorage
-  - 实际实现时改用微信存储 API
-*/
+let authSessionCache: AuthSession | null | undefined;
+
+function normalizeRole(value: unknown): RoleType | null {
+  if (value === ROLE_TYPES.volunteer || value === ROLE_TYPES.family) {
+    return value;
+  }
+  return null;
+}
+
+function readAuthSessionFromStorage(): AuthSession | null {
+  const role = normalizeRole(getStorageValue<string | null>(STORAGE_KEYS.authRole, null));
+  const accountId = getStorageValue<string>(STORAGE_KEYS.accountId, '').trim();
+  const displayName = getStorageValue<string>(STORAGE_KEYS.displayName, '').trim();
+  const token = getStorageValue<string>(STORAGE_KEYS.authToken, '');
+  const loggedInAt = Number(getStorageValue<number>(STORAGE_KEYS.authLoggedInAt, 0));
+  const cookieBacked = Boolean(getStorageValue<boolean>(STORAGE_KEYS.authCookieBacked, false));
+
+  if (!role || !accountId || !token.trim()) {
+    return null;
+  }
+
+  return {
+    token,
+    role,
+    accountId,
+    displayName: displayName || accountId,
+    loggedInAt,
+    cookieBacked,
+  };
+}
+
+export function getAuthSession() {
+  if (authSessionCache === undefined) {
+    authSessionCache = readAuthSessionFromStorage();
+  }
+  return authSessionCache;
+}
+
+export function saveAuthSession(session: AuthSession) {
+  authSessionCache = session;
+  setStorageValue(STORAGE_KEYS.authToken, session.token);
+  setStorageValue(STORAGE_KEYS.authRole, session.role);
+  setStorageValue(STORAGE_KEYS.accountId, session.accountId);
+  setStorageValue(STORAGE_KEYS.displayName, session.displayName);
+  setStorageValue(STORAGE_KEYS.authLoggedInAt, session.loggedInAt);
+  setStorageValue(STORAGE_KEYS.authCookieBacked, session.cookieBacked);
+  return session;
+}
+
+export function updateAuthSession(patch: Partial<AuthSession>) {
+  const current = getAuthSession();
+  if (!current) {
+    return null;
+  }
+
+  return saveAuthSession({
+    ...current,
+    ...patch,
+  });
+}
+
+export function clearAuthSession() {
+  authSessionCache = null;
+  removeStorageValue(STORAGE_KEYS.authToken);
+  removeStorageValue(STORAGE_KEYS.authRole);
+  removeStorageValue(STORAGE_KEYS.accountId);
+  removeStorageValue(STORAGE_KEYS.displayName);
+  removeStorageValue(STORAGE_KEYS.authLoggedInAt);
+  removeStorageValue(STORAGE_KEYS.authCookieBacked);
+}

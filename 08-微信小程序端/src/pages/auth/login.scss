@@ -1,8 +1,197 @@
-/*
-  登录页样式规划
+.auth-login-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24rpx;
+  background:
+    radial-gradient(circle at top left, rgba(38, 166, 154, 0.16), transparent 30%),
+    radial-gradient(circle at top right, rgba(20, 121, 184, 0.14), transparent 34%),
+    linear-gradient(180deg, #eef6fd 0%, #f8fbfe 52%, #eef4fa 100%);
+}
 
-  视觉要求：
-  - 延续现有志愿者 / 家属端的青蓝色品牌感
-  - 表单区清晰，按钮层级明确
-  - 输入错误和 loading 状态要明显
-*/
+.auth-login-shell {
+  position: relative;
+  width: 100%;
+  max-width: 690rpx;
+  overflow: hidden;
+  border-radius: 38rpx;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92) 0%, rgba(252, 254, 255, 0.98) 100%);
+  border: 1rpx solid rgba(255, 255, 255, 0.82);
+  box-shadow: 0 28rpx 60rpx rgba(12, 79, 117, 0.16);
+}
+
+.auth-login-shell__inner {
+  position: relative;
+  padding: 14rpx;
+}
+
+.auth-login-shell__inner::before {
+  content: '';
+  position: absolute;
+  inset: 14rpx;
+  border: 1rpx solid rgba(13, 162, 173, 0.08);
+  border-radius: 28rpx;
+  pointer-events: none;
+}
+
+.auth-login-content {
+  position: relative;
+  z-index: 1;
+  padding: 18rpx 16rpx 24rpx;
+}
+
+.auth-login-hero {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 340rpx;
+  margin-bottom: 12rpx;
+  overflow: hidden;
+  border-radius: 30rpx;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.92), transparent 52%),
+    linear-gradient(180deg, #effcff 0%, #ffffff 72%);
+}
+
+.auth-login-hero::before {
+  content: '';
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: 44rpx;
+  height: 132rpx;
+  background:
+    radial-gradient(circle at 16% 18%, rgba(13, 162, 173, 0.12), transparent 18%),
+    linear-gradient(180deg, rgba(13, 162, 173, 0.12) 0%, rgba(13, 162, 173, 0.04) 100%);
+  clip-path: polygon(0 80%, 10% 64%, 20% 76%, 34% 54%, 46% 70%, 58% 38%, 70% 58%, 82% 32%, 100% 72%, 100% 100%, 0 100%);
+}
+
+.auth-login-hero::after {
+  content: '';
+  position: absolute;
+  right: 22rpx;
+  bottom: 88rpx;
+  width: 110rpx;
+  height: 110rpx;
+  border: 6rpx solid rgba(13, 162, 173, 0.14);
+  border-radius: 999rpx 999rpx 0 999rpx;
+  transform: rotate(45deg);
+}
+
+.auth-login-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-login-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(180deg, #e3f9fa 0%, #f4fdfd 100%);
+  color: var(--sl-color-primary-strong);
+  font-size: 40rpx;
+  font-weight: 800;
+  box-shadow: 0 18rpx 36rpx rgba(13, 162, 173, 0.12);
+}
+
+.auth-login-brand__title {
+  margin-top: 18rpx;
+  color: var(--sl-color-primary-strong);
+  font-size: 48rpx;
+  font-weight: 800;
+  letter-spacing: 8rpx;
+}
+
+.auth-login-brand__subtitle {
+  margin-top: 10rpx;
+  color: #3d7f92;
+  font-size: 24rpx;
+  letter-spacing: 8rpx;
+}
+
+.auth-login-panel {
+  position: relative;
+  margin-top: -18rpx;
+  padding: 28rpx 24rpx 20rpx;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1rpx solid #ebf5f7;
+  border-radius: 28rpx;
+  box-shadow: 0 20rpx 44rpx rgba(12, 79, 117, 0.1);
+}
+
+.auth-login-panel__title {
+  color: var(--sl-color-text);
+  font-size: 44rpx;
+  font-weight: 800;
+}
+
+.auth-login-error {
+  margin-top: 20rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 20rpx;
+  background: rgba(207, 91, 91, 0.1);
+  color: var(--sl-color-danger);
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.auth-login-form {
+  margin-top: 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.auth-login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.auth-login-field__label {
+  font-size: 24rpx;
+  color: var(--sl-color-text-secondary);
+}
+
+.auth-login-field__input-wrap {
+  position: relative;
+}
+
+.auth-login-field__icon {
+  position: absolute;
+  left: 18rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36rpx;
+  height: 36rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  background: #edf6fb;
+  color: #7e96a7;
+  font-size: 20rpx;
+  font-weight: 700;
+  z-index: 1;
+}
+
+.auth-login-field__input {
+  height: 92rpx;
+  padding: 0 24rpx 0 72rpx;
+  border: 1rpx solid #dce8f2;
+  border-radius: 22rpx;
+  background: #f8fbfd;
+  font-size: 28rpx;
+  color: var(--sl-color-text);
+}
+
+.auth-login-submit {
+  margin-top: 8rpx;
+}

@@ -1,3 +1,4 @@
-/*
-  量表页配置规划
-*/
+export default {
+  navigationBarTitleText: '量表记录',
+  navigationStyle: 'custom',
+};

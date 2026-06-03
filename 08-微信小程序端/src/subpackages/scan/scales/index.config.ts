@@ -1,3 +1,3 @@
-/*
-  量表摘要页配置规划
-*/
+export default definePageConfig({
+  navigationBarTitleText: '量表记录',
+});

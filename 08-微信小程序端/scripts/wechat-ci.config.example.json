@@ -1,0 +1,10 @@
+{
+  "appid": "wxd6f1eb971f5d4bc5",
+  "projectPath": "/Users/sunyiyang/Desktop/Project/SilverLink Care/08-微信小程序端",
+  "privateKeyPath": "/absolute/path/to/private.wxd6f1eb971f5d4bc5.key",
+  "robot": 1,
+  "uploadVersion": "0.1.0",
+  "uploadDesc": "首版提审：首页双入口、统一登录、老人详情、二维码与名牌导出",
+  "previewDesc": "本地预览：首页、扫码、登录、二维码与名牌",
+  "qrcodeOutputDest": "/Users/sunyiyang/Desktop/Project/SilverLink Care/08-微信小程序端/miniprogram-ci-qrcode.png"
+}

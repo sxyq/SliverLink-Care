@@ -1,3 +1,3 @@
-/*
-  健康档案页配置规划
-*/
+export default definePageConfig({
+  navigationBarTitleText: '健康档案',
+});

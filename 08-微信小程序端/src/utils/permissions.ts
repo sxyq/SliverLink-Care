@@ -1,12 +1,37 @@
-/*
-  权限判断工具规划
+import { ROLE_TYPES, type RoleType } from '@/app/app.constants';
 
-  用途：
-  - 判断当前角色是否可编辑
-  - 判断当前角色是否可导出
-  - 判断页面是否需要验证后才可看
+export function canEditBasicInfo(role: RoleType) {
+  return role === ROLE_TYPES.volunteer;
+}
 
-  原则：
-  - 工具层只做纯判断
-  - 不在这里执行跳转副作用
-*/
+export function canManageContacts(role: RoleType) {
+  return role === ROLE_TYPES.family;
+}
+
+export function canEditMedications(role: RoleType) {
+  return role === ROLE_TYPES.volunteer || role === ROLE_TYPES.family;
+}
+
+export function canEditScales(role: RoleType) {
+  return role === ROLE_TYPES.volunteer;
+}
+
+export function canViewScales(role: RoleType) {
+  return role === ROLE_TYPES.volunteer;
+}
+
+export function canManageQrCode(role: RoleType) {
+  return role === ROLE_TYPES.volunteer || role === ROLE_TYPES.family;
+}
+
+export function canRegenerateQrCode(role: RoleType) {
+  return role === ROLE_TYPES.volunteer;
+}
+
+export function canRequestQrDisable(role: RoleType) {
+  return role === ROLE_TYPES.volunteer || role === ROLE_TYPES.family;
+}
+
+export function canExportNameplate(role: RoleType) {
+  return role === ROLE_TYPES.volunteer || role === ROLE_TYPES.family;
+}

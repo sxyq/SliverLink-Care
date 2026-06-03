@@ -1,4 +1,5 @@
 const FALLBACK_API_BASE_URL = 'https://sxyq27.online/silverlink-api';
+declare const TARO_APP_API_BASE_URL: string | undefined;
 
 export type AppEnvName = 'development' | 'production';
 
@@ -7,11 +8,15 @@ export function getAppEnvName(): AppEnvName {
     return __APP_ENV__;
   }
 
-  return process.env.NODE_ENV === 'production' ? 'production' : 'development';
+  return 'development';
 }
 
 export function getApiBaseUrl() {
-  return process.env.TARO_APP_API_BASE_URL || FALLBACK_API_BASE_URL;
+  if (typeof TARO_APP_API_BASE_URL !== 'undefined' && TARO_APP_API_BASE_URL) {
+    return TARO_APP_API_BASE_URL;
+  }
+
+  return FALLBACK_API_BASE_URL;
 }
 
 export function isDevelopmentEnv() {

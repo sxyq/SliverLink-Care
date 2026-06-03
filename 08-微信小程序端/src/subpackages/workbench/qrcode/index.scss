@@ -1,7 +1,111 @@
-/*
-  二维码管理页样式占位文件
+.workbench-qrcode-page {
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - H5 二维码、小程序码、名牌导出信息要分块呈现
-  - 状态、停用、导出等操作区要清晰
-*/
+.workbench-qrcode-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.workbench-qrcode-hero-copy {
+  display: flex;
+  align-items: center;
+}
+
+.workbench-qrcode-preview-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  padding: 22rpx;
+  border: 1rpx solid var(--sl-border);
+  border-radius: 22rpx;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
+}
+
+.workbench-qrcode-status-chip {
+  align-self: flex-start;
+  min-height: 42rpx;
+  padding: 0 16rpx;
+  border-radius: 999rpx;
+  background: rgba(13, 162, 173, 0.12);
+  color: var(--sl-primary-deep);
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 42rpx;
+}
+
+.workbench-qrcode-preview-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.workbench-qrcode-preview-meta,
+.workbench-qrcode-preview-link {
+  font-size: 23rpx;
+  line-height: 1.7;
+  color: var(--sl-text-secondary);
+  word-break: break-all;
+}
+
+.workbench-qrcode-preview-frame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260rpx;
+  border-radius: 22rpx;
+  background: #ffffff;
+  border: 1rpx dashed #cfe7eb;
+}
+
+.workbench-qrcode-preview-placeholder {
+  width: 180rpx;
+  height: 180rpx;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
+  border-radius: 18rpx;
+  background: rgba(20, 121, 184, 0.08);
+  color: var(--sl-color-primary);
+  padding: 16rpx;
+  text-align: center;
+}
+
+.workbench-qrcode-preview-token {
+  font-size: 22rpx;
+  line-height: 1.4;
+  font-weight: 800;
+  word-break: break-all;
+}
+
+.workbench-qrcode-preview-caption {
+  font-size: 18rpx;
+  line-height: 1.5;
+  color: var(--sl-text-secondary);
+}
+
+.workbench-qrcode-copy-button {
+  width: 100%;
+}
+
+.workbench-qrcode-message {
+  padding: 22rpx;
+  border-radius: 20rpx;
+  background: rgba(13, 162, 173, 0.08);
+  color: var(--sl-primary-deep);
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+
+.workbench-qrcode-note {
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+  line-height: 1.7;
+}
+
+.workbench-qrcode-primary-button {
+  width: 100%;
+}

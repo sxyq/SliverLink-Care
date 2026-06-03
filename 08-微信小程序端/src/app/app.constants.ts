@@ -4,8 +4,18 @@ export const APP_ROUTES = {
   home: '/pages/home/index',
   login: '/pages/auth/login',
   authRoleRedirect: '/pages/auth-role-redirect/index',
+  workbenchElderList: '/subpackages/workbench/elder-list/index',
+  workbenchElderDetail: '/subpackages/workbench/elder-detail/index',
+  workbenchBasic: '/subpackages/workbench/basic/index',
+  workbenchMedication: '/subpackages/workbench/medication/index',
+  workbenchScale: '/subpackages/workbench/scale/index',
+  workbenchQrCode: '/subpackages/workbench/qrcode/index',
   scanLanding: '/subpackages/scan/landing/index',
   scanVerify: '/subpackages/scan/verify/index',
+  scanArchive: '/subpackages/scan/archive/index',
+  scanMedications: '/subpackages/scan/medications/index',
+  scanScales: '/subpackages/scan/scales/index',
+  scanNameplate: '/subpackages/scan/nameplate/index',
 } as const;
 
 export const STORAGE_KEYS = {
@@ -13,7 +23,11 @@ export const STORAGE_KEYS = {
   authRole: 'sl_weapp_auth_role',
   accountId: 'sl_weapp_account_id',
   displayName: 'sl_weapp_display_name',
+  authLoggedInAt: 'sl_weapp_auth_logged_in_at',
+  authCookieBacked: 'sl_weapp_auth_cookie_backed',
   launchContext: 'sl_weapp_launch_context',
+  appSession: 'sl_weapp_app_session',
+  currentElderSummary: 'sl_weapp_current_elder_summary',
   privacyAccepted: 'sl_weapp_privacy_accepted',
 } as const;
 

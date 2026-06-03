@@ -1,3 +1,4 @@
-/*
-  基本信息编辑页配置规划
-*/
+export default {
+  navigationBarTitleText: '基本信息',
+  navigationStyle: 'custom',
+};

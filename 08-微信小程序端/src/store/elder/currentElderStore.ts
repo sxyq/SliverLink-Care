@@ -1,12 +1,39 @@
-/*
-  当前老人上下文状态规划
+import type { RoleType } from '@/app/app.constants';
+import { STORAGE_KEYS } from '@/app/app.constants';
+import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
 
-  建议维护：
-  - currentElderId
-  - currentArchiveNo
-  - currentElderName
-  - roleScopedEditableFields
+export interface CurrentElderSummary {
+  id: string;
+  archiveNo: string;
+  name: string;
+  age: number;
+  gender: string;
+  residence: string;
+  bloodType: string;
+  allergyHistory: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  emergencyContactRelation: string;
+  lastUpdate: string;
+  role: RoleType;
+}
 
-  用途：
-  - 详情页、编辑页、用药页、量表页共享当前老人上下文
-*/
+let currentElderCache: CurrentElderSummary | null | undefined;
+
+export function getCurrentElderSummary() {
+  if (currentElderCache === undefined) {
+    currentElderCache = getStorageValue<CurrentElderSummary | null>(STORAGE_KEYS.currentElderSummary, null);
+  }
+  return currentElderCache;
+}
+
+export function saveCurrentElderSummary(summary: CurrentElderSummary) {
+  currentElderCache = summary;
+  setStorageValue(STORAGE_KEYS.currentElderSummary, summary);
+  return summary;
+}
+
+export function clearCurrentElderSummary() {
+  currentElderCache = null;
+  removeStorageValue(STORAGE_KEYS.currentElderSummary);
+}

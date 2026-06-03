@@ -1,12 +1,18 @@
-/*
-  登录态派生选择器规划
+import { ROLE_TYPES } from '@/app/app.constants';
+import type { AuthSession } from './authStore';
 
-  用途：
-  - isLoggedIn
-  - isVolunteer
-  - isFamily
-  - shouldRedirectToLogin
+export function isLoggedIn(session: AuthSession | null | undefined) {
+  return Boolean(session?.role && session?.accountId);
+}
 
-  目标：
-  - 减少页面重复判断 role 与 token
-*/
+export function isVolunteer(session: AuthSession | null | undefined) {
+  return session?.role === ROLE_TYPES.volunteer;
+}
+
+export function isFamily(session: AuthSession | null | undefined) {
+  return session?.role === ROLE_TYPES.family;
+}
+
+export function shouldRedirectToLogin(session: AuthSession | null | undefined) {
+  return !isLoggedIn(session);
+}

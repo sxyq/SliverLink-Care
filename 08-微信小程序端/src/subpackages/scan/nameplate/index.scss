@@ -1,7 +1,114 @@
-/*
-  名牌预览与导出页样式占位文件
+.scan-nameplate-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 预览区与导出操作区分层
-  - 兼顾实体卡正反面缩略预览与文档导出说明
-*/
+.scan-nameplate-card {
+  padding: 26rpx 24rpx;
+}
+
+.scan-nameplate-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.scan-nameplate-card {
+  min-height: 260rpx;
+  background:
+    linear-gradient(160deg, rgba(20, 121, 184, 0.05), rgba(255, 255, 255, 1)),
+    #ffffff;
+}
+
+.scan-nameplate-card--back {
+  background:
+    linear-gradient(160deg, rgba(38, 166, 154, 0.08), rgba(255, 255, 255, 1)),
+    #ffffff;
+}
+
+.scan-nameplate-card__kicker {
+  font-size: 22rpx;
+  color: var(--sl-primary-deep);
+}
+
+.scan-nameplate-field {
+  margin-top: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.scan-nameplate-label {
+  font-size: 22rpx;
+  color: var(--sl-text-secondary);
+}
+
+.scan-nameplate-placeholder {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: var(--sl-text);
+  font-weight: 700;
+}
+
+.scan-nameplate-qr-area {
+  margin-top: 18rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.scan-nameplate-qr-box {
+  width: 168rpx;
+  height: 168rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 16rpx;
+  background: #ffffff;
+  border: 1rpx dashed #c7e3ea;
+  color: var(--sl-color-primary);
+  padding: 16rpx;
+  text-align: center;
+}
+
+.scan-nameplate-qr-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.scan-nameplate-qr-token {
+  font-size: 20rpx;
+  line-height: 1.45;
+  font-weight: 800;
+  word-break: break-all;
+}
+
+.scan-nameplate-qr-hint {
+  font-size: 23rpx;
+  color: var(--sl-text-secondary);
+}
+
+.scan-nameplate-divider {
+  margin-top: 18rpx;
+  height: 1rpx;
+  background: var(--sl-border);
+}
+
+.scan-nameplate-note {
+  font-size: 23rpx;
+  line-height: 1.7;
+  color: var(--sl-text-secondary);
+}
+
+.scan-nameplate-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.scan-nameplate-actions__button {
+  flex: 1;
+}

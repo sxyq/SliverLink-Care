@@ -1,17 +1,30 @@
-/*
-  通用分区卡片组件规划
+import type { ReactNode } from 'react';
+import { Text, View } from '@tarojs/components';
 
-  用途：
-  - 首页入口卡片
-  - 老人详情信息卡片
-  - 工作台模块卡片
-  - 扫码档案摘要卡片
+export interface SectionCardProps {
+  title?: string;
+  subtitle?: string;
+  extra?: ReactNode;
+  children?: ReactNode;
+}
 
-  后续建议支持：
-  - 标题
-  - 副标题
-  - 图标
-  - 右侧操作位
-  - 点击态
-  - loading / empty 状态
-*/
+export function SectionCard({ title, subtitle, extra, children }: SectionCardProps) {
+  return (
+    <View className='sl-card' style={{ padding: '28rpx 24rpx', display: 'flex', flexDirection: 'column', gap: '16rpx' }}>
+      {title || subtitle || extra ? (
+        <View style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '18rpx' }}>
+          <View style={{ display: 'flex', flexDirection: 'column', gap: '10rpx', flex: 1 }}>
+            {title ? <View style={{ fontSize: '30rpx', fontWeight: '700', color: 'var(--sl-color-text)' }}>{title}</View> : null}
+            {subtitle ? (
+              <Text style={{ fontSize: '24rpx', lineHeight: '1.7', color: 'var(--sl-color-text-secondary)' }}>{subtitle}</Text>
+            ) : null}
+          </View>
+          {extra ? <View>{extra}</View> : null}
+        </View>
+      ) : null}
+      {children}
+    </View>
+  );
+}
+
+export default SectionCard;

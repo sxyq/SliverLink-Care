@@ -1,17 +1,29 @@
-/*
-  权限保护组件规划
+import type { ReactNode } from 'react';
+import { Text, View } from '@tarojs/components';
 
-  用途：
-  - 家属不可见的志愿者操作
-  - 未验证用户不可见的敏感档案
-  - 无当前老人上下文时阻止进入详情操作页
+export interface PermissionGuardProps {
+  allowed: boolean;
+  children: ReactNode;
+  fallbackTitle?: string;
+  fallbackDescription?: string;
+}
 
-  后续建议支持：
-  - requiredRole
-  - fallback
-  - children
+export function PermissionGuard({
+  allowed,
+  children,
+  fallbackTitle = '当前无访问权限',
+  fallbackDescription = '请切换到有权限的账号，或返回上一页继续操作。',
+}: PermissionGuardProps) {
+  if (allowed) {
+    return <>{children}</>;
+  }
 
-  注意：
-  - 权限保护不能只在前端做
-  - 后端接口也必须做角色校验
-*/
+  return (
+    <View className='sl-card' style={{ padding: '30rpx 26rpx', display: 'flex', flexDirection: 'column', gap: '14rpx' }}>
+      <View style={{ fontSize: '30rpx', fontWeight: '700', color: 'var(--sl-color-danger)' }}>{fallbackTitle}</View>
+      <Text style={{ fontSize: '24rpx', lineHeight: '1.7', color: 'var(--sl-color-text-secondary)' }}>{fallbackDescription}</Text>
+    </View>
+  );
+}
+
+export default PermissionGuard;

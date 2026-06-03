@@ -1,7 +1,28 @@
-/*
-  基本信息编辑页样式占位文件
+.workbench-basic-page {
+  gap: 12rpx;
+}
 
-  视觉要求：
-  - 查看态与编辑态切换清楚
-  - 家属与志愿者不同权限区域可通过样式弱提示区分
-*/
+.workbench-basic-save-button {
+  width: 100%;
+}
+
+.workbench-basic-grid {
+  gap: 12rpx 12rpx;
+}
+
+.workbench-basic-grid__name,
+.workbench-basic-grid__residence {
+  grid-column: span 1;
+}
+
+.workbench-basic-grid__gender {
+  align-self: end;
+}
+
+.workbench-basic-grid__age {
+  max-width: 220rpx;
+}
+
+.workbench-basic-gender-switch {
+  justify-content: flex-start;
+}

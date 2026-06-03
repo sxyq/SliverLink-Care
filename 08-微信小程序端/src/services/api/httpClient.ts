@@ -42,7 +42,8 @@ async function request<T>(path: string, options: ApiRequestOptions = {}) {
     data: options.data,
     header: buildHeaders(options.headers),
     timeout: options.timeout || 15000,
-  });
+    enableCookie: true,
+  } as Taro.request.Option<ApiEnvelope<T> | T> & { enableCookie: boolean });
 
   if (response.statusCode === 401) {
     removeStorageValue(STORAGE_KEYS.authToken);
@@ -70,7 +71,8 @@ async function download(path: string): Promise<DownloadResult> {
     url: `${getApiBaseUrl()}${path}`,
     header: buildHeaders(),
     timeout: 20000,
-  });
+    enableCookie: true,
+  } as Taro.downloadFile.Option & { enableCookie: boolean });
 
   if (result.statusCode >= 400) {
     throw new Error(ERROR_MESSAGES.requestFailed);

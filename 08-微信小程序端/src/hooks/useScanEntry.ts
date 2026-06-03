@@ -1,29 +1,41 @@
 import Taro from '@tarojs/taro';
 
 import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { parseRouteText } from '@/utils/routeParams';
 
-function extractQrToken(rawResult: string) {
-  try {
-    const url = new URL(rawResult);
-    return url.searchParams.get('qrToken') || url.searchParams.get('token') || '';
-  } catch {
-    return '';
+function buildScanLandingUrl(rawResult: string) {
+  const params = parseRouteText(rawResult);
+  const searchParams = new URLSearchParams();
+
+  if (params.qrToken) {
+    searchParams.set('qrToken', params.qrToken);
   }
+  if (params.elderId) {
+    searchParams.set('elderId', params.elderId);
+  }
+  if (params.archiveNo) {
+    searchParams.set('archiveNo', params.archiveNo);
+  }
+
+  searchParams.set('source', params.source || 'wx-scan');
+
+  const queryString = searchParams.toString();
+  return queryString ? `${APP_ROUTES.scanLanding}?${queryString}` : '';
 }
 
 export function useScanEntry() {
   return async function openScan() {
     try {
       const result = await Taro.scanCode({ onlyFromCamera: false, scanType: ['qrCode'] });
-      const qrToken = extractQrToken(result.result || '');
+      const landingUrl = buildScanLandingUrl(result.result || '');
 
-      if (!qrToken) {
+      if (!landingUrl) {
         await Taro.showToast({ title: ERROR_MESSAGES.invalidQr, icon: 'none' });
         return;
       }
 
       await Taro.navigateTo({
-        url: `${APP_ROUTES.scanLanding}?qrToken=${encodeURIComponent(qrToken)}&source=wx-scan`,
+        url: landingUrl,
       });
     } catch (error) {
       const errMsg = String((error as { errMsg?: string })?.errMsg || '');

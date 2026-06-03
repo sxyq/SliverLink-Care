@@ -1,9 +1,40 @@
-/*
-  应用会话状态规划
+import { ENTRY_KEYS, STORAGE_KEYS } from '@/app/app.constants';
+import { getStorageValue, setStorageValue } from '@/utils/storage';
 
-  存储内容建议：
-  - 当前启动模式
-  - 最近一次扫码上下文
-  - 当前首页入口来源
-  - 是否已同意隐私政策
-*/
+export type HomeEntrySource = (typeof ENTRY_KEYS)[keyof typeof ENTRY_KEYS] | 'unknown';
+
+export interface AppSessionState {
+  homeEntrySource: HomeEntrySource;
+  privacyAccepted: boolean;
+  lastWorkbenchOpenedAt: number;
+}
+
+const DEFAULT_APP_SESSION: AppSessionState = {
+  homeEntrySource: 'unknown',
+  privacyAccepted: false,
+  lastWorkbenchOpenedAt: 0,
+};
+
+let appSessionCache: AppSessionState | undefined;
+
+export function getAppSession() {
+  if (appSessionCache) {
+    return appSessionCache;
+  }
+
+  appSessionCache = getStorageValue<AppSessionState>(STORAGE_KEYS.appSession, DEFAULT_APP_SESSION);
+  return appSessionCache;
+}
+
+export function saveAppSession(nextState: AppSessionState) {
+  appSessionCache = nextState;
+  setStorageValue(STORAGE_KEYS.appSession, nextState);
+  return nextState;
+}
+
+export function updateAppSession(patch: Partial<AppSessionState>) {
+  return saveAppSession({
+    ...getAppSession(),
+    ...patch,
+  });
+}

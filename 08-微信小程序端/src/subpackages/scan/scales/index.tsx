@@ -1,7 +1,149 @@
-/*
-  量表摘要页开发说明
+import { useEffect, useState } from 'react';
+import { Button, Text, View } from '@tarojs/components';
+import Taro, { useRouter } from '@tarojs/taro';
 
-  页面职责：
-  - 展示 PHQ、GAD、UCLA 等量表摘要
-  - 首版以摘要和分数为主
-*/
+import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { fetchScales } from '@/services/scan/scanArchiveService';
+import type { ScanScaleSummaryItem } from '@/types/scan';
+import { parseQueryParams } from '@/utils/routeParams';
+
+import './index.scss';
+
+function formatDate(value: string) {
+  if (!value) {
+    return '暂无记录';
+  }
+  return value.slice(0, 10);
+}
+
+export default function ScanScalesPage() {
+  const router = useRouter();
+  const params = parseQueryParams(router.params || {});
+  const elderId = params.elderId || '';
+  const sessionId = String(router.params?.sessionId || '');
+  const hasProtectedContext = Boolean(elderId && sessionId);
+
+  const [items, setItems] = useState<ScanScaleSummaryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [errorText, setErrorText] = useState('');
+
+  function buildArchiveUrl() {
+    return `${APP_ROUTES.scanArchive}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`;
+  }
+
+  function buildVerifyUrl() {
+    return `${APP_ROUTES.scanVerify}?elderId=${encodeURIComponent(elderId)}`;
+  }
+
+  useEffect(() => {
+    if (!elderId || !sessionId) {
+      setLoading(false);
+      setErrorText('缺少访问会话，请返回验证页重新进入。');
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+      try {
+        setLoading(true);
+        setErrorText('');
+        const data = await fetchScales(elderId, sessionId);
+        if (!cancelled) {
+          setItems(data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [elderId, sessionId]);
+
+  function handleBack() {
+    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: buildArchiveUrl() }));
+  }
+
+  return (
+    <View className='sl-stage'>
+      <View className='sl-app-shell'>
+        <View className='sl-phone-shell'>
+          <View className='sl-phone-content'>
+            <View className='sl-page scan-scales-page'>
+              <View className='sl-page-header-bar'>
+                <View className='sl-page-header-action'>
+                  <View className='sl-page-header-icon' onClick={handleBack}>
+                    返回
+                  </View>
+                </View>
+                <View className='sl-page-header-copy'>
+                  <View className='sl-page-header-copy__title'>量表记录</View>
+                </View>
+                <View className='sl-page-header-placeholder' />
+              </View>
+
+              {hasProtectedContext ? (
+                <View className='sl-action-grid scan-scales-actions'>
+                  <Button className='sl-secondary-button' onClick={() => Taro.redirectTo({ url: buildArchiveUrl() })}>
+                    返回档案
+                  </Button>
+                  <Button
+                    className='sl-secondary-button'
+                    onClick={() =>
+                      Taro.redirectTo({ url: `${APP_ROUTES.scanMedications}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}` })
+                    }
+                  >
+                    查看用药
+                  </Button>
+                </View>
+              ) : null}
+
+              {loading ? (
+                <View className='sl-card'>
+                  <View className='sl-empty-state'>正在加载量表记录...</View>
+                </View>
+              ) : errorText ? (
+                <View className='sl-card sl-form-panel'>
+                  <View className='sl-error-card'>{errorText}</View>
+                  <Button className='sl-secondary-button scan-scales-panel__button' onClick={() => Taro.redirectTo({ url: buildVerifyUrl() })}>
+                    返回验证页
+                  </Button>
+                </View>
+              ) : items.length === 0 ? (
+                <View className='sl-card'>
+                  <View className='sl-empty-state'>暂无量表记录。</View>
+                </View>
+              ) : (
+                <View className='scan-scales-list'>
+                  {items.map((item) => (
+                    <View key={`${item.name}-${item.updatedAt}`} className='sl-card scan-scales-item'>
+                      <View className='scan-scales-item__icon'>表</View>
+                      <View className='scan-scales-item__body'>
+                        <View className='scan-scales-item__name'>{item.name || '未命名量表'}</View>
+                        <View className='scan-scales-item__summary'>
+                          最近记录：{formatDate(item.updatedAt)} | 分数 <Text className='scan-scales-item__score'>{item.score}</Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              )}
+
+              {!loading && !errorText && items.length ? <View className='scan-scales-privacy-pill'>隐私保护</View> : null}
+            </View>
+          </View>
+        </View>
+      </View>
+    </View>
+  );
+}

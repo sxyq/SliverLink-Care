@@ -1,7 +1,78 @@
-/*
-  量表摘要页样式占位文件
+.scan-scales-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
 
-  视觉要求：
-  - 分数量级、时间、量表名称区分清晰
-  - 首版以摘要展示为主，不做复杂图表堆叠
-*/
+.scan-scales-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16rpx;
+  align-items: center;
+  padding: 22rpx 20rpx;
+}
+
+.scan-scales-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.scan-scales-actions {
+  flex-direction: column;
+}
+
+.scan-scales-item__icon {
+  width: 72rpx;
+  height: 72rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 22rpx;
+  background: rgba(20, 121, 184, 0.12);
+  color: var(--sl-color-primary);
+  font-size: 28rpx;
+  font-weight: 800;
+}
+
+.scan-scales-item__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.scan-scales-item__name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.scan-scales-item__summary {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--sl-text-secondary);
+}
+
+.scan-scales-item__score {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--sl-primary-ink);
+}
+
+.scan-scales-privacy-pill {
+  align-self: center;
+  min-height: 58rpx;
+  padding: 0 22rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999rpx;
+  background: rgba(12, 79, 117, 0.08);
+  color: var(--sl-primary-ink);
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.scan-scales-panel__button {
+  margin-top: 18rpx;
+}
