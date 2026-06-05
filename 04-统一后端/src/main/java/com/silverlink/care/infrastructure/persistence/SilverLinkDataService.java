@@ -2,6 +2,7 @@ package com.silverlink.care.infrastructure.persistence;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
@@ -12,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -24,11 +26,13 @@ import java.util.*;
 public class SilverLinkDataService {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final long SCALE_ANSWERS_CACHE_TTL_MS = 30_000L;
 
     private final JdbcTemplate jdbc;
     private final AesGcmCryptoService crypto;
     private final HashService hashService;
     private final ObjectMapper objectMapper;
+    private final SimpleTtlCache<String, List<Map<String, Object>>> scaleAnswersCache = new SimpleTtlCache<>();
 
     public SilverLinkDataService(JdbcTemplate jdbc, AesGcmCryptoService crypto, HashService hashService, ObjectMapper objectMapper) {
         this.jdbc = jdbc;
@@ -111,7 +115,13 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, Object>> eldersForAdmin() {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from elder order by updated_at desc");
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select e.*, u.account as volunteer_account, u.name_enc as volunteer_name_enc
+                from elder e
+                left join volunteer_elder_scope s on e.id = s.elder_id
+                left join app_user u on u.id = s.volunteer_user_id and u.role = 'VOLUNTEER'
+                order by e.updated_at desc
+                """);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             result.add(elderRow(row, false));
@@ -128,6 +138,8 @@ public class SilverLinkDataService {
         String phone = dec(row.get("emergency_phone_enc"));
         String name = dec(row.get("name_enc"));
         String residence = dec(row.get("residence_enc"));
+        String volunteerAccount = str(row.get("volunteer_account"));
+        String volunteerName = dec(row.get("volunteer_name_enc"));
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("id", str(row.get("id")));
         map.put("elderId", str(row.get("id")));
@@ -152,6 +164,9 @@ public class SilverLinkDataService {
         map.put("bloodType", str(row.get("abo_type")));
         map.put("allergySummary", dec(row.get("allergy_enc")));
         map.put("allergyHistory", dec(row.get("allergy_enc")));
+        map.put("volunteerAccount", volunteerAccount);
+        map.put("volunteerName", volunteerName);
+        map.put("volunteer", formatVolunteerLabel(volunteerName, volunteerAccount));
         map.put("status", str(row.get("status")));
         return map;
     }
@@ -210,6 +225,7 @@ public class SilverLinkDataService {
         for (Map<String, Object> row : rows) {
             Map<String, Object> map = new LinkedHashMap<>();
             String id = str(row.get("id"));
+            List<Map<String, Object>> assignedElders = volunteerScopeSummaries(id);
             map.put("id", id);
             map.put("name", dec(row.get("name_enc")));
             map.put("phone", dec(row.get("phone_enc")));
@@ -217,7 +233,9 @@ public class SilverLinkDataService {
             map.put("account", str(row.get("account")));
             map.put("role", "VOLUNTEER");
             map.put("status", str(row.get("status")));
-            map.put("scopeCount", count("volunteer_elder_scope", "volunteer_user_id='" + id.replace("'", "''") + "'"));
+            map.put("scopeCount", assignedElders.size());
+            map.put("assignedElders", assignedElders);
+            map.put("assignedElderIds", assignedElders.stream().map(item -> str(item.get("id"))).toList());
             result.add(map);
         }
         return result;
@@ -263,6 +281,7 @@ public class SilverLinkDataService {
     public void setVolunteerScope(String volunteerId, List<String> elderIds) {
         jdbc.update("delete from volunteer_elder_scope where volunteer_user_id=?", volunteerId);
         for (String elderId : elderIds) {
+            jdbc.update("delete from volunteer_elder_scope where elder_id=? and volunteer_user_id<>?", elderId, volunteerId);
             jdbc.update("insert ignore into volunteer_elder_scope (id, volunteer_user_id, elder_id) values (?,?,?)",
                     UUID.randomUUID().toString(), volunteerId, elderId);
         }
@@ -302,6 +321,16 @@ public class SilverLinkDataService {
         String nextPassword = value(body, "password", "");
         String id = str(existing.get("id"));
 
+        if (nextAccount.isBlank()) {
+            throw new BizException(400, "请输入登录账号");
+        }
+        if (nextName.isBlank()) {
+            throw new BizException(400, "请输入姓名");
+        }
+        if (!nextAccount.equals(account) && !findUser(nextAccount, "VOLUNTEER").isEmpty()) {
+            throw new BizException(400, "该登录账号已存在，请更换后重试");
+        }
+
         if (nextPassword.isBlank()) {
             jdbc.update("update app_user set account=?, name_enc=?, phone_enc=? where id=? and role='VOLUNTEER'",
                     nextAccount, enc(nextName), enc(nextPhone), id);
@@ -323,6 +352,35 @@ public class SilverLinkDataService {
         return rows.isEmpty() ? "" : str(rows.get(0).get("record_date"));
     }
 
+    private List<Map<String, Object>> volunteerScopeSummaries(String volunteerId) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select e.id, e.archive_no, e.name_enc, e.age, e.status
+                from volunteer_elder_scope s
+                join elder e on e.id = s.elder_id
+                where s.volunteer_user_id=?
+                order by e.updated_at desc
+                """, volunteerId);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", str(row.get("id")));
+            map.put("archiveNo", str(row.get("archive_no")));
+            map.put("name", dec(row.get("name_enc")));
+            map.put("age", intValue(row.get("age")));
+            map.put("status", str(row.get("status")));
+            result.add(map);
+        }
+        return result;
+    }
+
+    private String formatVolunteerLabel(String volunteerName, String volunteerAccount) {
+        if (!volunteerName.isBlank() && !volunteerAccount.isBlank()) {
+            return volunteerName + " / " + volunteerAccount;
+        }
+        if (!volunteerName.isBlank()) return volunteerName;
+        return volunteerAccount;
+    }
+
     public void requireVolunteerScope(String elderId) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null) return;
@@ -341,7 +399,14 @@ public class SilverLinkDataService {
     }
 
     public Map<String, Object> health(String elderId) {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from health_record where elder_id=? order by created_at desc limit 1", elderId);
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select record_date, volunteer, height_cm, weight_kg, waist_cm, bmi,
+                       health_self_assessment, self_care_assessment, cognitive_screening, emotion_screening
+                from health_record
+                where elder_id=?
+                order by created_at desc
+                limit 1
+                """, elderId);
         if (rows.isEmpty()) return Collections.emptyMap();
         Map<String, Object> row = rows.get(0);
         Map<String, Object> map = new LinkedHashMap<>();
@@ -359,7 +424,12 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, String>> medications(String elderId) {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from medication where elder_id=? order by updated_at desc", elderId);
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select id, name_enc, dosage_enc, usage_text_enc, timing_enc, updated_at
+                from medication
+                where elder_id=?
+                order by updated_at desc
+                """, elderId);
         List<Map<String, String>> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             Map<String, String> map = new LinkedHashMap<>();
@@ -400,7 +470,16 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, Object>> scales(String elderId) {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from scale_record where elder_id=? order by created_at desc", elderId);
+        return scaleSummaries(elderId);
+    }
+
+    public List<Map<String, Object>> scaleSummaries(String elderId) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select id, scale_name, score, record_date, volunteer
+                from scale_record
+                where elder_id=?
+                order by created_at desc
+                """, elderId);
         List<Map<String, Object>> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             Map<String, Object> map = new LinkedHashMap<>();
@@ -411,10 +490,34 @@ public class SilverLinkDataService {
             map.put("updatedAt", str(row.get("record_date")));
             map.put("date", str(row.get("record_date")));
             map.put("volunteer", str(row.get("volunteer")));
-            map.put("answers", parseScaleAnswers(dec(row.get("payload_enc"))));
             result.add(map);
         }
         return result;
+    }
+
+    public Map<String, Object> scaleDetail(String elderId, String scaleName) {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select id, scale_name, score, record_date, volunteer, payload_enc
+                from scale_record
+                where elder_id=? and scale_name=?
+                order by created_at desc
+                limit 1
+                """, elderId, scaleName);
+        if (rows.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Map<String, Object> row = rows.get(0);
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put("id", str(row.get("id")));
+        map.put("name", str(row.get("scale_name")));
+        map.put("scale", str(row.get("scale_name")));
+        map.put("score", intValue(row.get("score")));
+        map.put("updatedAt", str(row.get("record_date")));
+        map.put("date", str(row.get("record_date")));
+        map.put("volunteer", str(row.get("volunteer")));
+        String payloadEnc = str(row.get("payload_enc"));
+        map.put("answers", parseScaleAnswersCached(str(row.get("id")), dec(payloadEnc)));
+        return map;
     }
 
     public void saveBasic(String elderId, Map<String, Object> data) {
@@ -521,13 +624,61 @@ public class SilverLinkDataService {
         );
     }
 
+    public void recordAuditBatch(List<AuditLogWrite> entries) {
+        if (entries == null || entries.isEmpty()) {
+            return;
+        }
+        jdbc.batchUpdate("""
+                        insert into audit_log
+                        (id, time, operator, role, source_ip, target, action, verification_method, visitor_name_enc, visitor_phone_enc, visitor_id_card_enc, result, fail_reason, request_id)
+                        values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        """,
+                entries,
+                entries.size(),
+                (PreparedStatement ps, AuditLogWrite entry) -> {
+                    ps.setString(1, UUID.randomUUID().toString());
+                    ps.setString(2, entry.time());
+                    ps.setString(3, entry.operator());
+                    ps.setString(4, entry.role());
+                    ps.setString(5, entry.ip());
+                    ps.setString(6, entry.target());
+                    ps.setString(7, entry.action());
+                    ps.setString(8, entry.verificationMethod());
+                    ps.setString(9, enc(entry.visitorName()));
+                    ps.setString(10, enc(entry.visitorPhone()));
+                    ps.setString(11, enc(entry.visitorIdCard()));
+                    ps.setString(12, entry.result());
+                    ps.setString(13, entry.failReason());
+                    ps.setString(14, entry.requestId());
+                });
+    }
+
     public List<Map<String, Object>> auditLogs(String operator, String action, String result) {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from audit_log order by time desc limit 500");
+        StringBuilder sql = new StringBuilder("""
+                select id, time, operator, role, source_ip, target, action, verification_method,
+                       visitor_name_enc, visitor_phone_enc, visitor_id_card_enc,
+                       result, fail_reason, request_id
+                from audit_log
+                where 1=1
+                """);
+        List<Object> args = new ArrayList<>();
+        if (operator != null && !operator.isBlank()) {
+            sql.append(" and operator like ?");
+            args.add("%" + operator + "%");
+        }
+        if (action != null && !action.isBlank()) {
+            sql.append(" and action = ?");
+            args.add(action);
+        }
+        if (result != null && !result.isBlank()) {
+            sql.append(" and result = ?");
+            args.add(result);
+        }
+        sql.append(" order by time desc limit 500");
+
+        List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
         List<Map<String, Object>> out = new ArrayList<>();
         for (Map<String, Object> row : rows) {
-            if (operator != null && !operator.isBlank() && !str(row.get("operator")).contains(operator)) continue;
-            if (action != null && !action.isBlank() && !str(row.get("action")).equals(action)) continue;
-            if (result != null && !result.isBlank() && !str(row.get("result")).equals(result)) continue;
             Map<String, Object> map = new LinkedHashMap<>();
             map.put("id", row.get("id"));
             map.put("time", row.get("time"));
@@ -684,4 +835,40 @@ public class SilverLinkDataService {
         }
         return result;
     }
+
+    private List<Map<String, Object>> parseScaleAnswersCached(String cacheKey, String payload) {
+        if (cacheKey == null || cacheKey.isBlank()) {
+            return parseScaleAnswers(payload);
+        }
+        List<Map<String, Object>> cached = scaleAnswersCache.getOrLoad(
+                cacheKey,
+                SCALE_ANSWERS_CACHE_TTL_MS,
+                () -> deepCopyAnswers(parseScaleAnswers(payload))
+        );
+        return deepCopyAnswers(cached);
+    }
+
+    private List<Map<String, Object>> deepCopyAnswers(List<Map<String, Object>> answers) {
+        List<Map<String, Object>> copy = new ArrayList<>(answers.size());
+        for (Map<String, Object> answer : answers) {
+            copy.add(new LinkedHashMap<>(answer));
+        }
+        return copy;
+    }
+
+    public record AuditLogWrite(
+            String time,
+            String operator,
+            String role,
+            String ip,
+            String target,
+            String action,
+            String verificationMethod,
+            String visitorName,
+            String visitorPhone,
+            String visitorIdCard,
+            String result,
+            String failReason,
+            String requestId
+    ) {}
 }

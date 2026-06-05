@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
 
 export interface SummaryHeroField {
@@ -16,7 +16,7 @@ interface SummaryHeroProps {
   fields?: SummaryHeroField[];
 }
 
-export function SummaryHero({ title, meta, badge, kicker, childrenTopRight, fields = [] }: SummaryHeroProps) {
+export const SummaryHero = memo(function SummaryHero({ title, meta, badge, kicker, childrenTopRight, fields = [] }: SummaryHeroProps) {
   return (
     <View className='sl-summary-hero'>
       {kicker ? (
@@ -45,6 +45,6 @@ export function SummaryHero({ title, meta, badge, kicker, childrenTopRight, fiel
       ) : null}
     </View>
   );
-}
+});
 
 export default SummaryHero;

@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -302,6 +303,8 @@ describe('SmsVerifyPage', () => {
     expect(await screen.findByText('13800001111')).toBeInTheDocument();
     expect(screen.getByText('未生成短信内容')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /复制内容/ })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: /打开短信/ }));
+    expect(screen.queryByText(/如果没有自动打开短信/)).not.toBeInTheDocument();
   });
 
   it('validates 15-digit id card as valid', async () => {
@@ -516,6 +519,63 @@ describe('SmsVerifyPage', () => {
     );
 
     await waitFor(() => expect(startRelayVerification).toHaveBeenCalledWith('health'));
+  });
+
+  it('falls back to current elder id when verified status omits elderId', async () => {
+    const user = userEvent.setup();
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-no-elder',
+      receiverPhone: '13800001111',
+      messageBody: 'SL NOELDER',
+      status: 'PENDING',
+    });
+    getRelayVerificationStatus.mockResolvedValue({
+      sessionId: 'session-no-elder',
+      status: 'VERIFIED',
+      verified: true,
+    });
+
+    renderVerifyPage();
+    expect(await screen.findByText('SL NOELDER')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /我已发送/ }));
+
+    await waitFor(() => expect(setGlobalVerified).toHaveBeenCalledWith('session-no-elder', 'elder-1'));
+  });
+
+  it('ignores demo bypass interactions when local fallback is disabled', async () => {
+    startRelayVerification.mockResolvedValue({
+      sessionId: 'session-demo-disabled',
+      elderId: 'elder-1',
+      receiverPhone: '13800001111',
+      messageBody: 'SL DEMO OFF',
+      status: 'PENDING',
+    });
+
+    const { container } = renderVerifyPage();
+    await screen.findByText('SL DEMO OFF');
+    const heroIcon = container.querySelector('.sl-verify-hero-icon') as HTMLElement;
+
+    fireEvent.click(heroIcon);
+    fireEvent.keyDown(heroIcon, { key: 'Enter' });
+    fireEvent.keyDown(heroIcon, { key: ' ' });
+
+    expect(setGlobalVerified).not.toHaveBeenCalled();
+    expect(startAuthTimer).not.toHaveBeenCalled();
+  });
+
+  it('does not update state after the initial sms session request settles post-unmount', async () => {
+    let rejectSession: ((reason?: unknown) => void) | undefined;
+    startRelayVerification.mockImplementation(
+      () => new Promise((_, reject) => { rejectSession = reject; }),
+    );
+
+    const { unmount } = renderVerifyPage();
+    unmount();
+
+    rejectSession?.(new Error('late failure'));
+    await Promise.resolve();
+
+    expect(clearVerification).toHaveBeenCalled();
   });
 });
 

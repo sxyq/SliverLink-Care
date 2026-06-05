@@ -1,11 +1,13 @@
 import type { PropsWithChildren } from 'react';
 import { useDidHide, useDidShow, useLaunch } from '@tarojs/taro';
 
+import { cleanupExpiredStorage } from '@/utils/storage';
 import { createLaunchContext, persistLaunchContext } from './app.lifecycle';
 
 export default function App({ children }: PropsWithChildren) {
   useLaunch((options) => {
     persistLaunchContext(createLaunchContext(options?.query));
+    cleanupExpiredStorage();
   });
 
   useDidShow(() => {

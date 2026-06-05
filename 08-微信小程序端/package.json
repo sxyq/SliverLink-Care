@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "dev:weapp": "npm exec --package=node@20 -- node ./node_modules/@tarojs/cli/bin/taro build --type weapp --watch",
     "build:weapp": "npm exec --package=node@20 -- node ./node_modules/@tarojs/cli/bin/taro build --type weapp",

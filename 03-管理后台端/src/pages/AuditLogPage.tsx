@@ -11,10 +11,6 @@ type AuditColumnKey = 'time' | 'operator' | 'action' | 'target' | 'ip' | 'result
 type VisitorDetailColumnKey = 'time' | 'name' | 'phone' | 'idCard' | 'verificationMethod' | 'action' | 'target' | 'ip' | 'result';
 type VisitorSummaryColumnKey = 'time' | 'name' | 'phone' | 'verificationMethod' | 'result';
 type VisitorWidgetId =
-  | 'metric-total'
-  | 'metric-success'
-  | 'metric-fail'
-  | 'metric-ip'
   | 'identity-registration'
   | 'verification-distribution'
   | 'action-distribution'
@@ -62,10 +58,6 @@ const visitorDetailColumnOptions: TableColumnOption<VisitorDetailColumnKey>[] = 
 ];
 
 const VISITOR_WIDGETS: VisitorWidgetConfig[] = [
-  { id: 'metric-total', title: '访问记录数', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-success', title: '成功访问', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-fail', title: '失败访问', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-ip', title: '来源 IP 数', kind: 'metric', defaultSize: 'compact' },
   { id: 'identity-registration', title: '身份登记访问', kind: 'panel', defaultSize: 'wide' },
   { id: 'recent-visitor', title: '最近访问记录', kind: 'panel', defaultSize: 'wide' },
   { id: 'visitor-table', title: '访问人员记录', kind: 'panel', defaultSize: 'wide' },
@@ -377,42 +369,10 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   const mainColSpan = auditColumnOptions.filter((option) => columns.isVisible(option.key)).length;
   const visitorDetailColSpan = visitorDetailColumnOptions.filter((option) => visitorDetailColumns.isVisible(option.key)).length;
   const visitorSummaryColSpan = visitorSummaryColumnOptions.filter((option) => visitorSummaryColumns.isVisible(option.key)).length;
-  const visibleVisitorWidgets = VISITOR_WIDGETS.filter((item) => !item.id.startsWith('metric-')).map((item) => item.id);
+  const visibleVisitorWidgets = VISITOR_WIDGETS.map((item) => item.id);
 
   function renderVisitorWidget(widgetId: VisitorWidgetId): ReactNode {
     switch (widgetId) {
-      case 'metric-total':
-        return (
-          <article className="metric-card dashboard-module">
-            <p className="metric-label">访问记录数</p>
-            <strong className="metric-value">{filtered.length}</strong>
-            <span className="metric-trend">当前筛选条件下的访问行为</span>
-          </article>
-        );
-      case 'metric-success':
-        return (
-          <article className="metric-card dashboard-module">
-            <p className="metric-label">成功访问</p>
-            <strong className="metric-value">{successCount}</strong>
-            <span className="metric-trend">{formatPercent(successCount, filtered.length)} 成功率</span>
-          </article>
-        );
-      case 'metric-fail':
-        return (
-          <article className="metric-card dashboard-module">
-            <p className="metric-label">失败访问</p>
-            <strong className="metric-value">{abnormalCount}</strong>
-            <span className="metric-trend">{formatPercent(abnormalCount, filtered.length)} 失败占比</span>
-          </article>
-        );
-      case 'metric-ip':
-        return (
-          <article className="metric-card dashboard-module">
-            <p className="metric-label">来源 IP 数</p>
-            <strong className="metric-value">{uniqueIpCount}</strong>
-            <span className="metric-trend">按当前访问记录去重</span>
-          </article>
-        );
       case 'verification-distribution':
         return (
           <article className="panel analytics-card dashboard-module audit-scroll-panel">
@@ -683,8 +643,6 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
             </div>
           </article>
         );
-      default:
-        return null;
     }
   }
 

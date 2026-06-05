@@ -100,8 +100,10 @@ class QrCodeServiceTest {
         assertEquals("", unbound.getRelayDeviceId());
 
         assertEquals("https://example.com/scan?token=abc", service.buildPublicUrl("abc"));
+        assertEquals("https://example.com/scan?token=a%2Bb%2Fc%3D", service.buildPublicUrl("a+b/c="));
         ReflectionTestUtils.setField(service, "publicBaseUrl", "https://example.com/s");
         assertEquals("https://example.com/s/s/abc", service.buildPublicUrl("abc"));
+        assertEquals("https://example.com/s/s/a%2Bb%2Fc%3D", service.buildPublicUrl("a+b/c="));
 
         var rows = service.listAll();
         assertEquals(2, rows.size());
@@ -125,6 +127,34 @@ class QrCodeServiceTest {
         assertEquals(1, elder1Count);
         assertEquals(1, elder2Count);
         assertTrue(jdbc.qrCodes.stream().anyMatch(row -> "qr-2-new".equals(row.get("id"))));
+    }
+
+    @Test
+    void regenerateAndDisableConvenienceMethodsUpdateEntityState() throws Exception {
+        QrCodeEntity original = qrRow("qr-disable", "QR-OLD", "elder-disable", "A-007", "token-old", "hash-old", "", "2026-05-26T11:00:00Z");
+        jdbc.qrCodes.add(rowOf(original));
+
+        QrCodeEntity regenerated = service.regenerate("qr-disable");
+        assertNotNull(regenerated);
+        assertEquals("qr-disable", regenerated.getId());
+        assertEquals("ENABLED", regenerated.getStatus());
+
+        service.disable("qr-disable");
+        QrCodeEntity disabled = service.findById("qr-disable");
+        assertEquals("DISABLED", disabled.getStatus());
+        assertNotNull(disabled.getDisabledAt());
+    }
+
+    @Test
+    void resolveAcceptsLegacySpaceBrokenToken() throws Exception {
+        QrCodeEntity resolveRow = qrRow("qr-resolve-space", "QR-RESOLVE", "elder-resolve", "A-003", "token+resolve", "hash-space", "", "2026-05-26T10:00:01Z");
+        jdbc.qrCodes.add(rowOf(resolveRow));
+        when(hashService.sha256("token+resolve")).thenReturn("hash-space");
+        when(crypto.decrypt("token+resolve")).thenReturn("{\"qrId\":\"QR-RESOLVE\"}");
+
+        QrCodeEntity resolved = service.resolve("token resolve");
+        assertNotNull(resolved);
+        assertEquals("elder-resolve", resolved.getElderId());
     }
 
     private static QrCodeEntity qrRow(String id, String qrId, String elderId, String archiveNo, String token, String hash, String relayDeviceId, String createdAt) {

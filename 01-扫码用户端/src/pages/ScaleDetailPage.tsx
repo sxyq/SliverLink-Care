@@ -1,6 +1,7 @@
 import { BadgeInfo, CalendarDays, ChevronRight, ClipboardList, Shield, UserRound } from 'lucide-react';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { fetchScaleDetail } from '../api/scanApi';
 import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { formatDate } from '../utils/format';
@@ -9,6 +10,8 @@ import type { ScaleAnswerDetail, ScaleSummary } from '../types';
 interface ScaleDetailPageProps {
   data: ScaleSummary[] | null;
   loading: boolean;
+  sessionId?: string;
+  elderId?: string;
 }
 
 function getScaleCopy(item: ScaleSummary) {
@@ -49,29 +52,61 @@ function getAnswerLabel(scaleName: ScaleSummary['name'], value: number | null) {
   return optionLabels[scaleName][value] || `选项 ${value}`;
 }
 
-export function ScaleDetailPage({ data, loading }: ScaleDetailPageProps) {
+export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }: ScaleDetailPageProps) {
   const navigate = useNavigate();
   const params = useParams();
+  const [resolvedDetail, setResolvedDetail] = useState<ScaleSummary | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const current = useMemo(() => {
     const scaleName = decodeURIComponent(params.scaleName || '');
     return data?.find((item) => item.name === scaleName) || null;
   }, [data, params.scaleName]);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (!current || current.answers != null || !sessionId || !elderId) {
+      setResolvedDetail(null);
+      setDetailLoading(false);
+      return;
+    }
+    setDetailLoading(true);
+    fetchScaleDetail(sessionId, current.name, elderId)
+      .then((detail) => {
+        if (!cancelled) {
+          setResolvedDetail(detail);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setResolvedDetail(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setDetailLoading(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [current, elderId, sessionId]);
+
   if (loading) return <div className="sl-page loading">加载中...</div>;
   if (!current) return <div className="sl-page loading">未找到量表详情</div>;
 
-  const copy = getScaleCopy(current);
-  const answers: ScaleAnswerDetail[] = current.answers || [];
+  const detail = resolvedDetail || current;
+  const copy = getScaleCopy(detail);
+  const answers: ScaleAnswerDetail[] = detail.answers || [];
 
   return (
     <div className="sl-page sl-detail-page sl-has-bottom-nav">
-      <PageTopBar title={current.name} leading="back" trailing="menu" />
+      <PageTopBar title={detail.name} leading="back" trailing="menu" />
 
       <section className="sl-panel sl-scale-detail-hero">
         <div className="sl-scale-detail-score">
           <div className="sl-scale-detail-score-label">当前分数</div>
-          <strong>{current.score}</strong>
+          <strong>{detail.score}</strong>
         </div>
         <div className="sl-scale-detail-copy">
           <h2>{copy.title}</h2>
@@ -93,7 +128,7 @@ export function ScaleDetailPage({ data, loading }: ScaleDetailPageProps) {
               <CalendarDays size={16} />
             </span>
             <span className="sl-detail-row-label">记录日期：</span>
-            <strong>{formatDate(current.updatedAt)}</strong>
+            <strong>{formatDate(detail.updatedAt)}</strong>
           </div>
 
           <div className="sl-detail-row">
@@ -101,7 +136,7 @@ export function ScaleDetailPage({ data, loading }: ScaleDetailPageProps) {
               <UserRound size={16} />
             </span>
             <span className="sl-detail-row-label">记录人员：</span>
-            <strong>{current.volunteer || '暂无记录'}</strong>
+            <strong>{detail.volunteer || '暂无记录'}</strong>
           </div>
 
           <div className="sl-detail-row">
@@ -128,15 +163,20 @@ export function ScaleDetailPage({ data, loading }: ScaleDetailPageProps) {
         <div className="sl-scale-answer-panel">
           <div className="sl-scale-answer-scroll">
             <div className="sl-scale-answer-list">
-              {answers.length > 0 ? (
+              {detailLoading ? (
+                <div className="sl-detail-row">
+                  <span className="sl-detail-row-label">正在读取逐题记录</span>
+                  <strong>请稍候...</strong>
+                </div>
+              ) : answers.length > 0 ? (
                 answers.map((answer, index) => (
-                  <div key={`${current.name}-${index}`} className="sl-scale-answer-row">
+                  <div key={`${detail.name}-${index}`} className="sl-scale-answer-row">
                     <div className="sl-scale-answer-question">
                       <span className="sl-scale-answer-index">{index + 1}</span>
                       <p>{answer.question}</p>
                     </div>
                     <div className="sl-scale-answer-value">
-                      <strong>{getAnswerLabel(current.name, answer.value)}</strong>
+                      <strong>{getAnswerLabel(detail.name, answer.value)}</strong>
                       <span>{answer.value == null ? '未作答' : `${answer.value} 分`}</span>
                     </div>
                   </div>

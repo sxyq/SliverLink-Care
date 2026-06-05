@@ -30,6 +30,49 @@ function notify() {
 let countdownTimer: ReturnType<typeof setInterval> | null = null;
 let backupCountdownTimer: ReturnType<typeof setInterval> | null = null;
 
+function patchState(patch: Partial<VerificationState>) {
+  state = { ...state, ...patch };
+  notify();
+}
+
+function stopCountdownTimer() {
+  if (countdownTimer) {
+    clearInterval(countdownTimer);
+    countdownTimer = null;
+  }
+}
+
+function stopBackupCountdownTimer() {
+  if (backupCountdownTimer) {
+    clearInterval(backupCountdownTimer);
+    backupCountdownTimer = null;
+  }
+}
+
+function startCountdownTimer() {
+  stopCountdownTimer();
+  countdownTimer = setInterval(() => {
+    if (state.countdown > 0) {
+      patchState({ countdown: state.countdown - 1 });
+      return;
+    }
+    stopCountdownTimer();
+    patchState({ canResend: true });
+  }, 1000);
+}
+
+function startBackupCountdownTimer() {
+  stopBackupCountdownTimer();
+  backupCountdownTimer = setInterval(() => {
+    if (state.backupCountdown > 0) {
+      patchState({ backupCountdown: state.backupCountdown - 1 });
+      return;
+    }
+    stopBackupCountdownTimer();
+    patchState({ canSwitchBackup: true });
+  }, 1000);
+}
+
 export function subscribe(listener: Listener): () => void {
   listeners.push(listener);
   return () => {
@@ -50,8 +93,8 @@ function maskPhone(phone: string): string {
 }
 
 export function initVerification(phone: string, backupPhone?: string) {
-  if (countdownTimer) clearInterval(countdownTimer);
-  if (backupCountdownTimer) clearInterval(backupCountdownTimer);
+  stopCountdownTimer();
+  stopBackupCountdownTimer();
 
   state = {
     phone,
@@ -64,45 +107,13 @@ export function initVerification(phone: string, backupPhone?: string) {
     verified: false,
   };
   notify();
-
-  countdownTimer = setInterval(() => {
-    if (state.countdown > 0) {
-      state.countdown = state.countdown - 1;
-      notify();
-    } else {
-      state.canResend = true;
-      if (countdownTimer) clearInterval(countdownTimer);
-      notify();
-    }
-  }, 1000);
-
-  backupCountdownTimer = setInterval(() => {
-    if (state.backupCountdown > 0) {
-      state.backupCountdown = state.backupCountdown - 1;
-      notify();
-    } else {
-      state.canSwitchBackup = true;
-      if (backupCountdownTimer) clearInterval(backupCountdownTimer);
-      notify();
-    }
-  }, 1000);
+  startCountdownTimer();
+  startBackupCountdownTimer();
 }
 
 export function resetCountdown() {
-  state = { ...state, countdown: 60, canResend: false };
-  notify();
-
-  if (countdownTimer) clearInterval(countdownTimer);
-  countdownTimer = setInterval(() => {
-    if (state.countdown > 0) {
-      state.countdown = state.countdown - 1;
-      notify();
-    } else {
-      state.canResend = true;
-      if (countdownTimer) clearInterval(countdownTimer);
-      notify();
-    }
-  }, 1000);
+  patchState({ countdown: 60, canResend: false });
+  startCountdownTimer();
 }
 
 export function switchToBackup() {
@@ -117,29 +128,18 @@ export function switchToBackup() {
       backupCountdown: 0,
     };
     notify();
-
-    if (countdownTimer) clearInterval(countdownTimer);
-    countdownTimer = setInterval(() => {
-      if (state.countdown > 0) {
-        state.countdown = state.countdown - 1;
-        notify();
-      } else {
-        state.canResend = true;
-        if (countdownTimer) clearInterval(countdownTimer);
-        notify();
-      }
-    }, 1000);
+    stopBackupCountdownTimer();
+    startCountdownTimer();
   }
 }
 
 export function setVerified(verified: boolean) {
-  state = { ...state, verified };
-  notify();
+  patchState({ verified });
 }
 
 export function resetVerificationState() {
-  if (countdownTimer) clearInterval(countdownTimer);
-  if (backupCountdownTimer) clearInterval(backupCountdownTimer);
+  stopCountdownTimer();
+  stopBackupCountdownTimer();
   state = {
     phone: '',
     maskedPhone: '',

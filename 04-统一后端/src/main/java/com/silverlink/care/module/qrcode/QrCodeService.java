@@ -1,6 +1,12 @@
 package com.silverlink.care.module.qrcode;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
@@ -11,6 +17,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.*;
 
@@ -95,10 +109,11 @@ public class QrCodeService {
     }
 
     public QrCodeEntity resolve(String token) throws Exception {
-        String plain = crypto.decrypt(token);
+        String normalizedToken = normalizeToken(token);
+        String plain = crypto.decrypt(normalizedToken);
         Map<?, ?> map = mapper.readValue(plain, Map.class);
         String qrId = String.valueOf(map.get("qrId"));
-        String tokenHash = hashService.sha256(token);
+        String tokenHash = hashService.sha256(normalizedToken);
         List<Map<String, Object>> rows = jdbc.queryForList("select * from qr_code where qr_id=? and qr_token_hash=?", qrId, tokenHash);
         return rows.isEmpty() ? null : toEntity(rows.get(0));
     }
@@ -145,11 +160,82 @@ public class QrCodeService {
     }
 
     public String buildPublicUrl(String token) {
+        String normalizedToken = normalizeToken(token);
+        String encodedToken = URLEncoder.encode(normalizedToken, StandardCharsets.UTF_8);
         if (publicBaseUrl.endsWith("=")) {
-            return publicBaseUrl + token;
+            return publicBaseUrl + encodedToken;
         }
         String separator = publicBaseUrl.contains("?") ? "&token=" : "/s/";
-        return publicBaseUrl + separator + token;
+        return publicBaseUrl + separator + encodedToken;
+    }
+
+    public String renderPublicQrImageBase64(String token) {
+        if (token == null || token.isBlank()) {
+            return "";
+        }
+        return renderQrImageBase64(buildPublicUrl(token), 300);
+    }
+
+    public byte[] renderPublicQrImageBytes(String token, int size) {
+        if (token == null || token.isBlank()) {
+            return new byte[0];
+        }
+        return renderQrPngBytes(buildPublicUrl(token), size);
+    }
+
+    public String buildPublicQrImageUrl(String token) {
+        if (token == null || token.isBlank()) {
+            return "";
+        }
+        String base = publicBaseUrl == null ? "" : publicBaseUrl.trim();
+        int silverlinkIndex = base.indexOf("/silverlink/");
+        if (silverlinkIndex >= 0) {
+            String origin = base.substring(0, silverlinkIndex);
+            return origin + "/silverlink-api/api/qrcodes/image?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+        }
+
+        int queryIndex = base.indexOf('?');
+        if (queryIndex >= 0) {
+            base = base.substring(0, queryIndex);
+        }
+        String normalized = base.replaceAll("/+$", "");
+        return normalized + "/api/qrcodes/image?token=" + URLEncoder.encode(token, StandardCharsets.UTF_8);
+    }
+
+    public String renderQrImageBase64(String value, int size) {
+        if (value == null || value.isBlank()) {
+            return "";
+        }
+        return Base64.getEncoder().encodeToString(renderQrPngBytes(value, size));
+    }
+
+    public byte[] renderQrPngBytes(String value, int size) {
+        if (value == null || value.isBlank()) {
+            return new byte[0];
+        }
+        try {
+            Map<EncodeHintType, Object> hints = new HashMap<>();
+            hints.put(EncodeHintType.MARGIN, 1);
+            BitMatrix matrix = new MultiFormatWriter().encode(value, BarcodeFormat.QR_CODE, size, size, hints);
+            BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
+            BufferedImage target = new BufferedImage(size, size, BufferedImage.TYPE_INT_RGB);
+            Graphics2D graphics = target.createGraphics();
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            graphics.setColor(Color.WHITE);
+            graphics.fillRect(0, 0, size, size);
+            graphics.drawImage(image, 0, 0, size, size, null);
+            graphics.dispose();
+
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            ImageIO.write(target, "png", output);
+            return output.toByteArray();
+        } catch (WriterException | java.io.IOException e) {
+            throw new IllegalStateException("生成二维码图片失败", e);
+        }
+    }
+
+    private String normalizeToken(String token) {
+        return token == null ? "" : token.trim().replace(' ', '+');
     }
 
     public Collection<QrCodeEntity> listAll() {

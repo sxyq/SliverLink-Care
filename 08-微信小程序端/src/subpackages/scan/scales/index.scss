@@ -1,36 +1,44 @@
 .scan-scales-page {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .scan-scales-item {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 16rpx;
+  gap: 24rpx;
   align-items: center;
-  padding: 22rpx 20rpx;
+  padding: 28rpx 26rpx;
 }
 
 .scan-scales-list {
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
+  gap: 18rpx;
 }
 
 .scan-scales-actions {
-  flex-direction: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.scan-scales-actions .sl-secondary-button {
+  min-width: 0;
+  width: 100%;
+  height: 74rpx;
+  font-size: 25rpx;
 }
 
 .scan-scales-item__icon {
-  width: 72rpx;
-  height: 72rpx;
+  width: 82rpx;
+  height: 82rpx;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 22rpx;
-  background: rgba(20, 121, 184, 0.12);
-  color: var(--sl-color-primary);
+  border-radius: 24rpx;
+  background: #eef4ff;
+  color: #2b75dd;
   font-size: 28rpx;
   font-weight: 800;
 }
@@ -42,35 +50,35 @@
 }
 
 .scan-scales-item__name {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #16324a;
 }
 
 .scan-scales-item__summary {
-  font-size: 24rpx;
+  font-size: 28rpx;
   line-height: 1.6;
-  color: var(--sl-text-secondary);
+  color: #697788;
 }
 
 .scan-scales-item__score {
-  font-size: 26rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #2b75dd;
 }
 
 .scan-scales-privacy-pill {
   align-self: center;
-  min-height: 58rpx;
-  padding: 0 22rpx;
+  min-height: 70rpx;
+  padding: 0 30rpx;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999rpx;
-  background: rgba(12, 79, 117, 0.08);
-  color: var(--sl-primary-ink);
-  font-size: 24rpx;
-  font-weight: 700;
+  border-radius: 18rpx;
+  background: #eef4ff;
+  color: #2b75dd;
+  font-size: 26rpx;
+  font-weight: 800;
 }
 
 .scan-scales-panel__button {

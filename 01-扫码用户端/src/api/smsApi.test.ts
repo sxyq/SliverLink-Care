@@ -24,6 +24,7 @@ const envMockBase = {
 describe('smsApi', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    vi.resetModules();
     window.sessionStorage.clear();
     window.history.pushState({}, '', '/silverlink/scan/?token=qr-token-123456');
   });
@@ -95,6 +96,27 @@ describe('smsApi', () => {
     expect(result.status).toBe('PENDING');
     expect(result.localDev).toBe(true);
 
+    vi.doUnmock('../config/env');
+  });
+
+  it('uses random fallback path when crypto.getRandomValues is unavailable', async () => {
+    vi.doMock('../config/env', () => envMockBase);
+    const originalCrypto = window.crypto;
+    Object.defineProperty(window, 'crypto', {
+      configurable: true,
+      value: undefined,
+    });
+
+    const { startRelayVerification: fallbackStart } = await import('./smsApi');
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network')));
+
+    const result = await fallbackStart('health');
+    expect(result.messageBody).toMatch(/^SL [A-HJ-NP-Z2-9]{10}$/);
+
+    Object.defineProperty(window, 'crypto', {
+      configurable: true,
+      value: originalCrypto,
+    });
     vi.doUnmock('../config/env');
   });
 
@@ -234,7 +256,6 @@ describe('smsApi', () => {
   });
 
   it('verifyIdentityAccess throws error when local fallback is disabled', async () => {
-    vi.resetModules();
     vi.doMock('../config/env', () => ({
       ...envMockBase,
       ALLOW_LOCAL_VERIFICATION_FALLBACK: false,
@@ -249,6 +270,60 @@ describe('smsApi', () => {
       phone: '13800001111',
       idCard: '500102200212180836',
     })).rejects.toThrow('network');
+
+    vi.doUnmock('../config/env');
+  });
+
+  it('starts relay verification without local fallback when strict mode is enabled', async () => {
+    vi.doMock('../config/env', () => ({
+      ...envMockBase,
+      ALLOW_LOCAL_VERIFICATION_FALLBACK: false,
+    }));
+
+    const { startRelayVerification: strictStart } = await import('./smsApi');
+    const fetchMock = mockFetchData({
+      sessionId: 'strict-session',
+      elderId: 'elder-001',
+      receiverPhone: '13800001111',
+      receiverPhoneMasked: '138****1111',
+      messageBody: 'SL STRICT',
+      messagePrefix: 'SL-STRICT',
+      status: 'VERIFIED',
+      expiresAt: '2026-05-30T00:00:00Z',
+    });
+
+    const result = await strictStart('archive');
+    expect(result).toMatchObject({
+      sessionId: 'strict-session',
+      receiverPhoneMasked: '138****1111',
+      messagePrefix: 'SL-STRICT',
+      status: 'VERIFIED',
+      expiresAt: '2026-05-30T00:00:00Z',
+    });
+    expect(fetchMock.mock.calls[0][0]).toBe('/api/scan/verification/start');
+
+    vi.doUnmock('../config/env');
+  });
+
+  it('derives verified=true from backend status when strict identity verification omits the field', async () => {
+    vi.doMock('../config/env', () => ({
+      ...envMockBase,
+      ALLOW_LOCAL_VERIFICATION_FALLBACK: false,
+    }));
+
+    const { verifyIdentityAccess: strictVerify } = await import('./smsApi');
+    mockFetchData({
+      sessionId: 'strict-identity',
+      elderId: 'elder-001',
+      status: 'VERIFIED',
+    });
+
+    const result = await strictVerify('health', {
+      name: '测试',
+      phone: '13800001111',
+      idCard: '500102200212180836',
+    });
+    expect(result.verified).toBe(true);
 
     vi.doUnmock('../config/env');
   });

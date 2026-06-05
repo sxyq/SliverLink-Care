@@ -102,6 +102,8 @@ export function MedicationEditorPage({
         await onCreate(editing);
       }
       closeModal();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
     } finally {
       setSaving(false);
     }
@@ -112,8 +114,11 @@ export function MedicationEditorPage({
       setDrafts((prev) => prev.filter((item) => item.id !== id));
       return;
     }
-    if (onDelete) {
+    if (!onDelete) return;
+    try {
       await onDelete(id);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '删除失败，请稍后重试');
     }
   }
 
@@ -130,6 +135,8 @@ export function MedicationEditorPage({
           timing: item.timing,
         })),
       );
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
     } finally {
       setSaving(false);
     }

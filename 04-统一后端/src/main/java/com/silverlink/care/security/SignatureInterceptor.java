@@ -19,7 +19,7 @@ public class SignatureInterceptor implements HandlerInterceptor {
     @Value("${silverlink.security.signature-window-seconds:300}")
     private long signatureWindowSeconds;
 
-    @Value("${silverlink.security.admin-signature-secret:demo-admin-signature-secret}")
+    @Value("${silverlink.security.admin-signature-secret}")
     private String adminSignatureSecret;
 
     private final ConcurrentHashMap<String, Long> nonceStore = new ConcurrentHashMap<>();

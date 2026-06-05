@@ -12,7 +12,11 @@ export default function MedicationManagePage() {
   const [loading, setLoading] = useState(true);
 
   const loadMedications = () => {
-    if (!elderId) return;
+    if (!elderId) {
+      setMedications([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     getMedications(elderId)
       .then(setMedications)

@@ -3,10 +3,14 @@ package com.silverlink.care.module.qrcode;
 import com.silverlink.care.common.ApiResponse;
 import com.silverlink.care.module.audit.AuditLogService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @RestController
 @RequestMapping("/api/admin/qrcodes")
@@ -92,5 +96,25 @@ public class QrCodeController {
         map.put("token", issued.getToken());
         map.put("url", issued.getUrl());
         return map;
+    }
+}
+
+@RestController
+@RequestMapping("/api/qrcodes")
+class PublicQrCodeController {
+
+    private final QrCodeService qrCodeService;
+
+    PublicQrCodeController(QrCodeService qrCodeService) {
+        this.qrCodeService = qrCodeService;
+    }
+
+    @GetMapping("/image")
+    public ResponseEntity<byte[]> publicQrImage(@RequestParam String token) {
+        byte[] imageBytes = qrCodeService.renderPublicQrImageBytes(token, 300);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .cacheControl(CacheControl.maxAge(10, TimeUnit.MINUTES).cachePublic())
+                .body(imageBytes);
     }
 }

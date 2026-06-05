@@ -19,6 +19,9 @@ function isFamilyEntryHash(hash: string): boolean {
 
 function Main() {
   const [hash, setHash] = useState(() => window.location.hash);
+  const { loggedIn } = useAuth();
+  const [page, setPage] = useState<Page>('list');
+  const [selectedElder, setSelectedElder] = useState<AssignedElder | null>(null);
 
   useEffect(() => {
     const handleHashChange = () => setHash(window.location.hash);
@@ -29,10 +32,6 @@ function Main() {
   if (isFamilyEntryHash(hash)) {
     return <FamilyEntryApp />;
   }
-
-  const { loggedIn } = useAuth();
-  const [page, setPage] = useState<Page>('list');
-  const [selectedElder, setSelectedElder] = useState<AssignedElder | null>(null);
 
   if (!loggedIn) {
     return <LoginPage />;

@@ -1,35 +1,43 @@
 .scan-medications-page {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .scan-medications-item {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  padding: 22rpx 20rpx;
+  gap: 24rpx;
+  padding: 28rpx 26rpx;
 }
 
 .scan-medications-list {
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
+  gap: 18rpx;
 }
 
 .scan-medications-actions {
-  flex-direction: column;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.scan-medications-actions .sl-secondary-button {
+  min-width: 0;
+  width: 100%;
+  height: 74rpx;
+  font-size: 25rpx;
 }
 
 .scan-medications-item__icon {
-  width: 72rpx;
-  height: 72rpx;
+  width: 82rpx;
+  height: 82rpx;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 20rpx;
-  background: linear-gradient(135deg, rgba(13, 162, 173, 0.12) 0%, rgba(8, 123, 144, 0.18) 100%);
-  color: var(--sl-primary-deep);
+  border-radius: 24rpx;
+  background: #eef9f4;
+  color: #1ca98b;
   font-size: 28rpx;
   font-weight: 800;
   flex-shrink: 0;
@@ -41,18 +49,18 @@
 }
 
 .scan-medications-item__title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #16324a;
 }
 
 .scan-medications-item__meta {
-  margin-top: 14rpx;
+  margin-top: 12rpx;
   display: flex;
   flex-direction: column;
   gap: 10rpx;
-  font-size: 24rpx;
-  color: var(--sl-text-secondary);
+  font-size: 28rpx;
+  color: #697788;
 }
 
 .scan-medications-panel__button {
@@ -62,8 +70,11 @@
 .scan-medications-warning {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  background: linear-gradient(180deg, #fffaf5 0%, #fffdf9 100%);
+  justify-content: center;
+  gap: 18rpx;
+  margin-top: 6rpx;
+  color: #9d6b00;
+  background: linear-gradient(180deg, #fff9ea 0%, #fff5df 100%);
 }
 
 .scan-medications-warning__icon {
@@ -84,7 +95,8 @@
   display: flex;
   flex-direction: column;
   gap: 4rpx;
-  font-size: 24rpx;
+  font-size: 28rpx;
   line-height: 1.5;
   color: #9b6723;
+  text-align: center;
 }

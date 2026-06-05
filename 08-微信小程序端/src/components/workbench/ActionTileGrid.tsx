@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Text, View } from '@tarojs/components';
 
 export interface ActionTileItem {
@@ -11,15 +12,22 @@ export interface ActionTileItem {
 
 interface ActionTileGridProps {
   items: ActionTileItem[];
+  detail?: boolean;
 }
 
-export function ActionTileGrid({ items }: ActionTileGridProps) {
+export const ActionTileGrid = memo(function ActionTileGrid({ items, detail = false }: ActionTileGridProps) {
   return (
     <View className='sl-action-grid'>
       {items.map((item) => (
         <View
           key={item.key}
-          className={item.warning ? 'sl-action-card sl-action-card--warning' : 'sl-action-card'}
+          className={
+            detail
+              ? `sl-action-card sl-detail-action-card${item.warning ? ' sl-action-card--warning' : ''}`
+              : item.warning
+                ? 'sl-action-card sl-action-card--warning'
+                : 'sl-action-card'
+          }
           onClick={item.onClick}
         >
           <View className='sl-action-card__copy'>
@@ -31,6 +39,6 @@ export function ActionTileGrid({ items }: ActionTileGridProps) {
       ))}
     </View>
   );
-}
+});
 
 export default ActionTileGrid;

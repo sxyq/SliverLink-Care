@@ -3,10 +3,12 @@ import { httpClient } from './httpClient';
 import { readQrToken } from '../utils/qrToken';
 import type { ElderBasicInfo, HealthRecord, Medication, ScaleAnswerDetail, ScaleSummary } from '../types';
 
-const ELDER_ID_KEY = 'silverlink.scan.elderId';
-const PHONE_KEY = 'silverlink.scan.emergencyPhone';
-const PHONE_MASKED_KEY = 'silverlink.scan.emergencyPhoneMasked';
-const QR_TOKEN_KEY = 'silverlink.scan.qrToken';
+const resolvedScanContext = {
+  qrToken: '',
+  elderId: '',
+  emergencyPhone: '',
+  emergencyPhoneMasked: '',
+};
 
 interface ScanResolveDto {
   elderId: string;
@@ -49,36 +51,37 @@ interface ScaleDto {
 
 export function getResolvedElderId() {
   const currentToken = readQrToken() || '';
-  const resolvedToken = window.sessionStorage.getItem(QR_TOKEN_KEY) || '';
-  if (!currentToken || resolvedToken !== currentToken) {
+  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
     return '';
   }
-  return window.sessionStorage.getItem(ELDER_ID_KEY) || '';
+  return resolvedScanContext.elderId;
 }
 
 export function getResolvedEmergencyPhone() {
   const currentToken = readQrToken() || '';
-  const resolvedToken = window.sessionStorage.getItem(QR_TOKEN_KEY) || '';
-  if (!currentToken || resolvedToken !== currentToken) {
+  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
     return '';
   }
-  return window.sessionStorage.getItem(PHONE_KEY) || '';
+  return resolvedScanContext.emergencyPhone;
 }
 
 export function getResolvedEmergencyPhoneMasked() {
   const currentToken = readQrToken() || '';
-  const resolvedToken = window.sessionStorage.getItem(QR_TOKEN_KEY) || '';
-  if (!currentToken || resolvedToken !== currentToken) {
+  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
     return '';
   }
-  return window.sessionStorage.getItem(PHONE_MASKED_KEY) || '';
+  return resolvedScanContext.emergencyPhoneMasked;
+}
+
+export function getResolvedQrToken() {
+  return resolvedScanContext.qrToken;
 }
 
 export function clearResolvedScanContext() {
-  window.sessionStorage.removeItem(QR_TOKEN_KEY);
-  window.sessionStorage.removeItem(ELDER_ID_KEY);
-  window.sessionStorage.removeItem(PHONE_KEY);
-  window.sessionStorage.removeItem(PHONE_MASKED_KEY);
+  resolvedScanContext.qrToken = '';
+  resolvedScanContext.elderId = '';
+  resolvedScanContext.emergencyPhone = '';
+  resolvedScanContext.emergencyPhoneMasked = '';
 }
 
 export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
@@ -87,14 +90,10 @@ export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
     body: JSON.stringify({ token: qrToken }),
   });
 
-  window.sessionStorage.setItem(QR_TOKEN_KEY, qrToken);
-  window.sessionStorage.setItem(ELDER_ID_KEY, res.elderId);
-  if (res.emergencyPhoneDial) {
-    window.sessionStorage.setItem(PHONE_KEY, res.emergencyPhoneDial);
-  }
-  if (res.emergencyPhoneMasked) {
-    window.sessionStorage.setItem(PHONE_MASKED_KEY, res.emergencyPhoneMasked);
-  }
+  resolvedScanContext.qrToken = qrToken;
+  resolvedScanContext.elderId = res.elderId;
+  resolvedScanContext.emergencyPhone = res.emergencyPhoneDial || '';
+  resolvedScanContext.emergencyPhoneMasked = res.emergencyPhoneMasked || '';
 
   return {
     id: res.elderId,
@@ -176,11 +175,40 @@ export async function fetchScaleSummaries(sessionId: string, verifiedElderId?: s
     score: Number(item.score || 0),
     updatedAt: String(item.updatedAt || item.date || ''),
     volunteer: String(item.volunteer || ''),
+    ...(Array.isArray(item.answers)
+      ? {
+          answers: item.answers.map((answer) => ({
+            question: String(answer.question || ''),
+            value: typeof answer.value === 'number' ? answer.value : answer.value == null ? null : Number(answer.value),
+          })),
+        }
+      : {}),
+  }));
+}
+
+export async function fetchScaleDetail(
+  sessionId: string,
+  scaleName: ScaleSummary['name'],
+  verifiedElderId?: string,
+): Promise<ScaleSummary | null> {
+  const elderId = verifiedElderId || getResolvedElderId();
+  if (!elderId || !sessionId || !scaleName) {
+    return null;
+  }
+  const item = await httpClient<ScaleDto>(
+    `${ENDPOINTS.scanScales}/${encodeURIComponent(scaleName)}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`,
+    { method: 'GET' },
+  );
+  return {
+    name: (item.name || item.scale || scaleName) as ScaleSummary['name'],
+    score: Number(item.score || 0),
+    updatedAt: String(item.updatedAt || item.date || ''),
+    volunteer: String(item.volunteer || ''),
     answers: Array.isArray(item.answers)
       ? item.answers.map((answer) => ({
           question: String(answer.question || ''),
           value: typeof answer.value === 'number' ? answer.value : answer.value == null ? null : Number(answer.value),
         }))
       : [],
-  }));
+  };
 }

@@ -7,14 +7,19 @@ import com.silverlink.care.module.qrcode.QrCodeIssueResult;
 import com.silverlink.care.module.qrcode.QrCodeService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class NameplateServiceTest {
@@ -107,5 +112,75 @@ class NameplateServiceTest {
         assertEquals("未填写", response.getFrontPhone());
         assertEquals("未生成", response.getBackArchiveNo());
         assertEquals("https://public/scan?token=token-4", response.getBackQrToken());
+    }
+
+    @Test
+    void previewCachesResolvedResultWithinTtl() throws Exception {
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 10_000L);
+        when(data.elderDetail("elder-cache", false)).thenReturn(Map.of(
+                "name", "缓存测试",
+                "age", 80,
+                "emergencyContactPhone", "13800009999",
+                "archiveNo", "A-CACHE"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-cache");
+        when(qrCodeService.findCurrentByElder("elder-cache")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-cache")).thenReturn("https://public/scan?token=token-cache");
+
+        NameplatePreviewResponse first = service.preview("elder-cache", false);
+        NameplatePreviewResponse second = service.preview("elder-cache", false);
+
+        assertEquals("缓存测试", first.getFrontName());
+        assertEquals("https://public/scan?token=token-cache", second.getBackQrToken());
+        verify(data, times(1)).elderDetail("elder-cache", false);
+        verify(qrCodeService, times(1)).findCurrentByElder("elder-cache");
+    }
+
+    @Test
+    void generateDemoPdfCachesBytesAndReturnsDefensiveCopies() {
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 10_000L);
+        ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 10_000L);
+        ReflectionTestUtils.setField(service, "qrImageCacheTtlMs", 10_000L);
+        when(data.elderDetail("elder-pdf", false)).thenReturn(Map.of(
+                "name", "李奶奶",
+                "age", 78,
+                "emergencyContactPhone", "13800000000",
+                "archiveNo", "A-PDF"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-pdf");
+        when(qrCodeService.findCurrentByElder("elder-pdf")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-pdf")).thenReturn("https://public/scan?token=token-pdf");
+
+        byte[] first = service.generateDemoPdf("elder-pdf");
+        byte[] second = service.generateDemoPdf("elder-pdf");
+
+        assertTrue(first.length > 0);
+        assertArrayEquals(first, second);
+        assertNotSame(first, second);
+        verify(data, times(1)).elderDetail("elder-pdf", false);
+        verify(qrCodeService, times(1)).findCurrentByElder("elder-pdf");
+    }
+
+    @Test
+    void generateDemoPdfWorksWithoutFontResourceCacheAndPreservesAgeSuffix() {
+        ReflectionTestUtils.setField(service, "fontResourceCacheEnabled", false);
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
+        when(data.elderDetail("elder-age", false)).thenReturn(Map.of(
+                "name", "王爷爷",
+                "age", "80岁",
+                "emergencyContactPhone", "13900000000",
+                "archiveNo", "A-AGE"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-age");
+        when(qrCodeService.findCurrentByElder("elder-age")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-age")).thenReturn("https://public/scan?token=token-age");
+
+        byte[] pdf = service.generateDemoPdf("elder-age");
+
+        assertTrue(pdf.length > 0);
     }
 }

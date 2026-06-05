@@ -162,6 +162,75 @@ describe('volunteer care pages', () => {
     });
   });
 
+  it('shows basic info validation errors on sms verify failure, send failure and save failure', async () => {
+    sendSmsVerify.mockRejectedValueOnce(new Error('发送失败'));
+    verifySmsCode.mockResolvedValueOnce({ ok: false });
+    updateBasicInfo.mockRejectedValueOnce(new Error('保存失败'));
+    const onBack = vi.fn();
+
+    render(<BasicInfoFormPage elder={elder} onBack={onBack} />);
+
+    fireEvent.change(screen.getByDisplayValue('13800000000'), { target: { value: '13911112222' } });
+    fireEvent.click(screen.getByRole('button', { name: '获取验证码' }));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('发送失败，请重试');
+    });
+
+    fireEvent.change(screen.getByPlaceholderText('请输入短信验证码'), { target: { value: '000000' } });
+    fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('验证码错误');
+    });
+    expect(updateBasicInfo).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByPlaceholderText('请输入短信验证码'), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
+    await waitFor(() => {
+      expect(updateBasicInfo).toHaveBeenCalled();
+      expect(window.alert).toHaveBeenCalledWith('保存失败，请重试');
+    });
+    expect(onBack).not.toHaveBeenCalled();
+  });
+
+  it('saves basic info directly when emergency phone is unchanged and keeps edited fields', async () => {
+    updateBasicInfo.mockResolvedValue({});
+    const onBack = vi.fn();
+
+    render(<BasicInfoFormPage elder={elder} onBack={onBack} />);
+
+    fireEvent.change(screen.getByDisplayValue('李奶奶'), { target: { value: '李阿姨' } });
+    fireEvent.change(screen.getByDisplayValue('78'), { target: { value: '79' } });
+    fireEvent.change(screen.getByDisplayValue('重庆'), { target: { value: '成都' } });
+    fireEvent.change(screen.getByDisplayValue('家属甲'), { target: { value: '家属乙' } });
+    fireEvent.change(screen.getByDisplayValue('女儿'), { target: { value: '儿子' } });
+    fireEvent.change(screen.getByDisplayValue('A'), { target: { value: 'AB' } });
+    fireEvent.change(screen.getByDisplayValue('Rh+'), { target: { value: 'Rh-' } });
+    fireEvent.change(screen.getByDisplayValue('无'), { target: { value: '青霉素过敏' } });
+    fireEvent.click(screen.getByRole('button', { name: '女' }));
+    fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
+
+    await waitFor(() => {
+      expect(sendSmsVerify).not.toHaveBeenCalled();
+      expect(verifySmsCode).not.toHaveBeenCalled();
+      expect(updateBasicInfo).toHaveBeenCalledWith(
+        'elder-1',
+        expect.objectContaining({
+          name: '李阿姨',
+          gender: '女',
+          age: '79',
+          residence: '成都',
+          emergencyContactName: '家属乙',
+          emergencyContactPhone: '13800000000',
+          emergencyContactRelation: '儿子',
+          aboBloodType: 'AB',
+          rhBloodType: 'Rh-',
+          allergyHistory: '青霉素过敏',
+        }),
+      );
+      expect(onBack).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('computes bmi and saves health record', async () => {
     saveHealthRecord.mockResolvedValue({});
     const onBack = vi.fn();
@@ -321,6 +390,69 @@ describe('volunteer care pages', () => {
     });
   });
 
+  it('covers qr copy fallback, pending disable state and non-Error action failures', async () => {
+    const onBack = vi.fn();
+    const originalClipboard = navigator.clipboard;
+    const originalSecureContext = window.isSecureContext;
+    const execCommand = vi.fn().mockReturnValue(false);
+    Object.defineProperty(window, 'isSecureContext', {
+      configurable: true,
+      value: false,
+    });
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
+    Object.defineProperty(document, 'execCommand', {
+      configurable: true,
+      value: execCommand,
+    });
+
+    fetchVolunteerElderQrCode.mockResolvedValue({
+      id: '2',
+      qrId: 'qr-2',
+      elderId: 'elder-1',
+      archiveNo: 'A-001',
+      elderName: '李奶奶',
+      elderAge: 78,
+      elderPhone: '13800000000',
+      status: '启用',
+      createdAt: '',
+      token: 'token-2',
+      url: 'https://example.com/pending-qr',
+      disableReviewStatus: 'PENDING',
+    });
+    regenerateVolunteerElderQrCode.mockRejectedValueOnce('regenerate-failed');
+    disableVolunteerElderQrCode.mockRejectedValueOnce('disable-failed');
+
+    render(<QrCodeManagePage elder={elder} onBack={onBack} />);
+
+    expect(await screen.findByText('李奶奶 的二维码')).toBeInTheDocument();
+    expect(screen.getByText(/生成时间 未记录/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '审核中' })).toBeDisabled();
+
+    fireEvent.click(screen.getByRole('button', { name: '复制访问链接' }));
+    await waitFor(() => {
+      expect(execCommand).toHaveBeenCalledWith('copy');
+      expect(screen.getByText('当前环境暂不支持自动复制，请手动长按二维码或链接复制。')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '重新生成' }));
+    expect(await screen.findByText('重新生成失败')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '返回' }));
+    expect(onBack).toHaveBeenCalledTimes(1);
+
+    Object.defineProperty(window, 'isSecureContext', {
+      configurable: true,
+      value: originalSecureContext,
+    });
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: originalClipboard,
+    });
+  });
+
   it('sends sms verify with updated phone', async () => {
     sendSmsVerify.mockResolvedValue({});
 
@@ -351,6 +483,28 @@ describe('volunteer care pages', () => {
 
     await waitFor(() => {
       expect(alertMock).toHaveBeenCalledWith('验证码错误');
+    });
+  });
+
+  it('handles basic info save failure', async () => {
+    sendSmsVerify.mockResolvedValue({});
+    verifySmsCode.mockResolvedValue({ ok: true });
+    updateBasicInfo.mockRejectedValue(new Error('save failed'));
+    const alertMock = vi.fn();
+    vi.stubGlobal('alert', alertMock);
+
+    render(<BasicInfoFormPage elder={elder} onBack={vi.fn()} />);
+
+    fireEvent.change(screen.getByDisplayValue('13800000000'), { target: { value: '13911112222' } });
+    fireEvent.click(screen.getByRole('button', { name: '获取验证码' }));
+    await waitFor(() => expect(sendSmsVerify).toHaveBeenCalled());
+
+    fireEvent.change(screen.getByPlaceholderText('请输入短信验证码'), { target: { value: '123456' } });
+    fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
+
+    await waitFor(() => {
+      expect(updateBasicInfo).toHaveBeenCalled();
+      expect(alertMock).toHaveBeenCalledWith('保存失败，请重试');
     });
   });
 
@@ -398,6 +552,36 @@ describe('volunteer care pages', () => {
 
     await waitFor(() => {
       expect(submitScaleRecord).toHaveBeenCalled();
+    });
+  });
+
+  it('shows scale load failure, supports tab switching and reports submit failure', async () => {
+    fetchScaleRecords
+      .mockRejectedValueOnce(new Error('加载量表失败'))
+      .mockResolvedValueOnce([
+        { scale: 'GAD-7', date: '2026-05-01', score: 8, volunteer: '志愿者甲', answers: [] },
+      ]);
+    submitScaleRecord.mockRejectedValueOnce(new Error('提交失败'));
+
+    const { rerender } = render(<ScaleFormPage elder={elder} onBack={vi.fn()} />);
+
+    expect(await screen.findByText('加载量表失败')).toBeInTheDocument();
+
+    rerender(<ScaleFormPage elder={{ ...elder, id: 'elder-2' }} onBack={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'GAD-7' }));
+    expect(await screen.findByText(/当前已保存历史总分，但旧记录未保留逐题答案/)).toBeInTheDocument();
+    expect(screen.getByText('当前量表：GAD-7')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
+    fireEvent.click(screen.getAllByRole('button', { name: '完全不会(0分)' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
+
+    await waitFor(() => {
+      expect(submitScaleRecord).toHaveBeenCalledWith(
+        'elder-2',
+        expect.objectContaining({ type: 'GAD-7' }),
+      );
+      expect(window.alert).toHaveBeenCalledWith('提交失败，请重试');
     });
   });
 });

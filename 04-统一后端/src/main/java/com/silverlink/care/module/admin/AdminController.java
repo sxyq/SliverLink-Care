@@ -4,8 +4,10 @@ import com.silverlink.care.common.ApiResponse;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.audit.AuditLogService;
 import com.silverlink.care.module.qrcode.QrCodeService;
+import com.silverlink.care.security.AuthCookieService;
 import com.silverlink.care.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,27 +22,41 @@ public class AdminController {
 
     private final AdminDashboardService dashboardService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthCookieService authCookieService;
     private final AuditLogService auditLogService;
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
 
-    public AdminController(AdminDashboardService dashboardService, JwtTokenProvider jwtTokenProvider, AuditLogService auditLogService, SilverLinkDataService data, QrCodeService qrCodeService) {
+    public AdminController(
+            AdminDashboardService dashboardService,
+            JwtTokenProvider jwtTokenProvider,
+            AuthCookieService authCookieService,
+            AuditLogService auditLogService,
+            SilverLinkDataService data,
+            QrCodeService qrCodeService
+    ) {
         this.dashboardService = dashboardService;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.authCookieService = authCookieService;
         this.auditLogService = auditLogService;
         this.data = data;
         this.qrCodeService = qrCodeService;
     }
 
     @PostMapping("/login")
-    public ApiResponse<Map<String, String>> login(@RequestBody Map<String, String> body, HttpServletRequest request) {
+    public ApiResponse<Map<String, String>> login(
+            @RequestBody Map<String, String> body,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         String account = body.getOrDefault("account", body.get("username"));
         var user = data.login(account, body.get("password"), "SYSTEM_ADMIN");
         if (user.isPresent()) {
             String token = jwtTokenProvider.generateToken(account, "SYSTEM_ADMIN", 7200000L);
+            authCookieService.issueAdminCookie(request, response, token, 7200000L);
             Map<String, String> map = new LinkedHashMap<>();
-            map.put("token", token);
             map.put("role", "系统管理员");
+            map.put("account", account);
             auditLogService.record(account, "SYSTEM_ADMIN", request, "系统", "LOGIN", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         }
@@ -49,9 +65,21 @@ public class AdminController {
     }
 
     @PostMapping("/logout")
-    public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request) {
+    public ApiResponse<Void> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) {
+        authCookieService.clearAdminCookie(request, response);
         auditLogService.record(authentication, request, "绯荤粺", "LOGOUT", "SUCCESS");
         return ApiResponse.ok();
+    }
+
+    @GetMapping("/session")
+    public ApiResponse<Map<String, String>> session(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ApiResponse.fail(401, "未登录");
+        }
+        Map<String, String> map = new LinkedHashMap<>();
+        map.put("account", authentication.getName());
+        map.put("role", "系统管理员");
+        return ApiResponse.ok(map);
     }
 
     @GetMapping("/dashboard")
@@ -83,15 +111,27 @@ public class AdminController {
     @DeleteMapping("/elders/{id}")
     public ApiResponse<Void> deleteElder(@PathVariable String id, Authentication authentication, HttpServletRequest request) {
         data.deleteElder(id);
+        disableCurrentQrCode(id);
         auditLogService.record(authentication, request, id, "DELETE_ELDER", "SUCCESS");
         return ApiResponse.ok();
     }
 
     @PutMapping("/elders/{id}/status")
     public ApiResponse<Void> updateElderStatus(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
-        data.setElderStatus(id, String.valueOf(body.getOrDefault("status", "DISABLED")));
+        String status = String.valueOf(body.getOrDefault("status", "DISABLED"));
+        data.setElderStatus(id, status);
+        if (!"ACTIVE".equalsIgnoreCase(status)) {
+            disableCurrentQrCode(id);
+        }
         auditLogService.record(authentication, request, id, "UPDATE_ELDER_STATUS", "SUCCESS");
         return ApiResponse.ok();
+    }
+
+    private void disableCurrentQrCode(String elderId) {
+        var current = qrCodeService.findCurrentByElder(elderId);
+        if (current != null && !"DISABLED".equalsIgnoreCase(current.getStatus())) {
+            qrCodeService.disable(current.getId());
+        }
     }
 
     @GetMapping("/volunteers")

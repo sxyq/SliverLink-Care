@@ -15,7 +15,7 @@ describe('env config', () => {
   it('falls back to empty string when VITE_API_BASE_URL is not set', async () => {
     vi.stubEnv('VITE_API_BASE_URL', '');
     const { API_BASE_URL } = await import('./env');
-    expect(API_BASE_URL).toBe('');
+    expect(API_BASE_URL).toBe('/silverlink-api');
   });
 
   it('exports DEV_DEFAULT_QR_TOKEN from VITE_DEFAULT_QR_TOKEN', async () => {

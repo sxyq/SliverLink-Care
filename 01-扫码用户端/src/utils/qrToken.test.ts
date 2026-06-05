@@ -18,6 +18,11 @@ describe('qr token utilities', () => {
     expect(readQrToken()).toBe('qr-token');
   });
 
+  it('normalizes legacy query tokens whose plus signs became spaces', () => {
+    setLocation('/silverlink/scan/?token=a%20b%20c');
+    expect(readQrToken()).toBe('a+b+c');
+  });
+
   it('validates minimum token length', () => {
     expect(isValidQrToken('12345678')).toBe(true);
     expect(isValidQrToken('short')).toBe(false);

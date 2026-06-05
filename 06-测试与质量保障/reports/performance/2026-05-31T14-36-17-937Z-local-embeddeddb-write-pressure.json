@@ -1,0 +1,30 @@
+{
+  "generatedAt": "2026-05-31T14:35:58.322701Z",
+  "environment": {
+    "mode": "local-embedded-db-write-pressure",
+    "database": "h2-in-memory-mysql-mode",
+    "scope": "real-jdbc-real-sql-not-host-benchmark"
+  },
+  "scenarios": [
+    {
+      "name": "embedded-db-scan-start-write-pressure",
+      "totalRequests": 400000,
+      "concurrency": 65536,
+      "successCount": 400000,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 43,
+      "p95Ms": 358,
+      "p99Ms": 625,
+      "maxMs": 2066,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 400000,
+        "harnessWorkerCount": 2048
+      },
+      "findings": [],
+      "notes": []
+    }
+  ]
+}

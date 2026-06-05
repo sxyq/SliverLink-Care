@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react';
+import { memo, useMemo, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 
 interface WorkbenchHeaderActionProps {
   label?: string;
@@ -18,6 +19,45 @@ interface WorkbenchHeaderProps {
   trailingNode?: ReactNode;
 }
 
+function buildHeaderStyle() {
+  const fallback = {
+    '--sl-nav-status-bar-height': '22px',
+    '--sl-nav-top-gap': '26px',
+    '--sl-nav-bottom-gap': '14px',
+    '--sl-nav-total-height': '108px',
+    '--sl-nav-side-width': '56px',
+  } as Record<string, string>;
+
+  try {
+    const systemInfo = Taro.getSystemInfoSync();
+    const statusBarHeight = Math.max(Number(systemInfo.statusBarHeight || 0), 0);
+    const capsule = typeof Taro.getMenuButtonBoundingClientRect === 'function'
+      ? Taro.getMenuButtonBoundingClientRect()
+      : null;
+
+    const topGap = capsule?.top != null && statusBarHeight > 0
+      ? Math.max(capsule.top - statusBarHeight, 6)
+      : 26;
+    const contentHeight = Math.max(Number(capsule?.height || 0), 32);
+    const bottomGap = capsule?.bottom != null
+      ? Math.max(capsule.bottom - (statusBarHeight + topGap + contentHeight), topGap)
+      : topGap + 2;
+    const totalHeight = statusBarHeight + topGap + contentHeight + bottomGap;
+    // 固定为 56px，与 CSS 中 .sl-page-header-icon 尺寸一致
+    const sideWidth = 56;
+
+    return {
+      '--sl-nav-status-bar-height': `${statusBarHeight || 22}px`,
+      '--sl-nav-top-gap': `${topGap}px`,
+      '--sl-nav-bottom-gap': `${bottomGap}px`,
+      '--sl-nav-total-height': `${Math.max(totalHeight, 108)}px`,
+      '--sl-nav-side-width': `${sideWidth}px`,
+    } as Record<string, string>;
+  } catch {
+    return fallback;
+  }
+}
+
 function HeaderAction({ label, icon, onClick, compact = true, disabled = false }: WorkbenchHeaderActionProps) {
   return (
     <View
@@ -31,7 +71,7 @@ function HeaderAction({ label, icon, onClick, compact = true, disabled = false }
   );
 }
 
-export function WorkbenchHeader({
+export const WorkbenchHeader = memo(function WorkbenchHeader({
   title,
   subtitle,
   leadingAction,
@@ -39,8 +79,10 @@ export function WorkbenchHeader({
   leadingNode,
   trailingNode,
 }: WorkbenchHeaderProps) {
+  const headerStyle = useMemo(() => buildHeaderStyle(), []);
+
   return (
-    <View className='sl-page-header-bar'>
+    <View className='sl-page-header-bar' style={headerStyle}>
       {leadingNode ? (
         <View className='sl-page-header-action'>{leadingNode}</View>
       ) : leadingAction ? (
@@ -67,6 +109,6 @@ export function WorkbenchHeader({
       )}
     </View>
   );
-}
+});
 
 export default WorkbenchHeader;

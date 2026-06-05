@@ -8,6 +8,12 @@ spring:
     username: ${SPRING_DATASOURCE_USERNAME:silverlink}
     password: ${SPRING_DATASOURCE_PASSWORD:silverlink_pass}
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: ${SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE:64}
+      minimum-idle: ${SPRING_DATASOURCE_HIKARI_MINIMUM_IDLE:16}
+      connection-timeout: ${SPRING_DATASOURCE_HIKARI_CONNECTION_TIMEOUT_MS:1500}
+      idle-timeout: ${SPRING_DATASOURCE_HIKARI_IDLE_TIMEOUT_MS:30000}
+      max-lifetime: ${SPRING_DATASOURCE_HIKARI_MAX_LIFETIME_MS:600000}
   jpa:
     hibernate:
       ddl-auto: validate
@@ -15,19 +21,37 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:127.0.0.1}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD:}
+      timeout: ${SPRING_DATA_REDIS_TIMEOUT:2s}
 
 server:
   port: 8080
+  tomcat:
+    threads:
+      max: ${SERVER_TOMCAT_THREADS_MAX:800}
+    accept-count: ${SERVER_TOMCAT_ACCEPT_COUNT:10000}
+    max-connections: ${SERVER_TOMCAT_MAX_CONNECTIONS:20000}
 
 silverlink:
+  audit:
+    batch-size: ${SILVERLINK_AUDIT_BATCH_SIZE:64}
+    flush-interval-ms: ${SILVERLINK_AUDIT_FLUSH_INTERVAL_MS:150}
+  cache:
+    redis:
+      enabled: ${SILVERLINK_CACHE_REDIS_ENABLED:false}
+      prefix: ${SILVERLINK_CACHE_REDIS_PREFIX:silverlink:cache:}
   qrcode:
-    public-base-url: ${SILVERLINK_SCAN_URL_PREFIX:http://sxyq27.online/silverlink/scan/?token=}
+    public-base-url: ${SILVERLINK_SCAN_URL_PREFIX:https://sxyq27.online/silverlink/scan/?token=}
   security:
-    jwt-secret: demo-jwt-secret-key-2026-silverlink-care-must-be-32-bytes!!
+    jwt-secret: ${SILVERLINK_JWT_SECRET}
     aes-key-id: demo-key-v1
     aes-key-base64: ${SILVERLINK_AES_KEY_BASE64:QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=}
     signature-window-seconds: 300
-    admin-signature-secret: ${SILVERLINK_ADMIN_SIGNATURE_SECRET:demo-admin-signature-secret}
+    admin-signature-secret: ${SILVERLINK_ADMIN_SIGNATURE_SECRET}
   sms:
     provider: ${SILVERLINK_SMS_PROVIDER:configured}
     access-key: ${SILVERLINK_SMS_ACCESS_KEY:}
@@ -48,8 +72,8 @@ silverlink:
     authorization-window-seconds: ${SILVERLINK_SMSRELAY_AUTHORIZATION_WINDOW_SECONDS:1200}
     signature-window-seconds: ${SILVERLINK_SMSRELAY_SIGNATURE_WINDOW_SECONDS:300}
     server-url: ${SILVERLINK_SMSRELAY_SERVER_URL:https://sxyq27.online/silverlink-api}
-    default-device-id: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_ID:relay-android-01}
-    default-device-secret: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_SECRET:secret-001}
+    default-device-id: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_ID}
+    default-device-secret: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_SECRET}
   wechat:
     openid-salt: ${SILVERLINK_WECHAT_OPENID_SALT:demo-wechat-openid-salt}
     app-id: ${SILVERLINK_WECHAT_APP_ID:}

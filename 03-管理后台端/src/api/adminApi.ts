@@ -1,9 +1,10 @@
+import { API_BASE_URL } from '../config/env';
 import type { AdminReviewRequest, AuditLog, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const GET_CACHE_TTL_MS = 15_000;
 const responseCache = new Map<string, { expiresAt: number; data: unknown }>();
 const pendingGetRequests = new Map<string, Promise<unknown>>();
+let adminRole = '';
 
 interface ApiEnvelope<T> {
   code?: number;
@@ -12,8 +13,7 @@ interface ApiEnvelope<T> {
 }
 
 function clearAdminSession() {
-  localStorage.removeItem('sl_admin_token');
-  localStorage.removeItem('sl_admin_role');
+  adminRole = '';
   window.dispatchEvent(new CustomEvent('sl-admin-session-cleared'));
 }
 
@@ -37,43 +37,7 @@ function isGetRequest(options?: RequestInit) {
 }
 
 function getRequestCacheKey(path: string) {
-  const token = localStorage.getItem('sl_admin_token') || '';
-  return `${path}::${token}`;
-}
-
-const ADMIN_SIGNATURE_SECRET = import.meta.env.VITE_ADMIN_SIGNATURE_SECRET || 'demo-admin-signature-secret';
-
-async function hmacSha256Hex(secret: string, value: string) {
-  const cryptoApi = globalThis.crypto;
-  if (!cryptoApi?.subtle) {
-    throw new Error('当前浏览器不支持管理后台签名能力');
-  }
-  const encoder = new TextEncoder();
-  const key = await cryptoApi.subtle.importKey(
-    'raw',
-    encoder.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign'],
-  );
-  const signature = await cryptoApi.subtle.sign('HMAC', key, encoder.encode(value));
-  return Array.from(new Uint8Array(signature))
-    .map((item) => item.toString(16).padStart(2, '0'))
-    .join('');
-}
-
-async function createSignatureHeaders(method: string, path: string) {
-  const timestamp = String(Math.floor(Date.now() / 1000));
-  const nonce =
-    globalThis.crypto?.randomUUID?.() ??
-    `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  const requestPath = path.split('?')[0] || path;
-  const canonical = `${method.toUpperCase()}\n${requestPath}\n${timestamp}\n${nonce}`;
-  return {
-    'X-Timestamp': timestamp,
-    'X-Nonce': nonce,
-    'X-Signature': await hmacSha256Hex(ADMIN_SIGNATURE_SECRET, canonical),
-  };
+  return `${path}::${adminRole}`;
 }
 
 export function invalidateAdminCache() {
@@ -95,16 +59,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     }
   }
 
-  const token = localStorage.getItem('sl_admin_token') || '';
   const execute = async () => {
-    const method = options?.method || 'GET';
-    const signatureHeaders = await createSignatureHeaders(method, path);
     const response = await fetch(`${API_BASE_URL}${path}`, {
       ...options,
+      credentials: 'same-origin',
       headers: {
         'Content-Type': 'application/json',
-        ...signatureHeaders,
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.headers || {}),
       },
     });
@@ -198,9 +158,9 @@ function mapMedicationRows(rows: Array<Record<string, unknown>>) {
 }
 
 export async function loginAdmin(account: string, password: string) {
-  let result: { token: string; role: string };
+  let result: { role: string; account?: string };
   try {
-    result = await request<{ token: string; role: string }>('/api/admin/login', {
+    result = await request<{ role: string; account?: string }>('/api/admin/login', {
       method: 'POST',
       body: JSON.stringify({ account, password }),
     });
@@ -210,9 +170,8 @@ export async function loginAdmin(account: string, password: string) {
     }
     throw error;
   }
-  localStorage.setItem('sl_admin_token', result.token);
-  localStorage.setItem('sl_admin_role', result.role || '系统管理员');
-  return { ok: Boolean(result.token), role: result.role || '系统管理员' };
+  adminRole = result.role || '系统管理员';
+  return { ok: true, role: adminRole };
 }
 
 export async function logoutAdmin() {
@@ -220,7 +179,20 @@ export async function logoutAdmin() {
     await request<void>('/api/admin/logout', { method: 'POST' });
   } catch {
     // remote backend may not expose logout yet
+  } finally {
+    clearAdminSession();
+    invalidateAdminCache();
   }
+}
+
+export async function fetchAdminSession() {
+  const result = await request<{ role: string; account?: string }>('/api/admin/session');
+  adminRole = result.role || '系统管理员';
+  return { loggedIn: true, role: adminRole, account: result.account || '' };
+}
+
+export function getAdminRole() {
+  return adminRole;
 }
 
 export async function fetchDashboard() {
@@ -250,7 +222,7 @@ export async function fetchElders() {
     ),
     aboType: String(row.aboType || row.bloodType || ''),
     rhType: String(row.rhType || ''),
-    volunteer: String(row.volunteer || '未分配'),
+    volunteer: String(row.volunteer || row.volunteerName || row.volunteerAccount || '未分配'),
     status: formatAdminStatus(row.status),
   }));
 }
@@ -280,7 +252,27 @@ export async function fetchVolunteers() {
     name: String(row.name || ''),
     account: String(row.account || ''),
     phone: String(row.phone || ''),
-    elderCount: Number(row.scopeCount || row.elderCount || 0),
+    elderCount: Number(
+      row.scopeCount ||
+        row.elderCount ||
+        (Array.isArray(row.assignedElderIds) ? row.assignedElderIds.length : 0) ||
+        (Array.isArray(row.assignedElders) ? row.assignedElders.length : 0),
+    ),
+    assignedElderIds: Array.isArray(row.assignedElderIds) ? row.assignedElderIds.map((item) => String(item || '')) : [],
+    assignedElders: Array.isArray(row.assignedElders)
+      ? row.assignedElders.flatMap((item) => {
+          const data = item as Record<string, unknown>;
+          const id = String(data.id || data.elderId || '');
+          if (!id) return [];
+          return [{
+            id,
+            archiveNo: String(data.archiveNo || ''),
+            name: String(data.name || ''),
+            age: Number(data.age || 0),
+            status: formatAdminStatus(data.status),
+          }];
+        })
+      : [],
     status: formatAdminStatus(row.status),
     lastSubmit: String(row.lastSubmit || '-'),
     createdAt: String(row.createdAt || row.createTime || '-'),

@@ -85,6 +85,33 @@ describe('scan pages', () => {
     await waitFor(() => expect(alert).toHaveBeenCalledWith('PDF 下载失败，请稍后重试'));
   });
 
+  it('keeps UI responsive when audit reporting fails after nameplate download succeeds', async () => {
+    const user = userEvent.setup();
+    const click = vi.fn();
+    const createObjectURL = vi.fn(() => 'blob:pdf');
+    const revokeObjectURL = vi.fn();
+    reportAudit.mockRejectedValueOnce(new Error('audit failed'));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, blob: vi.fn().mockResolvedValue(new Blob(['pdf'])) }));
+    vi.stubGlobal('URL', { createObjectURL, revokeObjectURL });
+    vi.spyOn(document, 'createElement').mockImplementation((tagName: string) => {
+      const element = document.createElementNS('http://www.w3.org/1999/xhtml', tagName) as HTMLAnchorElement;
+      if (tagName === 'a') {
+        element.click = click;
+      }
+      return element;
+    });
+
+    render(<NameplatePreviewPage elderId="elder-2" archiveNo="" />);
+    await user.click(screen.getByRole('button', { name: /下载 PDF/ }));
+
+    await waitFor(() => {
+      expect(click).toHaveBeenCalledTimes(1);
+      expect(reportAudit).toHaveBeenCalledWith({ action: 'nameplate_pdf_download', target: 'elder-2' });
+    });
+
+    expect(screen.getByRole('button', { name: /生成 PDF/ })).toBeEnabled();
+  });
+
   it('asks for consent before viewing protected archive when not verified', async () => {
     const user = userEvent.setup();
     render(

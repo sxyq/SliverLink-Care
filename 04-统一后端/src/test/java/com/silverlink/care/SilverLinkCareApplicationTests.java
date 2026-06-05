@@ -6,6 +6,7 @@ class SilverLinkCareApplicationTests {
 
     @Test
     void mainMethodExists() throws Exception {
+        Assertions.assertNotNull(new SilverLinkCareApplication());
         Assertions.assertNotNull(
                 SilverLinkCareApplication.class.getDeclaredMethod("main", String[].class)
         );

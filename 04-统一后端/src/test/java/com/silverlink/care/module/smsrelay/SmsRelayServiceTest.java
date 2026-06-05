@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -56,6 +57,102 @@ class SmsRelayServiceTest {
         assertThrows(BizException.class, () -> service.updateDevice("", body));
         body.setReceiverPhone("");
         assertThrows(BizException.class, () -> service.updateDevice("device-1", body));
+    }
+
+    @Test
+    void createScanVerificationSessionUsesRequestedOrPreferredDevice() {
+        ReflectionTestUtils.setField(service, "defaultDeviceId", "device-default");
+        jdbc.devices.put("device-default", new HashMap<>(deviceRow("device-default", "secret-default")));
+        jdbc.devices.put("device-2", new HashMap<>(deviceRow("device-2", "secret-2")));
+
+        ScanVerificationSessionDto requested = service.createScanVerificationSession("elder-1", "health", "device-2");
+        ScanVerificationSessionDto preferred = service.createScanVerificationSession("elder-2", "archive", null);
+
+        assertEquals("13800000000", requested.getReceiverPhone());
+        assertTrue(requested.getMessageBody().startsWith("SL "));
+        assertTrue(requested.getSessionId().startsWith("scan-session-"));
+        assertEquals("13800000000", preferred.getReceiverPhone());
+        assertTrue(preferred.getMessageBody().startsWith("SL "));
+        assertMessage("未找到指定短信中转设备", () -> service.createScanVerificationSession("elder-3", "health", "missing"));
+    }
+
+    @Test
+    void handleHeartbeatAndGetDeviceConfigUpdateStatusAndHeartbeat() {
+        jdbc.devices.put("device-1", new HashMap<>(deviceRow("device-1", "secret-1")));
+        HeartbeatRequest request = new HeartbeatRequest();
+        request.setDeviceId("device-1");
+        request.setTimestamp(System.currentTimeMillis());
+
+        service.handleHeartbeat(request, "secret-1");
+        DeviceConfigDto config = service.getDeviceConfig("device-1", "secret-1");
+
+        assertEquals("device-1", config.getDeviceId());
+        assertEquals("在线", config.getStatus());
+        assertEquals("后台服务运行中", config.getServiceStatus());
+        assertTrue(config.getLastHeartbeat() != null && !config.getLastHeartbeat().isBlank());
+    }
+
+    @Test
+    void listRecordsListDevicesAndVerificationSessionsMapRows() {
+        jdbc.devices.put("device-1", new HashMap<>(deviceRow("device-1", "secret-1")));
+        Map<String, Object> onlineDevice = new HashMap<>(deviceRow("device-2", "secret-2"));
+        onlineDevice.put("status", "在线");
+        onlineDevice.put("last_heartbeat", Instant.now().toString());
+        jdbc.devices.put("device-2", onlineDevice);
+
+        Map<String, Object> record = new HashMap<>();
+        record.put("id", "rec-1");
+        record.put("device_id", "device-1");
+        record.put("receiver_phone", "13800000000");
+        record.put("sender_phone", "13900000000");
+        record.put("message_body", "SL 123456");
+        record.put("received_at", "1710000000000");
+        record.put("message_prefix", "SL");
+        record.put("uploaded_at", 1710000000100L);
+        record.put("status", "UPLOADED");
+        jdbc.records.add(record);
+
+        jdbc.sessions.put("verified-admin", new HashMap<>(Map.ofEntries(
+                Map.entry("session_id", "verified-admin"),
+                Map.entry("elder_id", "elder-1"),
+                Map.entry("target", "health"),
+                Map.entry("relay_device_id", "device-1"),
+                Map.entry("receiver_phone", "13800000000"),
+                Map.entry("message_body", "SL 123456"),
+                Map.entry("status", "VERIFIED"),
+                Map.entry("expires_at", Instant.now().plusSeconds(120).toString()),
+                Map.entry("verified", true),
+                Map.entry("verified_at", Instant.now().toString()),
+                Map.entry("sender_phone_masked", "139****0000"),
+                Map.entry("created_at", "2026-05-29T00:00:00Z")
+        )));
+        jdbc.sessions.put("expired-admin", new HashMap<>(Map.ofEntries(
+                Map.entry("session_id", "expired-admin"),
+                Map.entry("elder_id", "elder-2"),
+                Map.entry("target", "archive"),
+                Map.entry("relay_device_id", "device-2"),
+                Map.entry("receiver_phone", "13800000001"),
+                Map.entry("message_body", "SL 654321"),
+                Map.entry("status", "PENDING"),
+                Map.entry("expires_at", Instant.now().minusSeconds(5).toString()),
+                Map.entry("verified", false),
+                Map.entry("verified_at", ""),
+                Map.entry("sender_phone_masked", ""),
+                Map.entry("created_at", "2026-05-28T23:59:59Z")
+        )));
+
+        List<SmsRelayRecordDto> records = service.listRecords();
+        List<DeviceConfigDto> devices = service.listDevices();
+        List<ScanVerificationAdminDto> sessions = service.listVerificationSessions();
+
+        assertEquals(1, records.size());
+        assertEquals(1710000000000L, records.get(0).getReceivedAt());
+        assertEquals(1710000000100L, records.get(0).getUploadedAt());
+        assertEquals(2, devices.size());
+        assertEquals("后台服务运行中", devices.get(1).getServiceStatus());
+        assertEquals(2, sessions.size());
+        assertTrue(sessions.stream().anyMatch(dto -> "expired-admin".equals(dto.getSessionId()) && "EXPIRED".equals(dto.getStatus())));
+        assertTrue(sessions.stream().anyMatch(dto -> "verified-admin".equals(dto.getSessionId()) && dto.isVerified()));
     }
 
     @Test
@@ -184,6 +281,44 @@ class SmsRelayServiceTest {
         assertEquals(false, expired.isVerified());
     }
 
+    @Test
+    void helperMethodsSerializeCacheEntriesAndExposeDtoAccessors() {
+        SmsRelayService.VerifiedSessionContext context = new SmsRelayService.VerifiedSessionContext();
+        context.setSessionId("session-1");
+        context.setElderId("elder-1");
+        context.setTarget("health");
+        context.setVerificationMethod("IDENTITY");
+        context.setVisitorName("访客");
+        context.setVisitorPhone("13800000000");
+        context.setVisitorIdCard("500102200212180836");
+        context.setSenderPhoneMasked("138****0000");
+
+        SmsRelayService.CachedAuthorizedSession cached = new SmsRelayService.CachedAuthorizedSession();
+        Instant authorizedUntil = Instant.now().plusSeconds(90);
+        cached.setContext(context);
+        cached.setAuthorizedUntil(authorizedUntil);
+
+        Long ttl = ReflectionTestUtils.invokeMethod(service, "effectiveAuthorizedSessionTtl", cached);
+        String key = ReflectionTestUtils.invokeMethod(service, "authorizedSessionCacheKey", "session-1");
+        String json = ReflectionTestUtils.invokeMethod(service, "toJson", Map.of("sessionId", "session-1"));
+        String verifiedContextJson = """
+                {"sessionId":"session-1","elderId":"elder-1","target":"health","verificationMethod":"IDENTITY","visitorName":"访客","visitorPhone":"13800000000","visitorIdCard":"500102200212180836","senderPhoneMasked":"138****0000"}
+                """.trim();
+        SmsRelayService.VerifiedSessionContext decoded =
+                ReflectionTestUtils.invokeMethod(service, "fromJson", verifiedContextJson, SmsRelayService.VerifiedSessionContext.class);
+        Long parsedLong = ReflectionTestUtils.invokeMethod(service, "longValue", "1710000000000");
+
+        assertNotNull(ttl);
+        assertTrue(ttl >= 0L);
+        assertEquals("smsrelay:authorized-session:session-1", key);
+        assertNotNull(json);
+        assertEquals("session-1", decoded.getSessionId());
+        assertEquals("138****0000", decoded.getSenderPhoneMasked());
+        assertEquals(1710000000000L, parsedLong);
+        assertEquals(context, cached.getContext());
+        assertEquals(authorizedUntil, cached.getAuthorizedUntil());
+    }
+
     private static Map<String, Object> deviceRow(String deviceId, String secret) {
         return Map.of(
                 "device_id", deviceId,
@@ -289,10 +424,21 @@ class SmsRelayServiceTest {
     private static class FakeJdbcTemplate extends JdbcTemplate {
         private final Map<String, Map<String, Object>> devices = new HashMap<>();
         private final Map<String, Map<String, Object>> sessions = new HashMap<>();
+        private final List<Map<String, Object>> records = new ArrayList<>();
         private int sessionLookupCount;
 
         @Override
         public int update(String sql, Object... args) {
+            if (sql.contains("update sms_relay_device set last_heartbeat")) {
+                String deviceId = String.valueOf(args[2]);
+                Map<String, Object> row = devices.get(deviceId);
+                if (row == null) {
+                    return 0;
+                }
+                row.put("last_heartbeat", args[0]);
+                row.put("status", args[1]);
+                return 1;
+            }
             if (sql.contains("update sms_relay_device") && args.length >= 4) {
                 String deviceId = String.valueOf(args[3]);
                 Map<String, Object> row = devices.get(deviceId);
@@ -379,15 +525,66 @@ class SmsRelayServiceTest {
         }
 
         @Override
+        public List<Map<String, Object>> queryForList(String sql) {
+            if (sql.contains("from sms_relay_record")) {
+                return new ArrayList<>(records);
+            }
+            if (sql.contains("from sms_relay_device order by updated_at desc")) {
+                return new ArrayList<>(devices.values());
+            }
+            if (sql.contains("from scan_verification_session order by created_at desc")) {
+                return new ArrayList<>(sessions.values());
+            }
+            if (sql.contains("from scan_verification_session where status='PENDING'")) {
+                List<Map<String, Object>> rows = new ArrayList<>();
+                for (Map<String, Object> row : sessions.values()) {
+                    if ("PENDING".equals(row.get("status"))) {
+                        rows.add(row);
+                    }
+                }
+                return rows;
+            }
+            return super.queryForList(sql);
+        }
+
+        @Override
         public List<Map<String, Object>> queryForList(String sql, Object... args) {
+            if (sql.contains("from sms_relay_record")) {
+                return new ArrayList<>(records);
+            }
+            if (sql.contains("from sms_relay_device order by updated_at desc")) {
+                return new ArrayList<>(devices.values());
+            }
             if (sql.contains("from sms_relay_device where device_id=?")) {
                 Map<String, Object> row = devices.get(String.valueOf(args[0]));
                 return row == null ? List.of() : List.of(row);
+            }
+            if (sql.contains("from sms_relay_device") && sql.contains("limit 1")) {
+                if (args.length > 0) {
+                    String preferredId = String.valueOf(args[0]);
+                    Map<String, Object> preferred = devices.get(preferredId);
+                    if (preferred != null) {
+                        return List.of(preferred);
+                    }
+                }
+                return devices.isEmpty() ? List.of() : List.of(devices.values().iterator().next());
             }
             if (sql.contains("from scan_verification_session where session_id=?")) {
                 sessionLookupCount++;
                 Map<String, Object> row = sessions.get(String.valueOf(args[0]));
                 return row == null ? List.of() : List.of(row);
+            }
+            if (sql.contains("from scan_verification_session where status='PENDING'")) {
+                List<Map<String, Object>> rows = new ArrayList<>();
+                for (Map<String, Object> row : sessions.values()) {
+                    if ("PENDING".equals(row.get("status"))) {
+                        rows.add(row);
+                    }
+                }
+                return rows;
+            }
+            if (sql.contains("from scan_verification_session order by created_at desc")) {
+                return new ArrayList<>(sessions.values());
             }
             return new ArrayList<>();
         }

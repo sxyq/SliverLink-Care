@@ -14,6 +14,17 @@ function formatEmergencyContact(info: ScanBasicInfo) {
   return `${info.emergencyContactName || '未提供'}${relation}  ${info.emergencyPhoneMasked || '未提供'}`;
 }
 
+function maskName(name: string) {
+  const value = String(name || '').trim();
+  if (!value) {
+    return '未提供';
+  }
+  if (value.length <= 1) {
+    return value;
+  }
+  return `${value[0]}${'*'.repeat(Math.min(value.length - 1, 2))}`;
+}
+
 function ScanLandingHeader() {
   return (
     <View className='sl-page-header-bar'>
@@ -36,17 +47,11 @@ export default function ScanLandingPage() {
   const [basicInfo, setBasicInfo] = useState<ScanBasicInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [errorText, setErrorText] = useState('');
-  const hasDirectEntry = Boolean(params.elderId && !params.qrToken);
 
   useEffect(() => {
     const qrToken = params.qrToken;
 
     if (!qrToken) {
-      if (params.elderId) {
-        setLoading(false);
-        setErrorText('');
-        return;
-      }
       setLoading(false);
       setErrorText(ERROR_MESSAGES.invalidQr);
       return;
@@ -86,8 +91,16 @@ export default function ScanLandingPage() {
     });
   }
 
+  function handleEmergencyCall(phone: string) {
+    if (!phone) {
+      void Taro.showToast({ title: '暂未提供联系电话', icon: 'none' });
+      return;
+    }
+    void Taro.makePhoneCall({ phoneNumber: phone });
+  }
+
   return (
-    <View className='sl-stage'>
+    <View className='sl-stage sl-stage--scan'>
       <View className='sl-app-shell'>
         <View className='sl-phone-shell'>
           <View className='sl-phone-content'>
@@ -105,29 +118,6 @@ export default function ScanLandingPage() {
                     返回首页
                   </Button>
                 </View>
-              ) : hasDirectEntry ? (
-                <>
-                  <View className='sl-section-heading'>
-                    <Text className='scan-landing-heading__title'>基本信息</Text>
-                    <Text className='scan-landing-heading__badge'>盾</Text>
-                  </View>
-
-                  <View className='sl-card scan-landing-profile-panel'>
-                    <View className='scan-landing-profile-hero'>
-                      <View className='scan-landing-profile-avatar'>人</View>
-                      <View className='scan-landing-profile-lines'>
-                        <Text>姓名： 未提供</Text>
-                        <Text>性别： 未提供</Text>
-                        <Text>年龄： 未提供</Text>
-                      </View>
-                    </View>
-                    <View className='scan-landing-archive-line'>健康档案编号： {params.archiveNo || '未透传'}</View>
-                  </View>
-
-                  <Button className='sl-primary-button' onClick={() => handleContinueVerify(params.elderId || '')}>
-                    查看健康档案
-                  </Button>
-                </>
               ) : basicInfo ? (
                 <>
                   <View className='sl-section-heading'>
@@ -137,9 +127,14 @@ export default function ScanLandingPage() {
 
                   <View className='sl-card scan-landing-profile-panel'>
                     <View className='scan-landing-profile-hero'>
-                      <View className='scan-landing-profile-avatar'>人</View>
+                      <View className='scan-landing-profile-avatar'>
+                        <View className='sl-avatar-user'>
+                          <View className='sl-avatar-user__head' />
+                          <View className='sl-avatar-user__body' />
+                        </View>
+                      </View>
                       <View className='scan-landing-profile-lines'>
-                        <Text>姓名： {basicInfo.name || '未提供'}</Text>
+                        <Text>姓名： {maskName(basicInfo.name)}</Text>
                         <Text>性别： {basicInfo.gender || '未提供'}</Text>
                         <Text>年龄： {basicInfo.age ? `${basicInfo.age} 岁` : '未提供'}</Text>
                       </View>
@@ -159,7 +154,7 @@ export default function ScanLandingPage() {
                     <View className='scan-landing-contact-line'>
                       <Text>紧急联系人： {formatEmergencyContact(basicInfo)}</Text>
                     </View>
-                    <Button className='sl-secondary-button scan-landing-contact-button'>
+                    <Button className='sl-secondary-button scan-landing-contact-button' onClick={() => handleEmergencyCall(basicInfo.emergencyPhoneDial)}>
                       一键拨打
                     </Button>
                   </View>

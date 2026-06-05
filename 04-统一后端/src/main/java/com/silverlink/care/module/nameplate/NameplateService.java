@@ -6,6 +6,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.nameplate.dto.NameplatePreviewResponse;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
@@ -19,16 +20,22 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
+import org.apache.pdfbox.rendering.PDFRenderer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Base64;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import javax.imageio.ImageIO;
 
 @Service
 public class NameplateService {
@@ -41,9 +48,25 @@ public class NameplateService {
     private static final Color LINE = new Color(129, 185, 178);
     private static final Color GOLD = new Color(236, 174, 68);
     private static final Color BORDER = new Color(211, 225, 226);
+    private static volatile byte[] cachedFontBytes;
 
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
+    private final SimpleTtlCache<String, NameplatePreviewResponse> previewCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, byte[]> pdfCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, BufferedImage> qrImageCache = new SimpleTtlCache<>();
+
+    @Value("${silverlink.nameplate.preview-cache-ttl-ms:15000}")
+    private long previewCacheTtlMs;
+
+    @Value("${silverlink.nameplate.pdf-cache-ttl-ms:30000}")
+    private long pdfCacheTtlMs;
+
+    @Value("${silverlink.nameplate.qr-image-cache-ttl-ms:60000}")
+    private long qrImageCacheTtlMs;
+
+    @Value("${silverlink.nameplate.font-resource-cache-enabled:true}")
+    private boolean fontResourceCacheEnabled;
 
     public NameplateService(SilverLinkDataService data, QrCodeService qrCodeService) {
         this.data = data;
@@ -51,38 +74,66 @@ public class NameplateService {
     }
 
     public NameplatePreviewResponse preview(String elderId, boolean blankTemplate) {
-        NameplatePreviewResponse resp = new NameplatePreviewResponse();
-        resp.setElderId(elderId);
-        resp.setBlankTemplate(blankTemplate);
         if (blankTemplate) {
+            NameplatePreviewResponse resp = new NameplatePreviewResponse();
+            resp.setElderId(elderId);
+            resp.setBlankTemplate(true);
             resp.setFrontName("________");
             resp.setFrontAge("________");
             resp.setFrontPhone("________");
             resp.setBackQrToken("placeholder-qr-token");
+            resp.setBackQrUrl("");
+            resp.setBackQrPayload("placeholder-qr-token");
+            resp.setBackQrImageBase64("");
             resp.setBackArchiveNo("________");
             resp.setBackHint("扫码查看基础信息");
+            resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp));
             return resp;
         }
+        if (previewCacheTtlMs > 0) {
+            NameplatePreviewResponse cached = previewCache.getOrLoad(elderId, previewCacheTtlMs, () -> loadPreview(elderId));
+            return copyPreview(cached);
+        }
+        return copyPreview(loadPreview(elderId));
+    }
+
+    private NameplatePreviewResponse loadPreview(String elderId) {
+        NameplatePreviewResponse resp = new NameplatePreviewResponse();
+        resp.setElderId(elderId);
+        resp.setBlankTemplate(false);
         Map<String, Object> elder = data.elderDetail(elderId, false);
         resp.setFrontName(stringValue(elder.get("name"), "未填写"));
         resp.setFrontAge(stringValue(elder.get("age"), "未填写"));
         resp.setFrontPhone(stringValue(elder.get("emergencyContactPhone"), "未填写"));
-        resp.setBackQrToken(resolvePublicQrUrl(elderId, stringValue(elder.get("archiveNo"), "未生成")));
+        String qrUrl = resolvePublicQrUrl(elderId, stringValue(elder.get("archiveNo"), "未生成"));
+        resp.setBackQrToken(qrUrl);
+        resp.setBackQrUrl(qrUrl);
+        resp.setBackQrPayload(qrUrl);
+        resp.setBackQrImageBase64(qrCodeService.renderQrImageBase64(qrUrl, 300));
         resp.setBackArchiveNo(stringValue(elder.get("archiveNo"), "未生成"));
         resp.setBackHint("扫码查看基础信息");
+        resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp));
+        if (previewCacheTtlMs > 0) {
+            previewCache.put(elderId, copyPreview(resp), previewCacheTtlMs);
+        }
         return resp;
     }
 
     public byte[] generateDemoPdf(String elderId) {
         NameplatePreviewResponse preview = preview(elderId, false);
-        try (PDDocument document = new PDDocument();
-             InputStream fontStream = NameplateService.class.getResourceAsStream("/fonts/ArialUnicode.ttf")) {
-            if (fontStream == null) {
-                throw new IllegalStateException("缺少中文字体资源 ArialUnicode.ttf");
-            }
+        String pdfCacheKey = buildPdfCacheKey(elderId, preview);
+        if (pdfCacheTtlMs > 0) {
+            byte[] cachedPdf = pdfCache.getOrLoad(pdfCacheKey, pdfCacheTtlMs, () -> renderPdfBytes(preview));
+            return Arrays.copyOf(cachedPdf, cachedPdf.length);
+        }
+        return renderPdfBytes(preview);
+    }
 
+    private byte[] renderPdfBytes(NameplatePreviewResponse preview) {
+        try (PDDocument document = new PDDocument();
+             InputStream fontStream = new ByteArrayInputStream(loadFontBytes())) {
             PDFont font = PDType0Font.load(document, fontStream, true);
-            BufferedImage qrImage = renderQrImage(preview.getBackQrToken(), 300);
+            BufferedImage qrImage = renderQrImageCached(preview.getBackQrToken(), 300);
 
             PDPage page = new PDPage(new PDRectangle(1024, 576));
             document.addPage(page);
@@ -354,6 +405,76 @@ public class NameplateService {
         } catch (WriterException e) {
             throw new IllegalStateException("生成二维码失败", e);
         }
+    }
+
+    private BufferedImage renderQrImageCached(String value, int size) {
+        String cacheKey = value + "|" + size;
+        if (qrImageCacheTtlMs > 0) {
+            return qrImageCache.getOrLoad(cacheKey, qrImageCacheTtlMs, () -> renderQrImage(value, size));
+        }
+        return renderQrImage(value, size);
+    }
+
+    private byte[] loadFontBytes() throws IOException {
+        if (!fontResourceCacheEnabled) {
+            try (InputStream fontStream = NameplateService.class.getResourceAsStream("/fonts/ArialUnicode.ttf")) {
+                if (fontStream == null) {
+                    throw new IllegalStateException("缺少中文字体资源 ArialUnicode.ttf");
+                }
+                return fontStream.readAllBytes();
+            }
+        }
+        byte[] bytes = cachedFontBytes;
+        if (bytes != null) {
+            return bytes;
+        }
+        synchronized (NameplateService.class) {
+            if (cachedFontBytes == null) {
+                try (InputStream fontStream = NameplateService.class.getResourceAsStream("/fonts/ArialUnicode.ttf")) {
+                    if (fontStream == null) {
+                        throw new IllegalStateException("缺少中文字体资源 ArialUnicode.ttf");
+                    }
+                    cachedFontBytes = fontStream.readAllBytes();
+                }
+            }
+            return cachedFontBytes;
+        }
+    }
+
+    private String buildPdfCacheKey(String elderId, NameplatePreviewResponse preview) {
+        return elderId + "|" + safe(preview.getFrontName()) + "|" + safe(preview.getFrontAge()) + "|"
+                + safe(preview.getFrontPhone()) + "|" + safe(preview.getBackArchiveNo()) + "|"
+                + safe(preview.getBackQrToken()) + "|" + safe(preview.getBackHint());
+    }
+
+    private String renderPdfPreviewImageBase64(NameplatePreviewResponse preview) {
+        byte[] pdfBytes = renderPdfBytes(preview);
+        try (PDDocument document = PDDocument.load(pdfBytes);
+             ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            BufferedImage pageImage = new PDFRenderer(document).renderImageWithDPI(0, 144);
+            ImageIO.write(pageImage, "png", output);
+            return Base64.getEncoder().encodeToString(output.toByteArray());
+        } catch (IOException e) {
+            throw new IllegalStateException("生成名牌预览图失败", e);
+        }
+    }
+
+    private NameplatePreviewResponse copyPreview(NameplatePreviewResponse source) {
+        NameplatePreviewResponse copy = new NameplatePreviewResponse();
+        copy.setElderId(source.getElderId());
+        copy.setArchiveNo(source.getArchiveNo());
+        copy.setFrontName(source.getFrontName());
+        copy.setFrontAge(source.getFrontAge());
+        copy.setFrontPhone(source.getFrontPhone());
+        copy.setBackQrToken(source.getBackQrToken());
+        copy.setBackQrUrl(source.getBackQrUrl());
+        copy.setBackQrPayload(source.getBackQrPayload());
+        copy.setBackQrImageBase64(source.getBackQrImageBase64());
+        copy.setBackArchiveNo(source.getBackArchiveNo());
+        copy.setBackHint(source.getBackHint());
+        copy.setPdfPreviewImageBase64(source.getPdfPreviewImageBase64());
+        copy.setBlankTemplate(source.isBlankTemplate());
+        return copy;
     }
 
     private String resolvePublicQrUrl(String elderId, String archiveNo) {

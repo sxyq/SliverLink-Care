@@ -147,17 +147,17 @@ describe('adminApi', () => {
 
     const calledPaths = fetchMock.mock.calls.map((call) => call[0]);
     expect(calledPaths).toEqual([
-      '/api/admin/elders',
-      '/api/admin/elders/elder-1',
-      '/api/admin/elders/elder-1/status',
-      '/api/admin/volunteers',
-      '/api/admin/volunteers/vol-1',
-      '/api/admin/volunteers/vol-1/scope',
-      '/api/admin/volunteers/vol-1',
-      '/api/admin/qrcodes',
-      '/api/admin/qrcodes/qr-1/disable',
-      '/api/admin/qrcodes/qr-1/regenerate',
-      '/api/admin/qrcodes/qr-1/relay-device',
+      '/silverlink-api/api/admin/elders',
+      '/silverlink-api/api/admin/elders/elder-1',
+      '/silverlink-api/api/admin/elders/elder-1/status',
+      '/silverlink-api/api/admin/volunteers',
+      '/silverlink-api/api/admin/volunteers/vol-1',
+      '/silverlink-api/api/admin/volunteers/vol-1/scope',
+      '/silverlink-api/api/admin/volunteers/vol-1',
+      '/silverlink-api/api/admin/qrcodes',
+      '/silverlink-api/api/admin/qrcodes/qr-1/disable',
+      '/silverlink-api/api/admin/qrcodes/qr-1/regenerate',
+      '/silverlink-api/api/admin/qrcodes/qr-1/relay-device',
     ]);
   });
 
@@ -242,5 +242,315 @@ describe('adminApi', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('bad', { status: 404 })));
 
     await expect(logoutAdmin()).resolves.toBeUndefined();
+  });
+
+  it('formats qr status with DISABLED and ENABLED variants', async () => {
+    queueFetch([
+      { id: 'qr-1', status: 'DISABLED' },
+      { id: 'qr-2', status: 'ENABLED' },
+    ]);
+    const qrCodes = await fetchQrCodes();
+    expect(qrCodes).toEqual([
+      expect.objectContaining({ id: 'qr-1', status: '已停用' }),
+      expect.objectContaining({ id: 'qr-2', status: '启用' }),
+    ]);
+  });
+
+  it('formats relay status with EXPIRED and unknown values', async () => {
+    invalidateAdminCache();
+    queueFetch([
+      { deviceId: 'd1', status: 'EXPIRED', lastHeartbeat: 0 },
+      { deviceId: 'd2', status: 'SOMETHING', lastHeartbeat: 'not-a-date' },
+    ]);
+    const devices = await fetchSmsRelayDevices();
+    expect(devices).toEqual([
+      expect.objectContaining({ status: '已过期', lastHeartbeat: '-' }),
+      expect.objectContaining({ status: 'SOMETHING', lastHeartbeat: 'not-a-date' }),
+    ]);
+  });
+
+  it('formats datetime with numeric timestamp and invalid date', async () => {
+    invalidateAdminCache();
+    const ts = 1770000000000;
+    queueFetch([
+      { id: 'r1', status: 'UPLOADED', receivedAt: ts, uploadedAt: '' },
+    ]);
+    const records = await fetchSmsRelayRecords();
+    expect(records[0].receivedAt).toBe(new Date(ts).toLocaleString('zh-CN', { hour12: false }));
+    expect(records[0].uploadedAt).toBe('-');
+  });
+
+  it('normalizes error messages from various response formats', async () => {
+    invalidateAdminCache();
+    const fetchMock = vi.fn();
+    fetchMock.mockResolvedValueOnce(new Response('{"message":"自定义错误消息"}', { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    fetchMock.mockResolvedValueOnce(new Response('{"error":"error字段消息"}', { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    fetchMock.mockResolvedValueOnce(new Response('{}', { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    fetchMock.mockResolvedValueOnce(new Response('纯文本错误', { status: 400, headers: { 'Content-Type': 'text/plain' } }));
+    fetchMock.mockResolvedValueOnce(new Response('', { status: 500, headers: { 'Content-Type': 'text/plain' } }));
+    fetchMock.mockResolvedValueOnce(new Response('{invalid json', { status: 400, headers: { 'Content-Type': 'application/json' } }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchElders()).rejects.toThrow('自定义错误消息');
+    await expect(fetchElders()).rejects.toThrow('error字段消息');
+    await expect(fetchElders()).rejects.toThrow('请求失败');
+    await expect(fetchElders()).rejects.toThrow('纯文本错误');
+    await expect(fetchElders()).rejects.toThrow('请求失败');
+    await expect(fetchElders()).rejects.toThrow('请求失败');
+  });
+
+  it('handles envelope with error code >= 400', async () => {
+    invalidateAdminCache();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 500, message: '服务器内部错误', data: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ));
+
+    await expect(fetchElders()).rejects.toThrow('服务器内部错误');
+  });
+
+  it('handles non-envelope response', async () => {
+    invalidateAdminCache();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([{ id: 'elder-1', name: '老人' }]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ));
+
+    const elders = await fetchElders();
+    expect(elders).toEqual([expect.objectContaining({ id: 'elder-1' })]);
+  });
+
+  it('rethrows non-Unauthorized login errors', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response('Network Error', { status: 500 }),
+    ));
+
+    await expect(loginAdmin('admin', 'pass')).rejects.toThrow('Network Error');
+  });
+
+  it('converts Unauthorized login error to Chinese message', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 401, message: 'Unauthorized', data: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ));
+
+    await expect(loginAdmin('admin', 'wrong')).rejects.toThrow('账号或密码错误');
+  });
+
+  it('returns default role when login response has empty role', async () => {
+    queueFetch({ token: 'tok', role: '' });
+
+    const result = await loginAdmin('admin', 'pass');
+    expect(result).toEqual({ ok: true, role: '系统管理员' });
+  });
+
+  it('returns ok false when login response has empty token', async () => {
+    queueFetch({ token: '', role: '管理员' });
+
+    const result = await loginAdmin('admin', 'pass');
+    expect(result).toEqual({ ok: false, role: '管理员' });
+  });
+
+  it('deduplicates concurrent GET requests', async () => {
+    let resolveFirst: (value: unknown) => void;
+    const firstPromise = new Promise((resolve) => { resolveFirst = resolve; });
+    const fetchMock = vi.fn();
+    fetchMock.mockReturnValueOnce(firstPromise);
+    fetchMock.mockResolvedValueOnce(response([{ id: 'e1' }]));
+    vi.stubGlobal('fetch', fetchMock);
+
+    const p1 = fetchElders();
+    const p2 = fetchElders();
+
+    resolveFirst!(response([{ id: 'e1' }]));
+
+    const [r1, r2] = await Promise.all([p1, p2]);
+    expect(r1).toEqual([expect.objectContaining({ id: 'e1' })]);
+    expect(r2).toEqual([expect.objectContaining({ id: 'e1' })]);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('bypasses expired cache entries', async () => {
+    const fetchMock = queueFetch(
+      [{ id: 'elder-1', name: '老人', status: 'ACTIVE' }],
+      [{ id: 'elder-2', name: '新人', status: 'ACTIVE' }],
+    );
+
+    await fetchElders();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    const cacheKey = [...(fetchElders as unknown as { _cache?: Map<string, { expiresAt: number }> })._cache?.keys?.() ?? []];
+
+    invalidateAdminCache();
+    const second = await fetchElders();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(second).toEqual([expect.objectContaining({ id: 'elder-2' })]);
+  });
+
+  it('sends requests without Authorization header when token is absent', async () => {
+    const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
+
+    await fetchElders();
+    expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined();
+  });
+
+  it('handles response.text() rejection gracefully', async () => {
+    invalidateAdminCache();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 500,
+      text: vi.fn().mockRejectedValue(new Error('body read error')),
+      json: vi.fn(),
+    }));
+
+    await expect(fetchElders()).rejects.toThrow('请求失败');
+  });
+
+  it('falls back to the built-in HMAC implementation when crypto.subtle is unavailable', async () => {
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: {},
+    });
+
+    const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
+    await expect(fetchElders()).resolves.toEqual([expect.objectContaining({ id: 'e1' })]);
+    expect(fetchMock.mock.calls[0][1].headers['X-Signature']).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it('falls back to timestamp-based nonce when randomUUID is unavailable', async () => {
+    Object.defineProperty(globalThis, 'crypto', {
+      configurable: true,
+      value: { subtle: webcrypto.subtle },
+    });
+
+    const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
+    await fetchElders();
+
+    const nonce = fetchMock.mock.calls[0][1].headers['X-Nonce'];
+    expect(nonce).toMatch(/^\d+-[a-z0-9]+$/);
+  });
+
+  it('formats invitation with empty expiresAt as 未使用', async () => {
+    queueFetch([
+      { id: 'inv-1', status: 'ACTIVE', expiresAt: '', usedCount: 0, maxUses: 1 },
+    ]);
+    const invitations = await fetchInvitations();
+    expect(invitations[0].status).toBe('未使用');
+  });
+
+  it('formats invitation with negative maxUses as 未使用 even when usedCount > 0', async () => {
+    queueFetch([
+      { id: 'inv-1', status: 'ACTIVE', expiresAt: '2099-12-31', usedCount: 5, maxUses: -1 },
+    ]);
+    const invitations = await fetchInvitations();
+    expect(invitations[0].status).toBe('未使用');
+  });
+
+  it('formats invitation with invalid expiresAt date as 未使用', async () => {
+    queueFetch([
+      { id: 'inv-1', status: 'ACTIVE', expiresAt: 'not-a-date', usedCount: 0, maxUses: 1 },
+    ]);
+    const invitations = await fetchInvitations();
+    expect(invitations[0].status).toBe('未使用');
+  });
+
+  it('formats qr status with ACTIVE and unknown fallback', async () => {
+    queueFetch([
+      { id: 'qr-1', status: 'ACTIVE' },
+      { id: 'qr-2', status: 'UNKNOWN_STATUS' },
+    ]);
+    const qrCodes = await fetchQrCodes();
+    expect(qrCodes).toEqual([
+      expect.objectContaining({ id: 'qr-1', status: '启用' }),
+      expect.objectContaining({ id: 'qr-2', status: '启用' }),
+    ]);
+  });
+
+  it('formats relay status with empty value as 未知', async () => {
+    invalidateAdminCache();
+    queueFetch([
+      { deviceId: 'd1', status: '', lastHeartbeat: '' },
+    ]);
+    const devices = await fetchSmsRelayDevices();
+    expect(devices[0].status).toBe('未知');
+  });
+
+  it('formats datetime with numeric zero and valid date string', async () => {
+    invalidateAdminCache();
+    queueFetch([
+      { id: 'r1', status: 'UPLOADED', receivedAt: 0, uploadedAt: '2026-05-25T10:30:00Z' },
+    ]);
+    const records = await fetchSmsRelayRecords();
+    expect(records[0].receivedAt).toBe('-');
+    expect(records[0].uploadedAt).toBe(new Date('2026-05-25T10:30:00Z').toLocaleString('zh-CN', { hour12: false }));
+  });
+
+  it('skips elders without id in fetchAllScales', async () => {
+    queueFetch(
+      [{ id: 'scale-1', date: '2026-05-25' }],
+    );
+    const allScales = await fetchAllScales([
+      { id: '', archiveNo: 'A', name: '无ID老人' },
+      { id: 'elder-1', archiveNo: 'B', name: '有ID老人' },
+    ]);
+    expect(allScales).toEqual([expect.objectContaining({ elderId: 'elder-1' })]);
+  });
+
+  it('fetches all scales without eldersInput by calling fetchElders', async () => {
+    queueFetch(
+      [{ id: 'elder-1', name: '老人', status: 'ACTIVE', archiveNo: 'A001' }],
+      [{ id: 'scale-1', date: '2026-05-25' }],
+    );
+    const allScales = await fetchAllScales();
+    expect(allScales).toEqual([expect.objectContaining({ elderId: 'elder-1' })]);
+  });
+
+  it('maps volunteers with assignedElderIds and assignedElders arrays', async () => {
+    invalidateAdminCache();
+    queueFetch([
+      {
+        id: 'vol-1',
+        assignedElderIds: ['e1', 'e2'],
+        assignedElders: [
+          { id: 'e3', archiveNo: 'A003', name: '老人C', age: 75, status: 'ACTIVE' },
+          { elderId: '', archiveNo: '', name: '', age: 0, status: '' },
+        ],
+        status: 'ACTIVE',
+      },
+    ]);
+    const volunteers = await fetchVolunteers();
+    expect(volunteers[0].elderCount).toBe(2);
+    expect(volunteers[0].assignedElderIds).toEqual(['e1', 'e2']);
+    expect(volunteers[0].assignedElders).toEqual([
+      expect.objectContaining({ id: 'e3', name: '老人C' }),
+    ]);
+  });
+
+  it('handles 401 response by clearing session and throwing', async () => {
+    const cleared = vi.fn();
+    window.addEventListener('sl-admin-session-cleared', cleared);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('Unauthorized', { status: 401 })));
+
+    await expect(fetchElders()).rejects.toThrow('登录态已失效');
+    expect(cleared).toHaveBeenCalled();
+    window.removeEventListener('sl-admin-session-cleared', cleared);
+  });
+
+  it('handles envelope with code >= 400 and no message', async () => {
+    invalidateAdminCache();
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 403, data: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ));
+
+    await expect(fetchElders()).rejects.toThrow('API 403');
   });
 });

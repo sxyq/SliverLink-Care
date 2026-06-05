@@ -1,0 +1,7 @@
+silverlink:
+  security:
+    jwt-secret: test-jwt-secret-key-2026-silverlink-care-0123456789
+    admin-signature-secret: test-admin-signature-secret-2026-0123456789
+  smsrelay:
+    default-device-id: test-relay-device-01
+    default-device-secret: test-relay-device-secret-2026

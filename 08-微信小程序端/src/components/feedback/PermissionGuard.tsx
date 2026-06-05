@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
 
 export interface PermissionGuardProps {
@@ -8,7 +8,7 @@ export interface PermissionGuardProps {
   fallbackDescription?: string;
 }
 
-export function PermissionGuard({
+export const PermissionGuard = memo(function PermissionGuard({
   allowed,
   children,
   fallbackTitle = '当前无访问权限',
@@ -24,6 +24,6 @@ export function PermissionGuard({
       <Text style={{ fontSize: '24rpx', lineHeight: '1.7', color: 'var(--sl-color-text-secondary)' }}>{fallbackDescription}</Text>
     </View>
   );
-}
+});
 
 export default PermissionGuard;

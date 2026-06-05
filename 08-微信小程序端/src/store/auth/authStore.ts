@@ -79,4 +79,7 @@ export function clearAuthSession() {
   removeStorageValue(STORAGE_KEYS.displayName);
   removeStorageValue(STORAGE_KEYS.authLoggedInAt);
   removeStorageValue(STORAGE_KEYS.authCookieBacked);
+  removeStorageValue(STORAGE_KEYS.currentElderSummary);
+  removeStorageValue(STORAGE_KEYS.appSession);
+  removeStorageValue(STORAGE_KEYS.launchContext);
 }

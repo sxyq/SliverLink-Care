@@ -30,11 +30,6 @@ import type {
 } from '../types';
 
 type DashboardWidgetId =
-  | 'metric-elders'
-  | 'metric-volunteers'
-  | 'metric-qrcodes'
-  | 'metric-audits'
-  | 'metric-scales'
   | 'elder-overview'
   | 'health-overview'
   | 'scale-overview'
@@ -72,11 +67,6 @@ type DashboardLayoutState = {
 };
 
 const DASHBOARD_WIDGETS: DashboardWidgetConfig[] = [
-  { id: 'metric-elders', title: '老人档案', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-volunteers', title: '志愿者账号', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-qrcodes', title: '二维码', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-audits', title: '操作日志', kind: 'metric', defaultSize: 'compact' },
-  { id: 'metric-scales', title: '量表记录', kind: 'metric', defaultSize: 'compact' },
   { id: 'elder-overview', title: '老人管理概览', kind: 'panel', defaultSize: 'standard' },
   { id: 'health-overview', title: '健康记录概览', kind: 'panel', defaultSize: 'standard' },
   { id: 'qr-family-overview', title: '二维码与家属协管', kind: 'panel', defaultSize: 'standard' },
@@ -433,19 +423,6 @@ export function DashboardPage() {
     );
   }
 
-  function renderMetricCard(metricLabel: string) {
-    const metric = dashboardMetrics.find((item) => item.label === metricLabel);
-    if (!metric) return null;
-
-    return (
-      <article className="metric-card dashboard-module dashboard-module--metric">
-        <p className="metric-label">{metric.label}</p>
-        <strong className="metric-value">{metric.value}</strong>
-        <span className="metric-trend">{metric.trend}</span>
-      </article>
-    );
-  }
-
   function renderPanel(title: string, icon: ReactNode, content: ReactNode) {
     return (
       <article className="panel analytics-card dashboard-module dashboard-module--panel">
@@ -460,16 +437,6 @@ export function DashboardPage() {
 
   function renderWidget(widgetId: DashboardWidgetId) {
     switch (widgetId) {
-      case 'metric-elders':
-        return renderMetricCard('老人档案');
-      case 'metric-volunteers':
-        return renderMetricCard('志愿者账号');
-      case 'metric-qrcodes':
-        return renderMetricCard('二维码');
-      case 'metric-audits':
-        return renderMetricCard('操作日志');
-      case 'metric-scales':
-        return renderMetricCard('量表记录');
       case 'elder-overview':
         return renderPanel(
           '老人管理概览',
@@ -697,8 +664,6 @@ export function DashboardPage() {
           </>,
         );
       }
-      default:
-        return null;
     }
   }
 

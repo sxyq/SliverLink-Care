@@ -132,6 +132,90 @@ describe('ScaleManagePage', () => {
       ]);
     });
   });
+
+  it('covers load failure, empty editor draft, save failure and close branch', async () => {
+    fetchAllScales.mockRejectedValueOnce(new Error('量表加载失败'));
+    fetchElderScales
+      .mockResolvedValueOnce([])
+      .mockRejectedValueOnce(new Error('量表详情加载失败'))
+      .mockResolvedValueOnce([
+        {
+          id: 'scale-9',
+          elderId: 'elder-1',
+          archiveNo: 'A-001',
+          elderName: '李奶奶',
+          scaleName: 'PHQ-9',
+          score: 5,
+          date: '2026-05-29',
+          volunteer: '王志愿者',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'scale-9',
+          elderId: 'elder-1',
+          archiveNo: 'A-001',
+          elderName: '李奶奶',
+          scaleName: 'PHQ-9',
+          score: 5,
+          date: '2026-05-29',
+          volunteer: '王志愿者',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'scale-9',
+          elderId: 'elder-1',
+          archiveNo: 'A-001',
+          elderName: '李奶奶',
+          scaleName: 'PHQ-9',
+          score: 5,
+          date: '2026-05-29',
+          volunteer: '王志愿者',
+        },
+      ]);
+    saveElderScales.mockRejectedValueOnce(new Error('量表保存失败'));
+
+    const firstView = renderWithRoute(<ScaleManagePage />);
+    expect(await screen.findByText('量表加载失败')).toBeInTheDocument();
+
+    firstView.unmount();
+    renderWithRoute(<ScaleManagePage />, '/?elderId=elder-1&archiveNo=A-001&elderName=李奶奶');
+
+    expect(await screen.findByRole('heading', { name: '老人量表编辑' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
+    expect(await screen.findByText('量表详情加载失败')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
+    expect(await screen.findByRole('heading', { name: '编辑量表信息' })).toBeInTheDocument();
+    expect(screen.getAllByDisplayValue('PHQ-9').length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '编辑量表信息' })).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
+    expect(await screen.findByRole('heading', { name: '编辑量表信息' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '新增量表' }));
+    fireEvent.click(screen.getAllByRole('button', { name: '删除' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: '保存量表' }));
+    expect(await screen.findByText('量表保存失败')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '编辑量表信息' })).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
+    expect(await screen.findByRole('heading', { name: '编辑量表信息' })).toBeInTheDocument();
+    fireEvent.change(screen.getAllByDisplayValue('PHQ-9')[0], { target: { value: 'UCLA' } });
+    fireEvent.change(screen.getAllByDisplayValue('5')[0], { target: { value: '7' } });
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '编辑量表信息' })).not.toBeInTheDocument();
+    });
+  });
 });
 
 describe('MedicationManagePage', () => {
@@ -249,6 +333,126 @@ describe('MedicationManagePage', () => {
       expect(saveElderMedications).toHaveBeenCalledWith('elder-1', [
         { name: '维生素B', dosage: '1 粒', usage: '口服', timing: '晚饭后' },
       ]);
+    });
+  });
+
+  it('shows medication load and save errors for elder editor flows', async () => {
+    fetchMedications.mockRejectedValueOnce(new Error('用药加载失败'));
+
+    const first = renderWithRoute(<MedicationManagePage />);
+    expect(await screen.findByText('用药加载失败')).toBeInTheDocument();
+    first.unmount();
+
+    fetchMedications.mockResolvedValueOnce([
+      {
+        id: 'med-1',
+        elderId: 'elder-1',
+        archiveNo: 'A-001',
+        elderName: '李奶奶',
+        drugName: '阿司匹林',
+        dosage: '1 片',
+        usage: '口服',
+        timing: '早饭后',
+        updatedAt: '2026-05-26 09:00:00',
+        status: '使用中',
+      },
+    ]);
+    fetchElderMedications.mockRejectedValueOnce(new Error('编辑加载失败'));
+
+    const second = renderWithRoute(<MedicationManagePage />);
+    expect(await screen.findByRole('heading', { name: '用药信息管理' })).toBeInTheDocument();
+    fireEvent.click(await screen.findByRole('button', { name: '编辑' }));
+    expect(await screen.findByText('编辑加载失败')).toBeInTheDocument();
+    second.unmount();
+
+    fetchElderMedications
+      .mockResolvedValueOnce([
+        {
+          id: 'med-1',
+          elderId: 'elder-1',
+          archiveNo: 'A-001',
+          elderName: '李奶奶',
+          drugName: '阿司匹林',
+          dosage: '1 片',
+          usage: '口服',
+          timing: '早饭后',
+          updatedAt: '2026-05-26 09:00:00',
+          status: '使用中',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'med-1',
+          elderId: 'elder-1',
+          archiveNo: 'A-001',
+          elderName: '李奶奶',
+          drugName: '阿司匹林',
+          dosage: '1 片',
+          usage: '口服',
+          timing: '早饭后',
+          updatedAt: '2026-05-26 09:00:00',
+          status: '使用中',
+        },
+      ]);
+    saveElderMedications.mockRejectedValueOnce(new Error('保存失败'));
+
+    renderWithRoute(<MedicationManagePage />, '/?elderId=elder-1&archiveNo=A-001&elderName=李奶奶');
+    expect(await screen.findByRole('heading', { name: '老人用药编辑' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '编辑用药' }));
+    expect(await screen.findByRole('heading', { name: '编辑用药信息' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '保存用药' }));
+    expect(await screen.findByText('保存失败')).toBeInTheDocument();
+  });
+
+  it('covers medication editor cancel, query trimming, status filtering and last-row delete fallback', async () => {
+    fetchMedications.mockResolvedValueOnce([
+      {
+        id: 'med-1',
+        elderId: 'elder-1',
+        archiveNo: 'A-001',
+        elderName: '李奶奶',
+        drugName: '阿司匹林',
+        dosage: '1 片',
+        usage: '口服',
+        timing: '早饭后',
+        updatedAt: '2026-05-26 09:00:00',
+        status: '使用中',
+      },
+      {
+        id: 'med-2',
+        elderId: 'elder-2',
+        archiveNo: 'A-002',
+        elderName: '张爷爷',
+        drugName: '维生素D',
+        dosage: '2 滴',
+        usage: '口服',
+        timing: '睡前',
+        updatedAt: '2026-05-26 09:10:00',
+        status: '停用' as never,
+      },
+    ]);
+    fetchElderMedications.mockResolvedValueOnce([]);
+
+    renderWithRoute(<MedicationManagePage />);
+
+    expect(await screen.findByRole('heading', { name: '用药信息管理' })).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('搜索档案编号、老人姓名或药品'), {
+      target: { value: ' 李奶奶 ' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '查询' }));
+    expect(screen.getByDisplayValue('李奶奶')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByDisplayValue('全部状态'), { target: { value: '使用中' } });
+    expect(screen.getByText('阿司匹林')).toBeInTheDocument();
+    expect(screen.queryByText('维生素D')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '编辑' }));
+    expect(await screen.findByRole('heading', { name: '编辑用药信息' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '删除' }));
+    expect(screen.getAllByText('用药 1')).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '编辑用药信息' })).not.toBeInTheDocument();
     });
   });
 });

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 
 export interface EmptyStateProps {
@@ -9,7 +10,7 @@ export interface EmptyStateProps {
   onSecondaryAction?: () => void;
 }
 
-export function EmptyState({
+export const EmptyState = memo(function EmptyState({
   title,
   description,
   primaryActionText,
@@ -39,6 +40,6 @@ export function EmptyState({
       ) : null}
     </View>
   );
-}
+});
 
 export default EmptyState;

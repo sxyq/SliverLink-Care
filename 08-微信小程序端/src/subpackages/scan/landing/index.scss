@@ -1,13 +1,14 @@
 .scan-landing-page {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .scan-landing-heading__title {
-  font-size: 32rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
+  font-size: 42rpx;
+  line-height: 1.25;
+  font-weight: 800;
+  color: #16324a;
 }
 
 .scan-landing-heading__badge,
@@ -30,45 +31,55 @@
 .scan-landing-medical-panel {
   display: flex;
   flex-direction: column;
-  gap: 16rpx;
+  gap: 20rpx;
 }
 
 .scan-landing-profile-hero {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 16rpx;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  gap: 34rpx;
 }
 
 .scan-landing-profile-avatar {
-  width: 88rpx;
-  height: 88rpx;
+  width: 128rpx;
+  height: 128rpx;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 26rpx;
-  background: linear-gradient(135deg, var(--sl-primary) 0%, var(--sl-primary-deep) 100%);
-  color: #ffffff;
+  border-radius: 999rpx;
+  background: linear-gradient(180deg, #e7f8f1 0%, #d9f1ea 100%);
+  color: #20a68e;
   font-size: 32rpx;
   font-weight: 800;
+}
+
+.scan-landing-profile-avatar .sl-avatar-user {
+  width: 40rpx;
+  height: 40rpx;
 }
 
 .scan-landing-profile-lines {
   display: flex;
   flex-direction: column;
-  gap: 8rpx;
-  font-size: 26rpx;
-  line-height: 1.55;
-  color: var(--sl-text);
+  gap: 14rpx;
+  font-size: 32rpx;
+  line-height: 1.25;
+  color: #16324a;
 }
 
 .scan-landing-archive-line,
 .scan-landing-address-line,
 .scan-landing-contact-line,
 .scan-landing-medical-list {
-  font-size: 24rpx;
-  line-height: 1.7;
-  color: var(--sl-text);
+  font-size: 30rpx;
+  line-height: 1.65;
+  color: #16324a;
+}
+
+.scan-landing-archive-line {
+  margin-top: 10rpx;
+  text-align: center;
 }
 
 .scan-landing-mini-heading {
@@ -79,14 +90,14 @@
 }
 
 .scan-landing-mini-heading__title {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
+  font-size: 34rpx;
+  font-weight: 800;
+  color: #16324a;
 }
 
 .scan-landing-contact-button,
 .scan-landing-panel__button {
-  margin-top: 4rpx;
+  margin-top: 8rpx;
 }
 
 .scan-landing-medical-list {

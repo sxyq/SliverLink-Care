@@ -68,7 +68,7 @@ export default function ScanMedicationsPage() {
   }
 
   return (
-    <View className='sl-stage'>
+    <View className='sl-stage sl-stage--scan'>
       <View className='sl-app-shell'>
         <View className='sl-phone-shell'>
           <View className='sl-phone-content'>

@@ -1,5 +1,6 @@
 import { ROLE_TYPES, type RoleType } from '@/app/app.constants';
 import { httpClient } from '@/services/api/httpClient';
+import { getStorageValue, setStorageValue } from '@/utils/storage';
 
 export interface WorkbenchMedicationItem {
   id: string;
@@ -27,6 +28,10 @@ interface FamilyMedicationResponse {
   updatedAt?: string;
 }
 
+function getVolunteerMedicationCacheKey(elderId: string) {
+  return `sl_weapp_volunteer_medications__${elderId}`;
+}
+
 function mapMedication(item: Partial<WorkbenchMedicationItem>) {
   return {
     id: String(item.id || ''),
@@ -38,12 +43,50 @@ function mapMedication(item: Partial<WorkbenchMedicationItem>) {
   } satisfies WorkbenchMedicationItem;
 }
 
+function normalizeMedicationList(items: Array<Partial<WorkbenchMedicationItem>>) {
+  return items.map((item) => mapMedication(item));
+}
+
+function isUnsupportedMedicationFetch(error: unknown) {
+  const message = (error as Error)?.message || '';
+  return (
+    message.includes("Request method 'GET' is not supported") ||
+    message.includes("method 'GET' is not supported") ||
+    message.includes('405') ||
+    message.includes('Request method')
+  );
+}
+
+export function getCachedVolunteerMedications(elderId: string): WorkbenchMedicationItem[] {
+  const cached = getStorageValue<WorkbenchMedicationItem[]>(getVolunteerMedicationCacheKey(elderId), []);
+  return normalizeMedicationList(Array.isArray(cached) ? cached : []);
+}
+
+export function cacheVolunteerMedications(elderId: string, items: Array<Partial<WorkbenchMedicationItem>>) {
+  setStorageValue(getVolunteerMedicationCacheKey(elderId), normalizeMedicationList(items));
+}
+
 export async function fetchWorkbenchMedications(role: RoleType, elderId: string): Promise<WorkbenchMedicationItem[]> {
   if (role === ROLE_TYPES.volunteer) {
-    return [];
+    const cached = getCachedVolunteerMedications(elderId);
+    try {
+      const rows = await httpClient.get<FamilyMedicationResponse[]>(`/api/volunteer/me/elders/${encodeURIComponent(elderId)}/medications`);
+      const normalized = normalizeMedicationList(rows);
+      cacheVolunteerMedications(elderId, normalized);
+      return normalized;
+    } catch (error) {
+      if (cached.length || isUnsupportedMedicationFetch(error)) {
+        return cached;
+      }
+      throw error;
+    }
   }
 
-  const rows = await httpClient.get<FamilyMedicationResponse[]>(`/api/family/elders/${encodeURIComponent(elderId)}/medications`);
+  const path =
+    role === ROLE_TYPES.family
+      ? `/api/family/elders/${encodeURIComponent(elderId)}/medications`
+      : `/api/elder/${encodeURIComponent(elderId)}/medications`;
+  const rows = await httpClient.get<FamilyMedicationResponse[]>(path);
   return rows.map((item) => mapMedication(item));
 }
 

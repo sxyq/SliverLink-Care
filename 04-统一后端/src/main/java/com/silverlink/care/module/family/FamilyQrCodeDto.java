@@ -8,6 +8,10 @@ public class FamilyQrCodeDto {
     private String disableReviewStatus;
     private String disableReviewId;
     private String reviewMessage;
+    private String url;
+    private String publicUrl;
+    private String qrImageBase64;
+    private String qrImageUrl;
 
     public FamilyQrCodeDto() {}
 
@@ -25,4 +29,12 @@ public class FamilyQrCodeDto {
     public void setDisableReviewId(String disableReviewId) { this.disableReviewId = disableReviewId; }
     public String getReviewMessage() { return reviewMessage; }
     public void setReviewMessage(String reviewMessage) { this.reviewMessage = reviewMessage; }
+    public String getUrl() { return url; }
+    public void setUrl(String url) { this.url = url; }
+    public String getPublicUrl() { return publicUrl; }
+    public void setPublicUrl(String publicUrl) { this.publicUrl = publicUrl; }
+    public String getQrImageBase64() { return qrImageBase64; }
+    public void setQrImageBase64(String qrImageBase64) { this.qrImageBase64 = qrImageBase64; }
+    public String getQrImageUrl() { return qrImageUrl; }
+    public void setQrImageUrl(String qrImageUrl) { this.qrImageUrl = qrImageUrl; }
 }

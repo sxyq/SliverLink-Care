@@ -138,11 +138,11 @@ describe('VolunteerManagePage', () => {
     fireEvent.click(volunteerActions.getByRole('button', { name: '负责老人' }));
     expect(await screen.findByRole('heading', { name: '负责老人管理 - 王志愿者' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '添加老人' }));
-    fireEvent.click(screen.getByRole('button', { name: '添加' }));
+    fireEvent.click(screen.getAllByRole('button', { name: '添加' })[0]);
     fireEvent.click(screen.getByRole('button', { name: '保存负责老人' }));
 
     await waitFor(() => {
-      expect(updateVolunteerScope).toHaveBeenCalledWith('vol-1', ['elder-1', 'elder-2']);
+      expect(updateVolunteerScope).toHaveBeenCalledWith('vol-1', ['elder-1']);
     });
 
     fireEvent.click(volunteerActions.getByRole('button', { name: '停用' }));
@@ -169,6 +169,160 @@ describe('VolunteerManagePage', () => {
     fireEvent.click(within(refreshedVolunteerRow as HTMLElement).getByRole('button', { name: '删除' }));
     await waitFor(() => {
       expect(deleteVolunteer).toHaveBeenCalledWith('vol-1');
+    });
+  });
+
+  it('covers invitation tab rendering and scope validation branches', async () => {
+    fetchVolunteers.mockResolvedValueOnce([
+      {
+        id: 'vol-1',
+        name: '王志愿者',
+        account: 'vol001',
+        phone: '13800000000',
+        elderCount: 1,
+        assignedElderIds: ['elder-1'],
+        status: '启用',
+        createMethod: '后台创建',
+        createdAt: '2026/05/26 09:00:00',
+        invitationCode: '',
+        lastSubmit: '2026/05/26 10:00:00',
+      },
+    ]);
+
+    render(<VolunteerManagePage />);
+
+    expect(await screen.findByRole('heading', { name: '志愿者、家属与邀请码管理' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '邀请码管理' }));
+    expect(await screen.findByText('InvitationManageSection-embedded')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '志愿者' }));
+    const volunteerRow = screen.getByText('王志愿者').closest('tr');
+    expect(volunteerRow).not.toBeNull();
+    fireEvent.click(within(volunteerRow as HTMLElement).getByRole('button', { name: '负责老人' }));
+
+    expect(await screen.findByRole('heading', { name: '负责老人管理 - 王志愿者' })).toBeInTheDocument();
+    const scopeDialog = screen.getByRole('heading', { name: '负责老人管理 - 王志愿者' }).closest('.modal-content');
+    expect(scopeDialog).not.toBeNull();
+    fireEvent.click(within(scopeDialog as HTMLElement).getAllByRole('button', { name: '删除' })[0]);
+    fireEvent.click(screen.getByRole('button', { name: '保存负责老人' }));
+
+    expect(await screen.findByText('请至少保留 1 位负责老人')).toBeInTheDocument();
+  });
+
+  it('covers volunteer query trim, status filter, scope rail toggle, chip remove and family empty state', async () => {
+    fetchVolunteers.mockResolvedValueOnce([
+      {
+        id: 'vol-1',
+        name: '王志愿者',
+        account: 'vol001',
+        phone: '13800000000',
+        elderCount: 2,
+        assignedElderIds: ['elder-1', 'elder-2'],
+        status: '停用',
+        createMethod: '后台创建',
+        createdAt: '2026/05/26 09:00:00',
+        invitationCode: 'INV-001',
+        lastSubmit: '2026/05/26 10:00:00',
+      },
+      {
+        id: 'vol-2',
+        name: '李志愿者',
+        account: 'vol002',
+        phone: '13900000000',
+        elderCount: 1,
+        assignedElderIds: ['elder-2'],
+        status: '启用',
+        createMethod: '邀请码注册',
+        createdAt: '2026/05/26 09:10:00',
+        invitationCode: '',
+        lastSubmit: '2026/05/26 10:10:00',
+      },
+    ]);
+    fetchFamilyBindings.mockResolvedValueOnce([]);
+
+    render(<VolunteerManagePage />);
+
+    expect(await screen.findByText('王志愿者')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('搜索姓名、账号、ID、邀请码'), {
+      target: { value: ' 王志愿者 ' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: '查询' }));
+    fireEvent.change(screen.getByDisplayValue('全部状态'), { target: { value: '停用' } });
+    expect(screen.getByDisplayValue('王志愿者')).toBeInTheDocument();
+
+    const volunteerRow = screen.getByText('王志愿者').closest('tr');
+    expect(volunteerRow).not.toBeNull();
+    fireEvent.click(within(volunteerRow as HTMLElement).getByRole('button', { name: '负责老人' }));
+    expect(await screen.findByRole('heading', { name: '负责老人管理 - 王志愿者' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '收起已选老人' }));
+    expect(document.querySelector('.scope-name-rail-count')?.textContent).toBe('2');
+    fireEvent.click(screen.getByRole('button', { name: '展开已选老人' }));
+    fireEvent.click(screen.getByTitle('李奶奶 / A-001'));
+    fireEvent.click(screen.getByRole('button', { name: '保存负责老人' }));
+    await waitFor(() => {
+      expect(updateVolunteerScope).toHaveBeenCalledWith('vol-1', ['elder-2']);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '家属协管' }));
+    expect(await screen.findByText('暂无家属绑定数据')).toBeInTheDocument();
+  });
+
+  it('covers derived create time, family export and family dialog close branch', async () => {
+    fetchVolunteers.mockResolvedValueOnce([
+      {
+        id: 'vol-1716979200000',
+        name: '边界志愿者',
+        account: 'vol003',
+        phone: '13600000000',
+        elderCount: 0,
+        assignedElderIds: [],
+        status: '停用',
+        createMethod: '-',
+        createdAt: '-',
+        invitationCode: '',
+        lastSubmit: '-',
+      },
+    ]);
+    fetchFamilyBindings.mockResolvedValueOnce([
+      {
+        id: 'binding-close',
+        familyName: '王家属',
+        familyPhoneMasked: '137****1000',
+        relationship: '儿子',
+        elderName: '周奶奶',
+        elderArchiveNo: 'A-009',
+        invitationCode: '',
+        createMethod: '',
+        boundAt: '',
+        status: '已解绑',
+      },
+    ]);
+
+    render(<VolunteerManagePage />);
+
+    expect(await screen.findByText('边界志愿者')).toBeInTheDocument();
+    expect(screen.getByText(/创建时间：20/)).toBeInTheDocument();
+    expect(screen.getByText('暂无分配')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '家属协管' }));
+    fireEvent.click(screen.getByRole('button', { name: '导出' }));
+    expect(exportToCsv).toHaveBeenCalledWith(
+      expect.stringMatching(/^family-groups-/),
+      expect.arrayContaining([
+        expect.objectContaining({
+          家属姓名: '王家属',
+          创建方式: '邀请码注册',
+          绑定老人数量: '1',
+        }),
+      ]),
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '查看绑定老人' }));
+    expect(await screen.findByRole('heading', { name: '家属绑定老人审查' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '关闭' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '家属绑定老人审查' })).not.toBeInTheDocument();
     });
   });
 });
@@ -266,5 +420,126 @@ describe('AuditLogPage', () => {
     expect(within(auditTable).getByText('登录')).toBeInTheDocument();
     expect(within(auditTable).getByText('admin')).toBeInTheDocument();
     expect(within(auditTable).getByText('system')).toBeInTheDocument();
+  });
+
+  it('keeps empty state when audit request fails silently', async () => {
+    fetchAuditLogs.mockRejectedValueOnce(new Error('日志加载失败'));
+
+    render(<AuditLogPage category="admin" />);
+
+    expect(await screen.findByText('暂无记录')).toBeInTheDocument();
+  });
+
+  it('covers medical/family categories, direct-sms labels and visitor fallback targets', async () => {
+    const auditRows = [
+      {
+        time: '2026-05-26T08:00:00Z',
+        operator: 'volunteer-helper',
+        action: 'SMS_SEND',
+        target: '138****9988',
+        ip: '10.0.0.1',
+        result: '成功',
+        role: 'VOLUNTEER',
+        verificationMethod: 'DIRECT_SMS',
+        visitorName: '',
+      },
+      {
+        time: '2026-05-26T08:30:00Z',
+        operator: 'family-account',
+        action: 'LOGIN',
+        target: 'system',
+        ip: '10.0.0.2',
+        result: '失败',
+        role: 'FAMILY',
+      },
+      {
+        time: '2026-05-26T09:00:00Z',
+        operator: 'unknown',
+        action: 'SMS_SEND',
+        target: '139****7788',
+        ip: '10.0.0.3',
+        result: '成功',
+        role: '',
+        verificationMethod: 'DIRECT_SMS',
+        visitorIdCardMasked: '320***********5678',
+      },
+    ];
+    fetchAuditLogs.mockResolvedValue(auditRows);
+    fetchElders.mockResolvedValue([]);
+
+    const medicalView = render(<AuditLogPage category="medical" />);
+    expect(await screen.findByRole('heading', { name: '医护/志愿者操作' })).toBeInTheDocument();
+    expect(screen.getByText('volunteer-helper')).toBeInTheDocument();
+    medicalView.unmount();
+
+    const familyView = render(<AuditLogPage category="family" />);
+    expect(await screen.findByRole('heading', { name: '家属操作' })).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('筛选家属账号')).toBeInTheDocument();
+    expect(screen.getByText('family-account')).toBeInTheDocument();
+    familyView.unmount();
+
+    fetchElders.mockResolvedValue([
+      { id: 'elder-1', archiveNo: 'A-001', name: '李奶奶', age: 72, phoneMasked: '138****9999', volunteer: '王志愿者' },
+    ]);
+    render(<AuditLogPage category="visitor" />);
+    expect((await screen.findAllByText('手机号 139****7788')).length).toBeGreaterThan(0);
+    expect(screen.getByText('320***********5678')).toBeInTheDocument();
+    expect(screen.getAllByText('短信验证码').length).toBeGreaterThan(0);
+  });
+
+  it('covers visitor toolbar inputs, timestamp fallbacks, operator-derived groups and query button no-op', async () => {
+    fetchAuditLogs.mockResolvedValue([
+      {
+        time: '',
+        operator: '审计管理员',
+        action: 'LOGIN',
+        target: 'system',
+        ip: '10.0.0.10',
+        result: '成功',
+        role: '',
+      },
+      {
+        time: 'bad-time',
+        operator: '医护张三',
+        action: 'SMS_SEND',
+        target: 'silverlink_care',
+        ip: '10.0.0.11',
+        result: '失败',
+        role: '',
+        verificationMethod: 'DIRECT_SMS',
+      },
+      {
+        time: '2026-05-26T09:01:00Z',
+        operator: '家属王五',
+        action: 'LOGIN',
+        target: 'A-001',
+        ip: '10.0.0.12',
+        result: '成功',
+        role: '',
+      },
+    ]);
+    fetchElders.mockResolvedValue([
+      { id: 'elder-1', archiveNo: 'A-001', name: '李奶奶', age: 72, phoneMasked: '138****9999', volunteer: '王志愿者' },
+    ]);
+
+    const adminView = render(<AuditLogPage category="admin" />);
+    expect(await screen.findByText('-')).toBeInTheDocument();
+    expect(screen.getByText('审计管理员')).toBeInTheDocument();
+    adminView.unmount();
+
+    const medicalView = render(<AuditLogPage category="medical" />);
+    expect(await screen.findByText('bad-time')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('筛选操作人'), { target: { value: '医护张三' } });
+    fireEvent.change(screen.getByPlaceholderText('筛选操作对象'), { target: { value: 'silverlink' } });
+    fireEvent.change(screen.getByPlaceholderText('筛选来源 IP'), { target: { value: '10.0.0.11' } });
+    fireEvent.change(screen.getByPlaceholderText('关键词搜索'), { target: { value: '短信' } });
+    fireEvent.click(screen.getByRole('button', { name: '查询' }));
+    expect(screen.getByText('暂无记录')).toBeInTheDocument();
+    medicalView.unmount();
+
+    render(<AuditLogPage category="family" />);
+    expect(await screen.findByText('家属王五')).toBeInTheDocument();
+    fireEvent.change(screen.getAllByRole('combobox')[1], { target: { value: '成功' } });
+    expect(screen.getByText('A-001')).toBeInTheDocument();
   });
 });

@@ -145,4 +145,114 @@ describe('DashboardPage', () => {
 
     expect(await screen.findByText('邀请码加载失败')).toBeInTheDocument();
   });
+
+  it('renders cached snapshot metrics immediately and tolerates malformed session cache', async () => {
+    sessionStorage.setItem(
+      'sl_admin_dashboard_snapshot_v1',
+      JSON.stringify({
+        elders: [{ id: 'elder-snapshot', age: 77, status: '启用', name: '缓存老人', archiveNo: 'SN-001' }],
+        volunteers: [],
+        qrCodes: [],
+        invitations: [],
+        familyBindings: [],
+        medications: [],
+        scales: [],
+        auditLogs: [],
+      }),
+    );
+    fetchElders.mockResolvedValue([]);
+    fetchVolunteers.mockResolvedValue([]);
+    fetchQrCodes.mockResolvedValue([]);
+    fetchAuditLogs.mockResolvedValue([]);
+    fetchInvitations.mockResolvedValue([]);
+    fetchFamilyBindings.mockResolvedValue([]);
+    fetchMedications.mockResolvedValue([]);
+    fetchAllScales.mockResolvedValue([]);
+
+    const { unmount } = render(<DashboardPage />);
+    expect(screen.getByText('老人档案')).toBeInTheDocument();
+    expect(screen.getAllByText('1').length).toBeGreaterThan(0);
+    unmount();
+
+    sessionStorage.setItem('sl_admin_dashboard_snapshot_v1', '{');
+    render(<DashboardPage />);
+    expect(await screen.findByText('管理首页')).toBeInTheDocument();
+  });
+
+  it('shows primary loading error when core requests fail early', async () => {
+    fetchElders.mockRejectedValue(new Error('首页加载失败'));
+    fetchVolunteers.mockResolvedValue([]);
+    fetchQrCodes.mockResolvedValue([]);
+    fetchAuditLogs.mockResolvedValue([]);
+    fetchInvitations.mockResolvedValue([]);
+    fetchFamilyBindings.mockResolvedValue([]);
+    fetchMedications.mockResolvedValue([]);
+    fetchAllScales.mockResolvedValue([]);
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByText('首页加载失败')).toBeInTheDocument();
+  });
+
+  it('covers scale risk labels, visitor phone fallbacks and silent panel paths', async () => {
+    fetchElders.mockResolvedValue([
+      { id: 'elder-1', age: 59, status: '启用', name: '李奶奶', archiveNo: 'A-001' },
+      { id: 'elder-2', age: 91, status: '停用', name: '张爷爷', archiveNo: 'A-002' },
+    ]);
+    fetchVolunteers.mockResolvedValue([
+      { id: 'vol-1', status: '启用', elderCount: 0 },
+      { id: 'vol-2', status: '停用', elderCount: 2 },
+    ]);
+    fetchQrCodes.mockResolvedValue([
+      { id: 'qr-1', status: '启用' },
+      { id: 'qr-2', status: '已停用' },
+    ]);
+    fetchAuditLogs.mockResolvedValue([
+      {
+        time: 'invalid-time',
+        operator: 'audit-helper',
+        action: 'UNKNOWN_ACTION',
+        result: '成功',
+        role: '',
+        target: '177****0000',
+        ip: '127.0.0.1',
+      },
+      {
+        time: '2026-05-26T01:00:00Z',
+        operator: '志愿者王',
+        action: 'SMS_SEND',
+        result: '失败',
+        role: '',
+        target: '138****5678',
+        ip: '127.0.0.2',
+      },
+      {
+        time: '2026-05-26T02:00:00Z',
+        operator: '家属李',
+        action: 'LOGIN',
+        result: '成功',
+        role: 'FAMILY',
+        target: '老人档案',
+        ip: '127.0.0.3',
+      },
+    ]);
+    fetchInvitations.mockResolvedValue([]);
+    fetchFamilyBindings.mockResolvedValue([]);
+    fetchMedications.mockResolvedValue([]);
+    fetchAllScales.mockResolvedValue([
+      { id: 'scale-1', scaleName: 'GAD custom', score: 17 },
+      { id: 'scale-2', scaleName: 'UCLA loneliness', score: 50 },
+      { id: 'scale-3', scaleName: '未知量表', score: 3 },
+    ]);
+
+    render(<DashboardPage />);
+
+    expect(await screen.findByText('GAD-7 / 重度风险')).toBeInTheDocument();
+    expect(screen.getByText('UCLA / 高关注')).toBeInTheDocument();
+    expect(screen.getByText('未知量表 / 待评估')).toBeInTheDocument();
+    expect(screen.getByText('audit-helper')).toBeInTheDocument();
+    expect(screen.getByText('UNKNOWN_ACTION')).toBeInTheDocument();
+    expect(screen.getByText('invalid-time')).toBeInTheDocument();
+    expect(screen.getByText('留痕手机号数')).toBeInTheDocument();
+  });
 });

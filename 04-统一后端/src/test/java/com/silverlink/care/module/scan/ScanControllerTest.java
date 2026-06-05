@@ -94,5 +94,7 @@ class ScanControllerTest {
         assertEquals("李奶奶", controller.basicInfo("elder-1", "session-1", request).getData().get("name"));
         assertEquals(1, controller.medications("elder-1", "session-1", request).getData().size());
         assertEquals(1, controller.scales("elder-1", "session-1", request).getData().size());
+        when(scanService.getScaleDetailData("elder-1", "PHQ-9")).thenReturn(Map.of("scaleName", "PHQ-9", "score", 3));
+        assertEquals("PHQ-9", controller.scaleDetail("PHQ-9", "elder-1", "session-1", request).getData().get("scaleName"));
     }
 }

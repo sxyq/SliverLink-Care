@@ -21,4 +21,5 @@ export default {
     request: 15000,
     downloadFile: 20000,
   },
+  lazyCodeLoading: 'requiredComponents',
 };

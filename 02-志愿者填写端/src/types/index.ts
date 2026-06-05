@@ -59,6 +59,9 @@ export interface VolunteerQrCodeInfo {
   disabledAt?: string;
   token: string;
   url: string;
+  publicUrl?: string;
+  qrImageBase64?: string;
+  qrImageUrl?: string;
   securityNote?: string;
   disableReviewStatus?: string;
   disableReviewId?: string;

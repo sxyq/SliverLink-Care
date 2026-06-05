@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button, Swiper, SwiperItem, Text, View } from '@tarojs/components';
 
 export interface ArchiveCarouselItem {
@@ -21,7 +22,7 @@ interface ArchiveCarouselProps {
   onOpen: (item: ArchiveCarouselItem) => void;
 }
 
-export function ArchiveCarousel({ items, activeIndex, onChange, onOpen }: ArchiveCarouselProps) {
+export const ArchiveCarousel = memo(function ArchiveCarousel({ items, activeIndex, onChange, onOpen }: ArchiveCarouselProps) {
   const safeIndex = Math.min(Math.max(activeIndex, 0), Math.max(items.length - 1, 0));
   const activeItem = items[safeIndex];
   const hasMultipleItems = items.length > 1;
@@ -68,13 +69,20 @@ export function ArchiveCarousel({ items, activeIndex, onChange, onOpen }: Archiv
           <SwiperItem key={item.id} className='sl-archive-swiper__item'>
             <View className={item.id === activeItem?.id ? 'sl-archive-card is-active' : 'sl-archive-card'}>
               <View className='sl-archive-card-top'>
-                <View className='sl-elder-avatar-xl'>人</View>
+                <View className='sl-elder-avatar-xl'>
+                  <View className='sl-avatar-user'>
+                    <View className='sl-avatar-user__head' />
+                    <View className='sl-avatar-user__body' />
+                  </View>
+                </View>
                 <View className='sl-archive-card-copy'>
                   <View className='sl-archive-card-name'>{item.name}</View>
                   <Text className='sl-archive-card-subtitle'>
                     档案编号 {item.archiveNo || '待生成'} {item.gender || '待补充'} {item.age || '年龄待补充'}
                   </Text>
-                  <Text className='sl-archive-card-subtitle sl-archive-card-residence'>住址 {item.residence || '待补充'}</Text>
+                  <View className='sl-archive-card-subtitle sl-archive-card-residence'>
+                    <Text>住址 {item.residence || '待补充'}</Text>
+                  </View>
                 </View>
               </View>
 
@@ -116,6 +124,6 @@ export function ArchiveCarousel({ items, activeIndex, onChange, onOpen }: Archiv
       {activeItem ? <View className='sl-carousel-active-sr'>{activeItem.name}</View> : null}
     </View>
   );
-}
+});
 
 export default ArchiveCarousel;

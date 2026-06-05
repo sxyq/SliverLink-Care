@@ -63,6 +63,15 @@ async function copyText(text: string) {
   }
 }
 
+function getPreferredQrUrl(info: VolunteerQrCodeInfo) {
+  return info.publicUrl || info.url || '';
+}
+
+function normalizeBase64Image(value?: string) {
+  if (!value) return '';
+  return value.startsWith('data:image') ? value : `data:image/png;base64,${value}`;
+}
+
 export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
   const [info, setInfo] = useState<VolunteerQrCodeInfo | null>(null);
   const [previewImage, setPreviewImage] = useState('');
@@ -72,13 +81,34 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
   const [error, setError] = useState('');
   const disableReviewPending = info?.disableReviewStatus === 'PENDING';
 
-  async function renderPreview(url: string) {
+  async function renderPreview(info: VolunteerQrCodeInfo) {
+    const inlineImage = normalizeBase64Image(info.qrImageBase64);
+    if (inlineImage) {
+      setPreviewImage(inlineImage);
+      return;
+    }
+
+    if (info.qrImageUrl) {
+      setPreviewImage(info.qrImageUrl);
+      return;
+    }
+
+    const url = getPreferredQrUrl(info);
     if (!url) {
       setPreviewImage('');
       return;
     }
-    const image = await QRCode.toDataURL(url, { width: 220, margin: 1 });
-    setPreviewImage(image);
+
+    try {
+      const image = await QRCode.toDataURL(url, {
+        width: 220,
+        margin: 1,
+        errorCorrectionLevel: 'M',
+      });
+      setPreviewImage(image);
+    } catch {
+      setPreviewImage('');
+    }
   }
 
   async function loadQrCode() {
@@ -88,7 +118,11 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     try {
       const next = await fetchVolunteerElderQrCode(elder.id);
       setInfo(next);
-      await renderPreview(next.url);
+      if (next) {
+        await renderPreview(next);
+      } else {
+        setPreviewImage('');
+      }
     } catch (nextError) {
       setInfo(null);
       setPreviewImage('');
@@ -103,10 +137,11 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
   }, [elder.id]);
 
   async function handleCopyLink() {
-    if (!info?.url) return;
+    const link = info ? getPreferredQrUrl(info) : '';
+    if (!link) return;
     setError('');
     setMessage('');
-    const copied = await copyText(info.url);
+    const copied = await copyText(link);
     if (copied) {
       setMessage('二维码访问链接已复制。');
       return;
@@ -122,7 +157,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     try {
       const next = await disableVolunteerElderQrCode(elder.id);
       setInfo(next);
-      await renderPreview(next.url);
+      await renderPreview(next);
       setMessage(next.reviewMessage || '停用申请已提交，等待管理员审核。');
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : '停用失败');
@@ -138,7 +173,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     try {
       const next = await regenerateVolunteerElderQrCode(elder.id);
       setInfo(next);
-      await renderPreview(next.url);
+      await renderPreview(next);
       setMessage('二维码已重新生成，旧二维码将被替换。');
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : '重新生成失败');
@@ -174,13 +209,17 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
                     alt={`${elder.name} 的二维码`}
                   />
                 ) : (
-                  <QrCode size={120} />
+                  <div className="sl-qr-preview-fallback">
+                    <QrCode size={96} />
+                    <span>二维码暂未生成成功</span>
+                  </div>
                 )}
               </div>
               <button type="button" className="sl-secondary-btn sl-qr-inline-btn" onClick={() => void handleCopyLink()}>
                 <Copy size={15} />
                 复制访问链接
               </button>
+              {getPreferredQrUrl(info) ? <div className="sl-qr-preview-link">访问链接 {getPreferredQrUrl(info)}</div> : null}
             </div>
           </div>
         ) : (

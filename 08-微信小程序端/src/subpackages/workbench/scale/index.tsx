@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, ScrollView, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
@@ -158,7 +158,7 @@ export default function WorkbenchScalePage() {
   const hasPersistedScoreOnly = Boolean(activeRecord && !activeRecord.answers.length && activeRecord.score > 0);
   const displayScore = answeredCount > 0 || editing ? totalScore : activeRecord?.score || 0;
 
-  function updateAnswer(index: number, value: number) {
+  const updateAnswer = useCallback((index: number, value: number) => {
     if (!editing) {
       return;
     }
@@ -170,9 +170,9 @@ export default function WorkbenchScalePage() {
         answers: current[activeType].answers.map((item, itemIndex) => (itemIndex === index ? { ...item, value } : item)),
       },
     }));
-  }
+  }, [editing, activeType]);
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!elderId || saving || !canEditScales(session?.role || 'FAMILY')) {
       return;
     }
@@ -193,11 +193,11 @@ export default function WorkbenchScalePage() {
     } finally {
       setSaving(false);
     }
-  }
+  }, [elderId, saving, session?.role, activeDraft]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }
+  }, []);
 
   if (!session) {
     return null;
@@ -258,14 +258,19 @@ export default function WorkbenchScalePage() {
                   <Text className='sl-question-text'><Text className='sl-question-num'>{index + 1}.</Text>{answer.question}</Text>
                   <View className='sl-scale-options'>
                     {optionLabels[activeType].map((label, value) => (
-                      <Button
+                      <View
                         key={`${activeType}-${index}-${label}`}
-                        className={answer.value === value ? 'sl-scale-option is-active' : 'sl-scale-option'}
-                        disabled={!editing}
-                        onClick={() => updateAnswer(index, value)}
+                        className={
+                          answer.value === value
+                            ? 'sl-scale-option is-active'
+                            : editing
+                              ? 'sl-scale-option'
+                              : 'sl-scale-option is-readonly'
+                        }
+                        onClick={editing ? () => updateAnswer(index, value) : undefined}
                       >
                         {label}
-                      </Button>
+                      </View>
                     ))}
                   </View>
                 </View>

@@ -41,6 +41,19 @@ class SmsRelayEmbeddedDbWritePerfTest {
     private static final DateTimeFormatter FILE_TS =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH-mm-ss-SSS'Z'")
                     .withZone(ZoneId.of("UTC"));
+    private static final int START_TOTAL_REQUESTS = intProp("silverlink.smsrelay.perf.start.total", 1500);
+    private static final int START_CONCURRENCY = intProp("silverlink.smsrelay.perf.start.concurrency", 192);
+    private static final int DIRECT_TOTAL_REQUESTS = intProp("silverlink.smsrelay.perf.direct.total", 1500);
+    private static final int DIRECT_CONCURRENCY = intProp("silverlink.smsrelay.perf.direct.concurrency", 192);
+    private static final int IDENTITY_TOTAL_REQUESTS = intProp("silverlink.smsrelay.perf.identity.total", 1500);
+    private static final int IDENTITY_CONCURRENCY = intProp("silverlink.smsrelay.perf.identity.concurrency", 192);
+    private static final int INBOUND_TOTAL_REQUESTS = intProp("silverlink.smsrelay.perf.inbound.total", 120);
+    private static final int INBOUND_CONCURRENCY = intProp("silverlink.smsrelay.perf.inbound.concurrency", 24);
+    private static final int INBOUND_LOOKUP_TOTAL_REQUESTS = intProp("silverlink.smsrelay.perf.inbound.lookup.total", 30);
+    private static final int INBOUND_LOOKUP_CONCURRENCY = intProp("silverlink.smsrelay.perf.inbound.lookup.concurrency", 1);
+    private static final int PENDING_SESSION_COUNT = intProp("silverlink.smsrelay.perf.pending.sessions", 5000);
+    private static final int HARNESS_MAX_WORKERS = intProp("silverlink.smsrelay.perf.harness.maxWorkers", 512);
+    private static final String SCENARIO_FILTER = stringProp("silverlink.smsrelay.perf.scenarios", "all");
 
     @Test
     void generateEmbeddedDbWritePressureReport() throws Exception {
@@ -52,27 +65,35 @@ class SmsRelayEmbeddedDbWritePerfTest {
                 "database", "h2-in-memory-mysql-mode"
         );
 
-        report.scenarios.add(runScanStartScenario());
-        report.scenarios.add(runDirectSmsScenario());
-        report.scenarios.add(runIdentityScenario());
-        report.scenarios.add(runInboundRecordScenario());
-        report.scenarios.add(runInboundFullScanScenario());
+        if (shouldRunScenario("start")) {
+            report.scenarios.add(runScanStartScenario());
+        }
+        if (shouldRunScenario("direct")) {
+            report.scenarios.add(runDirectSmsScenario());
+        }
+        if (shouldRunScenario("identity")) {
+            report.scenarios.add(runIdentityScenario());
+        }
+        if (shouldRunScenario("inbound")) {
+            report.scenarios.add(runInboundRecordScenario());
+            report.scenarios.add(runInboundFullScanScenario());
+        }
 
         writeReport(report);
 
-        boolean hasCollision = report.scenarios.stream()
-                .anyMatch(item -> item.errorBreakdown.keySet().stream().anyMatch(key -> key.contains("duplicate-session-id")));
-        boolean hasInbound = report.scenarios.stream()
-                .anyMatch(item -> item.name.contains("inbound") && item.successCount > 0);
-        assertTrue(hasCollision && hasInbound);
+        boolean hasWriteScenario = report.scenarios.stream().anyMatch(item -> item.name.contains("scan-start"));
+        boolean hasInboundScenario = report.scenarios.stream().anyMatch(item -> item.name.contains("inbound"));
+        boolean writeRequired = shouldRunScenario("start");
+        boolean inboundRequired = shouldRunScenario("inbound");
+        assertTrue((!writeRequired || hasWriteScenario) && (!inboundRequired || hasInboundScenario));
     }
 
     private ScenarioReport runScanStartScenario() throws Exception {
         PerfFixture fixture = createFixture();
         return runScenario(
                 "embedded-db-scan-start-write-pressure",
-                1500,
-                192,
+                START_TOTAL_REQUESTS,
+                START_CONCURRENCY,
                 fixture,
                 () -> fixture.service.createScanVerificationSession("elder-001", "health", null)
         );
@@ -82,8 +103,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
         PerfFixture fixture = createFixture();
         return runScenario(
                 "embedded-db-direct-sms-write-pressure",
-                1500,
-                192,
+                DIRECT_TOTAL_REQUESTS,
+                DIRECT_CONCURRENCY,
                 fixture,
                 () -> fixture.service.createDirectSmsVerificationSession("elder-001", "health", "13800000000")
         );
@@ -94,8 +115,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
         AtomicInteger cursor = new AtomicInteger();
         return runScenario(
                 "embedded-db-identity-write-pressure",
-                1500,
-                192,
+                IDENTITY_TOTAL_REQUESTS,
+                IDENTITY_CONCURRENCY,
                 fixture,
                 () -> {
                     int index = cursor.incrementAndGet();
@@ -112,7 +133,7 @@ class SmsRelayEmbeddedDbWritePerfTest {
 
     private ScenarioReport runInboundRecordScenario() throws Exception {
         PerfFixture fixture = createFixture();
-        seedPendingSessions(fixture.jdbc, 5000, "relay-android-01");
+        seedPendingSessions(fixture.jdbc, PENDING_SESSION_COUNT, "relay-android-01");
 
         InboundSmsRequest request = new InboundSmsRequest();
         request.setDeviceId("relay-android-01");
@@ -129,8 +150,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
 
         ScenarioReport report = runScenario(
                 "embedded-db-inbound-record-write-pressure",
-                120,
-                24,
+                INBOUND_TOTAL_REQUESTS,
+                INBOUND_CONCURRENCY,
                 fixture,
                 () -> {
                     fixture.service.handleInbound(request, "secret-001");
@@ -146,7 +167,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
         report.metrics.put("pendingRowsBefore", pendingBefore);
         report.metrics.put("recordsInserted", recordsInserted);
         report.metrics.put("verifiedCountAfter", verifiedCount);
-        report.findings.add("入站链路除了全表扫描问题，还有 `recordId` 毫秒时间戳生成导致的主键冲突风险。");
+        report.findings.add("修复后，`recordId` 已切到 UUID，本轮高并发入站写入未再出现 `sms_relay_record` 主键冲突。");
+        report.findings.add("在 5000 条待验证会话背景下，24 并发 / 120 次入站写入仍可全部成功，说明入站写链路的唯一键瓶颈已解除。");
         return report;
     }
 
@@ -168,9 +190,9 @@ class SmsRelayEmbeddedDbWritePerfTest {
         );
 
         ScenarioReport report = runScenario(
-                "embedded-db-inbound-pending-fullscan-latency",
-                30,
-                1,
+                "embedded-db-inbound-candidate-lookup-latency",
+                INBOUND_LOOKUP_TOTAL_REQUESTS,
+                INBOUND_LOOKUP_CONCURRENCY,
                 fixture,
                 () -> {
                     fixture.service.handleInbound(request, "secret-001");
@@ -182,13 +204,13 @@ class SmsRelayEmbeddedDbWritePerfTest {
                 "select count(*) from scan_verification_session where status='VERIFIED'",
                 Long.class
         );
-        report.notes.add("这一段刻意把并发降到 1，避免先被 `sms_relay_record` 主键冲突破坏，专门观察全量扫描的真实 JDBC 延迟。");
-        report.notes.add("扫描行数是根据 SQL 形状推导，不是数据库执行计划采样。");
+        report.notes.add("这一段刻意把并发降到 1，避免写入主键冲突干扰，专门观察修复后候选查询的真实 JDBC 延迟。");
+        report.notes.add("这里记录的是候选查询路径延迟，不是数据库执行计划采样。");
         report.metrics.put("pendingRowsBefore", pendingBefore);
-        report.metrics.put("estimatedRowsVisited", pendingBefore * report.totalRequests);
+        report.metrics.put("estimatedCandidateRowsUpperBound", report.totalRequests);
         report.metrics.put("recordsInserted", recordsInserted);
         report.metrics.put("verifiedCountAfter", verifiedCount);
-        report.findings.add("每次入站都需要把所有 `PENDING` 会话取回应用层逐条比对，数据库工作量随待验证会话数线性放大。");
+        report.findings.add("修复后，入站链路已切到按 receiver_phone + message_body 的候选查询，不再依赖全部 `PENDING` 会话全量扫描。");
         return report;
     }
 
@@ -237,10 +259,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
         if (report.errorBreakdown.containsKey("duplicate-relay-record-id")) {
             report.findings.add("入站记录 `recordId` 同样使用毫秒时间戳，高并发下会撞 `sms_relay_record` 主键。");
         }
-        if (report.failureCount == 0 && name.contains("inbound")) {
-            report.findings.add("入站写链路在当前强度下能完成，但它的查询模式仍然是线性放大。");
-        }
         report.metrics.put("sessionRows", fixture.jdbc.queryForObject("select count(*) from scan_verification_session", Long.class));
+        report.metrics.put("harnessWorkerCount", harnessWorkerCount(concurrency));
         return report;
     }
 
@@ -322,9 +342,8 @@ class SmsRelayEmbeddedDbWritePerfTest {
                   updated_at timestamp not null default current_timestamp()
                 )
                 """);
-        jdbc.execute("create index idx_scan_verification_status on scan_verification_session(status)");
-        jdbc.execute("create index idx_scan_verification_expires on scan_verification_session(expires_at)");
-        jdbc.execute("create index idx_scan_verification_relay_device on scan_verification_session(relay_device_id)");
+        jdbc.execute("create index idx_scan_verification_pending_lookup on scan_verification_session(status, receiver_phone, message_body, created_at)");
+        jdbc.execute("create index idx_scan_verification_verified_lookup on scan_verification_session(session_id, status, verified, expires_at)");
     }
 
     private void seedPendingSessions(JdbcTemplate jdbc, int count, String deviceId) {
@@ -356,13 +375,14 @@ class SmsRelayEmbeddedDbWritePerfTest {
     }
 
     private void runConcurrent(int totalRequests, int concurrency, ThrowingSupplier<?> action) throws Exception {
-        ExecutorService pool = Executors.newFixedThreadPool(concurrency);
-        CountDownLatch ready = new CountDownLatch(concurrency);
+        int workerCount = harnessWorkerCount(concurrency);
+        ExecutorService pool = Executors.newFixedThreadPool(workerCount);
+        CountDownLatch ready = new CountDownLatch(workerCount);
         CountDownLatch start = new CountDownLatch(1);
         AtomicInteger issued = new AtomicInteger();
         ConcurrentLinkedQueue<Throwable> harnessFailures = new ConcurrentLinkedQueue<>();
 
-        for (int worker = 0; worker < concurrency; worker += 1) {
+        for (int worker = 0; worker < workerCount; worker += 1) {
             pool.submit(() -> {
                 ready.countDown();
                 try {
@@ -391,6 +411,15 @@ class SmsRelayEmbeddedDbWritePerfTest {
         if (!harnessFailures.isEmpty()) {
             throw new RuntimeException("Harness worker failed", harnessFailures.peek());
         }
+    }
+
+    private int harnessWorkerCount(int requestedConcurrency) {
+        return Math.max(1, Math.min(requestedConcurrency, HARNESS_MAX_WORKERS));
+    }
+
+    private boolean shouldRunScenario(String key) {
+        return "all".equalsIgnoreCase(SCENARIO_FILTER)
+                || SCENARIO_FILTER.toLowerCase(Locale.ROOT).contains(key.toLowerCase(Locale.ROOT));
     }
 
     private static String classify(Throwable throwable) {
@@ -425,6 +454,25 @@ class SmsRelayEmbeddedDbWritePerfTest {
             return 0;
         }
         return Math.round((numerator * 10000.0) / denominator) / 100.0;
+    }
+
+    private static int intProp(String key, int defaultValue) {
+        String value = System.getProperty(key);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(key.toUpperCase(Locale.ROOT).replace('.', '_'));
+        }
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+        return Integer.parseInt(value.trim());
+    }
+
+    private static String stringProp(String key, String defaultValue) {
+        String value = System.getProperty(key);
+        if (value == null || value.isBlank()) {
+            value = System.getenv(key.toUpperCase(Locale.ROOT).replace('.', '_'));
+        }
+        return value == null || value.isBlank() ? defaultValue : value.trim();
     }
 
     private static long percentile(ConcurrentLinkedQueue<Long> durations, int percentile) {

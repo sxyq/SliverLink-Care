@@ -11,19 +11,22 @@ export async function downloadNameplatePdf({ elderId, archiveNo, tokenStorageKey
   void tokenStorageKey;
 
   const url = `${API_BASE_URL}/api/nameplates/${encodeURIComponent(elderId)}/pdf`;
+  const response = await fetch(url, {
+    method: 'GET',
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    throw new Error('导出名牌失败，请重新登录后重试');
+  }
+  const blob = await response.blob();
+  const objectUrl = window.URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.target = '_blank';
-  a.rel = 'noopener noreferrer';
+  a.href = objectUrl;
+  a.download = `nameplate-${elderId}.pdf`;
   document.body.appendChild(a);
   a.click();
   a.remove();
-
-  // Some in-app browsers ignore programmatic anchor clicks unless the page
-  // visibly navigates, so fall back to direct navigation.
   window.setTimeout(() => {
-    if (document.visibilityState === 'visible') {
-      window.location.href = url;
-    }
-  }, 180);
+    window.URL.revokeObjectURL(objectUrl);
+  }, 1000);
 }

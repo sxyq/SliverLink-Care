@@ -11,7 +11,6 @@ export default function ContactManagePage() {
   const [elder, setElder] = useState<ElderInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [phoneChanged, setPhoneChanged] = useState(false);
 
   const [emergencyName, setEmergencyName] = useState('');
   const [emergencyPhone, setEmergencyPhone] = useState('');
@@ -21,7 +20,11 @@ export default function ContactManagePage() {
   const [backupRelation, setBackupRelation] = useState('');
 
   useEffect(() => {
-    if (!elderId) return;
+    if (!elderId) {
+      setElder(null);
+      setLoading(false);
+      return;
+    }
     getElderDetail(elderId).then((data) => {
       if (data) {
         setElder(data);
@@ -35,17 +38,9 @@ export default function ContactManagePage() {
     }).finally(() => setLoading(false));
   }, [elderId]);
 
-  const handlePhoneChange = (value: string, field: 'emergency' | 'backup') => {
-    if (field === 'emergency') {
-      if (value !== (elder?.emergencyContactPhone || '')) setPhoneChanged(true);
-      else setPhoneChanged(false);
-      setEmergencyPhone(value);
-    } else {
-      if (value !== (elder?.backupContactPhone || '')) setPhoneChanged(true);
-      else setPhoneChanged(false);
-      setBackupPhone(value);
-    }
-  };
+  const phoneChanged =
+    emergencyPhone !== (elder?.emergencyContactPhone || '') ||
+    backupPhone !== (elder?.backupContactPhone || '');
 
   const handleSave = async () => {
     if (!elderId) return;
@@ -65,6 +60,8 @@ export default function ContactManagePage() {
       } else {
         alert(result.message);
       }
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
     } finally {
       setSaving(false);
     }
@@ -95,7 +92,7 @@ export default function ContactManagePage() {
               className="form-input"
               type="tel"
               value={emergencyPhone}
-              onChange={(e) => handlePhoneChange(e.target.value, 'emergency')}
+              onChange={(e) => setEmergencyPhone(e.target.value)}
             />
           </div>
           <div className="form-group">
@@ -116,7 +113,7 @@ export default function ContactManagePage() {
               className="form-input"
               type="tel"
               value={backupPhone}
-              onChange={(e) => handlePhoneChange(e.target.value, 'backup')}
+              onChange={(e) => setBackupPhone(e.target.value)}
             />
           </div>
           <div className="form-group">

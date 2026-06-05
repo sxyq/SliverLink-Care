@@ -1,18 +1,77 @@
 .workbench-elder-detail-page {
   gap: 16rpx;
+  padding-bottom: 8rpx;
 }
 
-.workbench-elder-detail-summary__title {
-  font-size: 36rpx;
-  line-height: 1.2;
-  font-weight: 800;
-  color: var(--sl-primary-ink);
+.workbench-elder-detail-page .sl-summary-grid,
+.workbench-elder-detail-page .sl-action-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.workbench-elder-detail-summary__meta {
+.workbench-elder-detail-page .sl-summary-hero {
+  margin-top: -2rpx;
+  padding: 40rpx 30rpx 34rpx;
+  border-radius: 40rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-top__title {
+  font-size: 44rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-top__meta {
+  margin-top: 12rpx;
+  font-size: 26rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-grid {
+  gap: 18rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-cell {
+  min-height: 170rpx;
+  padding: 24rpx 22rpx;
+  border-radius: 28rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-label {
+  font-size: 22rpx;
+}
+
+.workbench-elder-detail-page .sl-summary-value {
   margin-top: 10rpx;
-  display: block;
-  font-size: 23rpx;
-  line-height: 1.6;
-  color: var(--sl-text-secondary);
+  font-size: 28rpx;
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+.workbench-elder-detail-page .sl-action-grid {
+  gap: 18rpx;
+}
+
+.workbench-elder-detail-page .sl-detail-action-card {
+  min-height: 200rpx;
+  border-radius: 32rpx;
+  padding: 24rpx 26rpx;
+}
+
+.workbench-elder-detail-page .sl-detail-action-card .sl-action-card__arrow {
+  width: 64rpx;
+  height: 64rpx;
+  font-size: 32rpx;
+}
+
+.workbench-elder-detail-page .sl-page-header-icon-label {
+  min-width: 108rpx;
+  min-height: 84rpx;
+  padding: 10rpx 16rpx;
+  border-radius: 26rpx;
+}
+
+.workbench-elder-detail-page .sl-page-header-icon-label .sl-header-icon-glyph {
+  font-size: 30rpx;
+}
+
+.workbench-elder-detail-page .sl-page-header-icon-label .sl-header-icon-label {
+  font-size: 22rpx;
+  font-weight: 700;
 }

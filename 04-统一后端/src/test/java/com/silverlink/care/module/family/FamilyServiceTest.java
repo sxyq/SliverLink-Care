@@ -261,6 +261,7 @@ class FamilyServiceTest {
     void qrcodeReturnsDtoWhenFound() {
         String auth = "Bearer test-token";
         stubAuth(auth, "13800000000", "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
         qrRow.put("id", "qr-1");
@@ -284,6 +285,7 @@ class FamilyServiceTest {
     void qrcodeThrowsWhenNoQrCodeExists() {
         String auth = "Bearer test-token";
         stubAuth(auth, "13800000000", "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
         when(jdbc.queryForList(contains("from qr_code"), eq("elder-1"))).thenReturn(Collections.emptyList());
 
         BizException ex = assertThrows(BizException.class, () -> service.qrcode("elder-1", auth));
@@ -295,6 +297,7 @@ class FamilyServiceTest {
     void qrcodeIncludesPendingReviewInfoWhenPresent() {
         String auth = "Bearer test-token";
         stubAuth(auth, "13800000000", "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
         qrRow.put("id", "qr-1");
@@ -319,6 +322,7 @@ class FamilyServiceTest {
     void qrcodeReturnsDisabledStatus() {
         String auth = "Bearer test-token";
         stubAuth(auth, "13800000000", "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
         qrRow.put("id", "qr-1");
@@ -331,6 +335,18 @@ class FamilyServiceTest {
         FamilyQrCodeDto result = service.qrcode("elder-1", auth);
 
         assertEquals("已停用", result.getStatus());
+    }
+
+    @Test
+    void qrcodeRejectsDisabledElder() {
+        String auth = "Bearer test-token";
+        stubAuth(auth, "13800000000", "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "DISABLED"));
+
+        BizException ex = assertThrows(BizException.class, () -> service.qrcode("elder-1", auth));
+
+        assertEquals(404, ex.getCode());
+        assertEquals("老人档案已停用，二维码不可用", ex.getMessage());
     }
 
     @Test

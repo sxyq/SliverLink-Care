@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 
 export interface PageContainerProps {
@@ -11,7 +11,7 @@ export interface PageContainerProps {
   footer?: ReactNode;
 }
 
-export function PageContainer({
+export const PageContainer = memo(function PageContainer({
   title,
   subtitle,
   children,
@@ -41,6 +41,6 @@ export function PageContainer({
       {footer ? <View style={{ paddingBottom: '8rpx' }}>{footer}</View> : null}
     </View>
   );
-}
+});
 
 export default PageContainer;

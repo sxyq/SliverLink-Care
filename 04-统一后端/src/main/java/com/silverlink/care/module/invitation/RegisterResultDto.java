@@ -14,6 +14,7 @@ public class RegisterResultDto {
     }
 
     public Boolean getOk() { return ok; }
+    public boolean isSuccess() { return Boolean.TRUE.equals(ok); }
     public void setOk(Boolean ok) { this.ok = ok; }
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }

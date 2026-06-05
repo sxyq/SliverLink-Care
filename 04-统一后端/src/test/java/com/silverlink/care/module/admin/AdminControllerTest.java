@@ -3,11 +3,13 @@ package com.silverlink.care.module.admin;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.audit.AuditLogService;
 import com.silverlink.care.module.qrcode.QrCodeService;
+import com.silverlink.care.security.AuthCookieService;
 import com.silverlink.care.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 
 import java.util.List;
@@ -25,21 +27,25 @@ class AdminControllerTest {
 
     private AdminDashboardService dashboardService;
     private JwtTokenProvider jwtTokenProvider;
+    private AuthCookieService authCookieService;
     private AuditLogService auditLogService;
     private SilverLinkDataService data;
     private QrCodeService qrCodeService;
     private AdminController controller;
     private MockHttpServletRequest request;
+    private MockHttpServletResponse response;
 
     @BeforeEach
     void setUp() {
         dashboardService = mock(AdminDashboardService.class);
         jwtTokenProvider = mock(JwtTokenProvider.class);
+        authCookieService = mock(AuthCookieService.class);
         auditLogService = mock(AuditLogService.class);
         data = mock(SilverLinkDataService.class);
         qrCodeService = mock(QrCodeService.class);
-        controller = new AdminController(dashboardService, jwtTokenProvider, auditLogService, data, qrCodeService);
+        controller = new AdminController(dashboardService, jwtTokenProvider, authCookieService, auditLogService, data, qrCodeService);
         request = new MockHttpServletRequest();
+        response = new MockHttpServletResponse();
     }
 
     @Test
@@ -47,13 +53,13 @@ class AdminControllerTest {
         when(data.login("admin", "pwd", "SYSTEM_ADMIN")).thenReturn(Optional.of(Map.of("name_enc", "enc")));
         when(jwtTokenProvider.generateToken("admin", "SYSTEM_ADMIN", 7200000L)).thenReturn("token-admin");
 
-        var ok = controller.login(Map.of("account", "admin", "password", "pwd"), request);
+        var ok = controller.login(Map.of("account", "admin", "password", "pwd"), request, response);
         assertEquals(200, ok.getCode());
         assertEquals("token-admin", ok.getData().get("token"));
         assertEquals("系统管理员", ok.getData().get("role"));
 
         when(data.login("admin", "bad", "SYSTEM_ADMIN")).thenReturn(Optional.empty());
-        var fail = controller.login(Map.of("username", "admin", "password", "bad"), request);
+        var fail = controller.login(Map.of("username", "admin", "password", "bad"), request, response);
         assertEquals(401, fail.getCode());
         assertEquals("账号或密码错误", fail.getMessage());
     }
@@ -87,13 +93,19 @@ class AdminControllerTest {
 
         assertEquals("vol-1", controller.createVolunteer(Map.of("name", "志愿者甲"), auth, request).getData().get("id"));
         assertEquals(200, controller.updateElder("elder-1", Map.of("name", "李奶奶"), auth, request).getCode());
+        var qrCode = new com.silverlink.care.module.qrcode.QrCodeEntity();
+        qrCode.setId("qr-1");
+        qrCode.setStatus("ENABLED");
+        when(qrCodeService.findCurrentByElder("elder-1")).thenReturn(qrCode);
         assertEquals(200, controller.deleteElder("elder-1", auth, request).getCode());
         assertEquals(200, controller.updateElderStatus("elder-1", Map.of("status", "ACTIVE"), auth, request).getCode());
+        assertEquals(200, controller.updateElderStatus("elder-1", Map.of("status", "DISABLED"), auth, request).getCode());
         assertEquals(200, controller.updateVolunteer("vol-1", Map.of("name", "志愿者乙"), auth, request).getCode());
         assertEquals(200, controller.updateVolunteerScope("vol-1", Map.of("elderIds", List.of("elder-1", "elder-2")), auth, request).getCode());
         assertEquals(200, controller.deleteVolunteer("vol-1", auth, request).getCode());
 
         verify(data).setVolunteerScope("vol-1", List.of("elder-1", "elder-2"));
+        verify(qrCodeService, times(2)).disable(anyString());
     }
 
     @Test
@@ -116,7 +128,7 @@ class AdminControllerTest {
         assertEquals("A-001", scales.get(0).get("archiveNo"));
         assertEquals("李奶奶", scales.get(0).get("elderName"));
         assertEquals("PHQ-9", scales.get(0).get("scaleName"));
-        assertEquals(200, controller.logout(auth, request).getCode());
+        assertEquals(200, controller.logout(auth, request, response).getCode());
 
         verify(auditLogService).record(any(), any(HttpServletRequest.class), anyString(), anyString(), anyString());
     }

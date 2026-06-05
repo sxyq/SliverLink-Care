@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
 
@@ -100,8 +101,9 @@ export async function writeBenchmarkReports({
   const outDir = path.join(root, '06-测试与质量保障/reports/performance');
   await fs.mkdir(outDir, { recursive: true });
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-  const jsonPath = path.join(outDir, `${timestamp}-${topic}.json`);
-  const mdPath = path.join(outDir, `${timestamp}-${topic}.md`);
+  const uniqueSuffix = `${process.pid}-${randomUUID().slice(0, 8)}`;
+  const jsonPath = path.join(outDir, `${timestamp}-${topic}-${uniqueSuffix}.json`);
+  const mdPath = path.join(outDir, `${timestamp}-${topic}-${uniqueSuffix}.md`);
   await fs.writeFile(jsonPath, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
 
   const lines = [

@@ -4,8 +4,8 @@ This file is generated from local coverage artifacts. A failed 100% gate is pres
 
 | Module | Function/Method Coverage | Statement/Instruction Coverage | Notes |
 | --- | ---: | ---: | --- |
-| scan-client | 97.79% (177/181) | 98.11% (780/795) | V8/Istanbul |
-| volunteer-client | 93.02% (400/430) | 92.98% (1165/1253) | V8/Istanbul |
-| admin-console | 93.1% (715/768) | 89.07% (1963/2204) | V8/Istanbul |
-| backend | 94.15% (917/974) | 90.56% (17996/19873) | JaCoCo |
-| android-relay | pending XML aggregation | available | Android JVM test report exists; JaCoCo XML aggregation is pending in a later coverage task. |
+| scan-client | 100.0% (181/181) | 99.5% (791/795) | V8/Istanbul |
+| volunteer-client | 99.3% (428/431) | 97.29% (1220/1254) | V8/Istanbul |
+| admin-console | 98.56% (754/765) | 95.79% (2095/2187) | V8/Istanbul |
+| backend | 99.9% (973/974) | 96.76% (19229/19873) | JaCoCo |
+| android-relay | 17.65% (45/255) | 12.08% (768/6356) | JaCoCo (Android JVM) |

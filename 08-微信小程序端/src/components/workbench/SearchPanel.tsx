@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Input, Text, View } from '@tarojs/components';
 
 interface SearchPanelProps {
@@ -7,7 +8,7 @@ interface SearchPanelProps {
   buttonLabel?: string;
 }
 
-export function SearchPanel({ value, placeholder, onChange, buttonLabel = '搜索' }: SearchPanelProps) {
+export const SearchPanel = memo(function SearchPanel({ value, placeholder, onChange, buttonLabel = '搜索' }: SearchPanelProps) {
   return (
     <View className='sl-card sl-card-soft sl-search-panel'>
       <View className='sl-search-box sl-search-box--hero'>
@@ -23,6 +24,6 @@ export function SearchPanel({ value, placeholder, onChange, buttonLabel = '搜�
       </View>
     </View>
   );
-}
+});
 
 export default SearchPanel;

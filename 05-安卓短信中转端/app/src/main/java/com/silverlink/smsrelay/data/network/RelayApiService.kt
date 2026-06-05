@@ -1,5 +1,6 @@
 package com.silverlink.smsrelay.data.network
 
+import android.util.Log
 import com.silverlink.smsrelay.data.model.InboundSmsPayload
 import com.silverlink.smsrelay.util.RelayServerUrlNormalizer
 import okhttp3.MediaType.Companion.toMediaType
@@ -18,6 +19,7 @@ class RelayApiService(
         payload: InboundSmsPayload,
     ): Result<Unit> {
         val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        Log.i(TAG, "uploadInboundSms baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
@@ -62,6 +64,7 @@ class RelayApiService(
 
     fun sendHeartbeat(baseUrl: String, deviceId: String, deviceSecret: String): Result<Unit> {
         val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        Log.i(TAG, "sendHeartbeat baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl deviceId=$deviceId")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
@@ -95,6 +98,7 @@ class RelayApiService(
 
     fun fetchDeviceConfig(baseUrl: String, deviceId: String, deviceSecret: String): Result<JSONObject> {
         val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        Log.i(TAG, "fetchDeviceConfig baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl deviceId=$deviceId")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
         }
@@ -123,5 +127,9 @@ class RelayApiService(
                 json.optJSONObject("data") ?: json
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "SmsRelayApi"
     }
 }

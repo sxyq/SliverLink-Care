@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
 
 interface FormSectionCardProps {
@@ -7,7 +7,7 @@ interface FormSectionCardProps {
   children: ReactNode;
 }
 
-export function FormSectionCard({ title, hint, children }: FormSectionCardProps) {
+export const FormSectionCard = memo(function FormSectionCard({ title, hint, children }: FormSectionCardProps) {
   return (
     <View className='sl-card sl-form-panel'>
       {title ? <View className='sl-form-panel__title'>{title}</View> : null}
@@ -15,6 +15,6 @@ export function FormSectionCard({ title, hint, children }: FormSectionCardProps)
       {children}
     </View>
   );
-}
+});
 
 export default FormSectionCard;

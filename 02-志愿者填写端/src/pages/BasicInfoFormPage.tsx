@@ -79,16 +79,22 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
       await updateBasicInfo(elder.id, form);
       alert('基本信息已保存');
       onBack();
+    } catch (e) {
+      alert('保存失败，请重试');
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div className="sl-page sl-page-compact-form">
+    <div className="sl-page sl-basic-info-page">
       <PageHeader title="基本信息编辑" onBack={onBack} />
 
-      <FormSection title="基础信息">
+      <FormSection
+        title="基础信息"
+        hint="按老人档案顺序维护基础资料，关键信息优先放在首页。"
+        className="sl-basic-info-section"
+      >
         <div className="sl-form-grid">
           <TextInput label="姓名" value={form.name} onChange={(value) => handleChange('name', value)} />
           <label className="sl-label">
@@ -125,21 +131,21 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
           </div>
           {showSms ? (
             <div className="sl-sms-panel sl-label-full">
-            <div className="sl-sms-alert">
-              <ShieldAlert size={14} />
-              <span>联系人电话修改后需进行短信验真，确认信息归属准确。</span>
-            </div>
-            <div className="sl-sms-row">
-              <input
-                className="sl-input"
-                placeholder="请输入短信验证码"
-                value={smsCode}
-                onChange={(event) => setSmsCode(event.target.value)}
-              />
-              <button type="button" className="sl-btn sl-btn-secondary sl-inline-btn" onClick={handleSendSms}>
-                {smsSent ? '已发送' : '获取验证码'}
-              </button>
-            </div>
+              <div className="sl-sms-alert">
+                <ShieldAlert size={14} />
+                <span>联系人电话修改后需进行短信验真，确认信息归属准确。</span>
+              </div>
+              <div className="sl-sms-row">
+                <input
+                  className="sl-input"
+                  placeholder="请输入短信验证码"
+                  value={smsCode}
+                  onChange={(event) => setSmsCode(event.target.value)}
+                />
+                <button type="button" className="sl-btn sl-btn-secondary sl-inline-btn" onClick={handleSendSms}>
+                  {smsSent ? '已发送' : '获取验证码'}
+                </button>
+              </div>
             </div>
           ) : null}
         </div>

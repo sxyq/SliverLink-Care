@@ -30,7 +30,11 @@ export default function ElderBasicManagePage() {
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
-    if (!elderId) return;
+    if (!elderId) {
+      setElder(null);
+      setLoading(false);
+      return;
+    }
     getElderDetail(elderId)
       .then(setElder)
       .finally(() => setLoading(false));

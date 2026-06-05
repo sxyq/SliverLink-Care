@@ -16,7 +16,10 @@ import com.silverlink.smsrelay.data.network.RelayApiService
 import com.silverlink.smsrelay.databinding.FragmentSettingsBinding
 import com.silverlink.smsrelay.service.RelayServiceLauncher
 import com.silverlink.smsrelay.util.BatteryOptimizationHelper
+import com.silverlink.smsrelay.util.EnhancedProtectionHelper
+import com.silverlink.smsrelay.util.NonRootKeepAliveHelper
 import com.silverlink.smsrelay.util.RelayConfigSyncResolver
+import com.silverlink.smsrelay.util.RootProtectionHelper
 import com.silverlink.smsrelay.util.SmsPermissionHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,7 +30,7 @@ class SettingsFragment : Fragment() {
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
     private lateinit var relayPreferences: RelayPreferences
-    private val relayApiService = RelayApiService(ApiClientFactory.create())
+    private val relayApiService by lazy { apiServiceFactory?.invoke() ?: RelayApiService(ApiClientFactory.create()) }
     private val smsPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
         val granted = result.values.all { it }
         Toast.makeText(
@@ -45,11 +48,12 @@ class SettingsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        relayPreferences = RelayPreferences(requireContext())
+        relayPreferences = preferencesFactory?.invoke(requireContext()) ?: RelayPreferences(requireContext())
         loadCurrentConfig()
         setupSaveButton()
         setupPermissionButton()
-        setupBatteryOptimizationButton()
+        setupUnifiedKeepAliveButton()
+        setupRootProtectionButton()
         setupSyncButton()
         loadRuntimeStatus(view)
     }
@@ -77,7 +81,7 @@ class SettingsFragment : Fragment() {
                 receiverPhone = binding.inputReceiverPhone.text?.toString().orEmpty().trim(),
                 messagePrefix = binding.inputPrefixRule.text?.toString().orEmpty().trim(),
             )
-            RelayServiceLauncher.start(requireContext(), immediateHeartbeat = true)
+            serviceStarter?.invoke(requireContext(), true) ?: RelayServiceLauncher.start(requireContext(), immediateHeartbeat = true)
             Toast.makeText(requireContext(), getString(R.string.config_saved), Toast.LENGTH_SHORT).show()
             view?.let { loadRuntimeStatus(it) }
         }
@@ -89,15 +93,41 @@ class SettingsFragment : Fragment() {
         }
     }
 
-    private fun setupBatteryOptimizationButton() {
-        binding.btnBatteryOptimization.setOnClickListener {
-            val opened = BatteryOptimizationHelper.requestIgnoreBatteryOptimizations(requireContext())
-            Toast.makeText(
-                requireContext(),
-                if (opened) getString(R.string.battery_optimization_opened) else getString(R.string.battery_optimization_open_failed),
-                Toast.LENGTH_SHORT,
-            ).show()
-            view?.postDelayed({ view?.let { loadRuntimeStatus(it) } }, 800)
+    private fun setupUnifiedKeepAliveButton() {
+        binding.btnUnifiedKeepAlive.setOnClickListener {
+            binding.btnUnifiedKeepAlive.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                val context = requireContext()
+                val opened = EnhancedProtectionHelper.openNonRootEnhancedProtection(context)
+                RelayServiceLauncher.setMediaKeepAlive(context, true)
+                serviceStarter?.invoke(context, true) ?: RelayServiceLauncher.start(context, immediateHeartbeat = true)
+                binding.btnUnifiedKeepAlive.isEnabled = true
+                val message = if (opened) {
+                    getString(R.string.unified_keepalive_enabled)
+                } else {
+                    getString(R.string.unified_keepalive_partial)
+                }
+                Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                view?.postDelayed({ view?.let { loadRuntimeStatus(it) } }, 800)
+            }
+        }
+    }
+
+    private fun setupRootProtectionButton() {
+        binding.btnRootForceProtection.setOnClickListener {
+            binding.btnRootForceProtection.isEnabled = false
+            viewLifecycleOwner.lifecycleScope.launch {
+                val result = withContext(Dispatchers.IO) {
+                    RootProtectionHelper.enableForceProtection(requireContext())
+                }
+                binding.btnRootForceProtection.isEnabled = true
+                Toast.makeText(
+                    requireContext(),
+                    if (result.success) getString(R.string.root_protection_enabled) else "${getString(R.string.root_protection_failed)}：${result.message}",
+                    Toast.LENGTH_LONG,
+                ).show()
+                view?.let { loadRuntimeStatus(it) }
+            }
         }
     }
 
@@ -123,7 +153,7 @@ class SettingsFragment : Fragment() {
                         receiverPhone = merged.receiverPhone,
                         messagePrefix = merged.messagePrefix,
                     )
-                    RelayServiceLauncher.start(requireContext(), immediateHeartbeat = true)
+                    serviceStarter?.invoke(requireContext(), true) ?: RelayServiceLauncher.start(requireContext(), immediateHeartbeat = true)
                     loadCurrentConfig()
                     view?.let { loadRuntimeStatus(it) }
                     Toast.makeText(requireContext(), getString(R.string.config_synced), Toast.LENGTH_SHORT).show()
@@ -139,7 +169,12 @@ class SettingsFragment : Fragment() {
         val isOnline = config.serverBaseUrl.isNotBlank()
         val hasSmsPermissions = SmsPermissionHelper.hasSmsPermissions(requireContext())
         val batteryOptimizationReady = BatteryOptimizationHelper.isIgnoringBatteryOptimizations(requireContext())
+        val exactAlarmReady = NonRootKeepAliveHelper.canScheduleExactAlarms(requireContext())
         val serviceState = relayPreferences.readServiceState()
+        val protectionSummary = EnhancedProtectionHelper.protectionSummary(requireContext())
+        val nonRootProtectionReady = NonRootKeepAliveHelper.isAggressiveProtectionReady(requireContext())
+        val mediaKeepAliveReady = relayPreferences.isMediaKeepAliveEnabled()
+        val rootProtectionReady = RootProtectionHelper.isForceProtectionEnabled(requireContext())
 
         setConfigRow(view, R.id.rowDeviceStatus, getString(R.string.device_status_label),
             if (isOnline) getString(R.string.device_online) else getString(R.string.device_offline))
@@ -148,6 +183,15 @@ class SettingsFragment : Fragment() {
             if (hasSmsPermissions) getString(R.string.sms_permission_ready) else getString(R.string.sms_permission_missing))
         setConfigRow(view, R.id.rowBatteryOptimization, getString(R.string.battery_optimization_label),
             if (batteryOptimizationReady) getString(R.string.battery_optimization_ready) else getString(R.string.battery_optimization_missing))
+        setConfigRow(view, R.id.rowExactAlarm, getString(R.string.exact_alarm_label),
+            if (exactAlarmReady) getString(R.string.exact_alarm_ready) else getString(R.string.exact_alarm_missing))
+        setConfigRow(view, R.id.rowProtectionSummary, getString(R.string.protection_summary_label), protectionSummary)
+        setConfigRow(view, R.id.rowNonRootProtection, getString(R.string.non_root_protection_label),
+            if (nonRootProtectionReady) getString(R.string.non_root_protection_ready) else getString(R.string.non_root_protection_missing))
+        setConfigRow(view, R.id.rowMediaKeepAlive, getString(R.string.media_keepalive_label),
+            if (mediaKeepAliveReady) getString(R.string.media_keepalive_ready) else getString(R.string.media_keepalive_missing))
+        setConfigRow(view, R.id.rowRootProtection, getString(R.string.root_protection_label),
+            if (rootProtectionReady) getString(R.string.root_protection_ready) else getString(R.string.root_protection_missing))
         setConfigRow(view, R.id.rowLastHeartbeat, getString(R.string.last_heartbeat),
             relayPreferences.getLastHeartbeat())
         setConfigRow(view, R.id.rowLastSync, getString(R.string.last_sync_time),
@@ -165,5 +209,17 @@ class SettingsFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    companion object {
+        internal var preferencesFactory: ((android.content.Context) -> RelayPreferences)? = null
+        internal var apiServiceFactory: (() -> RelayApiService)? = null
+        internal var serviceStarter: ((android.content.Context, Boolean) -> Unit)? = null
+
+        internal fun resetTestHooks() {
+            preferencesFactory = null
+            apiServiceFactory = null
+            serviceStarter = null
+        }
     }
 }

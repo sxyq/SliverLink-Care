@@ -1,6 +1,6 @@
 {
   "repo": "/Users/sunyiyang/Desktop/Project/SilverLink Care",
-  "total": 1436,
+  "total": 1541,
   "items": [
     {
       "module": "scan-client",
@@ -19,6 +19,16 @@
       "name": "App",
       "kind": "component",
       "line": 104,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/api/auditApi.test.ts",
+      "name": "mockFetchData",
+      "kind": "function",
+      "line": 4,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -48,7 +58,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/api/scanApi.test.ts",
       "name": "mockFetchData",
       "kind": "function",
-      "line": 14,
+      "line": 15,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -145,6 +155,16 @@
     {
       "module": "scan-client",
       "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/api/scanApi.ts",
+      "name": "fetchScaleDetail",
+      "kind": "function",
+      "line": 190,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/api/smsApi.test.ts",
       "name": "mockFetchData",
       "kind": "function",
@@ -225,6 +245,26 @@
     {
       "module": "scan-client",
       "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/app/SecurityProvider.test.tsx",
+      "name": "Consumer",
+      "kind": "component",
+      "line": 13,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/app/SecurityProvider.test.tsx",
+      "name": "BareConsumer",
+      "kind": "component",
+      "line": 28,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/app/SecurityProvider.tsx",
       "name": "SecurityProvider",
       "kind": "component",
@@ -248,7 +288,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/app/securityAndRouter.test.tsx",
       "name": "SecurityProbe",
       "kind": "component",
-      "line": 11,
+      "line": 26,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -369,6 +409,16 @@
       "name": "ProtectedRoute",
       "kind": "component",
       "line": 4,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/components/ScaleSummaryCard.test.tsx",
+      "name": "makeItem",
+      "kind": "function",
+      "line": 7,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -515,6 +565,16 @@
     {
       "module": "scan-client",
       "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/BasicInfoPage.test.tsx",
+      "name": "renderPage",
+      "kind": "function",
+      "line": 32,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/BasicInfoPage.tsx",
       "name": "formatEmergencyContact",
       "kind": "function",
@@ -625,10 +685,30 @@
     {
       "module": "scan-client",
       "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/ScaleDetailPage.test.tsx",
+      "name": "makeItem",
+      "kind": "function",
+      "line": 18,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/ScaleDetailPage.test.tsx",
+      "name": "renderPage",
+      "kind": "function",
+      "line": 28,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/ScaleDetailPage.tsx",
       "name": "getScaleCopy",
       "kind": "function",
-      "line": 14,
+      "line": 17,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -638,7 +718,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/ScaleDetailPage.tsx",
       "name": "getAnswerLabel",
       "kind": "function",
-      "line": 40,
+      "line": 43,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -648,7 +728,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/ScaleDetailPage.tsx",
       "name": "ScaleDetailPage",
       "kind": "component",
-      "line": 52,
+      "line": 55,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -665,10 +745,20 @@
     {
       "module": "scan-client",
       "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/SmsVerifyPage.localFallback.test.tsx",
+      "name": "renderVerifyPage",
+      "kind": "function",
+      "line": 111,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "scan-client",
+      "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/SmsVerifyPage.test.tsx",
       "name": "renderVerifyPage",
       "kind": "function",
-      "line": 189,
+      "line": 582,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -678,7 +768,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/SmsVerifyPage.test.tsx",
       "name": "fillValidIdentity",
       "kind": "function",
-      "line": 200,
+      "line": 593,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -828,7 +918,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/01-扫码用户端/src/pages/pages.test.tsx",
       "name": "basicInfo",
       "kind": "function",
-      "line": 134,
+      "line": 161,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -978,7 +1068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "goList",
       "kind": "function",
-      "line": 41,
+      "line": 40,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -988,7 +1078,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "goDetail",
       "kind": "function",
-      "line": 46,
+      "line": 45,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -998,7 +1088,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "selectElder",
       "kind": "function",
-      "line": 54,
+      "line": 53,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1008,7 +1098,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "editBasic",
       "kind": "function",
-      "line": 59,
+      "line": 58,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1018,7 +1108,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "App",
       "kind": "component",
-      "line": 131,
+      "line": 130,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1028,7 +1118,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/App.tsx",
       "name": "handleHashChange",
       "kind": "function",
-      "line": 24,
+      "line": 27,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1298,7 +1388,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/app/AuthProvider.tsx",
       "name": "useAuth",
       "kind": "function",
-      "line": 66,
+      "line": 69,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1326,9 +1416,29 @@
       "module": "volunteer-client",
       "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/app/authProviderAndApp.test.tsx",
+      "name": "DefaultAuthProbe",
+      "kind": "component",
+      "line": 96,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/app/authProviderAndApp.test.tsx",
+      "name": "LoginWithoutProfileProbe",
+      "kind": "component",
+      "line": 148,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/app/authProviderAndApp.test.tsx",
       "name": "sampleElder",
       "kind": "function",
-      "line": 180,
+      "line": 297,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1836,7 +1946,7 @@
       "module": "volunteer-client",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
-      "name": "subscribe",
+      "name": "patchState",
       "kind": "function",
       "line": 33,
       "test_status": "TODO",
@@ -1846,9 +1956,9 @@
       "module": "volunteer-client",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
-      "name": "getVerificationState",
+      "name": "stopCountdownTimer",
       "kind": "function",
-      "line": 41,
+      "line": 38,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1856,7 +1966,7 @@
       "module": "volunteer-client",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
-      "name": "maskPhone",
+      "name": "stopBackupCountdownTimer",
       "kind": "function",
       "line": 45,
       "test_status": "TODO",
@@ -1866,7 +1976,7 @@
       "module": "volunteer-client",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
-      "name": "initVerification",
+      "name": "startCountdownTimer",
       "kind": "function",
       "line": 52,
       "test_status": "TODO",
@@ -1876,9 +1986,59 @@
       "module": "volunteer-client",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
+      "name": "startBackupCountdownTimer",
+      "kind": "function",
+      "line": 64,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
+      "name": "subscribe",
+      "kind": "function",
+      "line": 76,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
+      "name": "getVerificationState",
+      "kind": "function",
+      "line": 84,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
+      "name": "maskPhone",
+      "kind": "function",
+      "line": 88,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
+      "name": "initVerification",
+      "kind": "function",
+      "line": 95,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "volunteer-client",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
       "name": "resetCountdown",
       "kind": "function",
-      "line": 91,
+      "line": 114,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1888,7 +2048,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
       "name": "switchToBackup",
       "kind": "function",
-      "line": 108,
+      "line": 119,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1898,7 +2058,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/features/verification/verificationStore.ts",
       "name": "setVerified",
       "kind": "function",
-      "line": 135,
+      "line": 136,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1926,19 +2086,9 @@
       "module": "volunteer-client",
       "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/pages/ContactManagePage.tsx",
-      "name": "handlePhoneChange",
-      "kind": "function",
-      "line": 38,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "volunteer-client",
-      "language": "tsx",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/pages/ContactManagePage.tsx",
       "name": "handleSave",
       "kind": "function",
-      "line": 50,
+      "line": 45,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1968,7 +2118,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/pages/ElderBasicManagePage.tsx",
       "name": "handleExport",
       "kind": "function",
-      "line": 53,
+      "line": 57,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -1998,7 +2148,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/pages/FamilyHomePage.tsx",
       "name": "handleBindConfirm",
       "kind": "function",
-      "line": 48,
+      "line": 49,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2208,7 +2358,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/family-entry/pages/familyPages.test.tsx",
       "name": "elder",
       "kind": "function",
-      "line": 330,
+      "line": 874,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2338,7 +2488,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/pages/BasicInfoFormPage.tsx",
       "name": "handleSubmit",
       "kind": "function",
-      "line": 65,
+      "line": 69,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2678,7 +2828,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/shared-workbench/MedicationEditorPage.tsx",
       "name": "handleDelete",
       "kind": "function",
-      "line": 110,
+      "line": 112,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2688,7 +2838,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/shared-workbench/MedicationEditorPage.tsx",
       "name": "handleSaveBatch",
       "kind": "function",
-      "line": 120,
+      "line": 125,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2698,7 +2848,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/shared-workbench/MedicationEditorPage.tsx",
       "name": "Field",
       "kind": "component",
-      "line": 229,
+      "line": 236,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2798,7 +2948,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/02-志愿者填写端/src/shared-workbench/sharedPages.test.tsx",
       "name": "subject",
       "kind": "function",
-      "line": 185,
+      "line": 303,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2936,9 +3086,49 @@
       "module": "admin-console",
       "language": "ts",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
+      "name": "rotateRight",
+      "kind": "function",
+      "line": 57,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
+      "name": "bytesToHex",
+      "kind": "function",
+      "line": 61,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
+      "name": "sha256Bytes",
+      "kind": "function",
+      "line": 67,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
+      "name": "hmacSha256HexFallback",
+      "kind": "function",
+      "line": 145,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "ts",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "hmacSha256Hex",
       "kind": "function",
-      "line": 46,
+      "line": 175,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2948,7 +3138,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "createSignatureHeaders",
       "kind": "function",
-      "line": 65,
+      "line": 192,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2958,7 +3148,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "invalidateAdminCache",
       "kind": "function",
-      "line": 79,
+      "line": 206,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2968,7 +3158,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatAdminStatus",
       "kind": "function",
-      "line": 154,
+      "line": 281,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2978,7 +3168,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatFamilyStatus",
       "kind": "function",
-      "line": 158,
+      "line": 285,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2988,7 +3178,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatQrStatus",
       "kind": "function",
-      "line": 162,
+      "line": 289,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -2998,7 +3188,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatInvitationStatus",
       "kind": "function",
-      "line": 170,
+      "line": 297,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3008,7 +3198,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "mapMedicationRows",
       "kind": "function",
-      "line": 185,
+      "line": 312,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3018,7 +3208,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "loginAdmin",
       "kind": "function",
-      "line": 200,
+      "line": 327,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3028,7 +3218,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "logoutAdmin",
       "kind": "function",
-      "line": 218,
+      "line": 345,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3038,7 +3228,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchDashboard",
       "kind": "function",
-      "line": 226,
+      "line": 353,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3048,7 +3238,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchElders",
       "kind": "function",
-      "line": 239,
+      "line": 366,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3058,7 +3248,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "createElder",
       "kind": "function",
-      "line": 258,
+      "line": 385,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3068,7 +3258,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "deleteElder",
       "kind": "function",
-      "line": 265,
+      "line": 392,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3078,7 +3268,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "setElderStatus",
       "kind": "function",
-      "line": 269,
+      "line": 396,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3088,7 +3278,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchVolunteers",
       "kind": "function",
-      "line": 276,
+      "line": 403,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3098,7 +3288,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "createVolunteer",
       "kind": "function",
-      "line": 292,
+      "line": 439,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3108,7 +3298,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "updateVolunteer",
       "kind": "function",
-      "line": 299,
+      "line": 446,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3118,7 +3308,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "updateVolunteerScope",
       "kind": "function",
-      "line": 306,
+      "line": 453,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3128,7 +3318,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "deleteVolunteer",
       "kind": "function",
-      "line": 313,
+      "line": 460,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3138,7 +3328,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchQrCodes",
       "kind": "function",
-      "line": 317,
+      "line": 464,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3148,7 +3338,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "createQrCode",
       "kind": "function",
-      "line": 334,
+      "line": 481,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3158,7 +3348,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "disableQrCode",
       "kind": "function",
-      "line": 341,
+      "line": 488,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3168,7 +3358,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "regenerateQrCode",
       "kind": "function",
-      "line": 345,
+      "line": 492,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3178,7 +3368,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "updateQrCodeRelayDevice",
       "kind": "function",
-      "line": 349,
+      "line": 496,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3188,7 +3378,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchInvitations",
       "kind": "function",
-      "line": 361,
+      "line": 508,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3198,7 +3388,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "createInvitation",
       "kind": "function",
-      "line": 377,
+      "line": 524,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3208,7 +3398,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "disableInvitation",
       "kind": "function",
-      "line": 384,
+      "line": 531,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3218,7 +3408,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "deleteInvitation",
       "kind": "function",
-      "line": 388,
+      "line": 535,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3228,7 +3418,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchFamilyBindings",
       "kind": "function",
-      "line": 392,
+      "line": 539,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3238,7 +3428,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "unbindFamily",
       "kind": "function",
-      "line": 408,
+      "line": 555,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3248,7 +3438,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "mapReviewRequest",
       "kind": "function",
-      "line": 412,
+      "line": 559,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3258,7 +3448,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchAdminReviewRequests",
       "kind": "function",
-      "line": 437,
+      "line": 584,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3268,7 +3458,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "approveAdminReviewRequest",
       "kind": "function",
-      "line": 442,
+      "line": 589,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3278,7 +3468,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "rejectAdminReviewRequest",
       "kind": "function",
-      "line": 449,
+      "line": 596,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3288,7 +3478,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchAuditLogs",
       "kind": "function",
-      "line": 457,
+      "line": 604,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3298,7 +3488,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchMedications",
       "kind": "function",
-      "line": 476,
+      "line": 623,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3308,7 +3498,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchElderMedications",
       "kind": "function",
-      "line": 481,
+      "line": 628,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3318,7 +3508,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "saveElderMedications",
       "kind": "function",
-      "line": 488,
+      "line": 635,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3328,7 +3518,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchElderScales",
       "kind": "function",
-      "line": 495,
+      "line": 642,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3338,7 +3528,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchAllScales",
       "kind": "function",
-      "line": 511,
+      "line": 658,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3348,7 +3538,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "saveElderScales",
       "kind": "function",
-      "line": 528,
+      "line": 675,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3358,7 +3548,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatRelayStatus",
       "kind": "function",
-      "line": 535,
+      "line": 682,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3368,7 +3558,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "formatDateTime",
       "kind": "function",
-      "line": 545,
+      "line": 692,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3378,7 +3568,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchSmsRelayDevices",
       "kind": "function",
-      "line": 557,
+      "line": 704,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3388,7 +3578,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "updateSmsRelayDevice",
       "kind": "function",
-      "line": 570,
+      "line": 717,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3398,7 +3588,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchSmsRelayRecords",
       "kind": "function",
-      "line": 586,
+      "line": 733,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3408,7 +3598,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "fetchSmsRelaySessions",
       "kind": "function",
-      "line": 600,
+      "line": 747,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3418,7 +3608,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/api/adminApi.ts",
       "name": "execute",
       "kind": "function",
-      "line": 99,
+      "line": 226,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3675,6 +3865,26 @@
     {
       "module": "admin-console",
       "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/components/TableColumnMenu.test.tsx",
+      "name": "TestComponent",
+      "kind": "component",
+      "line": 17,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/components/TableColumnMenu.test.tsx",
+      "name": "TestComponent",
+      "kind": "component",
+      "line": 273,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/components/TableColumnMenu.tsx",
       "name": "isVisible",
       "kind": "function",
@@ -3858,7 +4068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "formatTime",
       "kind": "function",
-      "line": 122,
+      "line": 114,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3868,7 +4078,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getLogGroup",
       "kind": "function",
-      "line": 129,
+      "line": 121,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3878,7 +4088,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "categoryTitle",
       "kind": "function",
-      "line": 143,
+      "line": 135,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3888,7 +4098,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "formatPercent",
       "kind": "function",
-      "line": 158,
+      "line": 150,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3898,7 +4108,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getVisitorPhone",
       "kind": "function",
-      "line": 163,
+      "line": 155,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3908,7 +4118,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getVisitorName",
       "kind": "function",
-      "line": 183,
+      "line": 175,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3918,7 +4128,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getVisitorIdCard",
       "kind": "function",
-      "line": 187,
+      "line": 179,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3928,7 +4138,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getVerificationMethodLabel",
       "kind": "function",
-      "line": 191,
+      "line": 183,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3938,7 +4148,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getDisplayOperator",
       "kind": "function",
-      "line": 199,
+      "line": 191,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3948,7 +4158,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getActionLabel",
       "kind": "function",
-      "line": 203,
+      "line": 195,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3958,7 +4168,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "resolveVisitorTarget",
       "kind": "function",
-      "line": 207,
+      "line": 199,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3968,7 +4178,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "getSlotClassName",
       "kind": "function",
-      "line": 234,
+      "line": 226,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3978,7 +4188,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "AuditLogPage",
       "kind": "component",
-      "line": 238,
+      "line": 230,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3988,7 +4198,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "handleExport",
       "kind": "function",
-      "line": 359,
+      "line": 351,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -3998,7 +4208,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "resetFilters",
       "kind": "function",
-      "line": 363,
+      "line": 355,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4008,7 +4218,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/AuditLogPage.tsx",
       "name": "renderVisitorWidget",
       "kind": "function",
-      "line": 382,
+      "line": 374,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4018,7 +4228,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "formatPercent",
       "kind": "function",
-      "line": 107,
+      "line": 97,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4028,7 +4238,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "average",
       "kind": "function",
-      "line": 112,
+      "line": 102,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4038,7 +4248,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "getAuditGroup",
       "kind": "function",
-      "line": 117,
+      "line": 107,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4048,7 +4258,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "normalizeScaleName",
       "kind": "function",
-      "line": 129,
+      "line": 119,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4058,7 +4268,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "getScaleRiskLabel",
       "kind": "function",
-      "line": 137,
+      "line": 127,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4068,7 +4278,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "getVisitorPhone",
       "kind": "function",
-      "line": 160,
+      "line": 150,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4078,7 +4288,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "formatDateTime",
       "kind": "function",
-      "line": 171,
+      "line": 161,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4088,7 +4298,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "actionLabel",
       "kind": "function",
-      "line": 178,
+      "line": 168,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4098,7 +4308,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "readDashboardSnapshot",
       "kind": "function",
-      "line": 225,
+      "line": 215,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4108,7 +4318,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "getWidgetConfig",
       "kind": "function",
-      "line": 235,
+      "line": 225,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4118,7 +4328,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "getSlotClassName",
       "kind": "function",
-      "line": 239,
+      "line": 229,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4128,7 +4338,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "renderBarList",
       "kind": "function",
-      "line": 244,
+      "line": 234,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4138,7 +4348,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "DashboardPage",
       "kind": "component",
-      "line": 267,
+      "line": 257,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4148,7 +4358,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "load",
       "kind": "function",
-      "line": 300,
+      "line": 290,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4158,17 +4368,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "renderMetricOverview",
       "kind": "function",
-      "line": 414,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "admin-console",
-      "language": "tsx",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
-      "name": "renderMetricCard",
-      "kind": "function",
-      "line": 436,
+      "line": 404,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4178,7 +4378,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "renderPanel",
       "kind": "function",
-      "line": 449,
+      "line": 426,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4188,7 +4388,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/DashboardPage.tsx",
       "name": "renderWidget",
       "kind": "function",
-      "line": 461,
+      "line": 438,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4836,39 +5036,9 @@
       "module": "admin-console",
       "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
-      "name": "scopeCacheKey",
-      "kind": "function",
-      "line": 79,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "admin-console",
-      "language": "tsx",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
-      "name": "loadScopeRegistry",
-      "kind": "function",
-      "line": 83,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "admin-console",
-      "language": "tsx",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
-      "name": "saveScopeRegistry",
-      "kind": "function",
-      "line": 94,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "admin-console",
-      "language": "tsx",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "loadVolunteerMeta",
       "kind": "function",
-      "line": 101,
+      "line": 78,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4878,7 +5048,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "saveVolunteerMeta",
       "kind": "function",
-      "line": 112,
+      "line": 89,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4888,7 +5058,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "formatDateTime",
       "kind": "function",
-      "line": 116,
+      "line": 93,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4898,7 +5068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "deriveCreatedAtFromId",
       "kind": "function",
-      "line": 128,
+      "line": 105,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4906,9 +5076,9 @@
       "module": "admin-console",
       "language": "tsx",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
-      "name": "buildSeededRegistry",
+      "name": "buildScopeRegistry",
       "kind": "function",
-      "line": 136,
+      "line": 113,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4918,7 +5088,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "VolunteerManagePage",
       "kind": "component",
-      "line": 151,
+      "line": 120,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4928,7 +5098,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "load",
       "kind": "function",
-      "line": 175,
+      "line": 144,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4938,7 +5108,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "resetForm",
       "kind": "function",
-      "line": 289,
+      "line": 257,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4948,7 +5118,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "closeDialog",
       "kind": "function",
-      "line": 295,
+      "line": 263,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4958,7 +5128,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "openCreateDialog",
       "kind": "function",
-      "line": 300,
+      "line": 268,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4968,7 +5138,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "openEditDialog",
       "kind": "function",
-      "line": 305,
+      "line": 273,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4978,7 +5148,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "openScopeDialog",
       "kind": "function",
-      "line": 318,
+      "line": 286,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4988,7 +5158,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "closeScopeDialog",
       "kind": "function",
-      "line": 327,
+      "line": 295,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -4998,7 +5168,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "openFamilyDialog",
       "kind": "function",
-      "line": 336,
+      "line": 304,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5008,7 +5178,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "closeFamilyDialog",
       "kind": "function",
-      "line": 341,
+      "line": 309,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5018,7 +5188,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleSubmit",
       "kind": "function",
-      "line": 346,
+      "line": 314,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5028,7 +5198,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleDelete",
       "kind": "function",
-      "line": 391,
+      "line": 359,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5038,7 +5208,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleToggleStatus",
       "kind": "function",
-      "line": 401,
+      "line": 367,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5048,7 +5218,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "addElderToVolunteer",
       "kind": "function",
-      "line": 410,
+      "line": 376,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5058,7 +5228,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "removeElderFromVolunteer",
       "kind": "function",
-      "line": 415,
+      "line": 381,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5068,7 +5238,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleSaveScope",
       "kind": "function",
-      "line": 420,
+      "line": 386,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5078,7 +5248,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleUnbindFamily",
       "kind": "function",
-      "line": 437,
+      "line": 402,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5088,7 +5258,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/VolunteerManagePage.tsx",
       "name": "handleExport",
       "kind": "function",
-      "line": 449,
+      "line": 414,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "admin-console",
+      "language": "tsx",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/03-管理后台端/src/pages/careManagePages.test.tsx",
+      "name": "renderWithRoute",
+      "kind": "function",
+      "line": 33,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5365,6 +5545,16 @@
     {
       "module": "backend",
       "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/config/PerformanceConfig.java",
+      "name": "auditLogExecutor",
+      "kind": "method",
+      "line": 17,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/config/SecurityConfig.java",
       "name": "filterChain",
       "kind": "method",
@@ -5399,6 +5589,136 @@
       "name": "WebMvcConfig",
       "kind": "method",
       "line": 13,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "getOrLoad",
+      "kind": "method",
+      "line": 30,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "get",
+      "kind": "method",
+      "line": 54,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "put",
+      "kind": "method",
+      "line": 73,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "invalidate",
+      "kind": "method",
+      "line": 89,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "isRedisAvailable",
+      "kind": "method",
+      "line": 104,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "fullKey",
+      "kind": "method",
+      "line": 108,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/JsonTwoLevelCache.java",
+      "name": "JsonTwoLevelCache",
+      "kind": "method",
+      "line": 26,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "get",
+      "kind": "method",
+      "line": 12,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "put",
+      "kind": "method",
+      "line": 27,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "getOrLoad",
+      "kind": "method",
+      "line": 38,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "getOrLoadEntry",
+      "kind": "method",
+      "line": 62,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "invalidate",
+      "kind": "method",
+      "line": 90,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/cache/SimpleTtlCache.java",
+      "name": "clear",
+      "kind": "method",
+      "line": 96,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5458,7 +5778,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "encryptSeedData",
       "kind": "method",
-      "line": 41,
+      "line": 45,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5468,7 +5788,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "encryptColumn",
       "kind": "method",
-      "line": 66,
+      "line": 70,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5478,7 +5798,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "login",
       "kind": "method",
-      "line": 80,
+      "line": 84,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5488,7 +5808,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "findUser",
       "kind": "method",
-      "line": 89,
+      "line": 93,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5498,7 +5818,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "dashboard",
       "kind": "method",
-      "line": 97,
+      "line": 101,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5508,7 +5828,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "count",
       "kind": "method",
-      "line": 108,
+      "line": 112,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5518,7 +5838,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "eldersForAdmin",
       "kind": "method",
-      "line": 113,
+      "line": 117,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5528,7 +5848,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "elderDetail",
       "kind": "method",
-      "line": 122,
+      "line": 132,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5538,7 +5858,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "elderRow",
       "kind": "method",
-      "line": 127,
+      "line": 137,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5548,7 +5868,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "createElder",
       "kind": "method",
-      "line": 159,
+      "line": 174,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5558,7 +5878,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "createElderForVolunteer",
       "kind": "method",
-      "line": 177,
+      "line": 192,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5568,7 +5888,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "updateElder",
       "kind": "method",
-      "line": 185,
+      "line": 200,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5578,7 +5898,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "deleteElder",
       "kind": "method",
-      "line": 198,
+      "line": 213,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5588,7 +5908,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "setElderStatus",
       "kind": "method",
-      "line": 202,
+      "line": 217,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5598,7 +5918,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "volunteers",
       "kind": "method",
-      "line": 207,
+      "line": 222,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5608,7 +5928,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "createVolunteer",
       "kind": "method",
-      "line": 226,
+      "line": 244,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5618,7 +5938,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "updateVolunteer",
       "kind": "method",
-      "line": 238,
+      "line": 256,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5628,7 +5948,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "deleteVolunteer",
       "kind": "method",
-      "line": 259,
+      "line": 277,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5638,7 +5958,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "setVolunteerScope",
       "kind": "method",
-      "line": 263,
+      "line": 281,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5648,7 +5968,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "assignedElders",
       "kind": "method",
-      "line": 271,
+      "line": 290,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5658,7 +5978,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "volunteerProfile",
       "kind": "method",
-      "line": 287,
+      "line": 306,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5668,7 +5988,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "updateVolunteerProfile",
       "kind": "method",
-      "line": 296,
+      "line": 315,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5678,7 +5998,27 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "latestHealthDate",
       "kind": "method",
-      "line": 321,
+      "line": 340,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "volunteerScopeSummaries",
+      "kind": "method",
+      "line": 345,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "formatVolunteerLabel",
+      "kind": "method",
+      "line": 366,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5688,7 +6028,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "requireVolunteerScope",
       "kind": "method",
-      "line": 326,
+      "line": 374,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5698,7 +6038,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "scanBasic",
       "kind": "method",
-      "line": 339,
+      "line": 387,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5708,7 +6048,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "health",
       "kind": "method",
-      "line": 343,
+      "line": 391,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5718,7 +6058,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "medications",
       "kind": "method",
-      "line": 361,
+      "line": 416,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5728,7 +6068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "allMedicationsForAdmin",
       "kind": "method",
-      "line": 378,
+      "line": 438,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5738,7 +6078,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "scales",
       "kind": "method",
-      "line": 402,
+      "line": 462,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5746,9 +6086,9 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "saveBasic",
+      "name": "scaleSummaries",
       "kind": "method",
-      "line": 420,
+      "line": 466,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5756,77 +6096,7 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "saveHealth",
-      "kind": "method",
-      "line": 425,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "saveMedicationList",
-      "kind": "method",
-      "line": 437,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "addMedication",
-      "kind": "method",
-      "line": 445,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "updateMedication",
-      "kind": "method",
-      "line": 452,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "deleteMedication",
-      "kind": "method",
-      "line": 457,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "saveScales",
-      "kind": "method",
-      "line": 461,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "recordAudit",
-      "kind": "method",
-      "line": 484,
-      "test_status": "TODO",
-      "evidence": ""
-    },
-    {
-      "module": "backend",
-      "language": "java",
-      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
-      "name": "recordAudit",
+      "name": "scaleDetail",
       "kind": "method",
       "line": 488,
       "test_status": "TODO",
@@ -5836,9 +6106,109 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "saveBasic",
+      "kind": "method",
+      "line": 513,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "saveHealth",
+      "kind": "method",
+      "line": 518,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "saveMedicationList",
+      "kind": "method",
+      "line": 530,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "addMedication",
+      "kind": "method",
+      "line": 538,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "updateMedication",
+      "kind": "method",
+      "line": 545,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "deleteMedication",
+      "kind": "method",
+      "line": 550,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "saveScales",
+      "kind": "method",
+      "line": 554,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "recordAudit",
+      "kind": "method",
+      "line": 577,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "recordAudit",
+      "kind": "method",
+      "line": 581,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "recordAuditBatch",
+      "kind": "method",
+      "line": 617,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "auditLogs",
       "kind": "method",
-      "line": 524,
+      "line": 646,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5848,7 +6218,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "one",
       "kind": "method",
-      "line": 553,
+      "line": 694,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5858,7 +6228,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "isFamilyBound",
       "kind": "method",
-      "line": 559,
+      "line": 700,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5868,7 +6238,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "enc",
       "kind": "method",
-      "line": 565,
+      "line": 706,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5878,7 +6248,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "dec",
       "kind": "method",
-      "line": 575,
+      "line": 716,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5888,7 +6258,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "isEncrypted",
       "kind": "method",
-      "line": 585,
+      "line": 726,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5898,7 +6268,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "currentOperator",
       "kind": "method",
-      "line": 594,
+      "line": 735,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5908,7 +6278,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "hash",
       "kind": "method",
-      "line": 599,
+      "line": 740,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5918,7 +6288,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "str",
       "kind": "method",
-      "line": 603,
+      "line": 744,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5928,7 +6298,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "value",
       "kind": "method",
-      "line": 607,
+      "line": 748,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5938,7 +6308,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "intValue",
       "kind": "method",
-      "line": 613,
+      "line": 754,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5948,7 +6318,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "decimal",
       "kind": "method",
-      "line": 623,
+      "line": 764,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5958,7 +6328,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "maskPhone",
       "kind": "method",
-      "line": 634,
+      "line": 775,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5968,7 +6338,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "maskName",
       "kind": "method",
-      "line": 639,
+      "line": 780,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5978,7 +6348,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "maskIdCard",
       "kind": "method",
-      "line": 645,
+      "line": 786,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5988,7 +6358,37 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "parseScaleAnswers",
       "kind": "method",
-      "line": 651,
+      "line": 792,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "parseScaleAnswersCached",
+      "kind": "method",
+      "line": 829,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "deepCopyAnswers",
+      "kind": "method",
+      "line": 841,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
+      "name": "AuditLogWrite",
+      "kind": "method",
+      "line": 849,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -5998,7 +6398,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/infrastructure/persistence/SilverLinkDataService.java",
       "name": "SilverLinkDataService",
       "kind": "method",
-      "line": 33,
+      "line": 37,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6608,7 +7008,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "listAll",
       "kind": "method",
-      "line": 31,
+      "line": 52,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6618,7 +7018,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "filter",
       "kind": "method",
-      "line": 35,
+      "line": 56,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6628,7 +7028,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 39,
+      "line": 60,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6638,7 +7038,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 43,
+      "line": 64,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6648,7 +7048,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 73,
+      "line": 94,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6658,7 +7058,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 77,
+      "line": 98,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6668,7 +7068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "operatorOf",
       "kind": "method",
-      "line": 107,
+      "line": 128,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6678,7 +7078,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "roleOf",
       "kind": "method",
-      "line": 114,
+      "line": 135,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6688,7 +7088,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 125,
+      "line": 146,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6698,7 +7098,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "record",
       "kind": "method",
-      "line": 129,
+      "line": 150,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6708,7 +7108,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "resolveClientIp",
       "kind": "method",
-      "line": 133,
+      "line": 154,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6718,7 +7118,67 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "firstIp",
       "kind": "method",
-      "line": 147,
+      "line": 168,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "dispatch",
+      "kind": "method",
+      "line": 181,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "flushPendingScheduled",
+      "kind": "method",
+      "line": 190,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "enqueue",
+      "kind": "method",
+      "line": 196,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "flushPending",
+      "kind": "method",
+      "line": 204,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "drainBatch",
+      "kind": "method",
+      "line": 245,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "buildWrite",
+      "kind": "method",
+      "line": 257,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6728,7 +7188,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "toEntities",
       "kind": "method",
-      "line": 160,
+      "line": 288,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -6738,7 +7198,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
       "name": "AuditLogService",
       "kind": "method",
-      "line": 27,
+      "line": 42,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/audit/AuditLogService.java",
+      "name": "AuditLogService",
+      "kind": "method",
+      "line": 47,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9116,7 +9586,7 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
-      "name": "setOk",
+      "name": "isSuccess",
       "kind": "method",
       "line": 17,
       "test_status": "TODO",
@@ -9126,7 +9596,7 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
-      "name": "getToken",
+      "name": "setOk",
       "kind": "method",
       "line": 18,
       "test_status": "TODO",
@@ -9136,7 +9606,7 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
-      "name": "setToken",
+      "name": "getToken",
       "kind": "method",
       "line": 19,
       "test_status": "TODO",
@@ -9146,7 +9616,7 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
-      "name": "getMessage",
+      "name": "setToken",
       "kind": "method",
       "line": 20,
       "test_status": "TODO",
@@ -9156,9 +9626,19 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
-      "name": "setMessage",
+      "name": "getMessage",
       "kind": "method",
       "line": 21,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/invitation/RegisterResultDto.java",
+      "name": "setMessage",
+      "kind": "method",
+      "line": 22,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9258,7 +9738,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "preview",
       "kind": "method",
-      "line": 53,
+      "line": 73,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "loadPreview",
+      "kind": "method",
+      "line": 93,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9268,7 +9758,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "generateDemoPdf",
       "kind": "method",
-      "line": 76,
+      "line": 110,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "renderPdfBytes",
+      "kind": "method",
+      "line": 120,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9278,7 +9778,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawPage",
       "kind": "method",
-      "line": 102,
+      "line": 141,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9288,7 +9788,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawCardBase",
       "kind": "method",
-      "line": 124,
+      "line": 163,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9298,7 +9798,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawFrontCard",
       "kind": "method",
-      "line": 161,
+      "line": 200,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9308,7 +9808,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawBackCard",
       "kind": "method",
-      "line": 183,
+      "line": 222,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9318,7 +9818,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawBackgroundImage",
       "kind": "method",
-      "line": 218,
+      "line": 257,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9328,7 +9828,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawLabeledValue",
       "kind": "method",
-      "line": 231,
+      "line": 270,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9338,7 +9838,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawDividerWithHealthIcon",
       "kind": "method",
-      "line": 247,
+      "line": 286,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9348,7 +9848,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawCareMark",
       "kind": "method",
-      "line": 260,
+      "line": 299,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9358,7 +9858,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawTopLeftWave",
       "kind": "method",
-      "line": 278,
+      "line": 317,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9368,7 +9868,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawTopRightWave",
       "kind": "method",
-      "line": 286,
+      "line": 325,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9378,7 +9878,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawBottomWave",
       "kind": "method",
-      "line": 295,
+      "line": 334,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9388,7 +9888,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "addRoundRect",
       "kind": "method",
-      "line": 305,
+      "line": 344,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9398,7 +9898,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "addCircle",
       "kind": "method",
-      "line": 320,
+      "line": 359,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9408,7 +9908,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawLine",
       "kind": "method",
-      "line": 331,
+      "line": 370,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9418,7 +9918,47 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "renderQrImage",
       "kind": "method",
-      "line": 340,
+      "line": 379,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "renderQrImageCached",
+      "kind": "method",
+      "line": 398,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "loadFontBytes",
+      "kind": "method",
+      "line": 406,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "buildPdfCacheKey",
+      "kind": "method",
+      "line": 432,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
+      "name": "copyPreview",
+      "kind": "method",
+      "line": 438,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9428,7 +9968,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "resolvePublicQrUrl",
       "kind": "method",
-      "line": 359,
+      "line": 452,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9438,7 +9978,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawCenteredText",
       "kind": "method",
-      "line": 372,
+      "line": 465,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9448,7 +9988,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "drawText",
       "kind": "method",
-      "line": 378,
+      "line": 471,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9458,7 +9998,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "formatAge",
       "kind": "method",
-      "line": 388,
+      "line": 481,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9468,7 +10008,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "safe",
       "kind": "method",
-      "line": 395,
+      "line": 488,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9478,7 +10018,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "stringValue",
       "kind": "method",
-      "line": 399,
+      "line": 492,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -9488,7 +10028,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/nameplate/NameplateService.java",
       "name": "NameplateService",
       "kind": "method",
-      "line": 48,
+      "line": 68,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10856,6 +11396,16 @@
       "module": "backend",
       "language": "java",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanController.java",
+      "name": "scaleDetail",
+      "kind": "method",
+      "line": 185,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanController.java",
       "name": "ScanController",
       "kind": "method",
       "line": 20,
@@ -10868,7 +11418,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "resolve",
       "kind": "method",
-      "line": 24,
+      "line": 62,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10878,7 +11428,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getArchive",
       "kind": "method",
-      "line": 34,
+      "line": 90,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10888,7 +11438,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getVerifiedBasicInfo",
       "kind": "method",
-      "line": 39,
+      "line": 95,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10898,7 +11448,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getMedications",
       "kind": "method",
-      "line": 44,
+      "line": 100,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10908,7 +11458,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getScales",
       "kind": "method",
-      "line": 49,
+      "line": 105,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getScaleDetail",
+      "kind": "method",
+      "line": 110,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10918,7 +11478,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "startVerificationSession",
       "kind": "method",
-      "line": 54,
+      "line": 115,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10928,7 +11488,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getVerificationStatus",
       "kind": "method",
-      "line": 60,
+      "line": 121,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10938,7 +11498,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "verifyByIdentity",
       "kind": "method",
-      "line": 64,
+      "line": 125,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10948,7 +11508,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "authorizeSession",
       "kind": "method",
-      "line": 68,
+      "line": 129,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10958,7 +11518,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getArchiveData",
       "kind": "method",
-      "line": 72,
+      "line": 133,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10968,7 +11528,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getVerifiedBasicInfoData",
       "kind": "method",
-      "line": 76,
+      "line": 137,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10978,7 +11538,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getMedicationsData",
       "kind": "method",
-      "line": 80,
+      "line": 141,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10988,7 +11548,227 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "getScalesData",
       "kind": "method",
-      "line": 84,
+      "line": 145,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getScaleDetailData",
+      "kind": "method",
+      "line": 149,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "readCachedMap",
+      "kind": "method",
+      "line": 160,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "readCachedList",
+      "kind": "method",
+      "line": 174,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "readProtectedReadBundle",
+      "kind": "method",
+      "line": 189,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "loadProtectedReadBundle",
+      "kind": "method",
+      "line": 203,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "deepCopyStringList",
+      "kind": "method",
+      "line": 212,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "deepCopyObjectList",
+      "kind": "method",
+      "line": 220,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "cacheKey",
+      "kind": "method",
+      "line": 228,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "toJson",
+      "kind": "method",
+      "line": 232,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "fromJson",
+      "kind": "method",
+      "line": 240,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "fromJson",
+      "kind": "method",
+      "line": 248,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getArchive",
+      "kind": "method",
+      "line": 262,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "setArchive",
+      "kind": "method",
+      "line": 266,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getBasicInfo",
+      "kind": "method",
+      "line": 270,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "setBasicInfo",
+      "kind": "method",
+      "line": 274,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getMedications",
+      "kind": "method",
+      "line": 278,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "setMedications",
+      "kind": "method",
+      "line": 282,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "getScales",
+      "kind": "method",
+      "line": 286,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "setScales",
+      "kind": "method",
+      "line": 290,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "copy",
+      "kind": "method",
+      "line": 294,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "copyStringRows",
+      "kind": "method",
+      "line": 303,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "copyObjectRows",
+      "kind": "method",
+      "line": 311,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -10998,7 +11778,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
       "name": "ScanService",
       "kind": "method",
-      "line": 18,
+      "line": 43,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/scan/ScanService.java",
+      "name": "ScanService",
+      "kind": "method",
+      "line": 48,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12248,7 +13038,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "ensureDefaultDevice",
       "kind": "method",
-      "line": 66,
+      "line": 90,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12258,7 +13048,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "createScanVerificationSession",
       "kind": "method",
-      "line": 88,
+      "line": 112,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12268,7 +13058,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getScanVerificationStatus",
       "kind": "method",
-      "line": 116,
+      "line": 140,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12278,7 +13068,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "createDirectSmsVerificationSession",
       "kind": "method",
-      "line": 133,
+      "line": 158,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12288,7 +13078,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "verifyDirectSmsVerificationSession",
       "kind": "method",
-      "line": 161,
+      "line": 186,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12298,7 +13088,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "createIdentityVerificationSession",
       "kind": "method",
-      "line": 205,
+      "line": 231,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12308,7 +13098,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "handleInbound",
       "kind": "method",
-      "line": 244,
+      "line": 272,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12318,7 +13108,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "handleHeartbeat",
       "kind": "method",
-      "line": 307,
+      "line": 344,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12328,7 +13118,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getDeviceConfig",
       "kind": "method",
-      "line": 317,
+      "line": 354,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12338,7 +13128,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "validateDeviceRequestSignature",
       "kind": "method",
-      "line": 321,
+      "line": 358,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12348,7 +13138,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "listRecords",
       "kind": "method",
-      "line": 365,
+      "line": 402,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12358,7 +13148,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "listDevices",
       "kind": "method",
-      "line": 374,
+      "line": 411,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12368,7 +13158,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "updateDevice",
       "kind": "method",
-      "line": 383,
+      "line": 420,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12378,7 +13168,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "listVerificationSessions",
       "kind": "method",
-      "line": 421,
+      "line": 458,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12388,7 +13178,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "authorizeVerifiedSession",
       "kind": "method",
-      "line": 431,
+      "line": 468,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "loadAuthorizedSession",
+      "kind": "method",
+      "line": 483,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12398,7 +13198,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "requireDevice",
       "kind": "method",
-      "line": 469,
+      "line": 526,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12408,7 +13208,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "expirePendingSessions",
       "kind": "method",
-      "line": 487,
+      "line": 544,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12418,7 +13218,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapSession",
       "kind": "method",
-      "line": 498,
+      "line": 556,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12428,7 +13228,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapStatus",
       "kind": "method",
-      "line": 511,
+      "line": 569,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12438,7 +13238,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapRecord",
       "kind": "method",
-      "line": 522,
+      "line": 580,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12448,7 +13248,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapDevice",
       "kind": "method",
-      "line": 536,
+      "line": 594,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12458,7 +13258,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "resolvePreferredDevice",
       "kind": "method",
-      "line": 548,
+      "line": 606,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12468,7 +13268,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "resolveDeviceById",
       "kind": "method",
-      "line": 566,
+      "line": 624,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12478,7 +13278,87 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "randomAlphaNumeric",
       "kind": "method",
-      "line": 574,
+      "line": 632,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "newSessionId",
+      "kind": "method",
+      "line": 641,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "newRelayRecordId",
+      "kind": "method",
+      "line": 645,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "validateAuthorizedContext",
+      "kind": "method",
+      "line": 649,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "invalidateAuthorizedSession",
+      "kind": "method",
+      "line": 665,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "effectiveAuthorizedSessionTtl",
+      "kind": "method",
+      "line": 672,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "authorizedSessionCacheKey",
+      "kind": "method",
+      "line": 677,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "toJson",
+      "kind": "method",
+      "line": 681,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "fromJson",
+      "kind": "method",
+      "line": 689,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12488,7 +13368,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapAdminSession",
       "kind": "method",
-      "line": 583,
+      "line": 697,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12498,7 +13378,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "mapVerifiedSessionContext",
       "kind": "method",
-      "line": 600,
+      "line": 714,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12508,7 +13388,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "normalizeVisitorName",
       "kind": "method",
-      "line": 613,
+      "line": 727,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12518,7 +13398,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "normalizeVisitorPhone",
       "kind": "method",
-      "line": 621,
+      "line": 735,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12528,7 +13408,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "normalizeIdCard",
       "kind": "method",
-      "line": 629,
+      "line": 743,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12538,7 +13418,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "isValidMainlandIdCard",
       "kind": "method",
-      "line": 640,
+      "line": 754,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12548,7 +13428,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "str",
       "kind": "method",
-      "line": 650,
+      "line": 764,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12558,7 +13438,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "bool",
       "kind": "method",
-      "line": 654,
+      "line": 768,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12568,7 +13448,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "longValue",
       "kind": "method",
-      "line": 664,
+      "line": 778,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12578,7 +13458,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "normalize",
       "kind": "method",
-      "line": 671,
+      "line": 785,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12588,7 +13468,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "normalizePhone",
       "kind": "method",
-      "line": 675,
+      "line": 789,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12598,7 +13478,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "maskPhone",
       "kind": "method",
-      "line": 679,
+      "line": 793,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12608,7 +13488,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "evictExpiredRelayNonces",
       "kind": "method",
-      "line": 684,
+      "line": 798,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12618,7 +13498,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "hmacSha256Hex",
       "kind": "method",
-      "line": 692,
+      "line": 806,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12628,7 +13508,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getSessionId",
       "kind": "method",
-      "line": 717,
+      "line": 831,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12638,7 +13518,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setSessionId",
       "kind": "method",
-      "line": 721,
+      "line": 835,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12648,7 +13528,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getElderId",
       "kind": "method",
-      "line": 725,
+      "line": 839,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12658,7 +13538,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setElderId",
       "kind": "method",
-      "line": 729,
+      "line": 843,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12668,7 +13548,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getTarget",
       "kind": "method",
-      "line": 733,
+      "line": 847,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12678,7 +13558,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setTarget",
       "kind": "method",
-      "line": 737,
+      "line": 851,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12688,7 +13568,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getVerificationMethod",
       "kind": "method",
-      "line": 741,
+      "line": 855,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12698,7 +13578,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setVerificationMethod",
       "kind": "method",
-      "line": 745,
+      "line": 859,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12708,7 +13588,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getVisitorName",
       "kind": "method",
-      "line": 749,
+      "line": 863,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12718,7 +13598,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setVisitorName",
       "kind": "method",
-      "line": 753,
+      "line": 867,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12728,7 +13608,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getVisitorPhone",
       "kind": "method",
-      "line": 757,
+      "line": 871,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12738,7 +13618,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setVisitorPhone",
       "kind": "method",
-      "line": 761,
+      "line": 875,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12748,7 +13628,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getVisitorIdCard",
       "kind": "method",
-      "line": 765,
+      "line": 879,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12758,7 +13638,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setVisitorIdCard",
       "kind": "method",
-      "line": 769,
+      "line": 883,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12768,7 +13648,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "getSenderPhoneMasked",
       "kind": "method",
-      "line": 773,
+      "line": 887,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12778,7 +13658,67 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "setSenderPhoneMasked",
       "kind": "method",
-      "line": 777,
+      "line": 891,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "context",
+      "kind": "method",
+      "line": 908,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "authorizedUntil",
+      "kind": "method",
+      "line": 912,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "getContext",
+      "kind": "method",
+      "line": 916,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "setContext",
+      "kind": "method",
+      "line": 920,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "getAuthorizedUntil",
+      "kind": "method",
+      "line": 924,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "setAuthorizedUntil",
+      "kind": "method",
+      "line": 928,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -12788,7 +13728,37 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
       "name": "SmsRelayService",
       "kind": "method",
-      "line": 59,
+      "line": 70,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "SmsRelayService",
+      "kind": "method",
+      "line": 75,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "CachedAuthorizedSession",
+      "kind": "method",
+      "line": 900,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "backend",
+      "language": "java",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/04-统一后端/src/main/java/com/silverlink/care/module/smsrelay/SmsRelayService.java",
+      "name": "CachedAuthorizedSession",
+      "kind": "method",
+      "line": 903,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13395,6 +14365,16 @@
     {
       "module": "android-relay",
       "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/MainActivity.kt",
+      "name": "resetTestHooks",
+      "kind": "function",
+      "line": 87,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/RelayApplication.kt",
       "name": "onCreate",
       "kind": "function",
@@ -13408,7 +14388,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "readConfig",
       "kind": "function",
-      "line": 32,
+      "line": 33,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13418,7 +14398,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveConfig",
       "kind": "function",
-      "line": 42,
+      "line": 43,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13428,7 +14408,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveLastSyncTime",
       "kind": "function",
-      "line": 58,
+      "line": 59,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13438,7 +14418,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "getLastSyncTime",
       "kind": "function",
-      "line": 62,
+      "line": 63,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13448,7 +14428,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveLastHeartbeat",
       "kind": "function",
-      "line": 67,
+      "line": 68,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13458,7 +14438,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "getLastHeartbeat",
       "kind": "function",
-      "line": 71,
+      "line": 72,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13468,7 +14448,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveUptimeStart",
       "kind": "function",
-      "line": 76,
+      "line": 77,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13478,7 +14458,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "getUptime",
       "kind": "function",
-      "line": 80,
+      "line": 81,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13488,7 +14468,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveServiceState",
       "kind": "function",
-      "line": 89,
+      "line": 90,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13498,7 +14478,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "readServiceState",
       "kind": "function",
-      "line": 96,
+      "line": 97,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13508,7 +14488,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "saveTodayStats",
       "kind": "function",
-      "line": 103,
+      "line": 104,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13518,7 +14498,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "readTodayStats",
       "kind": "function",
-      "line": 114,
+      "line": 115,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13528,7 +14508,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/local/RelayPreferences.kt",
       "name": "formatDateTime",
       "kind": "function",
-      "line": 129,
+      "line": 130,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13548,7 +14528,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/network/RelayApiService.kt",
       "name": "uploadInboundSms",
       "kind": "function",
-      "line": 14,
+      "line": 15,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13558,7 +14538,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/network/RelayApiService.kt",
       "name": "sendHeartbeat",
       "kind": "function",
-      "line": 61,
+      "line": 63,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13568,7 +14548,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/data/network/RelayApiService.kt",
       "name": "fetchDeviceConfig",
       "kind": "function",
-      "line": 93,
+      "line": 96,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13728,7 +14708,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "onCreate",
       "kind": "function",
-      "line": 37,
+      "line": 38,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13738,7 +14718,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "onStartCommand",
       "kind": "function",
-      "line": 45,
+      "line": 46,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13748,7 +14728,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "ensureHeartbeatLoop",
       "kind": "function",
-      "line": 67,
+      "line": 68,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13758,7 +14738,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "triggerHeartbeat",
       "kind": "function",
-      "line": 79,
+      "line": 80,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13768,7 +14748,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "sendHeartbeat",
       "kind": "function",
-      "line": 87,
+      "line": 88,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13778,7 +14758,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "handleSmsUpload",
       "kind": "function",
-      "line": 106,
+      "line": 107,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13788,7 +14768,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "buildNotification",
       "kind": "function",
-      "line": 137,
+      "line": 138,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13798,7 +14778,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "updateNotification",
       "kind": "function",
-      "line": 156,
+      "line": 157,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13808,7 +14788,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "ensureNotificationChannel",
       "kind": "function",
-      "line": 161,
+      "line": 162,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13818,7 +14798,7 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "onDestroy",
       "kind": "function",
-      "line": 174,
+      "line": 175,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -13828,7 +14808,17 @@
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
       "name": "onBind",
       "kind": "function",
-      "line": 180,
+      "line": 181,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/service/RelayForegroundService.kt",
+      "name": "resetTestHooks",
+      "kind": "function",
+      "line": 192,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -14015,6 +15005,16 @@
     {
       "module": "android-relay",
       "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/ui/overview/OverviewFragment.kt",
+      "name": "resetTestHooks",
+      "kind": "function",
+      "line": 187,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/ui/records/RecordsFragment.kt",
       "name": "onCreateView",
       "kind": "function",
@@ -14119,6 +15119,16 @@
       "name": "bindStatus",
       "kind": "function",
       "line": 123,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/ui/records/RecordsFragment.kt",
+      "name": "resetTestHooks",
+      "kind": "function",
+      "line": 147,
       "test_status": "TODO",
       "evidence": ""
     },
@@ -14235,6 +15245,16 @@
     {
       "module": "android-relay",
       "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/ui/settings/SettingsFragment.kt",
+      "name": "resetTestHooks",
+      "kind": "function",
+      "line": 175,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
       "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/util/BatteryOptimizationHelper.kt",
       "name": "isIgnoringBatteryOptimizations",
       "kind": "function",
@@ -14309,6 +15329,36 @@
       "name": "chooseReceiverPhone",
       "kind": "function",
       "line": 43,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/util/RelayServerUrlNormalizer.kt",
+      "name": "normalize",
+      "kind": "function",
+      "line": 7,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/util/RelayServerUrlNormalizer.kt",
+      "name": "isLocalHost",
+      "kind": "function",
+      "line": 29,
+      "test_status": "TODO",
+      "evidence": ""
+    },
+    {
+      "module": "android-relay",
+      "language": "kt",
+      "file": "/Users/sunyiyang/Desktop/Project/SilverLink Care/05-安卓短信中转端/app/src/main/java/com/silverlink/smsrelay/util/RelayServerUrlNormalizer.kt",
+      "name": "isPrivateIpv4",
+      "kind": "function",
+      "line": 33,
       "test_status": "TODO",
       "evidence": ""
     },

@@ -203,4 +203,53 @@ describe('FamilyBindingManagePage', () => {
       expect(fetchFamilyBindings).toHaveBeenCalledTimes(2);
     });
   });
+
+  it('covers invalid binding timestamps, default create method and silent load failure branch', async () => {
+    fetchFamilyBindings
+      .mockResolvedValueOnce([
+        {
+          id: 'binding-invalid',
+          familyName: '空时间家属',
+          familyPhoneMasked: '136****2222',
+          relationship: '配偶',
+          elderName: '空时间老人',
+          elderArchiveNo: 'A-010',
+          invitationCode: '',
+          createMethod: '',
+          boundAt: 'bad-time',
+          status: '已解绑',
+        },
+        {
+          id: 'binding-empty',
+          familyName: '缺失时间家属',
+          familyPhoneMasked: '135****3333',
+          relationship: '儿子',
+          elderName: '缺失时间老人',
+          elderArchiveNo: 'A-011',
+          invitationCode: 'INV-011',
+          createMethod: '后台导入',
+          boundAt: '',
+          status: '已绑定',
+        },
+      ])
+      .mockRejectedValueOnce(new Error('load failed'));
+
+    const first = render(<FamilyBindingManagePage />);
+    expect(await screen.findByText('空时间家属')).toBeInTheDocument();
+    expect(screen.getByText('bad-time')).toBeInTheDocument();
+    expect(screen.getByText('-')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '导出' }));
+    expect(exportToCsv).toHaveBeenCalledWith(
+      expect.stringMatching(/^family-bindings-/),
+      expect.arrayContaining([
+        expect.objectContaining({ 创建方式: '邀请码注册' }),
+        expect.objectContaining({ 创建方式: '后台导入' }),
+      ]),
+    );
+    first.unmount();
+
+    render(<FamilyBindingManagePage />);
+    expect(await screen.findByRole('heading', { name: '家属绑定管理' })).toBeInTheDocument();
+    expect(screen.queryByText('空时间家属')).not.toBeInTheDocument();
+  });
 });

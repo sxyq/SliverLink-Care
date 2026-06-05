@@ -13,7 +13,7 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    @Value("${silverlink.security.jwt-secret:demo-jwt-secret-key-2026-silverlink-care-must-be-32-bytes!!}")
+    @Value("${silverlink.security.jwt-secret}")
     private String jwtSecret;
 
     private SecretKey key() {

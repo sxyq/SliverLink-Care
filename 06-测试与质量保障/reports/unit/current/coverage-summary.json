@@ -2,109 +2,139 @@
   "scan-client": {
     "available": true,
     "statements": {
-      "covered": 673,
-      "total": 770,
-      "pct": 87.4
+      "covered": 791,
+      "total": 795,
+      "pct": 99.5
     },
     "functions": {
-      "covered": 158,
-      "total": 174,
-      "pct": 90.8
+      "covered": 181,
+      "total": 181,
+      "pct": 100.0
     },
     "branches": {
-      "covered": 476,
-      "total": 621,
-      "pct": 76.65
+      "covered": 633,
+      "total": 664,
+      "pct": 95.33
     },
     "lines": {
-      "covered": 198,
-      "total": 212,
-      "pct": 93.4
+      "covered": 215,
+      "total": 215,
+      "pct": 100.0
     }
   },
   "volunteer-client": {
     "available": true,
     "statements": {
-      "covered": 1070,
-      "total": 1257,
-      "pct": 85.12
+      "covered": 1220,
+      "total": 1254,
+      "pct": 97.29
     },
     "functions": {
-      "covered": 357,
-      "total": 428,
-      "pct": 83.41
+      "covered": 428,
+      "total": 431,
+      "pct": 99.3
     },
     "branches": {
-      "covered": 683,
-      "total": 908,
-      "pct": 75.22
+      "covered": 771,
+      "total": 892,
+      "pct": 86.43
     },
     "lines": {
-      "covered": 192,
+      "covered": 213,
       "total": 213,
-      "pct": 90.14
+      "pct": 100.0
     }
   },
   "admin-console": {
     "available": true,
     "statements": {
-      "covered": 1809,
-      "total": 2128,
-      "pct": 85.01
+      "covered": 2095,
+      "total": 2187,
+      "pct": 95.79
     },
     "functions": {
-      "covered": 689,
-      "total": 767,
-      "pct": 89.83
+      "covered": 754,
+      "total": 765,
+      "pct": 98.56
     },
     "branches": {
-      "covered": 1633,
-      "total": 2178,
-      "pct": 74.98
+      "covered": 1888,
+      "total": 2181,
+      "pct": 86.57
     },
     "lines": {
-      "covered": 525,
-      "total": 555,
-      "pct": 94.59
+      "covered": 544,
+      "total": 546,
+      "pct": 99.63
     }
   },
   "backend": {
     "available": true,
     "source": "04-统一后端/target/site/jacoco/jacoco.xml",
     "instruction": {
-      "covered": 8282,
-      "total": 17497,
-      "pct": 47.33
+      "covered": 19229,
+      "total": 19873,
+      "pct": 96.76
     },
     "branch": {
-      "covered": 281,
-      "total": 802,
-      "pct": 35.04
+      "covered": 774,
+      "total": 974,
+      "pct": 79.47
     },
     "line": {
-      "covered": 1729,
-      "total": 3130,
-      "pct": 55.24
+      "covered": 3318,
+      "total": 3432,
+      "pct": 96.68
     },
     "complexity": {
-      "covered": 777,
-      "total": 1269,
-      "pct": 61.23
+      "covered": 1269,
+      "total": 1462,
+      "pct": 86.8
     },
     "method": {
-      "covered": 682,
-      "total": 867,
-      "pct": 78.66
+      "covered": 973,
+      "total": 974,
+      "pct": 99.9
     },
     "class": {
-      "covered": 75,
-      "total": 88,
-      "pct": 85.23
+      "covered": 99,
+      "total": 99,
+      "pct": 100.0
     }
   },
   "android": {
     "available": true,
+    "source": "05-安卓短信中转端/app/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml",
     "unit_test_report": "05-安卓短信中转端/app/build/reports/tests/testDebugUnitTest/index.html",
-    "coverage_note": "Android JVM test report exists; JaCoCo XML aggregation is pending in a later coverage task."
+    "instruction": {
+      "covered": 768,
+      "total": 6356,
+      "pct": 12.08
+    },
+    "branch": {
+      "covered": 39,
+      "total": 430,
+      "pct": 9.07
+    },
+    "line": {
+      "covered": 106,
+      "total": 968,
+      "pct": 10.95
+    },
+    "complexity": {
+      "covered": 55,
+      "total": 472,
+      "pct": 11.65
+    },
+    "method": {
+      "covered": 45,
+      "total": 255,
+      "pct": 17.65
+    },
+    "class": {
+      "covered": 12,
+      "total": 50,
+      "pct": 24.0
+    }
   }
 }

@@ -1,10 +1,12 @@
 package com.silverlink.smsrelay
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.silverlink.smsrelay.data.local.RelayPreferences
 import com.silverlink.smsrelay.databinding.ActivityMainBinding
 import com.silverlink.smsrelay.service.RelayServiceLauncher
 import com.silverlink.smsrelay.ui.overview.OverviewFragment
@@ -37,8 +39,15 @@ class MainActivity : AppCompatActivity() {
 
         setupFragments()
         setupBottomNavigation()
-        RelayServiceLauncher.start(this, immediateHeartbeat = false)
+        handleExternalCommands(intent)
+        serviceStarter?.invoke(this, false) ?: RelayServiceLauncher.start(this, immediateHeartbeat = false)
         ensureSmsPermissions()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleExternalCommands(intent)
     }
 
     private fun setupFragments() {
@@ -73,7 +82,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun ensureSmsPermissions() {
-        if (SmsPermissionHelper.hasSmsPermissions(this)) return
-        smsPermissionLauncher.launch(SmsPermissionHelper.smsPermissions)
+        val hasPermissions = smsPermissionChecker?.invoke(this) ?: SmsPermissionHelper.hasSmsPermissions(this)
+        if (hasPermissions) return
+        permissionRequester?.invoke(this, SmsPermissionHelper.smsPermissions)
+            ?: smsPermissionLauncher.launch(SmsPermissionHelper.smsPermissions)
+    }
+
+    private fun handleExternalCommands(intent: android.content.Intent?) {
+        if (intent == null) return
+        if (intent.hasExtra(EXTRA_MEDIA_KEEPALIVE_ENABLED)) {
+            val enabled = intent.getBooleanExtra(EXTRA_MEDIA_KEEPALIVE_ENABLED, false)
+            RelayPreferences(this).saveMediaKeepAliveEnabled(enabled)
+            RelayServiceLauncher.setMediaKeepAlive(this, enabled)
+            Toast.makeText(
+                this,
+                if (enabled) getString(R.string.media_keepalive_enabled) else getString(R.string.media_keepalive_disabled),
+                Toast.LENGTH_SHORT,
+            ).show()
+        }
+        if (intent.getBooleanExtra(EXTRA_OPEN_SETTINGS, false)) {
+            binding.bottomNavigation.selectedItemId = R.id.nav_settings
+        }
+    }
+
+    companion object {
+        const val EXTRA_MEDIA_KEEPALIVE_ENABLED = "extra_media_keepalive_enabled"
+        const val EXTRA_OPEN_SETTINGS = "extra_open_settings"
+        internal var serviceStarter: ((MainActivity, Boolean) -> Unit)? = null
+        internal var smsPermissionChecker: ((MainActivity) -> Boolean)? = null
+        internal var permissionRequester: ((MainActivity, Array<String>) -> Unit)? = null
+
+        internal fun resetTestHooks() {
+            serviceStarter = null
+            smsPermissionChecker = null
+            permissionRequester = null
+        }
     }
 }

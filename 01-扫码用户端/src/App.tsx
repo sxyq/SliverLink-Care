@@ -5,6 +5,7 @@ import { ContentProtection } from './components/ContentProtection';
 import { useQrToken } from './hooks/useQrToken';
 import { useScanBasicInfo } from './hooks/useScanBasicInfo';
 import { useProtectedArchive } from './hooks/useProtectedArchive';
+import { getResolvedQrToken } from './api/scanApi';
 import { BasicInfoPage } from './pages/BasicInfoPage';
 import { SmsVerifyPage } from './pages/SmsVerifyPage';
 import { HealthArchivePage } from './pages/HealthArchivePage';
@@ -23,7 +24,7 @@ function AppRoutes() {
   const { verifiedBasicInfo, healthRecord, medications, scaleSummaries, loading: archiveLoading } = useProtectedArchive(verified, verifiedSessionId, verifiedElderId);
 
   useEffect(() => {
-    const verifiedQrToken = window.sessionStorage.getItem('silverlink.scan.verifiedQrToken') || '';
+    const verifiedQrToken = getResolvedQrToken();
     if (verifiedQrToken && token && verifiedQrToken !== token) {
       clearVerification();
     }
@@ -82,7 +83,7 @@ function AppRoutes() {
       <HealthArchivePage data={healthRecord} basicInfo={basicDisplayData} loading={archiveLoading} verified={verified} />,
       <MedicationPage data={medications} loading={archiveLoading} />,
       <ScaleSummaryPage data={scaleSummaries} loading={archiveLoading} />,
-      <ScaleDetailPage data={scaleSummaries} loading={archiveLoading} />,
+      <ScaleDetailPage data={scaleSummaries} loading={archiveLoading} sessionId={verifiedSessionId} elderId={verifiedElderId} />,
       <NameplatePreviewPage
         elderId={data.id}
         name={data.name}

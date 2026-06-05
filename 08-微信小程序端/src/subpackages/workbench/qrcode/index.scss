@@ -3,101 +3,113 @@
 }
 
 .workbench-qrcode-hero {
-  display: flex;
-  flex-direction: column;
-  gap: 18rpx;
+  display: grid;
+  gap: 12rpx;
 }
 
 .workbench-qrcode-hero-copy {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18rpx;
 }
 
-.workbench-qrcode-preview-card {
-  display: flex;
-  flex-direction: column;
-  gap: 12rpx;
-  padding: 22rpx;
-  border: 1rpx solid var(--sl-border);
-  border-radius: 22rpx;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
+/* 对齐 H5 sl-qr-preview-card：绝对定位状态 chip + 居中预览 */
+.workbench-qrcode-page .sl-qr-preview-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 18rpx;
+  padding: 28rpx 30rpx 32rpx;
+  border-radius: 44rpx;
 }
 
-.workbench-qrcode-status-chip {
-  align-self: flex-start;
-  min-height: 42rpx;
-  padding: 0 16rpx;
+.workbench-qrcode-page .sl-qr-status-chip {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  z-index: 1;
+  font-size: 28rpx;
+  font-weight: 800;
+  letter-spacing: 1rpx;
+}
+
+.workbench-qrcode-page .sl-qr-preview-title {
+  width: 100%;
+  padding-top: 24rpx;
+  font-size: 34rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: left;
+}
+
+.workbench-qrcode-page .sl-qr-preview-meta {
+  width: 100%;
+  margin-top: -4rpx;
+  font-size: 24rpx;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.workbench-qrcode-page .sl-qr-preview-frame {
+  position: relative;
+  width: min(100%, 420rpx);
+  min-height: 380rpx;
+  padding: 92rpx 28rpx 28rpx;
+  border-radius: 44rpx;
+  display: grid;
+  place-items: center;
+}
+
+.workbench-qrcode-export-button {
+  position: absolute;
+  top: 24rpx;
+  right: 24rpx;
+  z-index: 2;
+  min-width: 148rpx;
+  height: 56rpx;
+  padding: 0 20rpx;
   border-radius: 999rpx;
-  background: rgba(13, 162, 173, 0.12);
+  background: rgba(255, 255, 255, 0.96);
+  border: 1rpx solid #c8e7ec;
   color: var(--sl-primary-deep);
   font-size: 22rpx;
-  font-weight: 700;
-  line-height: 42rpx;
-}
-
-.workbench-qrcode-preview-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--sl-primary-ink);
-}
-
-.workbench-qrcode-preview-meta,
-.workbench-qrcode-preview-link {
-  font-size: 23rpx;
-  line-height: 1.7;
-  color: var(--sl-text-secondary);
-  word-break: break-all;
-}
-
-.workbench-qrcode-preview-frame {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 260rpx;
-  border-radius: 22rpx;
-  background: #ffffff;
-  border: 1rpx dashed #cfe7eb;
-}
-
-.workbench-qrcode-preview-placeholder {
-  width: 180rpx;
-  height: 180rpx;
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10rpx;
-  border-radius: 18rpx;
-  background: rgba(20, 121, 184, 0.08);
-  color: var(--sl-color-primary);
-  padding: 16rpx;
-  text-align: center;
-}
-
-.workbench-qrcode-preview-token {
-  font-size: 22rpx;
-  line-height: 1.4;
   font-weight: 800;
-  word-break: break-all;
+  line-height: 56rpx;
+  box-shadow: 0 10rpx 20rpx rgba(7, 84, 98, 0.1);
 }
 
-.workbench-qrcode-preview-caption {
-  font-size: 18rpx;
-  line-height: 1.5;
-  color: var(--sl-text-secondary);
+.workbench-qrcode-page .sl-qr-preview-placeholder {
+  width: 320rpx;
+  min-height: 320rpx;
+  padding: 28rpx;
+  border-radius: 44rpx;
+  gap: 16rpx;
 }
 
 .workbench-qrcode-copy-button {
   width: 100%;
+  gap: 12rpx;
+}
+
+.workbench-qrcode-preview-link {
+  width: 100%;
+  font-size: 24rpx;
+  line-height: 1.55;
+  word-break: break-all;
 }
 
 .workbench-qrcode-message {
-  padding: 22rpx;
-  border-radius: 20rpx;
-  background: rgba(13, 162, 173, 0.08);
-  color: var(--sl-primary-deep);
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 24rpx;
+  background: #fff8ec;
+  border: 1rpx solid #f6e0b7;
+  color: #b56b17;
   font-size: 24rpx;
-  line-height: 1.7;
+  line-height: 1.6;
 }
 
 .workbench-qrcode-note {
@@ -106,6 +118,25 @@
   line-height: 1.7;
 }
 
-.workbench-qrcode-primary-button {
-  width: 100%;
+/* 对齐 H5 二维码操作按钮：使用 sl-detail-action-card 结构 */
+.workbench-qrcode-page .sl-qr-action-grid {
+  gap: 20rpx;
+}
+
+.workbench-qrcode-page .sl-detail-action-card .sl-action-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 20rpx;
+  background: #eef8fa;
+  color: var(--sl-primary-deep);
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.workbench-qrcode-page .sl-detail-action-card.sl-action-card--warning .sl-action-card__arrow {
+  background: #fff4f4;
+  color: #e25a5a;
 }

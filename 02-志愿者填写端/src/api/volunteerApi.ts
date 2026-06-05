@@ -6,6 +6,7 @@ export interface LoginResult {
   ok: boolean;
   token: string;
   name?: string;
+  account?: string;
 }
 
 export interface VolunteerRegisterInput {
@@ -17,6 +18,7 @@ export interface VolunteerRegisterInput {
 }
 
 export interface VolunteerProfileResult {
+  token?: string;
   account: string;
   name: string;
   phone: string;
@@ -31,11 +33,11 @@ export interface UpdateVolunteerProfileInput {
 }
 
 export async function loginVolunteer(account: string, password: string): Promise<LoginResult> {
-  const res = await http<{ token: string; name?: string }>('/api/volunteer/login', {
+  const res = await http<{ token?: string; name?: string; account?: string }>('/api/volunteer/login', {
     method: 'POST',
     body: JSON.stringify({ account, password }),
   });
-  return { ok: Boolean(res.token), token: res.token, name: res.name };
+  return { ok: Boolean(res.token || res.account || res.name), token: res.token || '', name: res.name, account: res.account };
 }
 
 export async function previewVolunteerInvitation(code: string): Promise<InvitationPreview> {
@@ -43,11 +45,11 @@ export async function previewVolunteerInvitation(code: string): Promise<Invitati
 }
 
 export async function registerVolunteer(input: VolunteerRegisterInput): Promise<LoginResult> {
-  const res = await http<{ token: string; name?: string }>('/api/volunteer/register', {
+  const res = await http<{ token?: string; name?: string; account?: string }>('/api/volunteer/register', {
     method: 'POST',
     body: JSON.stringify(input),
   });
-  return { ok: Boolean(res.token), token: res.token, name: res.name };
+  return { ok: true, token: res.token || '', name: res.name, account: res.account };
 }
 
 export async function fetchAssignedElders(): Promise<AssignedElder[]> {
@@ -92,8 +94,8 @@ export async function fetchVolunteerProfile(): Promise<VolunteerProfileResult> {
   return http<VolunteerProfileResult>('/api/volunteer/me/profile');
 }
 
-export async function updateVolunteerProfile(input: UpdateVolunteerProfileInput): Promise<VolunteerProfileResult & { token: string }> {
-  return http<VolunteerProfileResult & { token: string }>('/api/volunteer/me/profile', {
+export async function updateVolunteerProfile(input: UpdateVolunteerProfileInput): Promise<VolunteerProfileResult> {
+  return http<VolunteerProfileResult>('/api/volunteer/me/profile', {
     method: 'PUT',
     body: JSON.stringify({
       account: input.account.trim(),
@@ -102,6 +104,12 @@ export async function updateVolunteerProfile(input: UpdateVolunteerProfileInput)
       currentPassword: input.currentPassword,
       password: input.password,
     }),
+  });
+}
+
+export async function logoutVolunteer(): Promise<void> {
+  await http<void>('/api/volunteer/logout', {
+    method: 'POST',
   });
 }
 

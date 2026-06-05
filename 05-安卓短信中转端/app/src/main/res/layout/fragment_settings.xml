@@ -110,12 +110,19 @@
                     android:text="@string/request_sms_permission" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBatteryOptimization"
+                    android:id="@+id/btnUnifiedKeepAlive"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/request_unified_keepalive" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRootForceProtection"
                     style="@style/Widget.Material3.Button.OutlinedButton"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="@string/request_battery_optimization" />
+                    android:text="@string/request_root_force_protection" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSyncConfig"
@@ -143,6 +150,11 @@
                 <include layout="@layout/item_config_row" android:id="@+id/rowServiceStatus" />
                 <include layout="@layout/item_config_row" android:id="@+id/rowPermissionStatus" />
                 <include layout="@layout/item_config_row" android:id="@+id/rowBatteryOptimization" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowExactAlarm" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowProtectionSummary" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowNonRootProtection" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowMediaKeepAlive" />
+                <include layout="@layout/item_config_row" android:id="@+id/rowRootProtection" />
                 <include layout="@layout/item_config_row" android:id="@+id/rowLastHeartbeat" />
                 <include layout="@layout/item_config_row" android:id="@+id/rowLastSync" />
                 <include layout="@layout/item_config_row" android:id="@+id/rowVersion" />

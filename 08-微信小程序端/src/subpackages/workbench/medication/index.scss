@@ -1,9 +1,29 @@
 .workbench-medication-page {
+  gap: 28rpx;
+}
+
+.workbench-medication-actions {
+  margin-top: 18rpx;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
   gap: 16rpx;
 }
 
-.workbench-medication-add-button {
-  margin-top: 18rpx;
+.workbench-medication-actions > .sl-secondary-button,
+.workbench-medication-actions > .sl-primary-button {
+  flex: 0 0 auto;
+}
+
+.workbench-medication-actions > .sl-secondary-button {
+  min-width: 236rpx;
+  padding: 0 28rpx;
+}
+
+.workbench-medication-actions > .sl-primary-button {
+  min-width: 204rpx;
+  padding: 0 28rpx;
 }
 
 .workbench-medication-list {

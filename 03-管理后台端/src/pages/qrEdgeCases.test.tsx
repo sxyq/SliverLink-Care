@@ -125,4 +125,56 @@ describe('QrCodeManagePage edge branches', () => {
     fireEvent.click(screen.getByRole('button', { name: '打开扫码页' }));
     expect(assignMock).toHaveBeenCalledWith('https://example.com/scan/10');
   });
+
+  it('covers relay save failure, search and status filters, and modal close reset', async () => {
+    fetchQrCodes.mockResolvedValue([
+      {
+        id: 'qr-search-1',
+        token: 'token-search-1',
+        archiveNo: 'A-011',
+        elderName: '检索老人',
+        elderAge: 67,
+        elderPhone: '13700000000',
+        relayDeviceId: 'device-1',
+        relayReceiverPhone: '13800000000',
+        url: 'https://example.com/scan/11',
+        status: '已停用',
+        createdAt: '2026-05-26T11:00:00Z',
+      },
+      {
+        id: 'qr-search-2',
+        token: 'token-search-2',
+        archiveNo: 'A-012',
+        elderName: '常规老人',
+        elderAge: 70,
+        elderPhone: '13600000000',
+        relayDeviceId: '',
+        relayReceiverPhone: '',
+        url: 'https://example.com/scan/12',
+        status: '启用',
+        createdAt: '2026-05-26T11:10:00Z',
+      },
+    ]);
+    updateQrCodeRelayDevice.mockRejectedValueOnce(new Error('绑定失败'));
+    toDataURL.mockResolvedValue('data:image/png;base64,ok');
+
+    render(<QrCodeManagePage />);
+
+    expect(await screen.findByText('检索老人')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('搜索二维码 ID、档案编号、老人姓名'), { target: { value: '检索' } });
+    fireEvent.change(screen.getByDisplayValue('全部状态'), { target: { value: '已停用' } });
+    expect(screen.getByText('检索老人')).toBeInTheDocument();
+    expect(screen.queryByText('常规老人')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '查看与管理' }));
+    fireEvent.click(screen.getByRole('button', { name: '保存短信接收设备' }));
+    expect(await screen.findByText('绑定失败')).toBeInTheDocument();
+
+    const overlay = document.querySelector('.modal-overlay');
+    expect(overlay).not.toBeNull();
+    fireEvent.click(overlay as Element);
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '二维码查看与管理' })).not.toBeInTheDocument();
+    });
+  });
 });

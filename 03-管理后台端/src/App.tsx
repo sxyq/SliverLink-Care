@@ -1,58 +1,61 @@
 import { useEffect, useState } from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { logoutAdmin } from './api/adminApi';
+import { fetchAdminSession, logoutAdmin } from './api/adminApi';
 import { createAdminRouter } from './routes/router';
 
 export function App() {
-  const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('sl_admin_token'));
-  const [role, setRole] = useState(() => localStorage.getItem('sl_admin_role') || '');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [role, setRole] = useState('');
+  const [hydrating, setHydrating] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('sl_admin_token');
-    const savedRole = localStorage.getItem('sl_admin_role') || '';
+    let cancelled = false;
 
-    if (!token) {
+    async function hydrateSession() {
+      try {
+        const session = await fetchAdminSession();
+        if (cancelled) return;
+        setLoggedIn(session.loggedIn);
+        setRole(session.role);
+      } catch {
+        if (cancelled) return;
+        setLoggedIn(false);
+        setRole('');
+      } finally {
+        if (!cancelled) {
+          setHydrating(false);
+        }
+      }
+    }
+
+    hydrateSession();
+
+    function handleSessionCleared() {
       setLoggedIn(false);
       setRole('');
-      localStorage.removeItem('sl_admin_role');
-      return;
+      setHydrating(false);
     }
 
-    if (!savedRole) {
-      setRole('');
-    } else if (savedRole !== role) {
-      setRole(savedRole);
-    }
-  }, [role]);
-
-  useEffect(() => {
-    function syncSession() {
-      const token = localStorage.getItem('sl_admin_token');
-      const savedRole = localStorage.getItem('sl_admin_role') || '';
-      setLoggedIn(Boolean(token));
-      setRole(token ? savedRole : '');
-    }
-
-    window.addEventListener('storage', syncSession);
-    window.addEventListener('sl-admin-session-cleared', syncSession as EventListener);
+    window.addEventListener('sl-admin-session-cleared', handleSessionCleared as EventListener);
     return () => {
-      window.removeEventListener('storage', syncSession);
-      window.removeEventListener('sl-admin-session-cleared', syncSession as EventListener);
+      cancelled = true;
+      window.removeEventListener('sl-admin-session-cleared', handleSessionCleared as EventListener);
     };
   }, []);
 
   function handleLogin(nextRole: string) {
-    localStorage.setItem('sl_admin_role', nextRole);
     setRole(nextRole);
     setLoggedIn(true);
   }
 
   async function handleLogout() {
     await logoutAdmin();
-    localStorage.removeItem('sl_admin_token');
-    localStorage.removeItem('sl_admin_role');
     setLoggedIn(false);
     setRole('');
+  }
+
+  if (hydrating) {
+    return <div className="admin-shell-loading">正在校验管理员会话...</div>;
   }
 
   const router = createAdminRouter(loggedIn, handleLogin, role, handleLogout);

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { CircleUserRound, LogOut, X } from 'lucide-react';
-import { createAssignedElder, fetchAssignedElders, fetchVolunteerProfile, updateVolunteerProfile } from '../api/volunteerApi';
+import { createAssignedElder, fetchAssignedElders, fetchVolunteerProfile, logoutVolunteer, updateVolunteerProfile } from '../api/volunteerApi';
 import { useAuth } from '../app/AuthProvider';
 import type { AssignedElder, CreateAssignedElderInput } from '../types';
 import { SubjectListPage } from '@shared/SubjectListPage';
@@ -153,7 +153,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
     setAccountSuccess('');
     try {
       const result = await updateVolunteerProfile(accountForm);
-      login(result.token, {
+      login(result.token || '', {
         account: result.account,
         name: result.name,
       });
@@ -177,6 +177,17 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
     }
   }
 
+  async function handleLogout() {
+    try {
+      await logoutVolunteer();
+    } catch {
+      // Clear local auth state even if the backend logout request fails.
+    } finally {
+      setShowAccountPanel(false);
+      logout();
+    }
+  }
+
   return (
     <>
       <SubjectListPage
@@ -197,7 +208,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
           </button>
         }
         headerAction={
-          <button type="button" className="sl-page-header-icon" onClick={logout} aria-label="退出登录" title="退出登录">
+          <button type="button" className="sl-page-header-icon" onClick={handleLogout} aria-label="退出登录" title="退出登录">
             <LogOut size={18} />
           </button>
         }
@@ -303,10 +314,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
               <button
                 type="button"
                 className="sl-btn sl-btn-primary"
-                onClick={() => {
-                  setShowAccountPanel(false);
-                  logout();
-                }}
+                onClick={handleLogout}
               >
                 <LogOut size={16} />
                 退出登录

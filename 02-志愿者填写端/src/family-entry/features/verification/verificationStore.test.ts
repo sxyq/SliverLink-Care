@@ -201,13 +201,18 @@ describe('family verification store', () => {
     vi.useFakeTimers();
     initVerification('13800006666');
 
-    vi.advanceTimersByTime(60000);
+    for (let i = 0; i < 61; i++) {
+      vi.advanceTimersByTime(1000);
+    }
     expect(getVerificationState().canResend).toBe(true);
 
     resetCountdown();
-    vi.advanceTimersByTime(61000);
+    for (let i = 0; i < 61; i++) {
+      vi.advanceTimersByTime(1000);
+    }
     expect(getVerificationState().countdown).toBe(0);
     expect(getVerificationState().canResend).toBe(true);
+    vi.useRealTimers();
   });
 
   it('multiple subscribers all receive notifications', () => {
@@ -239,5 +244,20 @@ describe('family verification store', () => {
     }
     expect(getVerificationState().backupCountdown).toBe(0);
     expect(getVerificationState().canSwitchBackup).toBe(true);
+  });
+
+  it('preserves resend state while backup timer continues ticking', () => {
+    vi.useFakeTimers();
+    initVerification('13800006666', '13900007777');
+
+    for (let i = 0; i < 61; i++) {
+      vi.advanceTimersByTime(1000);
+    }
+    expect(getVerificationState().canResend).toBe(true);
+    expect(getVerificationState().backupCountdown).toBe(59);
+
+    vi.advanceTimersByTime(1000);
+    expect(getVerificationState().canResend).toBe(true);
+    expect(getVerificationState().backupCountdown).toBe(58);
   });
 });

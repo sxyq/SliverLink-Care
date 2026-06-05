@@ -48,6 +48,11 @@ public class VolunteerService {
         return data.updateVolunteerProfile(account, body);
     }
 
+    public List<Map<String, String>> getMyElderMedications(String account, String elderId) {
+        findMyElder(account, elderId);
+        return data.medications(elderId);
+    }
+
     public Map<String, String> registerWithInvitation(VolunteerRegisterRequest req) {
         String invitationCode = req.getInvitationCode() == null ? "" : req.getInvitationCode().trim().toUpperCase();
         String account = req.getAccount() == null ? "" : req.getAccount().trim();
@@ -168,7 +173,11 @@ public class VolunteerService {
         map.put("createdAt", entity.getCreatedAt());
         map.put("disabledAt", entity.getDisabledAt());
         map.put("token", entity.getQrToken());
-        map.put("url", entity.getQrToken() == null || entity.getQrToken().isBlank() ? "" : qrCodeService.buildPublicUrl(entity.getQrToken()));
+        String publicUrl = entity.getQrToken() == null || entity.getQrToken().isBlank() ? "" : qrCodeService.buildPublicUrl(entity.getQrToken());
+        map.put("url", publicUrl);
+        map.put("publicUrl", publicUrl);
+        map.put("qrImageBase64", entity.getQrToken() == null || entity.getQrToken().isBlank() ? "" : qrCodeService.renderPublicQrImageBase64(entity.getQrToken()));
+        map.put("qrImageUrl", entity.getQrToken() == null || entity.getQrToken().isBlank() ? "" : qrCodeService.buildPublicQrImageUrl(entity.getQrToken()));
         map.put("securityNote", "二维码不包含明文身份与健康信息，仅保存加密访问令牌。");
         Map<String, Object> pendingReview = reviewRequestService.findPendingByQrCode(entity.getId());
         if (pendingReview != null) {

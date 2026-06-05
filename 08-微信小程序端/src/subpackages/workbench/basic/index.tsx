@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Text, Textarea, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
@@ -96,14 +96,14 @@ export default function WorkbenchBasicPage() {
     };
   }, [elderId, session?.role]);
 
-  const canEditAll = Boolean(session && canEditBasicInfo(session.role));
-  const canEditContactOnly = Boolean(session && canManageContacts(session.role));
+  const canEditAll = useMemo(() => Boolean(session && canEditBasicInfo(session.role)), [session]);
+  const canEditContactOnly = useMemo(() => Boolean(session && canManageContacts(session.role)), [session]);
 
-  function updateField(field: FormField, value: string) {
+  const updateField = useCallback((field: FormField, value: string) => {
     setFormValue((current) => (current ? { ...current, [field]: value } : current));
-  }
+  }, []);
 
-  function isReadOnly(field: FormField) {
+  const isReadOnly = useCallback((field: FormField) => {
     if (canEditAll) {
       return false;
     }
@@ -113,9 +113,9 @@ export default function WorkbenchBasicPage() {
     }
 
     return true;
-  }
+  }, [canEditAll, canEditContactOnly]);
 
-  async function handleSave() {
+  const handleSave = useCallback(async () => {
     if (!session || !detail || !formValue || saving) {
       return;
     }
@@ -139,11 +139,11 @@ export default function WorkbenchBasicPage() {
     } finally {
       setSaving(false);
     }
-  }
+  }, [session, detail, formValue, saving, canEditAll, canEditContactOnly]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }
+  }, []);
 
   if (!session) {
     return null;

@@ -6,7 +6,6 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { confirmRelayVerificationSent, getRelayVerificationStatus, startRelayVerification, verifyIdentityAccess } from '../api/smsApi';
 import { useSecurity } from '../app/SecurityProvider';
-import { ALLOW_LOCAL_VERIFICATION_FALLBACK } from '../config/env';
 import { useVerificationStore } from '../features/verification/verificationStore';
 import { getResolvedElderId } from '../api/scanApi';
 import type { IdentityVerificationPayload, SmsVerificationSession } from '../types/verification';
@@ -78,7 +77,6 @@ export function SmsVerifyPage() {
   const [submittingIdentity, setSubmittingIdentity] = useState(false);
   const [error, setError] = useState('');
   const [sentHint, setSentHint] = useState(false);
-  const [demoTapCount, setDemoTapCount] = useState(0);
   const [identityForm, setIdentityForm] = useState<IdentityVerificationPayload>({
     name: '',
     phone: '',
@@ -143,32 +141,13 @@ export function SmsVerifyPage() {
     window.location.href = smsLink;
   }
 
-  function handleDemoBypassTap() {
-    if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
-
-    setDemoTapCount((current) => {
-      const nextCount = current + 1;
-      if (nextCount < 5) return nextCount;
-
-      const demoSessionId = `local-relay-demo-${Date.now()}`;
-      setError('');
-      setGlobalVerified(demoSessionId, getResolvedElderId());
-      startAuthTimer();
-      navigate('/health');
-      return 0;
-    });
-  }
-
   async function handleCheckStatus() {
     if (!session) return;
     setChecking(true);
     setError('');
 
     try {
-      if (ALLOW_LOCAL_VERIFICATION_FALLBACK) {
-        await confirmRelayVerificationSent(session.sessionId);
-      }
-
+      await confirmRelayVerificationSent(session.sessionId);
       const status = await getRelayVerificationStatus(session.sessionId);
       if (status.verified) {
         const currentElderId = getResolvedElderId();
@@ -254,16 +233,6 @@ export function SmsVerifyPage() {
       <section className="sl-panel sl-verify-hero-card">
         <div
           className="sl-verify-hero-icon"
-          onClick={handleDemoBypassTap}
-          role={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 'button' : undefined}
-          tabIndex={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 0 : undefined}
-          onKeyDown={(event) => {
-            if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault();
-              handleDemoBypassTap();
-            }
-          }}
         >
           <LockKeyhole size={34} />
         </div>

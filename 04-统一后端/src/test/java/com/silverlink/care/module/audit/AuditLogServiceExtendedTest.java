@@ -8,11 +8,14 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.*;
 
 class AuditLogServiceExtendedTest {
@@ -24,6 +27,7 @@ class AuditLogServiceExtendedTest {
     void setUp() {
         data = mock(SilverLinkDataService.class);
         service = new AuditLogService(data);
+        ReflectionTestUtils.setField(service, "batchSize", 1);
         when(data.str(any())).thenAnswer(inv -> {
             Object arg = inv.getArgument(0);
             return arg == null ? "" : arg.toString();
@@ -192,14 +196,21 @@ class AuditLogServiceExtendedTest {
     @Test
     void recordWithAuthenticationAndIpDelegatesCorrectly() {
         var auth = new TestingAuthenticationToken("admin", "pwd", List.of(new SimpleGrantedAuthority("ROLE_SYSTEM_ADMIN")));
-        service.record(auth, "10.0.0.1", "elder-1", "VIEW", "SUCCESS");
-        verify(data).recordAudit(eq("admin"), eq("SYSTEM_ADMIN"), eq("10.0.0.1"), eq("elder-1"), eq("VIEW"), eq("SUCCESS"), any(), any());
+        SilverLinkDataService.AuditLogWrite write = captureSingleWrite(() ->
+                service.record(auth, "10.0.0.1", "elder-1", "VIEW", "SUCCESS"));
+        assertEquals("admin", write.operator());
+        assertEquals("SYSTEM_ADMIN", write.role());
+        assertEquals("10.0.0.1", write.ip());
+        assertEquals("elder-1", write.target());
+        assertEquals("VIEW", write.action());
     }
 
     @Test
     void recordWithAuthenticationAndIpUsesAnonymousWhenAuthIsNull() {
-        service.record(null, "10.0.0.1", "elder-1", "VIEW", "SUCCESS");
-        verify(data).recordAudit(eq("anonymous"), eq("UNKNOWN"), eq("10.0.0.1"), eq("elder-1"), eq("VIEW"), eq("SUCCESS"), any(), any());
+        SilverLinkDataService.AuditLogWrite write = captureSingleWrite(() ->
+                service.record(null, "10.0.0.1", "elder-1", "VIEW", "SUCCESS"));
+        assertEquals("anonymous", write.operator());
+        assertEquals("UNKNOWN", write.role());
     }
 
     @Test
@@ -207,16 +218,45 @@ class AuditLogServiceExtendedTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("10.0.0.1");
         var auth = new TestingAuthenticationToken("admin", "pwd", List.of(new SimpleGrantedAuthority("ROLE_VOLUNTEER")));
-        service.record(auth, request, "elder-1", "EDIT", "SUCCESS");
-        verify(data).recordAudit(eq("admin"), eq("VOLUNTEER"), eq("10.0.0.1"), eq("elder-1"), eq("EDIT"), eq("SUCCESS"), any(), any());
+        SilverLinkDataService.AuditLogWrite write = captureSingleWrite(() ->
+                service.record(auth, request, "elder-1", "EDIT", "SUCCESS"));
+        assertEquals("admin", write.operator());
+        assertEquals("VOLUNTEER", write.role());
+        assertEquals("10.0.0.1", write.ip());
+        assertEquals("EDIT", write.action());
     }
 
     @Test
     void recordWithAuthenticationAndRequestUsesAnonymousWhenAuthIsNull() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setRemoteAddr("10.0.0.1");
-        service.record(null, request, "elder-1", "VIEW", "SUCCESS");
-        verify(data).recordAudit(eq("anonymous"), eq("UNKNOWN"), eq("10.0.0.1"), eq("elder-1"), eq("VIEW"), eq("SUCCESS"), any(), any());
+        SilverLinkDataService.AuditLogWrite write = captureSingleWrite(() ->
+                service.record(null, request, "elder-1", "VIEW", "SUCCESS"));
+        assertEquals("anonymous", write.operator());
+        assertEquals("UNKNOWN", write.role());
+        assertEquals("10.0.0.1", write.ip());
+    }
+
+    private SilverLinkDataService.AuditLogWrite captureSingleWrite(Runnable action) {
+        AtomicReference<SilverLinkDataService.AuditLogWrite> captured = new AtomicReference<>();
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            List<SilverLinkDataService.AuditLogWrite> batch = (List<SilverLinkDataService.AuditLogWrite>) invocation.getArgument(0);
+            if (!batch.isEmpty()) {
+                captured.set(batch.get(0));
+            }
+            return null;
+        }).when(data).recordAuditBatch(anyList());
+
+        action.run();
+
+        SilverLinkDataService.AuditLogWrite write = captured.get();
+        assertNotNull(write, "expected a batched audit log entry");
+        verify(data, atLeastOnce()).recordAuditBatch(anyList());
+        verify(data, never()).recordAudit(
+                any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
+        );
+        return write;
     }
 
     @Test

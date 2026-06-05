@@ -180,4 +180,30 @@ public class ScanController {
         );
         return ApiResponse.ok(scales);
     }
+
+    @GetMapping("/scales/{scaleName}")
+    public ApiResponse<Map<String, Object>> scaleDetail(
+            @PathVariable String scaleName,
+            @RequestParam String elderId,
+            @RequestParam String sessionId,
+            HttpServletRequest request
+    ) {
+        var context = scanService.authorizeSession(sessionId, elderId, "health");
+        Map<String, Object> scale = scanService.getScaleDetailData(elderId, scaleName);
+        auditLogService.record(
+                context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
+                "VISITOR",
+                request,
+                elderId,
+                "VIEW_SCALE_DETAIL",
+                "SUCCESS",
+                null,
+                sessionId,
+                context.getVerificationMethod(),
+                context.getVisitorName(),
+                context.getVisitorPhone(),
+                context.getVisitorIdCard()
+        );
+        return ApiResponse.ok(scale);
+    }
 }

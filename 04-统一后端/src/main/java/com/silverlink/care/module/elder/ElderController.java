@@ -52,4 +52,9 @@ public class ElderController {
     public ApiResponse<java.util.List<Map<String, Object>>> getScales(@PathVariable String id) {
         return ApiResponse.ok(elderService.getScales(id));
     }
+
+    @GetMapping("/{id}/medications")
+    public ApiResponse<java.util.List<Map<String, String>>> getMedications(@PathVariable String id) {
+        return ApiResponse.ok(elderService.getMedications(id));
+    }
 }

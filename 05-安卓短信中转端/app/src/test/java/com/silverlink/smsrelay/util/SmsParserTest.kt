@@ -17,6 +17,15 @@ class SmsParserTest {
     }
 
     @Test
+    fun `matches alphanumeric verification token from unified backend`() {
+        val parsed = SmsParser.parse("SL XG8YLNM4AH", "SL")
+
+        assertTrue(parsed.matched)
+        assertEquals("SL", parsed.prefix)
+        assertEquals("XG8YLNM4AH", parsed.code)
+    }
+
+    @Test
     fun `rejects non matching message`() {
         val parsed = SmsParser.parse("hello world", "SL")
 

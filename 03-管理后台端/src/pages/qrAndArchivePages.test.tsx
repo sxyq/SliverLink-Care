@@ -284,4 +284,129 @@ describe('ElderArchivePage', () => {
       expect(deleteElder).toHaveBeenCalledWith('elder-1');
     });
   });
+
+  it('covers invalid age/phone, delete cancel and row actions without id', async () => {
+    fetchElders.mockReset();
+    fetchElders.mockResolvedValue([
+      {
+        id: '',
+        archiveNo: 'A-VOID',
+        name: '无编号老人',
+        gender: '男',
+        age: 65,
+        residence: '',
+        phoneMasked: '-',
+        aboType: '',
+        rhType: '',
+        volunteer: '-',
+        status: '停用',
+      },
+    ]);
+    confirmMock.mockReturnValue(false);
+
+    render(<ElderArchivePage />);
+
+    expect(await screen.findByText('无编号老人')).toBeInTheDocument();
+    const row = screen.getByText('无编号老人').closest('tr');
+    expect(row).not.toBeNull();
+    const actions = within(row as HTMLElement);
+
+    fireEvent.click(actions.getByRole('button', { name: '启用' }));
+    fireEvent.click(actions.getByRole('button', { name: '删除' }));
+    expect(setElderStatus).not.toHaveBeenCalled();
+    expect(deleteElder).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: '新增档案' }));
+    fireEvent.change(screen.getByLabelText('姓名'), { target: { value: '边界老人' } });
+    fireEvent.change(screen.getByLabelText('年龄'), { target: { value: '131' } });
+    fireEvent.change(screen.getByLabelText('联系电话'), { target: { value: '1380000' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+    expect(await screen.findByText('请填写有效年龄')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText('年龄'), { target: { value: '88' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+    expect(await screen.findByText('请填写有效联系电话')).toBeInTheDocument();
+  });
+
+  it('covers elder search trim, status filter, preset blood-type selections and dialog close', async () => {
+    fetchElders.mockReset();
+    fetchElders.mockResolvedValue([
+      {
+        id: 'elder-1',
+        archiveNo: 'A-001',
+        name: '李奶奶',
+        gender: '女',
+        age: 72,
+        residence: '上海',
+        phoneMasked: '138****0000',
+        aboType: 'A',
+        rhType: '阳性',
+        volunteer: '王志愿者',
+        status: '启用',
+      },
+      {
+        id: 'elder-2',
+        archiveNo: 'A-002',
+        name: '张爷爷',
+        gender: '男',
+        age: 80,
+        residence: '重庆',
+        phoneMasked: '137****0000',
+        aboType: 'B',
+        rhType: '阴性',
+        volunteer: '李志愿者',
+        status: '停用',
+      },
+    ]);
+
+    render(<ElderArchivePage />);
+
+    expect(await screen.findByText('李奶奶')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('搜索姓名或档案编号'), { target: { value: ' 张爷爷 ' } });
+    fireEvent.click(screen.getByRole('button', { name: '查询' }));
+    fireEvent.change(screen.getByDisplayValue('全部状态'), { target: { value: '停用' } });
+    expect(screen.getByText('张爷爷')).toBeInTheDocument();
+    expect(screen.queryByText('李奶奶')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '新增档案' }));
+    const createDialog = screen.getByRole('heading', { name: '新增老人档案' }).closest('.modal-content');
+    expect(createDialog).not.toBeNull();
+    const selects = within(createDialog as HTMLElement).getAllByRole('combobox');
+    fireEvent.change(selects[0], { target: { value: '女' } });
+    fireEvent.change(selects[1], { target: { value: 'A' } });
+    fireEvent.change(selects[2], { target: { value: '阳性' } });
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '新增老人档案' })).not.toBeInTheDocument();
+    });
+  });
+
+  it('closes create dialog when clicking overlay', async () => {
+    fetchElders.mockReset();
+    fetchElders.mockResolvedValue([
+      {
+        id: 'elder-1',
+        archiveNo: 'A-001',
+        name: '李奶奶',
+        gender: '女',
+        age: 72,
+        residence: '上海',
+        phoneMasked: '138****0000',
+        aboType: 'A',
+        rhType: '阳性',
+        volunteer: '王志愿者',
+        status: '启用',
+      },
+    ]);
+
+    const { container } = render(<ElderArchivePage />);
+
+    expect(await screen.findByText('李奶奶')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '新增档案' }));
+    expect(await screen.findByRole('heading', { name: '新增老人档案' })).toBeInTheDocument();
+    fireEvent.click(container.querySelector('.modal-overlay') as HTMLElement);
+    await waitFor(() => {
+      expect(screen.queryByRole('heading', { name: '新增老人档案' })).not.toBeInTheDocument();
+    });
+  });
 });

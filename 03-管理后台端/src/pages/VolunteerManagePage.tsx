@@ -45,7 +45,6 @@ const DISABLED_STATUS = '停用';
 const BOUND_STATUS = '已绑定';
 const UNBOUND_STATUS = '已解绑';
 const ALL_STATUS = '全部状态';
-const scopeRegistryKey = 'sl_volunteer_scope_registry_v1';
 const volunteerMetaKey = 'sl_volunteer_create_meta_v1';
 const volunteerColumnOptions: TableColumnOption<VolunteerColumnKey>[] = [
   { key: 'id', label: '志愿者 ID', defaultVisible: true },
@@ -75,28 +74,6 @@ const emptyForm: VolunteerForm = {
   password: 'Volunteer@123456',
   status: ACTIVE_STATUS,
 };
-
-function scopeCacheKey(volunteerId: string) {
-  return `sl_volunteer_scope_${volunteerId}`;
-}
-
-function loadScopeRegistry(): ScopeRegistry {
-  try {
-    const raw = localStorage.getItem(scopeRegistryKey);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as ScopeRegistry;
-    return parsed && typeof parsed === 'object' ? parsed : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveScopeRegistry(registry: ScopeRegistry) {
-  localStorage.setItem(scopeRegistryKey, JSON.stringify(registry));
-  Object.entries(registry).forEach(([volunteerId, elderIds]) => {
-    localStorage.setItem(scopeCacheKey(volunteerId), JSON.stringify(elderIds));
-  });
-}
 
 function loadVolunteerMeta(): VolunteerCreateMeta {
   try {
@@ -133,19 +110,11 @@ function deriveCreatedAtFromId(id: string) {
   return formatDateTime(timestamp);
 }
 
-function buildSeededRegistry(volunteers: VolunteerRow[], elderOptions: ElderScopeOption[], registry: ScopeRegistry) {
-  const next: ScopeRegistry = { ...registry };
-  const used = new Set(Object.values(next).flat());
-  const freeActiveElders = elderOptions.filter((item) => item.status === ACTIVE_STATUS && !used.has(item.id));
-
-  volunteers.forEach((volunteer) => {
-    if (!next[volunteer.id]) {
-      const count = Math.max(0, volunteer.elderCount);
-      next[volunteer.id] = freeActiveElders.splice(0, count).map((item) => item.id);
-    }
-  });
-
-  return next;
+function buildScopeRegistry(volunteers: VolunteerRow[]) {
+  return volunteers.reduce<ScopeRegistry>((acc, volunteer) => {
+    acc[volunteer.id] = volunteer.assignedElderIds || [];
+    return acc;
+  }, {});
 }
 
 export function VolunteerManagePage() {
@@ -190,14 +159,13 @@ export function VolunteerManagePage() {
       }))
       .filter((item) => item.id);
 
-    const seededRegistry = buildSeededRegistry(volunteers, elderOptions, loadScopeRegistry());
-    saveScopeRegistry(seededRegistry);
-    setScopeRegistry(seededRegistry);
+    const nextRegistry = buildScopeRegistry(volunteers);
+    setScopeRegistry(nextRegistry);
     setVolunteerMeta(localMeta);
     setRows(
       volunteers.map((row) => ({
         ...row,
-        elderCount: seededRegistry[row.id]?.length ?? row.elderCount,
+        elderCount: nextRegistry[row.id]?.length ?? row.elderCount,
         createdAt: row.createdAt && row.createdAt !== '-' ? row.createdAt : localMeta[row.id]?.createdAt || deriveCreatedAtFromId(row.id) || '-',
         createMethod: row.createMethod && row.createMethod !== '-' ? row.createMethod : localMeta[row.id]?.createMethod || '后台创建',
       })),
@@ -392,9 +360,7 @@ export function VolunteerManagePage() {
     await deleteVolunteer(id);
     const nextRegistry = { ...scopeRegistry };
     delete nextRegistry[id];
-    saveScopeRegistry(nextRegistry);
     setScopeRegistry(nextRegistry);
-    localStorage.removeItem(scopeCacheKey(id));
     await load();
   }
 
@@ -426,7 +392,6 @@ export function VolunteerManagePage() {
 
     await updateVolunteerScope(selectedVolunteer.id, selectedElderIds);
     const nextRegistry = { ...scopeRegistry, [selectedVolunteer.id]: selectedElderIds };
-    saveScopeRegistry(nextRegistry);
     setScopeRegistry(nextRegistry);
     setRows((prev) =>
       prev.map((row) => (row.id === selectedVolunteer.id ? { ...row, elderCount: selectedElderIds.length } : row)),

@@ -224,3 +224,20 @@ export async function updateFamilyContacts(elderId: string, formValue: Workbench
     backupContactRelation: formValue.backupContactRelation.trim(),
   });
 }
+
+export async function createVolunteerElder(formValue: WorkbenchBasicFormValue): Promise<{ id: string }> {
+  return httpClient.post<{ id: string }>('/api/volunteer/me/elders', {
+    name: formValue.name.trim(),
+    gender: formValue.gender.trim(),
+    age: Number(formValue.age || 0),
+    residence: formValue.residence.trim(),
+    emergencyContactName: formValue.emergencyContactName.trim(),
+    emergencyPhone: formValue.emergencyContactPhone.trim(),
+    relationship: formValue.emergencyContactRelation.trim(),
+    backupContactName: formValue.backupContactName.trim(),
+    backupPhone: formValue.backupContactPhone.trim(),
+    aboType: formValue.aboType.trim(),
+    rhType: formValue.rhType.trim(),
+    allergySummary: formValue.allergyHistory.trim(),
+  });
+}

@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
-import { setAuthToken, clearAuthToken } from '../api/httpClient';
+import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { clearAuthToken, setAuthToken } from '../api/httpClient';
+import { fetchVolunteerProfile } from '../api/volunteerApi';
 
 interface VolunteerProfile {
   account: string;
@@ -23,23 +24,39 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [loggedIn, setLoggedIn] = useState(() => !!localStorage.getItem('sl_token'));
-  const [user, setUser] = useState<VolunteerProfile | null>(() => {
-    try {
-      const raw = localStorage.getItem('sl_user');
-      if (!raw) return null;
-      const parsed = JSON.parse(raw) as VolunteerProfile;
-      return parsed?.account ? parsed : null;
-    } catch {
-      return null;
-    }
-  });
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [user, setUser] = useState<VolunteerProfile | null>(null);
+  const [hydrating, setHydrating] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchVolunteerProfile()
+      .then((profile) => {
+        if (cancelled) return;
+        setUser({ account: profile.account, name: profile.name });
+        setLoggedIn(true);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setLoggedIn(false);
+        setUser(null);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setHydrating(false);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const login = useCallback((token: string, nextUser?: VolunteerProfile) => {
     setAuthToken(token);
     if (nextUser) {
       setUser(nextUser);
-      localStorage.setItem('sl_user', JSON.stringify(nextUser));
+    } else {
+      setUser(null);
     }
     setLoggedIn(true);
   }, []);
@@ -47,14 +64,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(() => {
     clearAuthToken();
     setUser(null);
-    localStorage.removeItem('sl_user');
     setLoggedIn(false);
   }, []);
 
   const updateUser = useCallback((nextUser: VolunteerProfile) => {
     setUser(nextUser);
-    localStorage.setItem('sl_user', JSON.stringify(nextUser));
   }, []);
+
+  if (hydrating) {
+    return <div className="sl-page loading">正在校验登录状态...</div>;
+  }
 
   return (
     <AuthContext.Provider value={{ loggedIn, user, login, updateUser, logout }}>

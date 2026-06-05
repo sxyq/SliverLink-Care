@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../config/env', () => ({
@@ -115,5 +115,49 @@ describe('useProtectedArchive – local verification fallback', () => {
     expect(getDesignPreviewBasicInfoMock).not.toHaveBeenCalled();
     expect(getDesignPreviewArchiveMock).not.toHaveBeenCalled();
     expect(fetchVerifiedBasicInfoMock).toHaveBeenCalledWith('regular-session-1', 'elder-1');
+  });
+
+  it('ignores resolved data when the request is cancelled before Promise.all succeeds', async () => {
+    let resolveBasic: ((value: { id: string; name: string }) => void) | undefined;
+    fetchVerifiedBasicInfoMock.mockImplementation(
+      () => new Promise((resolve) => { resolveBasic = resolve; }),
+    );
+    fetchHealthRecordMock.mockResolvedValue({ bmi: 22 });
+    fetchMedicationsMock.mockResolvedValue([]);
+    fetchScaleSummariesMock.mockResolvedValue([]);
+
+    const { result, unmount } = renderHook(() =>
+      useProtectedArchive(true, 'session-cancel-ok', 'elder-1'),
+    );
+
+    expect(result.current.loading).toBe(true);
+    unmount();
+
+    await act(async () => {
+      resolveBasic?.({ id: 'elder-1', name: '老人' });
+      await Promise.resolve();
+    });
+  });
+
+  it('ignores rejection cleanup when the request is cancelled before Promise.all fails', async () => {
+    let rejectBasic: ((reason?: unknown) => void) | undefined;
+    fetchVerifiedBasicInfoMock.mockImplementation(
+      () => new Promise((_, reject) => { rejectBasic = reject; }),
+    );
+    fetchHealthRecordMock.mockResolvedValue({ bmi: 22 });
+    fetchMedicationsMock.mockResolvedValue([]);
+    fetchScaleSummariesMock.mockResolvedValue([]);
+
+    const { result, unmount } = renderHook(() =>
+      useProtectedArchive(true, 'session-cancel-fail', 'elder-1'),
+    );
+
+    expect(result.current.loading).toBe(true);
+    unmount();
+
+    await act(async () => {
+      rejectBasic?.(new Error('network'));
+      await Promise.resolve();
+    });
   });
 });

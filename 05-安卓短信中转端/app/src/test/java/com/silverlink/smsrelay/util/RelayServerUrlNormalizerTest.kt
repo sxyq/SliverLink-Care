@@ -6,9 +6,9 @@ import org.junit.Test
 class RelayServerUrlNormalizerTest {
 
     @Test
-    fun upgradesExternalHttpUrlsToHttps() {
+    fun keepsExternalHttpUrlsUnchanged() {
         assertEquals(
-            "https://sxyq27.online/silverlink-api",
+            "http://sxyq27.online/silverlink-api",
             RelayServerUrlNormalizer.normalize("http://sxyq27.online/silverlink-api"),
         )
     }
@@ -28,11 +28,19 @@ class RelayServerUrlNormalizerTest {
     @Test
     fun keepsHttpsAndMalformedValuesAsIs() {
         assertEquals(
-            "https://sxyq27.online/silverlink-api",
+            "http://sxyq27.online/silverlink-api",
             RelayServerUrlNormalizer.normalize("https://sxyq27.online/silverlink-api"),
         )
         assertEquals(
-            "not-a-url",
+            "http://sxyq27.online/silverlink-api",
+            RelayServerUrlNormalizer.normalize("sxyq27.online/silverlink-api"),
+        )
+        assertEquals(
+            "https://example.com/api",
+            RelayServerUrlNormalizer.normalize("https://example.com/api"),
+        )
+        assertEquals(
+            "https://not-a-url",
             RelayServerUrlNormalizer.normalize("not-a-url"),
         )
     }

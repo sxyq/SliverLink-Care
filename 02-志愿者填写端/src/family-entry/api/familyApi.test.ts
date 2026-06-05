@@ -45,6 +45,27 @@ describe('family entry api', () => {
     expect(localStorage.getItem('family_token')).toBeNull();
   });
 
+  it('clears family token on 401 and merges custom headers', async () => {
+    setToken('expired-token');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('unauthorized', { status: 401 })),
+    );
+
+    await expect(get('/api/protected', { headers: { 'X-Debug': '1' } })).rejects.toThrow('unauthorized');
+
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/protected',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          Authorization: 'Bearer expired-token',
+          'X-Debug': '1',
+        }),
+      }),
+    );
+    expect(localStorage.getItem('family_token')).toBeNull();
+  });
+
   it('normalizes family login success, missing token, failure and logout state', async () => {
     queueFetch(
       { token: 'token-1' },

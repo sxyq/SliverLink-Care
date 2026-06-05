@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -30,8 +30,11 @@ describe('admin components and security formatting', () => {
   it.each([
     ['启用', 'status-tag--success'],
     ['失败', 'status-tag--danger'],
+    ['已过期', 'status-tag--danger'],
     ['已停用', 'status-tag--disabled'],
+    ['等待设备连接', 'status-tag--disabled'],
     ['等待验证', 'status-tag--warning'],
+    ['待关注', 'status-tag--warning'],
     ['未知', 'status-tag--disabled'],
   ])('renders status %s with expected class', (status, className) => {
     render(<StatusTag status={status} />);
@@ -138,5 +141,72 @@ describe('admin components and security formatting', () => {
 
     await user.click(screen.getByRole('button', { name: '刷新' }));
     expect(await screen.findByText('网络异常')).toBeInTheDocument();
+  });
+
+  it('covers admin message timestamp fallbacks, timer refresh and action failure copy', async () => {
+    let intervalCallback: (() => void | Promise<void>) | undefined;
+    vi.spyOn(window, 'setInterval').mockImplementation(((callback: TimerHandler) => {
+      intervalCallback = callback as () => void;
+      return 1 as unknown as number;
+    }) as typeof window.setInterval);
+    vi.spyOn(window, 'clearInterval').mockImplementation(() => undefined);
+    fetchAdminReviewRequests
+      .mockResolvedValueOnce([
+        {
+          id: 'review-empty',
+          title: '空时间',
+          summary: '无时间戳',
+          createdAt: '',
+        },
+        {
+          id: 'review-invalid',
+          title: '非法时间',
+          summary: '原样展示',
+          createdAt: 'bad-time',
+        },
+      ])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        {
+          id: 'review-empty',
+          title: '空时间',
+          summary: '无时间戳',
+          createdAt: '',
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 'review-empty',
+          title: '空时间',
+          summary: '无时间戳',
+          createdAt: '',
+        },
+      ]);
+    approveAdminReviewRequest.mockRejectedValueOnce('approve-failed');
+    rejectAdminReviewRequest.mockRejectedValueOnce('reject-failed');
+
+    render(<AdminMessageCenter />);
+    fireEvent.click(await screen.findByLabelText('后台消息提醒'));
+    expect(screen.getByText('刚刚')).toBeInTheDocument();
+    expect(screen.getByText('bad-time')).toBeInTheDocument();
+    expect(window.setInterval).toHaveBeenCalledWith(expect.any(Function), 30000);
+    await act(async () => {
+      intervalCallback?.();
+    });
+
+    fireEvent.click(screen.getAllByRole('button', { name: /通过/ })[0]);
+    expect(await screen.findByText('审核通过失败')).toBeInTheDocument();
+
+    fireEvent.click((await screen.findAllByRole('button', { name: /驳回/ }))[0]);
+    expect(await screen.findByText('审核驳回失败')).toBeInTheDocument();
+  });
+
+  it('falls back to generic copy when admin messages fail with non-Error values', async () => {
+    fetchAdminReviewRequests.mockRejectedValueOnce('message-down');
+
+    render(<AdminMessageCenter />);
+    fireEvent.click(await screen.findByLabelText('后台消息提醒'));
+
+    expect(await screen.findByText('消息加载失败')).toBeInTheDocument();
   });
 });

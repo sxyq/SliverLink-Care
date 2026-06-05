@@ -1,9 +1,15 @@
 package com.silverlink.care.module.scan;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
+import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeService;
 import com.silverlink.care.module.smsrelay.SmsRelayService;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -11,44 +17,93 @@ import java.util.*;
 @Service
 public class ScanService {
 
+    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<Map<String, String>>> MEDICATIONS_TYPE = new TypeReference<>() {};
+    private static final TypeReference<List<Map<String, Object>>> SCALES_TYPE = new TypeReference<>() {};
+
     private final QrCodeService qrCodeService;
     private final SilverLinkDataService data;
     private final SmsRelayService smsRelayService;
+    private final JsonTwoLevelCache cache;
+    private final ObjectMapper objectMapper;
+    private final SimpleTtlCache<String, Map<String, Object>> localResolveCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, Map<String, Object>> localArchiveCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, Map<String, Object>> localBasicInfoCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, List<Map<String, String>>> localMedicationsCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, List<Map<String, Object>>> localScalesCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, Map<String, Object>> localScaleDetailCache = new SimpleTtlCache<>();
+    private final SimpleTtlCache<String, ProtectedReadBundle> localProtectedReadBundleCache = new SimpleTtlCache<>();
+
+    @Value("${silverlink.scan.resolve-cache-ttl-ms:10000}")
+    private long resolveCacheTtlMs = 10_000L;
+
+    @Value("${silverlink.scan.protected-read-cache-ttl-ms:15000}")
+    private long protectedReadCacheTtlMs = 15_000L;
 
     public ScanService(QrCodeService qrCodeService, SilverLinkDataService data, SmsRelayService smsRelayService) {
+        this(qrCodeService, data, smsRelayService, null, new ObjectMapper());
+    }
+
+    @Autowired
+    public ScanService(
+            QrCodeService qrCodeService,
+            SilverLinkDataService data,
+            SmsRelayService smsRelayService,
+            JsonTwoLevelCache cache,
+            ObjectMapper objectMapper
+    ) {
         this.qrCodeService = qrCodeService;
         this.data = data;
         this.smsRelayService = smsRelayService;
+        this.cache = cache;
+        this.objectMapper = objectMapper;
     }
 
     public Map<String, Object> resolve(String token) throws Exception {
-        QrCodeEntity entity = qrCodeService.resolve(token);
-        if (entity == null || !"ENABLED".equals(entity.getStatus())) {
+        if (token == null || token.isBlank()) {
             throw new RuntimeException("二维码无效或已停用");
         }
-        Map<String, Object> result = new LinkedHashMap<>(data.scanBasic(entity.getElderId()));
-        result.put("elderId", entity.getElderId());
-        return result;
+        Map<String, Object> cached = readCachedMap(cacheKey("scan:resolve:", token), resolveCacheTtlMs, localResolveCache, () -> {
+            try {
+                QrCodeEntity entity = qrCodeService.resolve(token);
+                if (entity == null || !"ENABLED".equals(entity.getStatus())) {
+                    throw new RuntimeException("二维码无效或已停用");
+                }
+                Map<String, Object> result = new LinkedHashMap<>(data.scanBasic(entity.getElderId()));
+                result.put("elderId", entity.getElderId());
+                return new LinkedHashMap<>(result);
+            } catch (Exception exception) {
+                throw exception instanceof RuntimeException runtimeException
+                        ? runtimeException
+                        : new IllegalStateException("二维码解析失败", exception);
+            }
+        });
+        return new LinkedHashMap<>(cached);
     }
 
     public Map<String, Object> getArchive(String elderId, String sessionId) {
         smsRelayService.authorizeVerifiedSession(sessionId, elderId, "health");
-        return data.health(elderId);
+        return getArchiveData(elderId);
     }
 
     public Map<String, Object> getVerifiedBasicInfo(String elderId, String sessionId) {
         smsRelayService.authorizeVerifiedSession(sessionId, elderId, "health");
-        return data.elderDetail(elderId, false);
+        return getVerifiedBasicInfoData(elderId);
     }
 
     public List<Map<String, String>> getMedications(String elderId, String sessionId) {
         smsRelayService.authorizeVerifiedSession(sessionId, elderId, "health");
-        return data.medications(elderId);
+        return getMedicationsData(elderId);
     }
 
     public List<Map<String, Object>> getScales(String elderId, String sessionId) {
         smsRelayService.authorizeVerifiedSession(sessionId, elderId, "health");
-        return data.scales(elderId);
+        return getScalesData(elderId);
+    }
+
+    public Map<String, Object> getScaleDetail(String elderId, String sessionId, String scaleName) {
+        smsRelayService.authorizeVerifiedSession(sessionId, elderId, "health");
+        return getScaleDetailData(elderId, scaleName);
     }
 
     public ScanVerificationSessionDto startVerificationSession(String elderId, String target) {
@@ -70,18 +125,194 @@ public class ScanService {
     }
 
     public Map<String, Object> getArchiveData(String elderId) {
-        return data.health(elderId);
+        return new LinkedHashMap<>(readProtectedReadBundle(elderId).archive);
     }
 
     public Map<String, Object> getVerifiedBasicInfoData(String elderId) {
-        return data.elderDetail(elderId, false);
+        return new LinkedHashMap<>(readProtectedReadBundle(elderId).basicInfo);
     }
 
     public List<Map<String, String>> getMedicationsData(String elderId) {
-        return data.medications(elderId);
+        return deepCopyStringList(readProtectedReadBundle(elderId).medications);
     }
 
     public List<Map<String, Object>> getScalesData(String elderId) {
-        return data.scales(elderId);
+        return deepCopyObjectList(readProtectedReadBundle(elderId).scales);
+    }
+
+    public Map<String, Object> getScaleDetailData(String elderId, String scaleName) {
+        String normalizedScaleName = scaleName == null ? "" : scaleName.trim();
+        String cacheKey = cacheKey("scan:scale-detail:", elderId + ":" + normalizedScaleName);
+        return readCachedMap(
+                cacheKey,
+                protectedReadCacheTtlMs,
+                localScaleDetailCache,
+                () -> new LinkedHashMap<>(data.scaleDetail(elderId, normalizedScaleName))
+        );
+    }
+
+    private Map<String, Object> readCachedMap(
+            String cacheKey,
+            long ttlMillis,
+            SimpleTtlCache<String, Map<String, Object>> localFallbackCache,
+            ThrowingSupplier<Map<String, Object>> loader
+    ) {
+        if (cache == null) {
+            Map<String, Object> value = localFallbackCache.getOrLoad(cacheKey, ttlMillis, () -> new LinkedHashMap<>(loader.get()));
+            return new LinkedHashMap<>(value);
+        }
+        String payload = cache.getOrLoad(cacheKey, ttlMillis, () -> toJson(new LinkedHashMap<>(loader.get())));
+        return fromJson(payload, MAP_TYPE);
+    }
+
+    private <T> List<T> readCachedList(
+            String cacheKey,
+            long ttlMillis,
+            SimpleTtlCache<String, List<T>> localFallbackCache,
+            TypeReference<List<T>> typeReference,
+            ThrowingSupplier<List<T>> loader
+    ) {
+        if (cache == null) {
+            List<T> value = localFallbackCache.getOrLoad(cacheKey, ttlMillis, () -> new ArrayList<>(loader.get()));
+            return new ArrayList<>(value);
+        }
+        String payload = cache.getOrLoad(cacheKey, ttlMillis, () -> toJson(new ArrayList<>(loader.get())));
+        return fromJson(payload, typeReference);
+    }
+
+    private ProtectedReadBundle readProtectedReadBundle(String elderId) {
+        String cacheKey = cacheKey("scan:bundle:", elderId);
+        if (cache == null) {
+            ProtectedReadBundle bundle = localProtectedReadBundleCache.getOrLoad(
+                    cacheKey,
+                    protectedReadCacheTtlMs,
+                    () -> loadProtectedReadBundle(elderId)
+            );
+            return bundle.copy();
+        }
+        String payload = cache.getOrLoad(cacheKey, protectedReadCacheTtlMs, () -> toJson(loadProtectedReadBundle(elderId)));
+        return fromJson(payload, ProtectedReadBundle.class).copy();
+    }
+
+    private ProtectedReadBundle loadProtectedReadBundle(String elderId) {
+        ProtectedReadBundle bundle = new ProtectedReadBundle();
+        bundle.archive = new LinkedHashMap<>(data.health(elderId));
+        bundle.basicInfo = new LinkedHashMap<>(data.elderDetail(elderId, false));
+        bundle.medications = deepCopyStringList(data.medications(elderId));
+        bundle.scales = deepCopyObjectList(data.scaleSummaries(elderId));
+        return bundle;
+    }
+
+    private List<Map<String, String>> deepCopyStringList(List<Map<String, String>> source) {
+        List<Map<String, String>> result = new ArrayList<>();
+        for (Map<String, String> row : source) {
+            result.add(new LinkedHashMap<>(row));
+        }
+        return result;
+    }
+
+    private List<Map<String, Object>> deepCopyObjectList(List<Map<String, Object>> source) {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : source) {
+            result.add(new LinkedHashMap<>(row));
+        }
+        return result;
+    }
+
+    private String cacheKey(String prefix, String suffix) {
+        return prefix + (suffix == null ? "" : suffix);
+    }
+
+    private String toJson(Object value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to serialize scan cache value", exception);
+        }
+    }
+
+    private <T> T fromJson(String payload, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(payload, typeReference);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to deserialize scan cache value", exception);
+        }
+    }
+
+    private <T> T fromJson(String payload, Class<T> type) {
+        try {
+            return objectMapper.readValue(payload, type);
+        } catch (Exception exception) {
+            throw new IllegalStateException("Failed to deserialize scan cache value", exception);
+        }
+    }
+
+    private static final class ProtectedReadBundle {
+        private Map<String, Object> archive = new LinkedHashMap<>();
+        private Map<String, Object> basicInfo = new LinkedHashMap<>();
+        private List<Map<String, String>> medications = new ArrayList<>();
+        private List<Map<String, Object>> scales = new ArrayList<>();
+
+        public Map<String, Object> getArchive() {
+            return archive;
+        }
+
+        public void setArchive(Map<String, Object> archive) {
+            this.archive = archive == null ? new LinkedHashMap<>() : new LinkedHashMap<>(archive);
+        }
+
+        public Map<String, Object> getBasicInfo() {
+            return basicInfo;
+        }
+
+        public void setBasicInfo(Map<String, Object> basicInfo) {
+            this.basicInfo = basicInfo == null ? new LinkedHashMap<>() : new LinkedHashMap<>(basicInfo);
+        }
+
+        public List<Map<String, String>> getMedications() {
+            return medications;
+        }
+
+        public void setMedications(List<Map<String, String>> medications) {
+            this.medications = medications == null ? new ArrayList<>() : copyStringRows(medications);
+        }
+
+        public List<Map<String, Object>> getScales() {
+            return scales;
+        }
+
+        public void setScales(List<Map<String, Object>> scales) {
+            this.scales = scales == null ? new ArrayList<>() : copyObjectRows(scales);
+        }
+
+        private ProtectedReadBundle copy() {
+            ProtectedReadBundle copy = new ProtectedReadBundle();
+            copy.archive = new LinkedHashMap<>(archive);
+            copy.basicInfo = new LinkedHashMap<>(basicInfo);
+            copy.medications = copyStringRows(medications);
+            copy.scales = copyObjectRows(scales);
+            return copy;
+        }
+
+        private static List<Map<String, String>> copyStringRows(List<Map<String, String>> source) {
+            List<Map<String, String>> rows = new ArrayList<>();
+            for (Map<String, String> row : source) {
+                rows.add(new LinkedHashMap<>(row));
+            }
+            return rows;
+        }
+
+        private static List<Map<String, Object>> copyObjectRows(List<Map<String, Object>> source) {
+            List<Map<String, Object>> rows = new ArrayList<>();
+            for (Map<String, Object> row : source) {
+                rows.add(new LinkedHashMap<>(row));
+            }
+            return rows;
+        }
+    }
+
+    @FunctionalInterface
+    private interface ThrowingSupplier<T> {
+        T get();
     }
 }

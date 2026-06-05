@@ -99,6 +99,69 @@ describe('shared volunteer and family components', () => {
     expect(onSecondaryAction).toHaveBeenCalled();
   });
 
+  it('renders subject list pre-profile panel, previous navigation and hides secondary action when absent', () => {
+    const onSelect = vi.fn();
+    render(
+      <MemoryRouter>
+        <SubjectListPage
+          title="家属老人"
+          subjects={[subject('1'), subject('2')]}
+          keyword=""
+          onKeywordChange={vi.fn()}
+          onSelect={onSelect}
+          preProfilePanel={<div>profile panel</div>}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('profile panel')).toBeInTheDocument();
+    expect(screen.queryByText('快速维护基础资料、联系人和联系方式')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '下一位老人' }));
+    fireEvent.click(screen.getByRole('button', { name: '上一位老人' }));
+    fireEvent.click(screen.getByLabelText('切换到王桂兰2'));
+    fireEvent.click(screen.getAllByText('进入档案')[0]);
+    expect(onSelect).toHaveBeenCalled();
+  });
+
+  it('renders single subject fallback labels and ignores non-activation keys', () => {
+    const onSelect = vi.fn();
+    render(
+      <MemoryRouter>
+        <SubjectListPage
+          title="家属老人"
+          subjects={[
+            {
+              id: 'solo',
+              archiveNo: '',
+              name: '独居老人',
+              gender: '',
+              age: undefined,
+              residence: '',
+              bloodType: '',
+              allergyHistory: '',
+              emergencyContactName: '',
+              emergencyContactPhone: '',
+              emergencyContactRelation: '',
+              status: '',
+              summary: '',
+            },
+          ]}
+          keyword=""
+          onKeywordChange={vi.fn()}
+          onSelect={onSelect}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByText('当前负责老人档案')).toBeInTheDocument();
+    expect(screen.getAllByText('待补充')).toHaveLength(3);
+    expect(screen.getByText('暂无明确过敏史')).toBeInTheDocument();
+
+    const card = screen.getByText('独居老人').closest('[data-elder-card="true"]') as HTMLElement;
+    fireEvent.keyDown(card, { key: 'Escape' });
+    expect(onSelect).not.toHaveBeenCalled();
+  });
+
   it('renders subject detail and action cards', () => {
     const onBack = vi.fn();
     const onAction = vi.fn();
@@ -155,6 +218,12 @@ describe('shared volunteer and family components', () => {
     fireEvent.change(screen.getByLabelText('用药时间'), { target: { value: '早' } });
     fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
     expect(screen.getByText('阿司匹林')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('编辑'));
+    fireEvent.change(screen.getByLabelText('药品名称'), { target: { value: '阿托伐他汀' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
+    expect(screen.getByText('阿托伐他汀')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '删除药品' }));
+    expect(screen.queryByText('阿托伐他汀')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: '保存' }));
     await waitFor(() => expect(onSaveBatch).toHaveBeenCalled());
 
@@ -179,6 +248,55 @@ describe('shared volunteer and family components', () => {
     await waitFor(() => expect(onDelete).toHaveBeenCalledWith('med-1'));
     fireEvent.click(screen.getByRole('button', { name: '返回' }));
     expect(onBack).toHaveBeenCalled();
+  });
+
+  it('shows medication editor error alerts for batch save, create/update and delete failures', async () => {
+    const onSaveBatch = vi.fn().mockRejectedValue(new Error('批量保存失败'));
+    const onCreate = vi.fn().mockRejectedValue(new Error('新增失败'));
+    const onUpdate = vi.fn().mockRejectedValue(new Error('修改失败'));
+    const onDelete = vi.fn().mockRejectedValue(new Error('删除失败'));
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <MedicationEditorPage
+          title="批量失败"
+          medications={[{ id: 'draft-1', name: '阿司匹林', dosage: '1片', usage: '口服', timing: '早', updatedAt: '' }]}
+          onSaveBatch={onSaveBatch}
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+    await waitFor(() => expect(onSaveBatch).toHaveBeenCalled());
+    expect(alert).toHaveBeenCalledWith('批量保存失败');
+
+    rerender(
+      <MemoryRouter>
+        <MedicationEditorPage
+          title="单条失败"
+          medications={[{ id: 'med-1', name: '阿司匹林', dosage: '1片', usage: '口服', timing: '早', updatedAt: '' }]}
+          onCreate={onCreate}
+          onUpdate={onUpdate}
+          onDelete={onDelete}
+        />
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '添加用药' }));
+    fireEvent.change(screen.getByLabelText('药品名称'), { target: { value: '氯吡格雷' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
+    await waitFor(() => expect(onCreate).toHaveBeenCalled());
+    expect(alert).toHaveBeenCalledWith('新增失败');
+
+    fireEvent.click(screen.getByText('编辑'));
+    fireEvent.change(screen.getByLabelText('药品名称'), { target: { value: '华法林' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
+    await waitFor(() => expect(onUpdate).toHaveBeenCalled());
+    expect(alert).toHaveBeenCalledWith('修改失败');
+
+    fireEvent.click(screen.getByRole('button', { name: '删除药品' }));
+    await waitFor(() => expect(onDelete).toHaveBeenCalledWith('med-1'));
+    expect(alert).toHaveBeenCalledWith('删除失败');
   });
 });
 

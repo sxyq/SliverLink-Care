@@ -22,6 +22,37 @@ const config: UserConfigExport<'vite'> = {
     '@': path.resolve(process.cwd(), 'src'),
   },
   plugins: [],
+  modifyViteConfig(viteConfig: any) {
+    const build = viteConfig.build ?? (viteConfig.build = {});
+    const rollupOptions = build.rollupOptions ?? (build.rollupOptions = {});
+    const output = rollupOptions.output ?? (rollupOptions.output = {});
+
+    if (!Array.isArray(output)) {
+      output.manualChunks = (id: string) => {
+        // 按分包拆分代码
+        if (id.includes('/subpackages/scan/')) {
+          return 'scan';
+        }
+        if (id.includes('/subpackages/workbench/')) {
+          return 'workbench';
+        }
+        // node_modules 按库拆分
+        if (id.includes('node_modules')) {
+          if (id.includes('qrcode')) {
+            return 'vendor-qrcode';
+          }
+          if (id.includes('react') || id.includes('@tarojs')) {
+            return 'vendor-framework';
+          }
+          return 'vendor';
+        }
+        return undefined;
+      };
+    }
+
+    // 启用 Tree Shaking
+    build.chunkSizeWarningLimit = 500;
+  },
   mini: {
     postcss: {
       autoprefixer: {

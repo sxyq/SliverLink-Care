@@ -70,7 +70,7 @@ export default function ScanVerifyPage() {
   const elderId = params.elderId || '';
   const target = 'health';
 
-  const [mode, setMode] = useState<VerifyMode>('identity');
+  const [mode, setMode] = useState<VerifyMode>('sms');
   const [identityName, setIdentityName] = useState('');
   const [identityPhone, setIdentityPhone] = useState('');
   const [identityIdCard, setIdentityIdCard] = useState('');
@@ -85,12 +85,20 @@ export default function ScanVerifyPage() {
   const [errorText, setErrorText] = useState('');
   const [successText, setSuccessText] = useState('');
 
+  const missingParams = !elderId;
+
   useEffect(() => {
     setErrorText('');
     setSuccessText('');
   }, [mode]);
 
-  const missingParams = !elderId;
+  useEffect(() => {
+    if (mode !== 'sms' || missingParams || smsSessionId || smsLoading) {
+      return;
+    }
+
+    void handleStartSmsVerification();
+  }, [mode, missingParams, smsLoading, smsSessionId]);
 
   const identityError = useMemo(() => {
     if (!identityName.trim()) {
@@ -212,7 +220,7 @@ export default function ScanVerifyPage() {
   }
 
   return (
-    <View className='sl-stage'>
+    <View className='sl-stage sl-stage--scan'>
       <View className='sl-app-shell'>
         <View className='sl-phone-shell'>
           <View className='sl-phone-content'>
@@ -303,7 +311,7 @@ export default function ScanVerifyPage() {
                     ) : null}
                     <View className='scan-verify-actions'>
                       <Button className='sl-primary-button' loading={smsLoading} onClick={handleStartSmsVerification}>
-                        打开短信前先生成短信内容
+                        {smsSessionId ? '重新生成短信内容' : '打开短信前先生成短信内容'}
                       </Button>
                       <Button className='sl-secondary-button' loading={smsChecking} onClick={handleCheckSmsStatus}>
                         {smsChecking ? '检查中...' : '我已发送，检查结果'}

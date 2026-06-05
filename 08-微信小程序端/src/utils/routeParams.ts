@@ -11,9 +11,13 @@ function normalizeValue(value?: string | null) {
   return value == null || value === '' ? undefined : String(value);
 }
 
+function normalizeQrTokenValue(value?: string) {
+  return value == null || value === '' ? undefined : String(value).trim().replace(/\s+/g, '+');
+}
+
 function buildDirectParamsFromSearchParams(params: URLSearchParams) {
   return {
-    qrToken: normalizeValue(params.get('qrToken') || params.get('token') || params.get('qr')),
+    qrToken: normalizeQrTokenValue(params.get('qrToken') || params.get('token') || params.get('qr') || undefined),
     elderId: normalizeValue(params.get('elderId')),
     archiveNo: normalizeValue(params.get('archiveNo')),
     inviteCode: normalizeValue(params.get('inviteCode')),
@@ -24,7 +28,7 @@ function buildDirectParamsFromSearchParams(params: URLSearchParams) {
 
 function extractPathQrToken(pathname: string) {
   const match = pathname.match(/\/s\/([^/?#]+)/);
-  return normalizeValue(match?.[1] || '');
+  return normalizeQrTokenValue(match?.[1] ? decodeURIComponent(match[1]) : '');
 }
 
 export function parseSceneString(scene?: string) {
@@ -43,7 +47,7 @@ export function parseSceneString(scene?: string) {
 
 export function parseQueryParams(query: Record<string, unknown> = {}) {
   const directParams = {
-    qrToken: normalizeValue(String(query.qrToken ?? query.token ?? '')),
+    qrToken: normalizeQrTokenValue(String(query.qrToken ?? query.token ?? '')),
     elderId: normalizeValue(String(query.elderId ?? '')),
     archiveNo: normalizeValue(String(query.archiveNo ?? '')),
     inviteCode: normalizeValue(String(query.inviteCode ?? '')),
@@ -63,7 +67,7 @@ export function parseRouteText(rawText?: string): LaunchRouteParams {
 
   if (!text.includes('/') && !text.includes('?') && !text.includes('=') && !text.includes('&') && !text.includes('#')) {
     return {
-      qrToken: normalizeValue(text),
+      qrToken: normalizeQrTokenValue(text),
     } satisfies LaunchRouteParams;
   }
 

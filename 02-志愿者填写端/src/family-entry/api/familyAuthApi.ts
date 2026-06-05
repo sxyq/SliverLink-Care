@@ -1,4 +1,4 @@
-import { clearToken, post, setToken } from './httpClient';
+import { clearToken, getToken, post, setToken } from './httpClient';
 
 export interface LoginParams {
   phone: string;
@@ -35,9 +35,10 @@ export async function getFamilyProfile() {
 }
 
 export function familyLogout(): void {
+  void post<void>('/api/family/logout').catch(() => undefined);
   clearToken();
 }
 
 export function isFamilyLoggedIn(): boolean {
-  return !!localStorage.getItem('family_token');
+  return !!getToken();
 }

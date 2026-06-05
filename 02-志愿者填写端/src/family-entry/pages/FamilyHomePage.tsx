@@ -33,6 +33,7 @@ export default function FamilyHomePage() {
   useEffect(() => {
     getBoundElders()
       .then(setElders)
+      .catch(() => setElders([]))
       .finally(() => setLoading(false));
   }, []);
 

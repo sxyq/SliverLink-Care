@@ -322,6 +322,53 @@ button, input, select {
 }
 
 .metric-card {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 18px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--panel-radius);
+  box-shadow: 0 16px 34px rgb(23 33 43 / 8%);
+}
+
+.metric-label {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.metric-value {
+  display: block;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.metric-trend {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.panel {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--panel-radius);
+  box-shadow: 0 16px 34px rgb(23 33 43 / 8%);
+}
+
+.panel-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-bottom: 2px;
 }
 
 .panel-title h3 {
@@ -855,6 +902,7 @@ button, input, select {
 .sms-relay-device-table input {
   height: 34px;
   min-width: 0;
+}
 
 .sms-relay-record-table td:nth-child(4),
 .sms-relay-session-table td:nth-child(6) {
@@ -1226,11 +1274,13 @@ button, input, select {
   flex: 2 1 520px;
   min-width: min(100%, 420px);
 }
+
+.audit-visitor-summary-panel {
+  min-width: 0;
   min-height: 96px;
   padding: 12px 14px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  min-height: 0;
 }
 
 .audit-visitor-grid .dashboard-module-slot--panel-standard {
@@ -1689,9 +1739,17 @@ button, input, select {
   margin-top: 14px;
 }
 
+.dashboard-module-slot {
+  min-width: 0;
+}
+
 .dashboard-metric-grid {
   display: grid;
-    grid-template-columns: minmax(220px, 1fr) minmax(140px, 160px) auto auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 14px;
+}
+
 .dashboard-metric-overview {
   margin-top: 14px;
 }
@@ -1710,6 +1768,18 @@ button, input, select {
 
 .dashboard-metric-overview-item {
   display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: #f8fbfc;
+  font-size: 13px;
+}
+
+.dashboard-metric-overview-label {
+  margin: 0;
+  color: var(--color-text-secondary);
   font-size: 13px;
 }
 
@@ -1718,10 +1788,31 @@ button, input, select {
   font-size: 28px;
   font-weight: 700;
   line-height: 1;
+}
+
+.dashboard-metric-overview-trend {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
+
+.dashboard-module-slot--metric-compact {
   grid-column: span 2;
   grid-row: span 1;
 }
 
+.dashboard-module-slot--metric-standard {
+  grid-column: span 3;
+  grid-row: span 1;
+}
+
+.dashboard-module-slot--metric-wide {
+  grid-column: span 4;
+  grid-row: span 1;
+}
+
+.dashboard-module-slot--panel-standard {
+  grid-column: span 6;
+  grid-row: span 1;
 }
 
 .dashboard-module-slot--panel-wide {

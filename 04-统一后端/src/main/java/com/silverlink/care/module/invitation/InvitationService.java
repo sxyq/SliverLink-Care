@@ -15,7 +15,7 @@ import java.util.*;
 public class InvitationService {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final int MAX_ELDERS_PER_FAMILY_ACCOUNT = 4;
+    private static final int MAX_ELDERS_PER_FAMILY_ACCOUNT = 20;
 
     private final JdbcTemplate jdbc;
     private final SilverLinkDataService data;

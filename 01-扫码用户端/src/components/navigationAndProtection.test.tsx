@@ -82,14 +82,22 @@ describe('scan navigation and protection components', () => {
     const user = userEvent.setup();
     const onTrailingClick = vi.fn();
     render(
-      <MemoryRouter>
-        <PageTopBar
-          title="健康档案"
-          leading="home"
-          trailingLabel="短信验证"
-          trailingAriaLabel="切换短信验证"
-          onTrailingClick={onTrailingClick}
-        />
+      <MemoryRouter initialEntries={['/health']}>
+        <Routes>
+          <Route
+            path="/health"
+            element={
+              <PageTopBar
+                title="健康档案"
+                leading="home"
+                trailingLabel="短信验证"
+                trailingAriaLabel="切换短信验证"
+                onTrailingClick={onTrailingClick}
+              />
+            }
+          />
+          <Route path="/" element={<p>home page</p>} />
+        </Routes>
       </MemoryRouter>,
     );
 
@@ -97,6 +105,8 @@ describe('scan navigation and protection components', () => {
     expect(screen.getByLabelText('返回首页')).toBeInTheDocument();
     await user.click(screen.getByLabelText('切换短信验证'));
     expect(onTrailingClick).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByLabelText('返回首页'));
+    expect(screen.getByText('home page')).toBeInTheDocument();
   });
 
   it('renders medication list and verification badge states', () => {
@@ -159,15 +169,21 @@ describe('scan navigation and protection components', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('renders top bar with back leading and verified trailing', () => {
+  it('renders top bar with back leading and verified trailing', async () => {
+    const user = userEvent.setup();
     render(
-      <MemoryRouter initialEntries={['/health']}>
-        <PageTopBar title="健康档案" leading="back" trailing="verified" />
+      <MemoryRouter initialEntries={['/', '/health']} initialIndex={1}>
+        <Routes>
+          <Route path="/" element={<p>basic page</p>} />
+          <Route path="/health" element={<PageTopBar title="健康档案" leading="back" trailing="verified" />} />
+        </Routes>
       </MemoryRouter>,
     );
 
     expect(screen.getByLabelText('返回上一页')).toBeInTheDocument();
     expect(screen.getByLabelText('验证已开启')).toBeInTheDocument();
+    await user.click(screen.getByLabelText('返回上一页'));
+    expect(screen.getByText('basic page')).toBeInTheDocument();
   });
 
   it('renders top bar with menu trailing when no trailing label', () => {

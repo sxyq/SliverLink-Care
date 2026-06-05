@@ -40,7 +40,7 @@ class RelayPreferencesTest {
         preferences.saveUptimeStart(System.currentTimeMillis() - 90 * 60 * 1000L)
 
         val config = preferences.readConfig()
-        assertEquals("https://sxyq27.online/silverlink-api", config.serverBaseUrl)
+        assertEquals("http://sxyq27.online/silverlink-api", config.serverBaseUrl)
         assertEquals("device-1", config.deviceId)
         assertEquals("SL", config.messagePrefix)
         assertTrue(preferences.getLastSyncTime().contains("2026"))
@@ -79,5 +79,16 @@ class RelayPreferencesTest {
         )
 
         assertEquals("http://10.0.2.2:8080", preferences.readConfig().serverBaseUrl)
+    }
+
+    @Test
+    fun returnsDefaultsForUnsetValues() {
+        assertEquals("", preferences.readConfig().serverBaseUrl)
+        assertEquals("从未", preferences.getLastSyncTime())
+        assertEquals("从未", preferences.getLastHeartbeat())
+        assertEquals("未知", preferences.getUptime())
+        assertEquals(false, preferences.readServiceState().running)
+        assertEquals("未启动", preferences.readServiceState().statusText)
+        assertEquals(TodayStats(0, 0, 0, 0), preferences.readTodayStats())
     }
 }

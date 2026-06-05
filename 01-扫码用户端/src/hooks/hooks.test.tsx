@@ -48,6 +48,25 @@ describe('scan hooks', () => {
     expect(result.current.isValid).toBe(false);
   });
 
+  it('tracks replaceState, qr query fallback and missing token state', () => {
+    const { result } = renderHook(() => useQrToken());
+
+    act(() => {
+      window.history.replaceState({}, '', '/silverlink/scan/?qr=qr-query-1234');
+    });
+    expect(result.current.href).toContain('qr=qr-query-1234');
+    expect(result.current.token).toBe('qr-query-1234');
+    expect(result.current.isValid).toBe(true);
+
+    act(() => {
+      window.history.replaceState({}, '', '/silverlink/scan/');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    });
+    expect(result.current.href).toContain('/silverlink/scan/');
+    expect(result.current.token).toBeNull();
+    expect(result.current.isValid).toBe(false);
+  });
+
   it('loads basic info for a token and clears context when token is missing', async () => {
     fetchBasicInfoMock.mockResolvedValue({ id: 'elder-1', name: '老人' });
     const { result, rerender } = renderHook(({ token }) => useScanBasicInfo(token), {
@@ -108,5 +127,20 @@ describe('scan hooks', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
     expect(result.current.verifiedBasicInfo).toBeNull();
     expect(result.current.healthRecord).toBeNull();
+  });
+
+  it('clears protected archive when remote fetch fails', async () => {
+    fetchVerifiedBasicInfoMock.mockRejectedValue(new Error('boom'));
+    fetchHealthRecordMock.mockResolvedValue({ bmi: 22 });
+    fetchMedicationsMock.mockResolvedValue([{ name: '药品' }]);
+    fetchScaleSummariesMock.mockResolvedValue([{ name: 'ADL', score: 10 }]);
+
+    const { result } = renderHook(() => useProtectedArchive(true, 'session-1', 'elder-1'));
+
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.verifiedBasicInfo).toBeNull();
+    expect(result.current.healthRecord).toBeNull();
+    expect(result.current.medications).toBeNull();
+    expect(result.current.scaleSummaries).toBeNull();
   });
 });

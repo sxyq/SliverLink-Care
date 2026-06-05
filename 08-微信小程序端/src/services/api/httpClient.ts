@@ -2,8 +2,24 @@ import Taro from '@tarojs/taro';
 
 import { ERROR_MESSAGES, STORAGE_KEYS } from '@/app/app.constants';
 import { getApiBaseUrl } from '@/utils/env';
-import { getStorageValue, removeStorageValue } from '@/utils/storage';
+import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
+import { globalDeduplication } from '@/utils/throttleDebounce';
+import { queueRequest } from '@/utils/requestQueue';
 import type { ApiEnvelope, ApiRequestOptions, DownloadResult } from './requestTypes';
+
+const CACHE_PREFIX = 'api_cache__';
+
+function buildCacheKey(path: string, data?: unknown): string {
+  if (!data) {
+    return `${CACHE_PREFIX}${path}`;
+  }
+  try {
+    const dataHash = typeof data === 'string' ? data : JSON.stringify(data);
+    return `${CACHE_PREFIX}${path}__${dataHash}`;
+  } catch {
+    return `${CACHE_PREFIX}${path}`;
+  }
+}
 
 function normalizeErrorMessage(payload: unknown, fallback: string) {
   if (!payload) {
@@ -35,7 +51,7 @@ function buildHeaders(extraHeaders?: Record<string, string>) {
   };
 }
 
-async function request<T>(path: string, options: ApiRequestOptions = {}) {
+async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
   const response = await Taro.request<ApiEnvelope<T> | T>({
     url: `${getApiBaseUrl()}${path}`,
     method: options.method || 'GET',
@@ -64,6 +80,59 @@ async function request<T>(path: string, options: ApiRequestOptions = {}) {
   }
 
   return payload as T;
+}
+
+async function request<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
+  const useQueue = options.useQueue !== false;
+  const dedupKey = options.dedupKey;
+  const isGet = (options.method || 'GET') === 'GET';
+  const cacheTtl = options.cacheTtl && options.cacheTtl > 0 ? options.cacheTtl : 0;
+
+  // GET 请求且设置了缓存 TTL，先尝试读取缓存
+  if (isGet && cacheTtl > 0) {
+    const cacheKey = buildCacheKey(path, options.data);
+    const cached = getStorageValue<{ data: T; cachedAt: number } | null>(cacheKey, null);
+    if (cached && Date.now() - cached.cachedAt < cacheTtl) {
+      return cached.data;
+    }
+  }
+
+  const execute = async () => {
+    try {
+      const result = await doRequest<T>(path, options);
+
+      // GET 请求成功且设置了缓存，写入缓存
+      if (isGet && cacheTtl > 0) {
+        const cacheKey = buildCacheKey(path, options.data);
+        setStorageValue(cacheKey, { data: result, cachedAt: Date.now() }, cacheTtl);
+      }
+
+      return result;
+    } catch (error) {
+      // 请求失败时清除可能存在的旧缓存
+      if (isGet && cacheTtl > 0) {
+        const cacheKey = buildCacheKey(path, options.data);
+        removeStorageValue(cacheKey);
+      }
+      throw error;
+    }
+  };
+
+  // 如果设置了去重 key，使用去重逻辑
+  if (dedupKey) {
+    return globalDeduplication(dedupKey, () =>
+      useQueue
+        ? queueRequest(execute, { priority: options.priority, maxRetries: options.maxRetries })
+        : execute()
+    );
+  }
+
+  // 使用请求队列控制并发
+  if (useQueue) {
+    return queueRequest(execute, { priority: options.priority, maxRetries: options.maxRetries });
+  }
+
+  return execute();
 }
 
 async function download(path: string): Promise<DownloadResult> {

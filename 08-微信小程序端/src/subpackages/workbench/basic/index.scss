@@ -1,28 +1,120 @@
 .workbench-basic-page {
-  gap: 12rpx;
+  gap: 16rpx;
 }
 
 .workbench-basic-save-button {
   width: 100%;
+  min-height: 96rpx;
+  border-radius: 28rpx;
+  font-size: 30rpx;
+  font-weight: 800;
 }
 
 .workbench-basic-grid {
-  gap: 12rpx 12rpx;
+  grid-template-columns: minmax(0, 1.3fr) minmax(180rpx, 0.7fr);
+  gap: 20rpx 20rpx;
 }
 
-.workbench-basic-grid__name,
-.workbench-basic-grid__residence {
+.workbench-basic-grid__gender {
+  align-self: start;
+}
+
+.workbench-basic-grid__age {
+  max-width: none;
+}
+
+.workbench-basic-grid__name {
   grid-column: span 1;
 }
 
 .workbench-basic-grid__gender {
-  align-self: end;
+  grid-column: span 1;
 }
 
-.workbench-basic-grid__age {
-  max-width: 220rpx;
+.workbench-basic-grid__residence {
+  grid-column: span 1;
 }
 
 .workbench-basic-gender-switch {
   justify-content: flex-start;
+  gap: 12rpx;
+}
+
+/* 对齐 H5 sl-basic-info-page 放大样式 */
+.workbench-basic-page .sl-form-panel {
+  border-radius: 36rpx;
+}
+
+.workbench-basic-page .sl-form-panel__title {
+  font-size: 32rpx;
+  font-weight: 800;
+}
+
+.workbench-basic-page .sl-form-panel__hint {
+  font-size: 24rpx;
+  line-height: 1.6;
+}
+
+.workbench-basic-page .sl-form-label {
+  font-size: 24rpx;
+  font-weight: 700;
+}
+
+.workbench-basic-page .sl-form-input {
+  min-height: 88rpx;
+  padding: 0 24rpx;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+}
+
+.workbench-basic-page .sl-form-textarea {
+  min-height: 140rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 24rpx;
+  font-size: 28rpx;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.75);
+}
+
+.workbench-basic-page .sl-pill-switch {
+  gap: 16rpx;
+}
+
+.workbench-basic-page .sl-pill-switch__item {
+  min-width: 72rpx;
+  min-height: 72rpx;
+  padding: 0 18rpx;
+  border-radius: 22rpx;
+  font-size: 24rpx;
+  font-weight: 800;
+}
+
+.workbench-basic-page .sl-primary-button--wide {
+  min-height: 96rpx;
+  border-radius: 28rpx;
+  font-size: 30rpx;
+  font-weight: 800;
+}
+
+.workbench-basic-page .sl-submit-bar {
+  margin-top: 2rpx;
+}
+
+.workbench-basic-page .sl-bottom-nav-shell {
+  margin-top: 4rpx;
+  border-radius: 36rpx;
+  padding: 14rpx;
+}
+
+.workbench-basic-page .sl-bottom-nav-card {
+  min-height: 120rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 28rpx;
+}
+
+.workbench-basic-page .sl-bottom-nav-card__title {
+  font-size: 28rpx;
+}
+
+.workbench-basic-page .sl-bottom-nav-card__desc {
+  font-size: 22rpx;
 }

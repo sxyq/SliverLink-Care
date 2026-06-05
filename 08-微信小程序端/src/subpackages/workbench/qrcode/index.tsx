@@ -1,12 +1,12 @@
 import { Button, Image, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
-import { useEffect, useState } from 'react';
-import QRCode from 'qrcode';
+import { useCallback, useEffect, useState } from 'react';
 
 import { APP_ROUTES } from '@/app/app.constants';
 import {
   fetchWorkbenchQrCode,
   regenerateWorkbenchQrCode,
+  resolveWorkbenchQrPreviewImage,
   resolveQrDisplayUrl,
   requestDisableWorkbenchQrCode,
   type WorkbenchQrCodeInfo,
@@ -120,15 +120,8 @@ export default function WorkbenchQrCodePage() {
         setPreviewImage('');
         return;
       }
-
-      const displayUrl = resolveQrDisplayUrl(info.token, info.url);
-      if (!displayUrl) {
-        setPreviewImage('');
-        return;
-      }
-
       try {
-        const image = await QRCode.toDataURL(displayUrl, { width: 220, margin: 1 });
+        const image = await resolveWorkbenchQrPreviewImage(info);
         if (!cancelled) {
           setPreviewImage(image);
         }
@@ -146,8 +139,9 @@ export default function WorkbenchQrCodePage() {
     };
   }, [info]);
 
-  async function handleCopyLink() {
-    if (!info?.url || busyAction) {
+  const handleCopyLink = useCallback(async () => {
+    const accessLink = info ? resolveQrDisplayUrl(info.token, info.url, info.publicUrl) : '';
+    if (!accessLink || busyAction) {
       return;
     }
 
@@ -155,7 +149,7 @@ export default function WorkbenchQrCodePage() {
       setBusyAction('copy');
       setErrorText('');
       await Taro.setClipboardData({
-        data: info.url,
+        data: accessLink,
       });
       setMessageText('二维码访问链接已复制。');
     } catch (error) {
@@ -163,9 +157,9 @@ export default function WorkbenchQrCodePage() {
     } finally {
       setBusyAction('');
     }
-  }
+  }, [info, busyAction]);
 
-  async function handleDisable() {
+  const handleDisable = useCallback(async () => {
     if (!session || !elderId || busyAction || info?.status === '已停用' || info?.disableReviewStatus === 'PENDING') {
       return;
     }
@@ -181,9 +175,9 @@ export default function WorkbenchQrCodePage() {
     } finally {
       setBusyAction('');
     }
-  }
+  }, [session, elderId, busyAction, info?.status, info?.disableReviewStatus]);
 
-  async function handleRegenerate() {
+  const handleRegenerate = useCallback(async () => {
     if (!elderId || busyAction) {
       return;
     }
@@ -199,21 +193,25 @@ export default function WorkbenchQrCodePage() {
     } finally {
       setBusyAction('');
     }
-  }
+  }, [elderId, busyAction]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }
+  }, []);
 
-  function handleOpenPreview() {
-    if (!elderId) {
+  const handleOpenNameplatePreview = useCallback(async () => {
+    if (!elderId || busyAction) {
       return;
     }
 
-    void Taro.navigateTo({
-      url: `${APP_ROUTES.scanNameplate}?elderId=${encodeURIComponent(elderId)}`,
-    });
-  }
+    try {
+      await Taro.navigateTo({
+        url: `${APP_ROUTES.scanNameplate}?elderId=${encodeURIComponent(elderId)}`,
+      });
+    } catch (error) {
+      setErrorText((error as Error)?.message || '打开名牌预览失败');
+    }
+  }, [busyAction, elderId]);
 
   if (!session) {
     return null;
@@ -237,22 +235,22 @@ export default function WorkbenchQrCodePage() {
             </View>
 
             <View className={getPreviewCardClassName(info.status)}>
-              <View className='sl-qr-preview-head'>
-                <View>
-                  <View className='sl-qr-preview-title'>{info.elderName || elderName || '当前老人'}的二维码</View>
-                  <View className='sl-qr-preview-meta'>生成时间 {formatDateTimeLabel(info.createdAt)}</View>
-                </View>
-                <Text className={getStatusClassName(info.status)}>{info.status || '未知'}</Text>
-              </View>
+              <Text className={getStatusClassName(info.status)}>{info.status || '未知'}</Text>
+              <View className='sl-qr-preview-title'>{info.elderName || elderName || '当前老人'}的二维码</View>
+              <View className='sl-qr-preview-meta'>生成时间 {formatDateTimeLabel(info.createdAt)}</View>
 
-              <View className='sl-qr-preview-frame' onClick={handleOpenPreview}>
+              <View className='sl-qr-preview-frame'>
+                <Button className='workbench-qrcode-export-button' onClick={() => void handleOpenNameplatePreview()}>
+                  导出名牌
+                </Button>
                 <View className='sl-qr-preview-placeholder'>
                   {previewImage ? (
                     <Image className={getQrImageClassName(info.status)} mode='widthFix' src={previewImage} />
                   ) : (
                     <>
-                      <Text className='sl-qr-preview-token'>{info.token || '暂无 Token'}</Text>
-                      <Text className='sl-qr-preview-caption'>扫码后进入对应老人档案</Text>
+                      <Text className='sl-qr-preview-empty-icon'>⌁</Text>
+                      <Text className='sl-qr-preview-empty-title'>二维码预览暂不可用</Text>
+                      <Text className='sl-qr-preview-caption'>可复制访问链接，或重新生成二维码后再试</Text>
                     </>
                   )}
                 </View>
@@ -261,9 +259,6 @@ export default function WorkbenchQrCodePage() {
               <Button className='sl-secondary-button workbench-qrcode-copy-button' loading={busyAction === 'copy'} onClick={handleCopyLink}>
                 复制访问链接
               </Button>
-
-              <View className='workbench-qrcode-preview-link'>访问链接 {info.url || '暂无'}</View>
-              <View className='workbench-qrcode-preview-link'>二维码 Token {info.token || '暂无'}</View>
             </View>
           </View>
 
@@ -294,12 +289,6 @@ export default function WorkbenchQrCodePage() {
               </View>
             ) : null}
           </View>
-
-          {info.securityNote ? (
-            <View className='sl-card'>
-              <Text className='workbench-qrcode-note'>{info.securityNote}</Text>
-            </View>
-          ) : null}
 
           <BottomNavGrid elderId={elderId} activeKey='qrcode' />
         </>

@@ -1,3 +1,3 @@
 export default {
-  navigationBarTitleText: '统一登录',
+  navigationBarTitleText: '智联名牌',
 };

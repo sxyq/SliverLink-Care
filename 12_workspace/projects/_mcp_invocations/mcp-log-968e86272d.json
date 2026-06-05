@@ -1,0 +1,16 @@
+{
+  "id": "mcp-log-968e86272d",
+  "event_type": "lifecycle",
+  "method": "start",
+  "tool_name": null,
+  "agent_name": null,
+  "model_name": null,
+  "prompt_text": null,
+  "prompt_source": null,
+  "request_payload": {},
+  "response_payload": {},
+  "metadata": {},
+  "latency_ms": null,
+  "success": true,
+  "created_at": "2026-06-01T08:58:04.643112"
+}

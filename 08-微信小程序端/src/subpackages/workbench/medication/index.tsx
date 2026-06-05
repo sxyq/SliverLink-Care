@@ -1,12 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button, Input, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ROLE_TYPES } from '@/app/app.constants';
+import { APP_ROUTES, ROLE_TYPES, type RoleType } from '@/app/app.constants';
 import {
+  cacheVolunteerMedications,
   createFamilyMedication,
   deleteFamilyMedication,
   fetchWorkbenchMedications,
+  getCachedVolunteerMedications,
   saveVolunteerMedications,
   updateFamilyMedication,
   type WorkbenchMedicationDraft,
@@ -66,6 +68,14 @@ export default function WorkbenchMedicationPage() {
   const [saving, setSaving] = useState(false);
   const [errorText, setErrorText] = useState('');
 
+  const loadMedications = useCallback(async (role: RoleType, nextElderId: string) => {
+    setLoading(true);
+    setErrorText('');
+    const result = await fetchWorkbenchMedications(role, nextElderId);
+    setItems(result);
+    setPendingDeletedIds([]);
+  }, []);
+
   useEffect(() => {
     if (!session) {
       void Taro.redirectTo({ url: APP_ROUTES.login });
@@ -83,13 +93,7 @@ export default function WorkbenchMedicationPage() {
 
     async function load() {
       try {
-        setLoading(true);
-        setErrorText('');
-        const result = await fetchWorkbenchMedications(activeSession.role, elderId);
-        if (!cancelled) {
-          setItems(result);
-          setPendingDeletedIds([]);
-        }
+        await loadMedications(activeSession.role, elderId);
       } catch (error) {
         if (!cancelled) {
           setErrorText((error as Error)?.message || '加载用药信息失败');
@@ -106,40 +110,40 @@ export default function WorkbenchMedicationPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, session?.role]);
+  }, [elderId, loadMedications, session?.role]);
 
   const dirty = useMemo(() => {
     return Boolean(pendingDeletedIds.length || items.some((item) => item.id.startsWith('temp-')));
   }, [items, pendingDeletedIds]);
 
-  function updateDraft(field: MedicationField, value: string) {
+  const updateDraft = useCallback((field: MedicationField, value: string) => {
     setDraft((current) => ({
       ...current,
       [field]: value,
     }));
-  }
+  }, []);
 
-  function handleOpenCreate() {
+  const handleOpenCreate = useCallback(() => {
     setDraft(emptyDraft);
     setEditingId('');
     setShowEditor(true);
     setErrorText('');
-  }
+  }, []);
 
-  function handleOpenEdit(item: WorkbenchMedicationItem) {
+  const handleOpenEdit = useCallback((item: WorkbenchMedicationItem) => {
     setDraft(toDraft(item));
     setEditingId(item.id);
     setShowEditor(true);
     setErrorText('');
-  }
+  }, []);
 
-  function handleCancelEditor() {
+  const handleCancelEditor = useCallback(() => {
     setDraft(emptyDraft);
     setEditingId('');
     setShowEditor(false);
-  }
+  }, []);
 
-  function handleSaveDraft() {
+  const handleSaveDraft = useCallback(() => {
     if (!draft.name.trim()) {
       setErrorText('请先填写药品名称');
       return;
@@ -174,16 +178,16 @@ export default function WorkbenchMedicationPage() {
     }
 
     handleCancelEditor();
-  }
+  }, [draft, editingId]);
 
-  function handleDelete(item: WorkbenchMedicationItem) {
+  const handleDelete = useCallback((item: WorkbenchMedicationItem) => {
     setItems((current) => current.filter((row) => row.id !== item.id));
     if (!item.id.startsWith('temp-')) {
       setPendingDeletedIds((current) => Array.from(new Set([...current, item.id])));
     }
-  }
+  }, []);
 
-  async function handleSubmitSave() {
+  const handleSubmitSave = useCallback(async () => {
     if (!session || !elderId || saving) {
       return;
     }
@@ -194,6 +198,13 @@ export default function WorkbenchMedicationPage() {
 
       if (session.role === ROLE_TYPES.volunteer) {
         await saveVolunteerMedications(elderId, items.map(toPersistDraft));
+        const cachedItems = items.map((item) => ({
+          ...item,
+          updatedAt: item.updatedAt || new Date().toISOString(),
+        }));
+        cacheVolunteerMedications(elderId, cachedItems);
+        setItems(getCachedVolunteerMedications(elderId));
+        setPendingDeletedIds([]);
         void Taro.showToast({
           title: '保存成功',
           icon: 'success',
@@ -231,11 +242,11 @@ export default function WorkbenchMedicationPage() {
     } finally {
       setSaving(false);
     }
-  }
+  }, [session, elderId, saving, items, pendingDeletedIds]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }
+  }, []);
 
   if (!session) {
     return null;

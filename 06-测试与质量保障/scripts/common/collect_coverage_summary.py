@@ -19,6 +19,9 @@ FRONTEND_COVERAGE = [
 BACKEND_JACOCO_XML = Path("04-统一后端/target/site/jacoco/jacoco.xml")
 BACKEND_JACOCO_CSV = Path("04-统一后端/target/site/jacoco/jacoco.csv")
 ANDROID_TEST_REPORT = Path("05-安卓短信中转端/app/build/reports/tests/testDebugUnitTest/index.html")
+ANDROID_JACOCO_XML = Path(
+    "05-安卓短信中转端/app/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml"
+)
 
 
 def pct(covered: int, total: int) -> float:
@@ -97,6 +100,21 @@ def backend_summary(repo: Path) -> dict[str, Any]:
 
 def android_summary(repo: Path) -> dict[str, Any]:
     report_path = repo / ANDROID_TEST_REPORT
+    xml_path = repo / ANDROID_JACOCO_XML
+    if xml_path.exists():
+        root = ET.parse(xml_path).getroot()
+        counters: dict[str, dict[str, int]] = {}
+        for counter in root.findall("counter"):
+            kind = str(counter.attrib.get("type", "")).lower()
+            missed = int(counter.attrib.get("missed", "0"))
+            covered = int(counter.attrib.get("covered", "0"))
+            counters[kind] = {"covered": covered, "total": missed + covered, "pct": pct(covered, missed + covered)}
+        return {
+            "available": report_path.exists(),
+            "source": str(ANDROID_JACOCO_XML),
+            "unit_test_report": str(ANDROID_TEST_REPORT),
+            **counters,
+        }
     return {
         "available": report_path.exists(),
         "unit_test_report": str(ANDROID_TEST_REPORT),
@@ -135,9 +153,15 @@ def write_markdown(summary: dict[str, Any], output: Path) -> None:
         lines.append(f"| backend | - | - | {backend.get('reason', 'missing')} |")
 
     android = summary["android"]
-    lines.append(
-        f"| android-relay | pending XML aggregation | {'available' if android.get('available') else 'missing'} | {android['coverage_note']} |"
-    )
+    if "method" in android and "instruction" in android:
+        lines.append(
+            f"| android-relay | {android['method']['pct']}% ({android['method']['covered']}/{android['method']['total']}) "
+            f"| {android['instruction']['pct']}% ({android['instruction']['covered']}/{android['instruction']['total']}) | JaCoCo (Android JVM) |"
+        )
+    else:
+        lines.append(
+            f"| android-relay | pending XML aggregation | {'available' if android.get('available') else 'missing'} | {android['coverage_note']} |"
+        )
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 

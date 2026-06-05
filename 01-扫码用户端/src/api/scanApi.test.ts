@@ -4,6 +4,7 @@ import {
   fetchBasicInfo,
   fetchHealthRecord,
   fetchMedications,
+  fetchScaleDetail,
   fetchScaleSummaries,
   fetchVerifiedBasicInfo,
   getResolvedElderId,
@@ -156,7 +157,7 @@ describe('scanApi', () => {
     window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
 
     const result = await fetchScaleSummaries('session-1');
-    expect(result).toEqual([{ name: 'PHQ-9', score: 5, updatedAt: '2026-05-25', volunteer: '', answers: [] }]);
+    expect(result).toEqual([{ name: 'PHQ-9', score: 5, updatedAt: '2026-05-25', volunteer: '' }]);
   });
 
   it('handles fetchBasicInfo without emergency phone fields', async () => {
@@ -212,6 +213,14 @@ describe('scanApi', () => {
     expect(getResolvedElderId()).toBe('elder-001');
     expect(getResolvedEmergencyPhone()).toBe('13800000000');
     expect(getResolvedEmergencyPhoneMasked()).toBe('138****0000');
+  });
+
+  it('returns empty phone values when token matches but phone context is absent', () => {
+    window.sessionStorage.setItem('silverlink.scan.qrToken', 'qr-token-123456');
+    window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
+
+    expect(getResolvedEmergencyPhone()).toBe('');
+    expect(getResolvedEmergencyPhoneMasked()).toBe('');
   });
 
   it('clearResolvedScanContext removes all stored keys', async () => {
@@ -277,7 +286,7 @@ describe('scanApi', () => {
     mockFetchData([{ name: 'PHQ-9', score: 5, updatedAt: '2026-05-25', answers: null }]);
 
     const result = await fetchScaleSummaries('session-1', 'elder-001');
-    expect(result[0].answers).toEqual([]);
+    expect(result[0].answers).toBeUndefined();
   });
 
   it('fetchScaleSummaries falls back updatedAt to date when updatedAt is missing', async () => {
@@ -318,5 +327,55 @@ describe('scanApi', () => {
     await fetchBasicInfo('qr-token-123456');
     expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhone')).toBeNull();
     expect(window.sessionStorage.getItem('silverlink.scan.emergencyPhoneMasked')).toBeNull();
+  });
+
+  it('fetchScaleDetail returns null when required arguments are missing', async () => {
+    expect(await fetchScaleDetail('', 'PHQ-9', 'elder-001')).toBeNull();
+    expect(await fetchScaleDetail('session-1', 'PHQ-9')).toBeNull();
+    expect(await fetchScaleDetail('session-1', '' as never, 'elder-001')).toBeNull();
+  });
+
+  it('fetchScaleDetail normalizes detail payload and defaults answers to an empty array', async () => {
+    mockFetchData({
+      scale: 'UCLA',
+      score: '8',
+      date: '2026-05-28',
+      volunteer: '社工甲',
+      answers: null,
+    });
+
+    const result = await fetchScaleDetail('session-1', 'UCLA', 'elder-001');
+    expect(result).toEqual({
+      name: 'UCLA',
+      score: 8,
+      updatedAt: '2026-05-28',
+      volunteer: '社工甲',
+      answers: [],
+    });
+  });
+
+  it('fetchScaleDetail falls back to resolved elder id and maps answer values', async () => {
+    mockFetchData({
+      score: '6',
+      date: '2026-05-26',
+      answers: [
+        { question: 'Q1', value: '1' },
+        { question: 'Q2', value: null },
+      ],
+    });
+    window.sessionStorage.setItem('silverlink.scan.qrToken', 'qr-token-123456');
+    window.sessionStorage.setItem('silverlink.scan.elderId', 'elder-001');
+
+    const result = await fetchScaleDetail('session-1', 'PHQ-9');
+    expect(result).toEqual({
+      name: 'PHQ-9',
+      score: 6,
+      updatedAt: '2026-05-26',
+      volunteer: '',
+      answers: [
+        { question: 'Q1', value: 1 },
+        { question: 'Q2', value: null },
+      ],
+    });
   });
 });

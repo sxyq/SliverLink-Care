@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Button, View } from '@tarojs/components';
 
 import type { WorkbenchScaleType } from '@/services/workbench/scaleService';
@@ -7,7 +8,7 @@ interface ScaleTabBarProps {
   onChange: (type: WorkbenchScaleType) => void;
 }
 
-export function ScaleTabBar({ activeType, onChange }: ScaleTabBarProps) {
+export const ScaleTabBar = memo(function ScaleTabBar({ activeType, onChange }: ScaleTabBarProps) {
   return (
     <View className='sl-scale-tabs'>
       {(['PHQ-9', 'GAD-7', 'UCLA'] as WorkbenchScaleType[]).map((type) => (
@@ -21,6 +22,6 @@ export function ScaleTabBar({ activeType, onChange }: ScaleTabBarProps) {
       ))}
     </View>
   );
-}
+});
 
 export default ScaleTabBar;

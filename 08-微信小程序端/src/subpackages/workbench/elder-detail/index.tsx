@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useRouter } from '@tarojs/taro';
 import { View } from '@tarojs/components';
 
@@ -90,11 +90,11 @@ export default function WorkbenchElderDetailPage() {
     ];
   }, [detail]);
 
-  function handleBack() {
+  const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderList }));
-  }
+  }, []);
 
-  async function handleOpenPage(path: string) {
+  const handleOpenPage = useCallback(async (path: string) => {
     if (!elderId) {
       return;
     }
@@ -102,25 +102,25 @@ export default function WorkbenchElderDetailPage() {
     await Taro.navigateTo({
       url: `${path}?elderId=${encodeURIComponent(elderId)}`,
     });
-  }
+  }, [elderId]);
 
-  if (!session) {
-    return null;
-  }
-
-  const actionItems: ActionTileItem[] = [
+  const actionItems = useMemo<ActionTileItem[]>(() => [
     { key: 'basic', title: '基本信息', description: '档案资料', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic) },
     { key: 'medication', title: '主要用药', description: '用药记录', onClick: () => void handleOpenPage(APP_ROUTES.workbenchMedication) },
     { key: 'scale', title: '量表信息', description: 'PHQ / GAD / UCLA', onClick: () => void handleOpenPage(APP_ROUTES.workbenchScale) },
     { key: 'qrcode', title: '二维码管理', description: '扫码名牌', onClick: () => void handleOpenPage(APP_ROUTES.workbenchQrCode) },
-  ];
+  ], [handleOpenPage]);
+
+  if (!session) {
+    return null;
+  }
 
   return (
     <WorkbenchShell pageClassName='workbench-elder-detail-page'>
       <WorkbenchHeader
         title='老人详情'
         leadingAction={{ label: '返回', icon: '←', onClick: handleBack }}
-        trailingAction={{ label: '编辑', icon: '✎', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
+        trailingAction={{ label: '编辑', icon: '', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
       />
 
       {loading ? <View className='sl-card'><View className='sl-empty-state'>老人详情加载中...</View></View> : null}
@@ -133,7 +133,7 @@ export default function WorkbenchElderDetailPage() {
             meta={`档案编号 ${detail.archiveNo || '未分配'}${detail.gender ? ` ${detail.gender}` : ''}${detail.age ? ` ${detail.age}岁` : ''}`}
             fields={summaryFields}
           />
-          <ActionTileGrid items={actionItems} />
+          <ActionTileGrid items={actionItems} detail />
         </>
       ) : null}
     </WorkbenchShell>

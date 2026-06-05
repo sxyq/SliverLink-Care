@@ -1,11 +1,18 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ScaleDetailPage } from './ScaleDetailPage';
 import type { ScaleSummary } from '../types';
 
+const fetchScaleDetail = vi.fn();
+
 vi.mock('../components/BottomTabBar', () => ({
   BottomTabBar: () => <div data-testid="bottom-tab" />,
+}));
+
+vi.mock('../api/scanApi', () => ({
+  fetchScaleDetail: (...args: unknown[]) => fetchScaleDetail(...args),
 }));
 
 function makeItem(overrides: Partial<ScaleSummary> = {}): ScaleSummary {
@@ -18,11 +25,11 @@ function makeItem(overrides: Partial<ScaleSummary> = {}): ScaleSummary {
   };
 }
 
-function renderPage(data: ScaleSummary[] | null, scaleName = 'PHQ-9', loading = false) {
+function renderPage(data: ScaleSummary[] | null, scaleName = 'PHQ-9', loading = false, extraProps: Partial<ComponentProps<typeof ScaleDetailPage>> = {}) {
   return render(
     <MemoryRouter initialEntries={[`/scale/${scaleName}`]}>
       <Routes>
-        <Route path="/scale/:scaleName" element={<ScaleDetailPage data={data} loading={loading} />} />
+        <Route path="/scale/:scaleName" element={<ScaleDetailPage data={data} loading={loading} {...extraProps} />} />
         <Route path="/scale" element={<p>scale list</p>} />
       </Routes>
     </MemoryRouter>,
@@ -30,6 +37,14 @@ function renderPage(data: ScaleSummary[] | null, scaleName = 'PHQ-9', loading = 
 }
 
 describe('ScaleDetailPage', () => {
+  beforeEach(() => {
+    fetchScaleDetail.mockReset();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it('shows loading state', () => {
     renderPage(null, 'PHQ-9', true);
     expect(screen.getByText(/加载中/)).toBeInTheDocument();
@@ -184,5 +199,48 @@ describe('ScaleDetailPage', () => {
     });
     renderPage([item], 'PHQ-9');
     expect(screen.getByText('2 分')).toBeInTheDocument();
+  });
+
+  it('loads scale detail lazily when list item has no answers and falls back to fetched detail', async () => {
+    fetchScaleDetail.mockResolvedValue({
+      name: 'PHQ-9',
+      score: 6,
+      updatedAt: '2026-05-25',
+      volunteer: '新志愿者',
+      answers: [{ question: '做事提不起劲', value: 1 }],
+    });
+
+    renderPage([makeItem({ answers: undefined })], 'PHQ-9', false, {
+      sessionId: 'session-1',
+      elderId: 'elder-1',
+    });
+
+    expect(screen.getByText('请稍候...')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(fetchScaleDetail).toHaveBeenCalledWith('session-1', 'PHQ-9', 'elder-1');
+      expect(screen.getByText('几天')).toBeInTheDocument();
+      expect(screen.getByText('新志愿者')).toBeInTheDocument();
+    });
+  });
+
+  it('falls back to placeholder when lazy detail loading fails', async () => {
+    fetchScaleDetail.mockRejectedValue(new Error('load failed'));
+
+    renderPage([makeItem({ answers: undefined })], 'PHQ-9', false, {
+      sessionId: 'session-1',
+      elderId: 'elder-1',
+    });
+
+    await waitFor(() => {
+      expect(fetchScaleDetail).toHaveBeenCalled();
+      expect(screen.getByText(/暂无逐题记录/)).toBeInTheDocument();
+    });
+  });
+
+  it('returns to scale list when clicking the next card', () => {
+    renderPage([makeItem()], 'PHQ-9');
+    fireEvent.click(screen.getByRole('button', { name: /返回量表列表/ }));
+    expect(screen.getByText('scale list')).toBeInTheDocument();
   });
 });

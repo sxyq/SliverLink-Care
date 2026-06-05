@@ -1,1 +1,0 @@
-curl -sS -w '\nHTTP_STATUS:%{http_code}\nTOTAL_TIME:%{time_total}\n' -H 'Content-Type: application/json' -H 'X-Timestamp: 1779710232' -H 'X-Nonce: 404557ca-2d39-4cb3-a9a4-fc5d9fb5bd7f' -H 'X-Signature: 3f3d6d5ebf4c4f245df786d22d51936ba31895c957fd1211aae6d17569b5d677' -X POST 'http://sxyq27.online/silverlink-api/api/admin/login' -d '{"account":"admin","password":"admin"}'

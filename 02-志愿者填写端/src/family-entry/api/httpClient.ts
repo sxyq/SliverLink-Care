@@ -1,4 +1,14 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+function resolveBaseUrl() {
+  const configured = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+  return '/silverlink-api';
+}
+
+const API_BASE_URL = resolveBaseUrl();
+const TOKEN_STORAGE_KEY = 'sl_family_web_token';
+let familyToken = '';
 
 interface RequestConfig {
   headers?: Record<string, string>;
@@ -10,22 +20,50 @@ interface ApiEnvelope<T> {
   data?: T;
 }
 
-function getToken(): string | null {
-  return localStorage.getItem('family_token');
+function normalizeErrorMessage(raw: string) {
+  if (!raw) return '请求失败';
+  if (raw.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(raw) as ApiEnvelope<unknown> & { error?: string };
+      if (parsed.message) return parsed.message;
+      if (parsed.error) return parsed.error;
+      if (parsed.data && typeof parsed.data === 'object' && 'message' in parsed.data) {
+        return String((parsed.data as { message?: string }).message || '请求失败');
+      }
+    } catch {
+      return '请求失败';
+    }
+    return '请求失败';
+  }
+  return raw;
 }
 
-export function setToken(token: string): void {
-  localStorage.setItem('family_token', token);
+export function getToken(): string {
+  if (!familyToken && typeof window !== 'undefined') {
+    familyToken = window.localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+  }
+  return familyToken;
+}
+
+export function setToken(nextToken: string): void {
+  familyToken = nextToken;
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, nextToken);
+  }
 }
 
 export function clearToken(): void {
-  localStorage.removeItem('family_token');
+  familyToken = '';
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
 }
 
 async function request<T>(method: string, url: string, body?: unknown, config?: RequestConfig): Promise<T> {
   const token = getToken();
   const res = await fetch(`${API_BASE_URL}${url}`, {
     method,
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -33,8 +71,11 @@ async function request<T>(method: string, url: string, body?: unknown, config?: 
     },
     ...(body === undefined ? {} : { body: JSON.stringify(body) }),
   });
-  if (res.status === 401) clearToken();
-  if (!res.ok) throw new Error(await res.text().catch(() => '请求失败'));
+  if (res.status === 401 || res.status === 403) clearToken();
+  if (!res.ok) {
+    const text = await res.text().catch(() => '请求失败');
+    throw new Error(normalizeErrorMessage(text));
+  }
   const json = (await res.json()) as ApiEnvelope<T> | T;
   if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
     const envelope = json as ApiEnvelope<T>;

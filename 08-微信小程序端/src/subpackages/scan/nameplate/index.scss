@@ -1,47 +1,143 @@
 .scan-nameplate-page {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.scan-nameplate-card {
-  padding: 26rpx 24rpx;
+  gap: 20rpx;
 }
 
 .scan-nameplate-card-list {
+  display: grid;
+  gap: 20rpx;
+}
+
+.scan-nameplate-pdf-preview-card {
+  display: grid;
+  gap: 20rpx;
+  padding: 28rpx;
+}
+
+.scan-nameplate-pdf-preview-card__header {
   display: flex;
-  flex-direction: column;
-  gap: 14rpx;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+}
+
+.scan-nameplate-pdf-preview-frame {
+  overflow: hidden;
+  border-radius: 28rpx;
+  border: 1rpx solid rgba(202, 230, 234, 0.95);
+  background: #f4f8f9;
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.72);
+}
+
+.scan-nameplate-pdf-preview-image {
+  display: block;
+  width: 100%;
 }
 
 .scan-nameplate-card {
-  min-height: 260rpx;
+  display: grid;
+  gap: 22rpx;
+  padding: 32rpx;
+  border-radius: 36rpx;
   background:
-    linear-gradient(160deg, rgba(20, 121, 184, 0.05), rgba(255, 255, 255, 1)),
-    #ffffff;
+    radial-gradient(circle at top right, rgba(70, 191, 221, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(244, 252, 253, 0.96), rgba(255, 255, 255, 1));
+}
+
+.scan-nameplate-card--front {
+  background:
+    radial-gradient(circle at top right, rgba(53, 183, 220, 0.16), transparent 42%),
+    linear-gradient(180deg, rgba(247, 253, 253, 0.98), rgba(255, 255, 255, 1));
 }
 
 .scan-nameplate-card--back {
   background:
-    linear-gradient(160deg, rgba(38, 166, 154, 0.08), rgba(255, 255, 255, 1)),
-    #ffffff;
+    radial-gradient(circle at top left, rgba(97, 200, 191, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(245, 252, 250, 0.98), rgba(255, 255, 255, 1));
+}
+
+.scan-nameplate-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
 }
 
 .scan-nameplate-card__kicker {
-  font-size: 22rpx;
+  font-size: 32rpx;
+  line-height: 1.2;
   color: var(--sl-primary-deep);
+  font-weight: 800;
+}
+
+.scan-nameplate-card__tag {
+  padding: 10rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(237, 248, 249, 0.98);
+  border: 1rpx solid rgba(194, 228, 233, 0.95);
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.scan-nameplate-front-hero {
+  display: grid;
+  justify-items: start;
+  gap: 12rpx;
+}
+
+.scan-nameplate-front-hero__title {
+  font-size: 44rpx;
+  line-height: 1.1;
+  color: var(--sl-primary-deep);
+  font-weight: 900;
+  letter-spacing: 2rpx;
+}
+
+.scan-nameplate-front-hero__divider {
+  width: 88rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: linear-gradient(90deg, #18a9c8, rgba(24, 169, 200, 0.16));
+}
+
+.scan-nameplate-front-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
 }
 
 .scan-nameplate-field {
-  margin-top: 16rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
+  display: grid;
+  gap: 10rpx;
+  padding: 22rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1rpx solid rgba(202, 230, 234, 0.95);
+  box-shadow: inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
+}
+
+.scan-nameplate-field--compact {
+  min-height: 120rpx;
+}
+
+.scan-nameplate-field--full {
+  grid-column: 1 / -1;
 }
 
 .scan-nameplate-label {
   font-size: 22rpx;
+  line-height: 1.2;
   color: var(--sl-text-secondary);
+  font-weight: 700;
+}
+
+.scan-nameplate-value {
+  font-size: 38rpx;
+  line-height: 1.35;
+  color: var(--sl-text);
+  font-weight: 800;
+  word-break: break-all;
 }
 
 .scan-nameplate-placeholder {
@@ -52,32 +148,58 @@
 }
 
 .scan-nameplate-qr-area {
-  margin-top: 18rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12rpx;
+  display: grid;
+  justify-items: center;
+  gap: 16rpx;
+  padding: 12rpx 0 6rpx;
 }
 
 .scan-nameplate-qr-box {
-  width: 168rpx;
-  height: 168rpx;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 320rpx;
+  height: 320rpx;
+  display: grid;
+  place-items: center;
   overflow: hidden;
-  border-radius: 16rpx;
+  border-radius: 32rpx;
   background: #ffffff;
-  border: 1rpx dashed #c7e3ea;
-  color: var(--sl-color-primary);
-  padding: 16rpx;
-  text-align: center;
+  border: 1rpx solid #d5edf2;
+  box-shadow:
+    0 18rpx 40rpx rgba(15, 103, 120, 0.06),
+    inset 0 1rpx 0 rgba(255, 255, 255, 0.7);
 }
 
 .scan-nameplate-qr-image {
   display: block;
-  width: 100%;
-  height: auto;
+  width: 236rpx;
+  height: 236rpx;
+}
+
+.scan-nameplate-qr-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10rpx;
+  padding: 28rpx;
+  text-align: center;
+}
+
+.scan-nameplate-qr-empty__icon {
+  font-size: 44rpx;
+  line-height: 1;
+  color: var(--sl-color-primary);
+  font-weight: 700;
+}
+
+.scan-nameplate-qr-empty__title {
+  font-size: 26rpx;
+  line-height: 1.35;
+  color: var(--sl-text);
+  font-weight: 700;
+}
+
+.scan-nameplate-qr-empty__caption {
+  font-size: 22rpx;
+  line-height: 1.55;
+  color: var(--sl-text-secondary);
 }
 
 .scan-nameplate-qr-token {
@@ -88,27 +210,32 @@
 }
 
 .scan-nameplate-qr-hint {
-  font-size: 23rpx;
+  font-size: 24rpx;
+  line-height: 1.55;
   color: var(--sl-text-secondary);
+  text-align: center;
 }
 
 .scan-nameplate-divider {
-  margin-top: 18rpx;
   height: 1rpx;
-  background: var(--sl-border);
+  background: rgba(202, 230, 234, 0.95);
 }
 
 .scan-nameplate-note {
-  font-size: 23rpx;
+  padding: 0 4rpx;
+  font-size: 24rpx;
   line-height: 1.7;
   color: var(--sl-text-secondary);
 }
 
 .scan-nameplate-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16rpx;
 }
 
 .scan-nameplate-actions__button {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 0 18rpx;
 }

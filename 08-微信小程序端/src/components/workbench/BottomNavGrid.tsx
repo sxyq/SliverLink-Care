@@ -1,3 +1,4 @@
+import { memo, useCallback } from 'react';
 import { Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
@@ -17,8 +18,8 @@ const NAV_ITEMS: Array<{ key: WorkbenchNavKey; title: string; desc: string; rout
   { key: 'qrcode', title: '二维码管理', desc: '扫码名牌', route: APP_ROUTES.workbenchQrCode },
 ];
 
-export function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
-  async function handleOpen(route: string) {
+export const BottomNavGrid = memo(function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
+  const handleOpen = useCallback((route: string) => {
     if (!elderId) {
       return;
     }
@@ -27,10 +28,10 @@ export function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
       return;
     }
 
-    await Taro.redirectTo({
+    void Taro.redirectTo({
       url: `${route}?elderId=${encodeURIComponent(elderId)}`,
     });
-  }
+  }, [elderId, activeKey]);
 
   return (
     <View className='sl-bottom-nav-shell'>
@@ -39,7 +40,7 @@ export function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
           <View
             key={item.key}
             className={item.key === activeKey ? 'sl-bottom-nav-card is-active' : 'sl-bottom-nav-card'}
-            onClick={() => void handleOpen(item.route)}
+            onClick={() => handleOpen(item.route)}
           >
             <Text className='sl-bottom-nav-card__title'>{item.title}</Text>
             <Text className='sl-bottom-nav-card__desc'>{item.desc}</Text>
@@ -48,6 +49,6 @@ export function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
       </View>
     </View>
   );
-}
+});
 
 export default BottomNavGrid;

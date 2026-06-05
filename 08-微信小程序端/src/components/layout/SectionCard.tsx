@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Text, View } from '@tarojs/components';
 
 export interface SectionCardProps {
@@ -8,7 +8,7 @@ export interface SectionCardProps {
   children?: ReactNode;
 }
 
-export function SectionCard({ title, subtitle, extra, children }: SectionCardProps) {
+export const SectionCard = memo(function SectionCard({ title, subtitle, extra, children }: SectionCardProps) {
   return (
     <View className='sl-card' style={{ padding: '28rpx 24rpx', display: 'flex', flexDirection: 'column', gap: '16rpx' }}>
       {title || subtitle || extra ? (
@@ -25,6 +25,6 @@ export function SectionCard({ title, subtitle, extra, children }: SectionCardPro
       {children}
     </View>
   );
-}
+});
 
 export default SectionCard;

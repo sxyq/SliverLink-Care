@@ -152,7 +152,7 @@ class InvitationServiceTest {
         assertTrue(result.getOk());
         assertEquals("jwt-token", result.getToken());
         verify(jdbc).update(contains("insert into app_user"), any(), any(), any(), any(), any());
-        verify(jdbc).update(contains("insert into family_binding"), any(), any(), any(), any(), any(), any(), any(), any(), any());
+        verify(jdbc).update(contains("insert into family_binding"), any(), any(), any(), any(), any(), any(), any(), any());
         verify(jdbc).update(contains("update invitation set used_count"), eq("ABC12345"));
     }
 
@@ -262,7 +262,7 @@ class InvitationServiceTest {
         var dto = service.create(req);
         assertNotNull(dto.getCode());
         assertEquals("ACTIVE", dto.getStatus());
-        verify(jdbc).update(contains("insert into invitation"), any(), anyString(), anyString(), anyString(), any(), any(), any());
+        verify(jdbc).update(contains("insert into invitation"), any(), anyString(), anyString(), anyString(), any(), any());
     }
 
     @Test

@@ -1,22 +1,33 @@
 import { useEffect, useState } from 'react';
 import { Button, Image, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
-import QRCode from 'qrcode';
 
 import { APP_ROUTES } from '@/app/app.constants';
-import { fetchNameplatePreview, openNameplatePdf, resolveQrDisplayUrl, type NameplatePreviewInfo } from '@/services/workbench/qrcodeService';
+import {
+  fetchNameplatePreview,
+  fetchWorkbenchQrCode,
+  openNameplatePdf,
+  resolveBase64PreviewImage,
+  resolveNameplateQrValue,
+  resolveQrPayloadPreviewImage,
+  resolveWorkbenchQrPreviewImage,
+  type NameplatePreviewInfo,
+} from '@/services/workbench/qrcodeService';
+import { getAuthSession } from '@/store/auth/authStore';
 
 import './index.scss';
 
 export default function NameplatePreviewPage() {
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
+  const session = getAuthSession();
 
   const [preview, setPreview] = useState<NameplatePreviewInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [openingPdf, setOpeningPdf] = useState(false);
   const [errorText, setErrorText] = useState('');
   const [qrImage, setQrImage] = useState('');
+  const [pdfPreviewImage, setPdfPreviewImage] = useState('');
 
   useEffect(() => {
     if (!elderId) {
@@ -56,16 +67,65 @@ export default function NameplatePreviewPage() {
   useEffect(() => {
     let cancelled = false;
 
+    async function loadPdfPreviewImage() {
+      const base64 = String(preview?.pdfPreviewImageBase64 || '').trim();
+      if (!base64) {
+        if (!cancelled) {
+          setPdfPreviewImage('');
+        }
+        return;
+      }
+
+      const image = await resolveBase64PreviewImage(base64, 'nameplate-pdf-preview');
+      if (!cancelled) {
+        setPdfPreviewImage(image);
+      }
+    }
+
+    void loadPdfPreviewImage();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [preview?.pdfPreviewImageBase64]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     async function renderQrImage() {
-      if (!preview?.backQrToken) {
+      if (!preview) {
         setQrImage('');
         return;
       }
 
       try {
-        const image = await QRCode.toDataURL(resolveQrDisplayUrl(preview.backQrToken), { width: 220, margin: 1 });
-        if (!cancelled) {
+        const directBase64 = String(preview.backQrImageBase64 || '').trim();
+        if (directBase64) {
+          const image = directBase64.startsWith('data:image') ? directBase64 : `data:image/png;base64,${directBase64}`;
+          if (!cancelled) {
+            setQrImage(image);
+          }
+          return;
+        }
+
+        const nameplateQrValue = resolveNameplateQrValue(preview.backQrPayload || preview.backQrUrl || preview.backQrToken);
+        const image = nameplateQrValue ? await resolveQrPayloadPreviewImage(nameplateQrValue, 'nameplate-qr-preview') : '';
+        if (!cancelled && image) {
           setQrImage(image);
+          return;
+        }
+
+        if (session && elderId) {
+          const info = await fetchWorkbenchQrCode(session.role, elderId);
+          const fallbackImage = await resolveWorkbenchQrPreviewImage(info);
+          if (!cancelled) {
+            setQrImage(fallbackImage);
+          }
+          return;
+        }
+
+        if (!cancelled) {
+          setQrImage('');
         }
       } catch {
         if (!cancelled) {
@@ -79,7 +139,7 @@ export default function NameplatePreviewPage() {
     return () => {
       cancelled = true;
     };
-  }, [preview]);
+  }, [elderId, preview, session]);
 
   async function handleOpenPdf() {
     if (!elderId || openingPdf) {
@@ -102,7 +162,7 @@ export default function NameplatePreviewPage() {
   }
 
   return (
-    <View className='sl-stage'>
+    <View className='sl-stage sl-stage--scan'>
       <View className='sl-app-shell'>
         <View className='sl-phone-shell'>
           <View className='sl-phone-content'>
@@ -128,42 +188,70 @@ export default function NameplatePreviewPage() {
 
               {!loading && preview ? (
                 <>
-                  <View className='scan-nameplate-card-list'>
-                    <View className='sl-card scan-nameplate-card'>
-                      <View className='scan-nameplate-card__kicker'>正面</View>
-                      <View className='scan-nameplate-field'>
-                        <Text className='scan-nameplate-label'>姓名</Text>
-                        <Text className='scan-nameplate-placeholder'>{preview.frontName || '未填写'}</Text>
+                  {pdfPreviewImage ? (
+                    <View className='sl-card scan-nameplate-pdf-preview-card'>
+                      <View className='scan-nameplate-pdf-preview-card__header'>
+                        <View className='scan-nameplate-card__kicker'>PDF 实际预览</View>
+                        <View className='scan-nameplate-card__tag'>与导出一致</View>
                       </View>
-                      <View className='scan-nameplate-field'>
-                        <Text className='scan-nameplate-label'>年龄</Text>
-                        <Text className='scan-nameplate-placeholder'>{preview.frontAge ? `${preview.frontAge}` : '未填写'}</Text>
-                      </View>
-                      <View className='scan-nameplate-field'>
-                        <Text className='scan-nameplate-label'>联系电话</Text>
-                        <Text className='scan-nameplate-placeholder'>{preview.frontPhone || '未填写'}</Text>
+                      <View className='scan-nameplate-pdf-preview-frame'>
+                        <Image className='scan-nameplate-pdf-preview-image' mode='widthFix' src={pdfPreviewImage} />
                       </View>
                     </View>
-
-                    <View className='sl-card scan-nameplate-card scan-nameplate-card--back'>
-                      <View className='scan-nameplate-card__kicker'>背面</View>
-                      <View className='scan-nameplate-qr-area'>
-                        <View className='scan-nameplate-qr-box'>
-                          {qrImage ? (
-                            <Image className='scan-nameplate-qr-image' mode='widthFix' src={qrImage} />
-                          ) : (
-                            <Text className='scan-nameplate-qr-token'>{preview.backQrToken || '暂无 Token'}</Text>
-                          )}
+                  ) : (
+                    <View className='scan-nameplate-card-list'>
+                      <View className='sl-card scan-nameplate-card scan-nameplate-card--front'>
+                        <View className='scan-nameplate-card__header'>
+                          <View className='scan-nameplate-card__kicker'>正面</View>
+                          <View className='scan-nameplate-card__tag'>随身携带</View>
                         </View>
-                        <Text className='scan-nameplate-qr-hint'>{preview.backHint || '微信扫码查看健康档案'}</Text>
+                        <View className='scan-nameplate-front-hero'>
+                          <View className='scan-nameplate-front-hero__title'>智联名牌</View>
+                          <View className='scan-nameplate-front-hero__divider' />
+                        </View>
+                        <View className='scan-nameplate-front-grid'>
+                          <View className='scan-nameplate-field scan-nameplate-field--compact'>
+                            <Text className='scan-nameplate-label'>姓名</Text>
+                            <Text className='scan-nameplate-value'>{preview.frontName || '未填写'}</Text>
+                          </View>
+                          <View className='scan-nameplate-field scan-nameplate-field--compact'>
+                            <Text className='scan-nameplate-label'>年龄</Text>
+                            <Text className='scan-nameplate-value'>{preview.frontAge ? `${preview.frontAge} 岁` : '未填写'}</Text>
+                          </View>
+                          <View className='scan-nameplate-field scan-nameplate-field--full'>
+                            <Text className='scan-nameplate-label'>联系电话</Text>
+                            <Text className='scan-nameplate-value'>{preview.frontPhone || '未填写'}</Text>
+                          </View>
+                        </View>
                       </View>
-                      <View className='scan-nameplate-divider' />
-                      <View className='scan-nameplate-field'>
-                        <Text className='scan-nameplate-label'>档案编号</Text>
-                        <Text className='scan-nameplate-placeholder'>{preview.backArchiveNo || preview.archiveNo || '未生成'}</Text>
+
+                      <View className='sl-card scan-nameplate-card scan-nameplate-card--back'>
+                        <View className='scan-nameplate-card__header'>
+                          <View className='scan-nameplate-card__kicker'>背面</View>
+                          <View className='scan-nameplate-card__tag'>扫码查看</View>
+                        </View>
+                        <View className='scan-nameplate-qr-area'>
+                          <View className='scan-nameplate-qr-box'>
+                            {qrImage ? (
+                              <Image className='scan-nameplate-qr-image' mode='aspectFit' src={qrImage} />
+                            ) : (
+                              <View className='scan-nameplate-qr-empty'>
+                                <Text className='scan-nameplate-qr-empty__icon'>⌁</Text>
+                                <Text className='scan-nameplate-qr-empty__title'>二维码暂不可预览</Text>
+                                <Text className='scan-nameplate-qr-empty__caption'>请稍后重试，或直接生成 PDF 查看</Text>
+                              </View>
+                            )}
+                          </View>
+                          <Text className='scan-nameplate-qr-hint'>{preview.backHint || '微信扫码查看健康档案'}</Text>
+                        </View>
+                        <View className='scan-nameplate-divider' />
+                        <View className='scan-nameplate-field scan-nameplate-field--compact'>
+                          <Text className='scan-nameplate-label'>档案编号</Text>
+                          <Text className='scan-nameplate-value'>{preview.backArchiveNo || preview.archiveNo || '未生成'}</Text>
+                        </View>
                       </View>
                     </View>
-                  </View>
+                  )}
 
                   <View className='scan-nameplate-actions'>
                     <Button className='sl-secondary-button scan-nameplate-actions__button' loading={openingPdf} onClick={handleOpenPdf}>

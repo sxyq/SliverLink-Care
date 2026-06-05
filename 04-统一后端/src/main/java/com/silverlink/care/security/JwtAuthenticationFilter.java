@@ -2,6 +2,7 @@ package com.silverlink.care.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,9 +26,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+        String token = resolveToken(request);
+        if (token != null && !token.isBlank()) {
             try {
                 if (jwtTokenProvider.validateToken(token)) {
                     String subject = jwtTokenProvider.getSubject(token);
@@ -42,5 +42,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
+    }
+
+    private static String resolveToken(HttpServletRequest request) {
+        String header = request.getHeader("Authorization");
+        if (header != null && header.startsWith("Bearer ")) {
+            return header.substring(7);
+        }
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return null;
+        }
+        for (Cookie cookie : cookies) {
+            String name = cookie.getName();
+            if (AuthCookieService.ADMIN_COOKIE.equals(name)
+                    || AuthCookieService.VOLUNTEER_COOKIE.equals(name)
+                    || AuthCookieService.FAMILY_COOKIE.equals(name)) {
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }

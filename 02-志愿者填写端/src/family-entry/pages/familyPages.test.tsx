@@ -23,6 +23,7 @@ const updateMedication = vi.fn();
 const deleteMedication = vi.fn();
 const getElderDetail = vi.fn();
 const updateElderContacts = vi.fn();
+const downloadNameplatePdf = vi.fn();
 
 vi.mock('../api/familyAuthApi', () => ({
   familyLogin: (...args: unknown[]) => familyLogin(...args),
@@ -76,7 +77,7 @@ vi.mock('@shared/SubjectDetailPage', () => ({
 }));
 
 vi.mock('../../shared-workbench/nameplateExport', () => ({
-  downloadNameplatePdf: vi.fn().mockResolvedValue(undefined),
+  downloadNameplatePdf: (...args: unknown[]) => downloadNameplatePdf(...args),
 }));
 
 describe('family entry pages', () => {
@@ -92,7 +93,10 @@ describe('family entry pages', () => {
     addMedication.mockReset();
     updateMedication.mockReset();
     deleteMedication.mockReset();
+    downloadNameplatePdf.mockReset();
+    downloadNameplatePdf.mockResolvedValue(undefined);
     vi.stubGlobal('open', vi.fn());
+    vi.stubGlobal('alert', vi.fn());
   });
 
   it('handles family login validation, failure, enter key and success navigation', async () => {
@@ -148,6 +152,7 @@ describe('family entry pages', () => {
     fireEvent.click(screen.getByRole('button', { name: '下一步：短信验证' }));
     expect(screen.getByText('请输入姓名')).toBeInTheDocument();
 
+    fireEvent.change(screen.getByPlaceholderText('请输入后台发放的邀请码'), { target: { value: ' INV-2 ' } });
     fireEvent.change(screen.getByPlaceholderText('请输入您的姓名'), { target: { value: '家属甲' } });
     fireEvent.change(screen.getByPlaceholderText('请输入手机号'), { target: { value: '123' } });
     fireEvent.click(screen.getByText('子女'));
@@ -163,6 +168,19 @@ describe('family entry pages', () => {
     fireEvent.change(screen.getByPlaceholderText('请再次输入密码'), { target: { value: '123456' } });
     fireEvent.click(screen.getByRole('button', { name: '下一步：短信验证' }));
     expect(await screen.findByText('verify route')).toBeInTheDocument();
+  });
+
+  it('requires invite code when registration has no preset code', () => {
+    render(
+      <MemoryRouter initialEntries={['/register']}>
+        <Routes>
+          <Route path="/register" element={<FamilyRegisterPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '下一步：短信验证' }));
+    expect(screen.getByText('请输入邀请码')).toBeInTheDocument();
   });
 
   it('loads family invitation page for active and disabled invitations', async () => {
@@ -212,6 +230,73 @@ describe('family entry pages', () => {
       </MemoryRouter>,
     );
     expect(await screen.findByText('该邀请码已作废')).toBeInTheDocument();
+  });
+
+  it('handles missing code, preview failure and used/expired invitation statuses', async () => {
+    const empty = render(
+      <MemoryRouter initialEntries={['/invite']}>
+        <Routes>
+          <Route path="/invite" element={<InviteLandingPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(previewInvitation).not.toHaveBeenCalled();
+    expect(empty.container.textContent).toBe('');
+    empty.unmount();
+
+    previewInvitation.mockRejectedValueOnce(new Error('邀请码信息加载失败'));
+    const failure = render(
+      <MemoryRouter initialEntries={['/invite/FAIL']}>
+        <Routes>
+          <Route path="/invite/:code" element={<InviteLandingPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('邀请码信息加载失败')).toBeInTheDocument();
+    failure.unmount();
+    resetInviteState();
+
+    previewInvitation
+      .mockResolvedValueOnce({
+        code: 'INV-USED',
+        elderName: '刘婆婆',
+        elderAge: 76,
+        elderArchiveNo: 'ARCHIVE66789',
+        status: 'USED',
+        expiresAt: '2099-05-26',
+        maxUses: 1,
+        usedCount: 1,
+      })
+      .mockResolvedValueOnce({
+        code: 'INV-EXP',
+        elderName: '周爷爷',
+        elderAge: 81,
+        elderArchiveNo: 'ARCHIVE99887',
+        status: 'EXPIRED',
+        expiresAt: '2099-05-26',
+        maxUses: 1,
+        usedCount: 1,
+      });
+
+    const used = render(
+      <MemoryRouter initialEntries={['/invite/INV-USED']}>
+        <Routes>
+          <Route path="/invite/:code" element={<InviteLandingPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('该邀请码已被使用')).toBeInTheDocument();
+    used.unmount();
+    resetInviteState();
+
+    render(
+      <MemoryRouter initialEntries={['/invite/INV-EXP']}>
+        <Routes>
+          <Route path="/invite/:code" element={<InviteLandingPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('该邀请码已过期')).toBeInTheDocument();
   });
 
   it('renders family home states, binding modal and limit reached copy', async () => {
@@ -265,6 +350,85 @@ describe('family entry pages', () => {
     fireEvent.change(screen.getByPlaceholderText('请输入后台发放的邀请码'), { target: { value: 'INV-OPEN' } });
     fireEvent.click(screen.getByRole('button', { name: '继续绑定' }));
     expect(await screen.findByText('invite route')).toBeInTheDocument();
+  });
+
+  it('filters bound elders, navigates to elder detail and closes bind modal without navigating on blank code', async () => {
+    getBoundElders.mockResolvedValue([elder('1'), elder('2')]);
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<FamilyHomePage />} />
+          <Route path="/invite/:code" element={<p>invite route</p>} />
+          <Route path="/elders/:elderId" element={<p>elder detail route</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('老人1')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名或档案编号'), { target: { value: 'A002' } });
+    expect(screen.queryByText('老人1')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /输入邀请码/ }));
+    expect(await screen.findByText('绑定上限')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '继续绑定' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: '关闭增加档案' }));
+    await waitFor(() => {
+      expect(screen.queryByText('绑定上限')).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText('进入档案'));
+    expect(await screen.findByText('elder detail route')).toBeInTheDocument();
+  });
+
+  it('closes bind modal via cancel button and clears register-mode errors when switching back to login', async () => {
+    getBoundElders.mockResolvedValue([elder('1')]);
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<FamilyHomePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/当前家属账号已绑定 1\/4 位老人/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /输入邀请码/ }));
+    expect(await screen.findByText('绑定上限')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '取消' }));
+    await waitFor(() => {
+      expect(screen.queryByText('绑定上限')).not.toBeInTheDocument();
+    });
+  });
+
+  it('falls back to empty list when bound elder loading fails and closes bind modal by overlay', async () => {
+    getBoundElders.mockRejectedValueOnce(new Error('load failed'));
+
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<FamilyHomePage />} />
+          <Route path="/invite/:code" element={<p>invite route</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('暂无已绑定老人')).toBeInTheDocument();
+
+    getBoundElders.mockResolvedValueOnce([elder('1')]);
+    const next = render(
+      <MemoryRouter initialEntries={['/']}>
+        <Routes>
+          <Route path="/" element={<FamilyHomePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText(/当前家属账号已绑定 1\/4 位老人/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: /输入邀请码/ }));
+    expect(await screen.findByText('绑定上限')).toBeInTheDocument();
+    fireEvent.click(next.container.querySelector('.sl-modal-overlay') as HTMLElement);
+    await waitFor(() => {
+      expect(screen.queryByText('绑定上限')).not.toBeInTheDocument();
+    });
   });
 
   it('renders qr code view success, download, disable request, error and empty states', async () => {
@@ -329,10 +493,10 @@ describe('family entry pages', () => {
     deleteMedication.mockResolvedValue({ success: true });
 
     render(
-      <MemoryRouter initialEntries={['/elders/elder-1/medications']}>
+      <MemoryRouter initialEntries={['/back', '/elders/elder-1/medications']} initialIndex={1}>
         <Routes>
           <Route path="/elders/:elderId/medications" element={<MedicationManagePage />} />
-          <Route path="/" element={<p>back route</p>} />
+          <Route path="/back" element={<p>back route</p>} />
         </Routes>
       </MemoryRouter>,
     );
@@ -348,9 +512,34 @@ describe('family entry pages', () => {
       expect(updateMedication).toHaveBeenCalledWith('elder-1', 'med-1', expect.objectContaining({ name: '药品B' }));
       expect(deleteMedication).toHaveBeenCalledWith('elder-1', 'med-1');
     });
+
+    fireEvent.click(screen.getByRole('button', { name: 'editor back' }));
+    expect(await screen.findByText('back route')).toBeInTheDocument();
   });
 
-  it('renders contact manage page with contacts and handles update', async () => {
+  it('keeps medication page usable without elder id and skips api side effects', async () => {
+    render(
+      <MemoryRouter initialEntries={['/medications']}>
+        <Routes>
+          <Route path="/medications" element={<MedicationManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('editor:用药信息维护')).toBeInTheDocument();
+    expect(screen.getByText('loading:false')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'editor create' }));
+    fireEvent.click(screen.getByRole('button', { name: 'editor update' }));
+    fireEvent.click(screen.getByRole('button', { name: 'editor delete' }));
+
+    expect(getMedications).not.toHaveBeenCalled();
+    expect(addMedication).not.toHaveBeenCalled();
+    expect(updateMedication).not.toHaveBeenCalled();
+    expect(deleteMedication).not.toHaveBeenCalled();
+  });
+
+  it('renders contact manage page, tracks phone changes and saves successfully', async () => {
     getElderDetail.mockResolvedValue({
       id: 'elder-1',
       name: '王桂兰',
@@ -364,7 +553,7 @@ describe('family entry pages', () => {
     updateElderContacts.mockResolvedValue({ success: true });
 
     render(
-      <MemoryRouter initialEntries={['/elders/elder-1/contacts']}>
+      <MemoryRouter initialEntries={['/elders/elder-1', '/elders/elder-1/contacts']} initialIndex={1}>
         <Routes>
           <Route path="/elders/:elderId/contacts" element={<ContactManagePage />} />
           <Route path="/elders/:elderId" element={<p>elder detail</p>} />
@@ -375,6 +564,20 @@ describe('family entry pages', () => {
     expect(await screen.findByText('联系人维护')).toBeInTheDocument();
     expect(screen.getByDisplayValue('王丽')).toBeInTheDocument();
     expect(screen.getByDisplayValue('13800006666')).toBeInTheDocument();
+    fireEvent.change(screen.getByDisplayValue('13800006666'), { target: { value: '13900007777' } });
+    expect(screen.getByText('修改电话号码后需短信验真确认')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+    await waitFor(() => {
+      expect(updateElderContacts).toHaveBeenCalledWith(
+        'elder-1',
+        expect.objectContaining({
+          emergencyContactPhone: '13900007777',
+        }),
+      );
+      expect(screen.getByText('elder detail')).toBeInTheDocument();
+    });
   });
 
   it('renders contact manage page loading then empty state', async () => {
@@ -394,7 +597,110 @@ describe('family entry pages', () => {
     });
   });
 
-  it('renders elder basic manage page with elder detail', async () => {
+  it('renders contact manage page without elder id and skips loading loop', async () => {
+    const priorCalls = getElderDetail.mock.calls.length;
+
+    render(
+      <MemoryRouter initialEntries={['/contacts']}>
+        <Routes>
+          <Route path="/contacts" element={<ContactManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('联系人维护')).toBeInTheDocument();
+    expect(screen.queryByText('加载中...')).not.toBeInTheDocument();
+    expect(getElderDetail).toHaveBeenCalledTimes(priorCalls);
+  });
+
+  it('keeps contact phone-change banner until all changed phones are restored and surfaces request errors', async () => {
+    getElderDetail.mockResolvedValue({
+      id: 'elder-1',
+      name: '王桂兰',
+      emergencyContactName: '王丽',
+      emergencyContactPhone: '13800006666',
+      emergencyContactRelation: '女儿',
+      backupContactName: '王梅',
+      backupContactPhone: '13700002222',
+      backupContactRelation: '侄女',
+    });
+    updateElderContacts
+      .mockResolvedValueOnce({ success: false, message: '保存失败' })
+      .mockRejectedValueOnce(new Error('请求异常'));
+
+    render(
+      <MemoryRouter initialEntries={['/elders/elder-1/contacts']}>
+        <Routes>
+          <Route path="/elders/:elderId/contacts" element={<ContactManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByDisplayValue('13700002222')).toBeInTheDocument();
+    fireEvent.change(screen.getByDisplayValue('13800006666'), { target: { value: '13900007777' } });
+    const backupPhoneInput = screen.getByDisplayValue('13700002222');
+    fireEvent.change(backupPhoneInput, { target: { value: '13600003333' } });
+    expect(screen.getByText('修改电话号码后需短信验真确认')).toBeInTheDocument();
+    fireEvent.change(screen.getByDisplayValue('13600003333'), { target: { value: '13700002222' } });
+    expect(screen.getByText('修改电话号码后需短信验真确认')).toBeInTheDocument();
+    fireEvent.change(screen.getByDisplayValue('13900007777'), { target: { value: '13800006666' } });
+    expect(screen.queryByText('修改电话号码后需短信验真确认')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+    await waitFor(() => {
+      expect(updateElderContacts).toHaveBeenCalled();
+    });
+    expect(window.alert).toHaveBeenCalledWith('保存失败');
+
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('请求异常');
+    });
+  });
+
+  it('updates all contact fields before save so non-phone inputs and backup relation branches are covered', async () => {
+    getElderDetail.mockResolvedValue({
+      id: 'elder-1',
+      name: '王桂兰',
+      emergencyContactName: '王丽',
+      emergencyContactPhone: '13800006666',
+      emergencyContactRelation: '女儿',
+      backupContactName: '王梅',
+      backupContactPhone: '13700002222',
+      backupContactRelation: '侄女',
+    });
+    updateElderContacts.mockResolvedValue({ success: true });
+
+    render(
+      <MemoryRouter initialEntries={['/elders/elder-1/contacts']}>
+        <Routes>
+          <Route path="/elders/:elderId/contacts" element={<ContactManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByDisplayValue('王丽')).toBeInTheDocument();
+    fireEvent.change(screen.getByDisplayValue('王丽'), { target: { value: '王芳' } });
+    fireEvent.change(screen.getByDisplayValue('女儿'), { target: { value: '外孙女' } });
+    fireEvent.change(screen.getByDisplayValue('王梅'), { target: { value: '王琴' } });
+    fireEvent.change(screen.getByDisplayValue('侄女'), { target: { value: '邻居' } });
+
+    fireEvent.click(screen.getByRole('button', { name: '保存' }));
+
+    await waitFor(() => {
+      expect(updateElderContacts).toHaveBeenCalledWith(
+        'elder-1',
+        expect.objectContaining({
+          emergencyContactName: '王芳',
+          emergencyContactRelation: '外孙女',
+          backupContactName: '王琴',
+          backupContactRelation: '邻居',
+        }),
+      );
+    });
+  });
+
+  it('renders elder basic manage page with elder detail and action navigation', async () => {
     getElderDetail.mockResolvedValue({
       id: 'elder-1',
       name: '王桂兰',
@@ -413,12 +719,17 @@ describe('family entry pages', () => {
         <Routes>
           <Route path="/elders/:elderId/basic" element={<ElderBasicManagePage />} />
           <Route path="/" element={<p>home</p>} />
+          <Route path="/elders/:elderId/contacts" element={<p>contacts route</p>} />
+          <Route path="/elders/:elderId/medications" element={<p>medications route</p>} />
+          <Route path="/elders/:elderId/qrcode" element={<p>qrcode route</p>} />
         </Routes>
       </MemoryRouter>,
     );
 
     expect(await screen.findByText('subject-detail:老人信息')).toBeInTheDocument();
     expect(screen.getByText('subject-name:王桂兰')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '联系人维护' }));
+    expect(screen.getByText('contacts route')).toBeInTheDocument();
   });
 
   it('renders elder basic manage page empty state', async () => {
@@ -433,6 +744,130 @@ describe('family entry pages', () => {
     );
 
     expect(await screen.findByText('未找到老人信息')).toBeInTheDocument();
+  });
+
+  it('renders elder basic page without elder id and avoids detail request', async () => {
+    const priorCalls = getElderDetail.mock.calls.length;
+
+    render(
+      <MemoryRouter initialEntries={['/basic']}>
+        <Routes>
+          <Route path="/basic" element={<ElderBasicManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('未找到老人信息')).toBeInTheDocument();
+    expect(getElderDetail).toHaveBeenCalledTimes(priorCalls);
+  });
+
+  it('handles elder basic export success, export failure and back navigation', async () => {
+    getElderDetail
+      .mockResolvedValueOnce({
+        id: 'elder-1',
+        name: '王桂兰',
+        gender: '女',
+        age: 82,
+        archiveNo: 'A001',
+        bloodType: 'O',
+        allergyHistory: '无',
+        emergencyContactName: '王丽',
+        emergencyContactPhone: '13800006666',
+        emergencyContactRelation: '女儿',
+      })
+      .mockResolvedValueOnce({
+        id: 'elder-2',
+        name: '赵永福',
+        gender: '男',
+        age: 79,
+        archiveNo: 'A002',
+        bloodType: 'A',
+        allergyHistory: '青霉素过敏',
+        emergencyContactName: '赵丽',
+        emergencyContactPhone: '13800008888',
+        emergencyContactRelation: '儿媳',
+      });
+    downloadNameplatePdf
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error('导出失败，请稍后重试'));
+
+    const first = render(
+      <MemoryRouter initialEntries={['/', '/elders/elder-1/basic']} initialIndex={1}>
+        <Routes>
+          <Route path="/" element={<p>family home</p>} />
+          <Route path="/elders/:elderId/basic" element={<ElderBasicManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('subject-name:王桂兰')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '导出名牌 PDF' }));
+    await waitFor(() => {
+      expect(downloadNameplatePdf).toHaveBeenCalledWith({
+        elderId: 'elder-1',
+        archiveNo: 'A001',
+        tokenStorageKey: 'family_token',
+      });
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'detail back' }));
+    expect(screen.getByText('family home')).toBeInTheDocument();
+    first.unmount();
+
+    render(
+      <MemoryRouter initialEntries={['/elders/elder-2/basic']}>
+        <Routes>
+          <Route path="/elders/:elderId/basic" element={<ElderBasicManagePage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByText('subject-name:赵永福')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '导出名牌 PDF' }));
+    await waitFor(() => {
+      expect(window.alert).toHaveBeenCalledWith('导出失败，请稍后重试');
+    });
+  });
+
+  it('navigates to medication and qrcode actions from elder basic manage page', async () => {
+    getElderDetail.mockResolvedValue({
+      id: 'elder-1',
+      name: '王桂兰',
+      gender: '女',
+      age: 82,
+      archiveNo: 'A001',
+      bloodType: 'O',
+      allergyHistory: '无',
+      emergencyContactName: '王丽',
+      emergencyContactPhone: '13800006666',
+      emergencyContactRelation: '女儿',
+    });
+
+    const first = render(
+      <MemoryRouter initialEntries={['/elders/elder-1/basic']}>
+        <Routes>
+          <Route path="/elders/:elderId/basic" element={<ElderBasicManagePage />} />
+          <Route path="/elders/:elderId/medications" element={<p>medications route</p>} />
+          <Route path="/elders/:elderId/qrcode" element={<p>qrcode route</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('subject-detail:老人信息')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '用药信息' }));
+    expect(await screen.findByText('medications route')).toBeInTheDocument();
+    first.unmount();
+
+    render(
+      <MemoryRouter initialEntries={['/elders/elder-1/basic']}>
+        <Routes>
+          <Route path="/elders/:elderId/basic" element={<ElderBasicManagePage />} />
+          <Route path="/elders/:elderId/qrcode" element={<p>qrcode route</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('subject-detail:老人信息')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '二维码查看' }));
+    expect(await screen.findByText('qrcode route')).toBeInTheDocument();
   });
 });
 

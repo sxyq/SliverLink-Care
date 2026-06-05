@@ -1,6 +1,15 @@
-const BASE_URL = (import.meta as any).env?.VITE_API_BASE_URL || '';
+function resolveBaseUrl() {
+  const configured = (import.meta as any).env?.VITE_API_BASE_URL?.trim();
+  if (configured) {
+    return configured.replace(/\/$/, '');
+  }
+  return '/silverlink-api';
+}
 
-let token = localStorage.getItem('sl_token') || '';
+const BASE_URL = resolveBaseUrl();
+const TOKEN_STORAGE_KEY = 'sl_volunteer_web_token';
+
+let token = '';
 
 interface ApiEnvelope<T> {
   code?: number;
@@ -25,28 +34,37 @@ function normalizeErrorMessage(raw: string) {
 
 export function setAuthToken(t: string) {
   token = t;
-  localStorage.setItem('sl_token', t);
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, t);
+  }
 }
 
 export function getAuthToken() {
+  if (!token && typeof window !== 'undefined') {
+    token = window.localStorage.getItem(TOKEN_STORAGE_KEY) || '';
+  }
   return token;
 }
 
 export function clearAuthToken() {
   token = '';
-  localStorage.removeItem('sl_token');
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+  }
 }
 
 export async function http<T>(path: string, options?: RequestInit): Promise<T> {
+  const authToken = getAuthToken();
   const res = await fetch(`${BASE_URL}${path}`, {
     ...options,
+    credentials: 'same-origin',
     headers: {
       'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
       ...(options?.headers || {}),
     },
   });
-  if (res.status === 401) {
+  if (res.status === 401 || res.status === 403) {
     clearAuthToken();
   }
   if (!res.ok) {

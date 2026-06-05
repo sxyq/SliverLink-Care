@@ -1,0 +1,122 @@
+{
+  "generatedAt": "2026-05-31T13:38:27.506152Z",
+  "environment": {
+    "mode": "local-mariadb-write-pressure",
+    "scope": "real-jdbc-real-sql-not-host-benchmark",
+    "database": "embedded-mariadb4j"
+  },
+  "scenarios": [
+    {
+      "name": "mariadb-scan-start-write-pressure",
+      "totalRequests": 40000,
+      "concurrency": 2048,
+      "successCount": 40000,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 108,
+      "p95Ms": 1026,
+      "p99Ms": 1846,
+      "maxMs": 2427,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 40000,
+        "hikariMaximumPoolSize": 64,
+        "hikariMinimumIdle": 8
+      },
+      "findings": [],
+      "notes": []
+    },
+    {
+      "name": "mariadb-direct-sms-write-pressure",
+      "totalRequests": 1000,
+      "concurrency": 64,
+      "successCount": 1000,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 0,
+      "p95Ms": 13,
+      "p99Ms": 27,
+      "maxMs": 35,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 1000,
+        "hikariMaximumPoolSize": 64,
+        "hikariMinimumIdle": 8
+      },
+      "findings": [],
+      "notes": []
+    },
+    {
+      "name": "mariadb-identity-write-pressure",
+      "totalRequests": 1000,
+      "concurrency": 64,
+      "successCount": 1000,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 0,
+      "p95Ms": 9,
+      "p99Ms": 17,
+      "maxMs": 24,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 1000,
+        "hikariMaximumPoolSize": 64,
+        "hikariMinimumIdle": 8
+      },
+      "findings": [],
+      "notes": []
+    },
+    {
+      "name": "mariadb-inbound-record-write-pressure",
+      "totalRequests": 20,
+      "concurrency": 4,
+      "successCount": 20,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 5,
+      "p95Ms": 7,
+      "p99Ms": 7,
+      "maxMs": 7,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 5000,
+        "hikariMaximumPoolSize": 64,
+        "hikariMinimumIdle": 8,
+        "pendingRowsBefore": 5000,
+        "recordsInserted": 20,
+        "verifiedCountAfter": 1
+      },
+      "findings": ["MariaDB 实库下，`recordId` 已切到 UUID，本轮高并发入站写入未再出现 `sms_relay_record` 主键冲突。", "在高密度待验证会话背景下，入站写链路仍可全部成功，说明唯一键瓶颈已解除。"],
+      "notes": ["这一段保留高并发，优先观察 `sms_relay_record` 写入和入站链路主键策略。"]
+    },
+    {
+      "name": "mariadb-inbound-candidate-lookup-latency",
+      "totalRequests": 5,
+      "concurrency": 1,
+      "successCount": 5,
+      "failureCount": 0,
+      "successRate": 100.0,
+      "p50Ms": 3,
+      "p95Ms": 3,
+      "p99Ms": 3,
+      "maxMs": 3,
+      "errorBreakdown": {
+      },
+      "metrics": {
+        "sessionRows": 5000,
+        "hikariMaximumPoolSize": 64,
+        "hikariMinimumIdle": 8,
+        "pendingRowsBefore": 5000,
+        "estimatedCandidateRowsUpperBound": 5,
+        "recordsInserted": 5,
+        "verifiedCountAfter": 1
+      },
+      "findings": ["MariaDB 实库下，入站链路已切到按 receiver_phone + message_body 的候选查询，不再依赖全部 `PENDING` 会话全量扫描。"],
+      "notes": ["这一段刻意把并发降到 1，避免写入主键冲突干扰，专门观察修复后候选查询的真实 JDBC 延迟。", "这里记录的是候选查询路径延迟，不是数据库执行计划采样。"]
+    }
+  ]
+}

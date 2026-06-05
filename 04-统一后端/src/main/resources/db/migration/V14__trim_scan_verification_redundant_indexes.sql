@@ -1,0 +1,3 @@
+DROP INDEX idx_scan_verification_status ON scan_verification_session;
+DROP INDEX idx_scan_verification_expires ON scan_verification_session;
+DROP INDEX idx_scan_verification_relay_device ON scan_verification_session;
