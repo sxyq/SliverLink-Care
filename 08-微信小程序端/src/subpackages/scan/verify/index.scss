@@ -144,6 +144,11 @@
   gap: 20rpx;
 }
 
+.scan-verify-actions .sl-primary-button,
+.scan-verify-actions .sl-secondary-button {
+  width: 100%;
+}
+
 .scan-verify-header-toggle {
   width: 108rpx;
   min-width: 108rpx;

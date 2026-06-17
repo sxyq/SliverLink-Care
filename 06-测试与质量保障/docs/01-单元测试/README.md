@@ -86,6 +86,7 @@
 | 管理后台二维码缺链接、清除短信设备、复制回退、窗口打开失败等边界分支 | `03-管理后台端/src/pages/qrEdgeCases.test.tsx` | 2026-05-29 |
 | 短信中转 direct SMS 状态更新与过期分支、两级缓存/线程池基础设施测试 | `SmsRelayServiceTest.java`、`JsonTwoLevelCacheTest.java`、`PerformanceConfigTest.java` | 2026-05-29 |
 | Android JVM JaCoCo XML 聚合 | `05-安卓短信中转端/app/build.gradle.kts`、`06-测试与质量保障/scripts/common/collect_coverage_summary.py` | 2026-05-29 |
+| 微信小程序代码层单元/契约门禁纳入统一脚本 | `08-微信小程序端/scripts/run-unit-tests.mjs`、`06-测试与质量保障/scripts/common/generate_function_inventory.py`、`06-测试与质量保障/scripts/common/collect_coverage_summary.py` | 2026-06-06 |
 | `FamilyHomePage` 在绑定老人拉取失败时兜底为空列表并退出 loading | `02-志愿者填写端/src/family-entry/pages/FamilyHomePage.tsx` | 2026-05-29 |
 | 扫码端 API / SecurityProvider / useProtectedArchive / 短信验证尾部分支补测 | `scanApi.test.ts`、`smsApi.test.ts`、`SecurityProvider.test.tsx`、`useProtectedArchive.test.tsx`、`SmsVerifyPage.test.tsx` | 2026-05-29 |
 | 管理后台 Dashboard / AuditLog 死分支清理与页面边界补测 | `DashboardPage.tsx`、`AuditLogPage.tsx`、`loginAndDashboard.test.tsx`、`advancedAdminPages.test.tsx`、`qrAndArchivePages.test.tsx` | 2026-05-29 |

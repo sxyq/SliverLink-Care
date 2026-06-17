@@ -116,7 +116,7 @@ export async function createFamilyMedication(elderId: string, item: WorkbenchMed
 }
 
 export async function updateFamilyMedication(elderId: string, medicationId: string, item: WorkbenchMedicationDraft) {
-  const result = await httpClient.put<FamilyMedicationResponse>(
+  await httpClient.put<void>(
     `/api/family/elders/${encodeURIComponent(elderId)}/medications/${encodeURIComponent(medicationId)}`,
     {
       name: item.name.trim(),
@@ -126,7 +126,13 @@ export async function updateFamilyMedication(elderId: string, medicationId: stri
     },
   );
 
-  return mapMedication(result);
+  return mapMedication({
+    id: medicationId,
+    name: item.name.trim(),
+    dosage: item.dosage.trim(),
+    usage: item.usage.trim(),
+    timing: item.timing.trim(),
+  });
 }
 
 export async function deleteFamilyMedication(elderId: string, medicationId: string) {

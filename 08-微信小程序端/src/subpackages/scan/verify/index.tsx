@@ -10,12 +10,23 @@ import './index.scss';
 
 type VerifyMode = 'identity' | 'sms';
 
+function buildSmsLink(phone: string, body: string) {
+  const systemInfo = Taro.getSystemInfoSync();
+  const isIos = systemInfo.platform === 'ios';
+  const separator = isIos ? '&' : '?';
+  return `sms:${phone}${separator}body=${encodeURIComponent(body)}`;
+}
+
 function normalizePhone(phone: string) {
   return phone.replace(/\D/g, '');
 }
 
 function normalizeIdCard(idCard: string) {
   return idCard.trim().toUpperCase();
+}
+
+function formatSmsReceiverLabel(maskedPhone: string) {
+  return maskedPhone || '后台指定号码';
 }
 
 function isValidIdCard(idCard: string) {
@@ -48,7 +59,7 @@ function ScanVerifyHeader(props: {
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
-        <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.switchTab({ url: APP_ROUTES.home }))}>
+        <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.home }))}>
           首页
         </View>
       </View>
@@ -79,6 +90,7 @@ export default function ScanVerifyPage() {
   const [smsLoading, setSmsLoading] = useState(false);
   const [smsChecking, setSmsChecking] = useState(false);
   const [smsSessionId, setSmsSessionId] = useState('');
+  const [smsReceiverPhone, setSmsReceiverPhone] = useState('');
   const [smsReceiverPhoneMasked, setSmsReceiverPhoneMasked] = useState('');
   const [smsMessageBody, setSmsMessageBody] = useState('');
 
@@ -174,6 +186,7 @@ export default function ScanVerifyPage() {
       setSuccessText('');
       const session = await startScanSmsVerification(elderId, target);
       setSmsSessionId(session.sessionId);
+      setSmsReceiverPhone(session.receiverPhone);
       setSmsReceiverPhoneMasked(session.receiverPhoneMasked);
       setSmsMessageBody(session.messageBody);
       setSuccessText('短信验证会话已创建，请由绑定手机发送验证短信后再检查状态');
@@ -216,6 +229,38 @@ export default function ScanVerifyPage() {
       setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
     } finally {
       setSmsChecking(false);
+    }
+  }
+
+  async function handleOpenSmsComposer() {
+    if (!smsReceiverPhone || !smsMessageBody) {
+      setErrorText('请先生成短信内容');
+      return;
+    }
+
+    try {
+      setErrorText('');
+      setSuccessText('');
+      await Taro.setClipboardData({ data: smsMessageBody });
+
+      if (process.env.TARO_ENV === 'h5' && typeof window !== 'undefined') {
+        window.location.href = buildSmsLink(smsReceiverPhone, smsMessageBody);
+        setSuccessText('已打开系统短信；如果没有自动填充，请直接粘贴已复制的短信内容。');
+        return;
+      }
+
+      const result = await Taro.showModal({
+        title: '短信内容已复制',
+        content: `当前环境暂不支持直接拉起系统短信，请手动打开短信并发送到 ${formatSmsReceiverLabel(smsReceiverPhoneMasked)}。`,
+        confirmText: '我知道了',
+        showCancel: false,
+      });
+
+      if (result.confirm) {
+        setSuccessText('短信内容已复制，请打开系统短信后粘贴发送。');
+      }
+    } catch (error) {
+      setErrorText((error as Error)?.message || '打开短信失败，请稍后重试');
     }
   }
 
@@ -310,6 +355,9 @@ export default function ScanVerifyPage() {
                       </View>
                     ) : null}
                     <View className='scan-verify-actions'>
+                      <Button className='sl-primary-button' onClick={handleOpenSmsComposer} disabled={smsLoading || !smsSessionId || !smsMessageBody}>
+                        一键跳转短信
+                      </Button>
                       <Button className='sl-primary-button' loading={smsLoading} onClick={handleStartSmsVerification}>
                         {smsSessionId ? '重新生成短信内容' : '打开短信前先生成短信内容'}
                       </Button>

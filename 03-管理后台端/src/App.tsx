@@ -11,7 +11,7 @@ export function App() {
   useEffect(() => {
     let cancelled = false;
 
-    async function hydrateSession() {
+    async function syncSessionFromServer() {
       try {
         const session = await fetchAdminSession();
         if (cancelled) return;
@@ -28,14 +28,13 @@ export function App() {
       }
     }
 
-    hydrateSession();
-
     function handleSessionCleared() {
       setLoggedIn(false);
       setRole('');
       setHydrating(false);
     }
 
+    void syncSessionFromServer();
     window.addEventListener('sl-admin-session-cleared', handleSessionCleared as EventListener);
     return () => {
       cancelled = true;

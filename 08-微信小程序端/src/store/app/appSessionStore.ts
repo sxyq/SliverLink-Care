@@ -1,5 +1,5 @@
 import { ENTRY_KEYS, STORAGE_KEYS } from '@/app/app.constants';
-import { getStorageValue, setStorageValue } from '@/utils/storage';
+import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
 
 export type HomeEntrySource = (typeof ENTRY_KEYS)[keyof typeof ENTRY_KEYS] | 'unknown';
 
@@ -37,4 +37,9 @@ export function updateAppSession(patch: Partial<AppSessionState>) {
     ...getAppSession(),
     ...patch,
   });
+}
+
+export function clearAppSession() {
+  appSessionCache = undefined;
+  removeStorageValue(STORAGE_KEYS.appSession);
 }

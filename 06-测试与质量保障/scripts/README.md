@@ -15,12 +15,12 @@
 ## 推荐脚本清单
 
 ### 通用
-- `common/generate_function_inventory.py`: 生成源码函数清单和覆盖矩阵。
-- `common/collect_coverage_summary.py`: 汇总前端 V8/Istanbul、后端 JaCoCo、Android JVM 报告。
+- `common/generate_function_inventory.py`: 生成源码函数清单和覆盖矩阵，覆盖 01/02/03/04/05/08 模块。
+- `common/collect_coverage_summary.py`: 汇总前端 V8/Istanbul、后端 JaCoCo、Android JVM 报告，并记录微信小程序代码层门禁证据。
 - `common/redact_reports.py`: 脱敏测试报告。
 
 ### 单元测试
-- `unit/run_unit_suite.sh`: 执行三端前端单测、后端 JUnit、Android JVM 单测。
+- `unit/run_unit_suite.sh`: 执行三端前端单测、微信小程序代码层单测、后端 JUnit、Android JVM 单测。
 
 ### 功能测试
 - `functional/live_readonly_smoke.mjs`: 对页面入口做只读 GET 冒烟。

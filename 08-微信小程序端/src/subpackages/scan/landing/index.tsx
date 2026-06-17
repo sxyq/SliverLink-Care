@@ -29,7 +29,7 @@ function ScanLandingHeader() {
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
-        <View className='sl-page-header-icon' onClick={() => Taro.switchTab({ url: APP_ROUTES.home })}>
+        <View className='sl-page-header-icon' onClick={() => Taro.redirectTo({ url: APP_ROUTES.home })}>
           首页
         </View>
       </View>
@@ -114,7 +114,7 @@ export default function ScanLandingPage() {
               ) : errorText ? (
                 <View className='sl-card sl-form-panel'>
                   <View className='sl-error-card'>{errorText}</View>
-                  <Button className='sl-secondary-button scan-landing-panel__button' onClick={() => Taro.switchTab({ url: APP_ROUTES.home })}>
+                  <Button className='sl-secondary-button scan-landing-panel__button' onClick={() => Taro.redirectTo({ url: APP_ROUTES.home })}>
                     返回首页
                   </Button>
                 </View>

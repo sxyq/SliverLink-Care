@@ -34,10 +34,29 @@ export function removeStorageValue(key: string) {
   Taro.removeStorageSync(getExpirationKey(key));
 }
 
+export function removeStorageValuesByPrefix(prefixes: string[]) {
+  try {
+    const keys = Taro.getStorageInfoSync().keys || [];
+    for (const key of keys) {
+      if (prefixes.some((prefix) => key.startsWith(prefix))) {
+        removeStorageValue(key);
+      }
+    }
+  } catch {
+    // 静默处理，不影响登出或 401 主流程。
+  }
+}
+
 export async function getStorageValueAsync<T>(key: string, fallback: T): Promise<T> {
   try {
-    const expiredAtResult = await Taro.getStorage<number | null>({ key: getExpirationKey(key) });
-    const expiredAt = expiredAtResult.data;
+    let expiredAt: number | null = null;
+    try {
+      const expiredAtResult = await Taro.getStorage<number | null>({ key: getExpirationKey(key) });
+      expiredAt = expiredAtResult.data;
+    } catch {
+      expiredAt = null;
+    }
+
     if (expiredAt && Date.now() > expiredAt) {
       await Taro.removeStorage({ key });
       await Taro.removeStorage({ key: getExpirationKey(key) });

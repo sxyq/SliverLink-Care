@@ -22,6 +22,9 @@ ANDROID_TEST_REPORT = Path("05-安卓短信中转端/app/build/reports/tests/tes
 ANDROID_JACOCO_XML = Path(
     "05-安卓短信中转端/app/build/reports/jacoco/jacocoDebugUnitTestReport/jacocoDebugUnitTestReport.xml"
 )
+WEAPP_CODE_LEVEL_REPORT = Path(
+    "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/performance.json"
+)
 
 
 def pct(covered: int, total: int) -> float:
@@ -122,6 +125,27 @@ def android_summary(repo: Path) -> dict[str, Any]:
     }
 
 
+def weapp_summary(repo: Path) -> dict[str, Any]:
+    report_path = repo / WEAPP_CODE_LEVEL_REPORT
+    if not report_path.exists():
+        return {
+            "available": False,
+            "reason": f"missing {WEAPP_CODE_LEVEL_REPORT}",
+            "coverage_note": "WeChat miniapp uses custom code-level unit/contract gates; Istanbul coverage aggregation is pending.",
+        }
+
+    payload = json.loads(report_path.read_text(encoding="utf-8"))
+    checks = payload.get("checks", {})
+    unit = checks.get("unit", {})
+    return {
+        "available": True,
+        "source": str(WEAPP_CODE_LEVEL_REPORT),
+        "unit_cases": unit.get("cases"),
+        "unit_status": unit.get("status"),
+        "coverage_note": "Custom code-level gates cover unit, static, route/platform/backend contracts, page privacy render, dist security and package budget; Istanbul coverage aggregation is pending.",
+    }
+
+
 def write_markdown(summary: dict[str, Any], output: Path) -> None:
     lines = [
         "# Coverage Summary",
@@ -162,6 +186,15 @@ def write_markdown(summary: dict[str, Any], output: Path) -> None:
         lines.append(
             f"| android-relay | pending XML aggregation | {'available' if android.get('available') else 'missing'} | {android['coverage_note']} |"
         )
+
+    weapp = summary["weapp-miniapp"]
+    if weapp.get("available"):
+        lines.append(
+            f"| weapp-miniapp | code-level gate {weapp.get('unit_status', '-')} ({weapp.get('unit_cases', '-') } cases) "
+            f"| coverage artifact pending | {weapp['coverage_note']} |"
+        )
+    else:
+        lines.append(f"| weapp-miniapp | - | - | {weapp.get('coverage_note', weapp.get('reason', 'missing'))} |")
     output.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
@@ -180,6 +213,7 @@ def main() -> int:
         summary[module] = frontend_summary(repo / relative_path)
     summary["backend"] = backend_summary(repo)
     summary["android"] = android_summary(repo)
+    summary["weapp-miniapp"] = weapp_summary(repo)
 
     (out_dir / "coverage-summary.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n",

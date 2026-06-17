@@ -1,0 +1,13 @@
+name	path	query
+scan-landing	subpackages/scan/landing/index	elderId=ELDER_DEMO_001&archiveNo=A2026001&source=devtools-verify
+scan-verify	subpackages/scan/verify/index	elderId=ELDER_DEMO_001&source=devtools-verify
+scan-archive	subpackages/scan/archive/index	elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001
+scan-medications	subpackages/scan/medications/index	elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001
+scan-scales	subpackages/scan/scales/index	elderId=ELDER_DEMO_001&sessionId=SESSION_DEMO_001
+scan-nameplate	subpackages/scan/nameplate/index	elderId=ELDER_DEMO_001
+workbench-elder-list	subpackages/workbench/elder-list/index	
+workbench-elder-detail	subpackages/workbench/elder-detail/index	elderId=ELDER_DEMO_001
+workbench-basic	subpackages/workbench/basic/index	elderId=ELDER_DEMO_001
+workbench-medication	subpackages/workbench/medication/index	elderId=ELDER_DEMO_001
+workbench-scale	subpackages/workbench/scale/index	elderId=ELDER_DEMO_001
+workbench-qrcode	subpackages/workbench/qrcode/index	elderId=ELDER_DEMO_001

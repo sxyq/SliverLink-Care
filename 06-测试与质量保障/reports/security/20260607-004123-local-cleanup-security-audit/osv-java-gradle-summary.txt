@@ -1,0 +1,71 @@
+generatedAt: 2026-06-07T02:56:34+0800
+mavenDependencyCount: 108
+androidDependencyCount: 92
+queriedDependencyCount: 200
+vulnerableDependencyCount: 19
+
+- org.springframework.boot:spring-boot:3.1.5 [maven-runtime]
+  - GHSA-rc42-6c7j-7h5r   
+- ch.qos.logback:logback-classic:1.4.11 [maven-runtime]
+  - GHSA-vmq6-5m68-f53m   
+- ch.qos.logback:logback-core:1.4.11 [maven-runtime]
+  - GHSA-25qh-j22f-pwp8   
+  - GHSA-6v67-2wr5-gvf4   
+  - GHSA-pr98-23f8-jwxv   
+  - GHSA-qqpg-mvqg-649v   
+  - GHSA-vmq6-5m68-f53m   
+- org.yaml:snakeyaml:1.33 [maven-runtime]
+  - GHSA-mjmj-j48q-9wg2   
+- org.apache.tomcat.embed:tomcat-embed-core:10.1.15 [maven-runtime]
+  - GHSA-25xr-qj8w-c4vf   
+  - GHSA-27hp-xhwr-wr2m   
+  - GHSA-3p2h-wqq4-wf4h   
+  - GHSA-42wg-hm62-jcwg   
+  - GHSA-563x-q5rq-57qp   
+  - GHSA-5j33-cvvr-w245   
+  - GHSA-5m62-pw8w-7w9f   
+  - GHSA-5mp6-jrq3-r938   
+- org.apache.tomcat.embed:tomcat-embed-websocket:10.1.15 [maven-runtime]
+  - GHSA-v682-8vv8-vpwr   
+- org.springframework:spring-web:6.0.13 [maven-runtime]
+  - GHSA-2rmj-mq67-h97g   
+  - GHSA-2wrp-6fg6-hmc5   
+  - GHSA-4gc7-5j7h-4qph   
+  - GHSA-6r3c-xf4w-jxjm   
+  - GHSA-ccgv-vj62-xf9h   
+  - GHSA-hgjh-9rj2-g67j   
+- org.springframework:spring-webmvc:6.0.13 [maven-runtime]
+  - GHSA-4773-3jfm-qmx3   
+  - GHSA-6hcq-hmm3-jj3c   
+  - GHSA-cx7f-g6mp-7hqm   
+  - GHSA-g5vr-rgqm-vf78   
+  - GHSA-r936-gwx5-v52f   
+  - GHSA-v94h-hvhg-mf9h   
+- org.springframework:spring-context:6.0.13 [maven-runtime]
+  - GHSA-4gc7-5j7h-4qph   
+  - GHSA-4wp7-92pw-q264   
+- org.springframework.security:spring-security-core:6.1.5 [maven-runtime]
+  - GHSA-f3jh-qvm4-mg39   
+  - GHSA-q3v6-hm2v-pw99   
+  - GHSA-w3w6-26f2-p474   
+- org.springframework.security:spring-security-crypto:6.1.5 [maven-runtime]
+  - GHSA-mg83-c7gq-rv5c   
+- org.springframework.security:spring-security-web:6.1.5 [maven-runtime]
+  - GHSA-c4q5-6c82-3qpw   
+  - GHSA-mf92-479x-3373   
+- io.netty:netty-common:4.1.100.Final [maven-runtime]
+  - GHSA-389x-839f-4rhx   
+  - GHSA-xq3w-v528-46rv   
+- io.netty:netty-handler:4.1.100.Final [maven-runtime]
+  - GHSA-4g8c-wm8x-jfhw   
+- io.netty:netty-codec:4.1.100.Final [maven-runtime]
+  - GHSA-3p8m-j85q-pgmj   
+  - GHSA-mj4r-2hfc-f8p6   
+- com.fasterxml.jackson.core:jackson-core:2.15.3 [maven-runtime]
+  - GHSA-72hv-8253-57qq   
+- org.apache.commons:commons-lang3:3.12.0 [maven-runtime]
+  - GHSA-j288-q9x7-2f5v   
+- com.mysql:mysql-connector-j:8.0.33 [maven-runtime]
+  - GHSA-m6vm-37g8-gqvh   
+- org.springframework:spring-core:6.0.13 [maven-runtime]
+  - GHSA-jmp9-x22r-554x   

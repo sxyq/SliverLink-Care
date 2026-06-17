@@ -22,6 +22,7 @@ ROOTS = [
     ("admin-console", Path("03-管理后台端/src"), ("ts", "tsx")),
     ("backend", Path("04-统一后端/src/main/java"), ("java",)),
     ("android-relay", Path("05-安卓短信中转端/app/src/main/java"), ("kt",)),
+    ("weapp-miniapp", Path("08-微信小程序端/src"), ("ts", "tsx")),
 ]
 
 EXCLUDED_DIR_PARTS = {

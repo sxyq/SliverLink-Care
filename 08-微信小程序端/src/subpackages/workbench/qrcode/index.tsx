@@ -196,8 +196,8 @@ export default function WorkbenchQrCodePage() {
   }, [elderId, busyAction]);
 
   const handleBack = useCallback(() => {
-    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }, []);
+    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
+  }, [elderId]);
 
   const handleOpenNameplatePreview = useCallback(async () => {
     if (!elderId || busyAction) {

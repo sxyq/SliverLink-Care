@@ -2,6 +2,7 @@ import Taro from '@tarojs/taro';
 
 import { ERROR_MESSAGES, STORAGE_KEYS } from '@/app/app.constants';
 import { getApiBaseUrl } from '@/utils/env';
+import { clearAuthSession } from '@/store/auth/authStore';
 import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
 import { globalDeduplication } from '@/utils/throttleDebounce';
 import { queueRequest } from '@/utils/requestQueue';
@@ -62,7 +63,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
   } as Taro.request.Option<ApiEnvelope<T> | T> & { enableCookie: boolean });
 
   if (response.statusCode === 401) {
-    removeStorageValue(STORAGE_KEYS.authToken);
+    clearAuthSession();
   }
 
   if (response.statusCode >= 400) {
@@ -71,7 +72,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
 
   const payload = response.data;
 
-  if (payload && typeof payload === 'object' && 'data' in payload) {
+  if (payload && typeof payload === 'object' && ('code' in payload || 'data' in payload)) {
     const envelope = payload as ApiEnvelope<T>;
     if ((envelope.code || 0) >= 400) {
       throw new Error(envelope.message || ERROR_MESSAGES.requestFailed);

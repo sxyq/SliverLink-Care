@@ -197,10 +197,6 @@ export async function resolveWorkbenchQrPreviewImage(info: Pick<WorkbenchQrCodeI
     return info.qrImageBase64.startsWith('data:') ? info.qrImageBase64 : `data:image/png;base64,${base64}`;
   }
 
-  if (info.qrImageUrl) {
-    return info.qrImageUrl;
-  }
-
   const displayUrl = resolveQrDisplayUrl(info.token, info.url, info.publicUrl);
   if (!displayUrl) {
     return '';

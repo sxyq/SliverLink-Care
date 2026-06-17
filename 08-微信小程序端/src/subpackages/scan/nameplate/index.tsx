@@ -30,6 +30,11 @@ export default function NameplatePreviewPage() {
   const [pdfPreviewImage, setPdfPreviewImage] = useState('');
 
   useEffect(() => {
+    if (!session) {
+      void Taro.redirectTo({ url: APP_ROUTES.login });
+      return;
+    }
+
     if (!elderId) {
       setLoading(false);
       setErrorText('缺少老人标识，请返回后重试');
@@ -62,7 +67,7 @@ export default function NameplatePreviewPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId]);
+  }, [elderId, session]);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,7 +106,7 @@ export default function NameplatePreviewPage() {
       try {
         const directBase64 = String(preview.backQrImageBase64 || '').trim();
         if (directBase64) {
-          const image = directBase64.startsWith('data:image') ? directBase64 : `data:image/png;base64,${directBase64}`;
+          const image = await resolveBase64PreviewImage(directBase64, 'nameplate-qr-preview');
           if (!cancelled) {
             setQrImage(image);
           }
@@ -158,7 +163,11 @@ export default function NameplatePreviewPage() {
   }
 
   function handleBack() {
-    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
+    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
+  }
+
+  if (!session) {
+    return null;
   }
 
   return (

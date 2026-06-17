@@ -28,7 +28,7 @@ function ScanArchiveHeader() {
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
-        <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.switchTab({ url: APP_ROUTES.home }))}>
+        <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.home }))}>
           返回
         </View>
       </View>

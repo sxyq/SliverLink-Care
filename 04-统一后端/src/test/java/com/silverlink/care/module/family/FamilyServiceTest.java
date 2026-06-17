@@ -45,14 +45,13 @@ class FamilyServiceTest {
         when(data.maskPhone(anyString())).thenReturn("138****0000");
     }
 
-    private void stubAuth(String auth, String phone, String userId) {
-        when(jwtTokenProvider.getSubject(auth.substring(7))).thenReturn(phone);
+    private void stubFamilyAccount(String familyAccount, String userId) {
         Map<String, Object> userRow = new LinkedHashMap<>();
         userRow.put("id", userId);
-        userRow.put("account", phone);
+        userRow.put("account", familyAccount);
         userRow.put("role", "FAMILY");
         userRow.put("status", "ACTIVE");
-        when(data.one(contains("from app_user"), eq(phone))).thenReturn(userRow);
+        when(data.one(contains("from app_user"), eq(familyAccount))).thenReturn(userRow);
         when(data.isFamilyBound(eq(userId), anyString())).thenReturn(true);
     }
 
@@ -89,8 +88,8 @@ class FamilyServiceTest {
 
     @Test
     void myEldersReturnsElderList() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         Map<String, Object> row = new LinkedHashMap<>();
         row.put("id", "elder-1");
@@ -110,8 +109,8 @@ class FamilyServiceTest {
 
     @Test
     void myEldersReturnsEmptyList() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(jdbc.queryForList(contains("from family_binding"), eq("user-1"))).thenReturn(Collections.emptyList());
 
         List<FamilyElderDto> result = service.myElders(auth);
@@ -121,8 +120,8 @@ class FamilyServiceTest {
 
     @Test
     void elderDetailReturnsDetailDto() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         Map<String, Object> elderRow = new LinkedHashMap<>();
         elderRow.put("id", "elder-1");
@@ -155,8 +154,8 @@ class FamilyServiceTest {
 
     @Test
     void updateContactsCallsJdbcUpdate() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         UpdateContactsRequest req = new UpdateContactsRequest();
         req.setEmergencyContactName("张三");
@@ -173,8 +172,8 @@ class FamilyServiceTest {
 
     @Test
     void medicationsReturnsMedicationList() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         Map<String, String> medRow = new LinkedHashMap<>();
         medRow.put("id", "med-1");
@@ -197,8 +196,8 @@ class FamilyServiceTest {
 
     @Test
     void medicationsReturnsEmptyList() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.medications("elder-1")).thenReturn(Collections.emptyList());
 
         List<FamilyMedicationDto> result = service.medications("elder-1", auth);
@@ -208,8 +207,8 @@ class FamilyServiceTest {
 
     @Test
     void addMedicationReturnsNewMedicationDto() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         FamilyMedicationRequest req = new FamilyMedicationRequest();
         req.setName("阿司匹林");
@@ -233,8 +232,8 @@ class FamilyServiceTest {
 
     @Test
     void updateMedicationCallsDataUpdateMedication() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         FamilyMedicationRequest req = new FamilyMedicationRequest();
         req.setName("布洛芬");
@@ -249,8 +248,8 @@ class FamilyServiceTest {
 
     @Test
     void deleteMedicationCallsDataDeleteMedication() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         service.deleteMedication("elder-1", "med-1", auth);
 
@@ -259,8 +258,8 @@ class FamilyServiceTest {
 
     @Test
     void qrcodeReturnsDtoWhenFound() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
@@ -283,8 +282,8 @@ class FamilyServiceTest {
 
     @Test
     void qrcodeThrowsWhenNoQrCodeExists() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
         when(jdbc.queryForList(contains("from qr_code"), eq("elder-1"))).thenReturn(Collections.emptyList());
 
@@ -295,8 +294,8 @@ class FamilyServiceTest {
 
     @Test
     void qrcodeIncludesPendingReviewInfoWhenPresent() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
@@ -320,8 +319,8 @@ class FamilyServiceTest {
 
     @Test
     void qrcodeReturnsDisabledStatus() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         Map<String, Object> qrRow = new LinkedHashMap<>();
@@ -339,8 +338,8 @@ class FamilyServiceTest {
 
     @Test
     void qrcodeRejectsDisabledElder() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "DISABLED"));
 
         BizException ex = assertThrows(BizException.class, () -> service.qrcode("elder-1", auth));
@@ -351,8 +350,8 @@ class FamilyServiceTest {
 
     @Test
     void requestDisableQrCodeCreatesRequestAndReturnsUpdatedDto() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
 
         QrCodeEntity currentQr = new QrCodeEntity();
         currentQr.setId("qr-1");
@@ -384,8 +383,8 @@ class FamilyServiceTest {
 
     @Test
     void requestDisableQrCodeThrowsWhenNoCurrentQrCode() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(qrCodeService.findCurrentByElder("elder-1")).thenReturn(null);
 
         BizException ex = assertThrows(BizException.class, () -> service.requestDisableQrCode("elder-1", auth));
@@ -438,36 +437,6 @@ class FamilyServiceTest {
     }
 
     @Test
-    void resolveFamilyOperatorReturnsPhoneFromBearerToken() {
-        when(jwtTokenProvider.getSubject("valid-token")).thenReturn("13800000000");
-
-        String result = service.resolveFamilyOperator("Bearer valid-token");
-
-        assertEquals("13800000000", result);
-    }
-
-    @Test
-    void resolveFamilyOperatorReturnsDefaultForNullAuth() {
-        String result = service.resolveFamilyOperator(null);
-
-        assertEquals("family-user", result);
-    }
-
-    @Test
-    void resolveFamilyOperatorReturnsDefaultForInvalidAuth() {
-        String result = service.resolveFamilyOperator("Token abc");
-
-        assertEquals("family-user", result);
-    }
-
-    @Test
-    void resolveFamilyOperatorReturnsDefaultForEmptyAuth() {
-        String result = service.resolveFamilyOperator("");
-
-        assertEquals("family-user", result);
-    }
-
-    @Test
     void resolveFamilyUserIdThrowsForNullAuth() {
         BizException ex = assertThrows(BizException.class, () -> service.myElders(null));
         assertEquals(401, ex.getCode());
@@ -475,16 +444,16 @@ class FamilyServiceTest {
     }
 
     @Test
-    void resolveFamilyUserIdThrowsForNonBearerAuth() {
-        BizException ex = assertThrows(BizException.class, () -> service.myElders("Token abc"));
+    void resolveFamilyUserIdThrowsForBlankAccount() {
+        BizException ex = assertThrows(BizException.class, () -> service.myElders(" "));
         assertEquals(401, ex.getCode());
         assertEquals("未登录或 Token 无效", ex.getMessage());
     }
 
     @Test
     void checkBindingThrowsWhenNotBound() {
-        String auth = "Bearer test-token";
-        stubAuth(auth, "13800000000", "user-1");
+        String auth = "13800000000";
+        stubFamilyAccount(auth, "user-1");
         when(data.isFamilyBound("user-1", "elder-1")).thenReturn(false);
 
         BizException ex = assertThrows(BizException.class, () -> service.elderDetail("elder-1", auth));

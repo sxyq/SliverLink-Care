@@ -3,9 +3,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from './App';
 
 const logoutAdmin = vi.fn();
+const fetchAdminSession = vi.fn();
 const createAdminRouter = vi.fn();
 
 vi.mock('./api/adminApi', () => ({
+  fetchAdminSession: (...args: unknown[]) => fetchAdminSession(...args),
   logoutAdmin: (...args: unknown[]) => logoutAdmin(...args),
 }));
 
@@ -34,8 +36,10 @@ vi.mock('react-router-dom', async () => {
 describe('App', () => {
   beforeEach(() => {
     localStorage.clear();
+    fetchAdminSession.mockReset();
     logoutAdmin.mockReset();
     createAdminRouter.mockReset();
+    fetchAdminSession.mockRejectedValue(new Error('not logged in'));
     createAdminRouter.mockImplementation((loggedIn: boolean, onLogin: (role: string) => void, role: string, onLogout: () => Promise<void>) => ({
       loggedIn,
       onLogin,
@@ -47,60 +51,53 @@ describe('App', () => {
   it('builds logged-out router by default and updates after login', async () => {
     render(<App />);
 
-    expect(createAdminRouter).toHaveBeenCalledWith(false, expect.any(Function), '', expect.any(Function));
-    expect(screen.getByTestId('router-state')).toHaveTextContent('logged-out');
+    await waitFor(() => {
+      expect(createAdminRouter).toHaveBeenCalledWith(false, expect.any(Function), '', expect.any(Function));
+      expect(screen.getByTestId('router-state')).toHaveTextContent('logged-out');
+    });
 
-    localStorage.setItem('sl_admin_token', 'token-1');
     fireEvent.click(screen.getByRole('button', { name: 'mock-login' }));
 
     await waitFor(() => {
-      expect(localStorage.getItem('sl_admin_role')).toBe('系统管理员');
       expect(screen.getByTestId('router-state')).toHaveTextContent('logged-in:系统管理员');
     });
   });
 
-  it('hydrates session from localStorage and reacts to storage sync events', async () => {
-    localStorage.setItem('sl_admin_token', 'token-1');
+  it('hydrates session from server and reacts to session-cleared events', async () => {
     localStorage.setItem('sl_admin_role', '审计员');
+    fetchAdminSession.mockResolvedValue({ loggedIn: true, role: '审计员', account: 'admin' });
 
     render(<App />);
 
-    expect(screen.getByTestId('router-state')).toHaveTextContent('logged-in:审计员');
+    await waitFor(() => {
+      expect(screen.getByTestId('router-state')).toHaveTextContent('logged-in:审计员');
+    });
 
     act(() => {
-      localStorage.removeItem('sl_admin_token');
       localStorage.removeItem('sl_admin_role');
-      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new CustomEvent('sl-admin-session-cleared'));
     });
 
     await waitFor(() => {
       expect(screen.getByTestId('router-state')).toHaveTextContent('logged-out');
     });
+  });
 
-    act(() => {
-      localStorage.setItem('sl_admin_token', 'token-2');
-      localStorage.setItem('sl_admin_role', '系统管理员');
-      window.dispatchEvent(new CustomEvent('sl-admin-session-cleared'));
-    });
+  it('clears session after logout', async () => {
+    localStorage.setItem('sl_admin_role', '系统管理员');
+    fetchAdminSession.mockResolvedValue({ loggedIn: true, role: '系统管理员', account: 'admin' });
+    logoutAdmin.mockResolvedValue(undefined);
+
+    render(<App />);
 
     await waitFor(() => {
       expect(screen.getByTestId('router-state')).toHaveTextContent('logged-in:系统管理员');
     });
-  });
-
-  it('clears session after logout', async () => {
-    localStorage.setItem('sl_admin_token', 'token-1');
-    localStorage.setItem('sl_admin_role', '系统管理员');
-    logoutAdmin.mockResolvedValue(undefined);
-
-    render(<App />);
 
     fireEvent.click(screen.getByRole('button', { name: 'mock-logout' }));
 
     await waitFor(() => {
       expect(logoutAdmin).toHaveBeenCalledTimes(1);
-      expect(localStorage.getItem('sl_admin_token')).toBeNull();
-      expect(localStorage.getItem('sl_admin_role')).toBeNull();
       expect(screen.getByTestId('router-state')).toHaveTextContent('logged-out');
     });
   });

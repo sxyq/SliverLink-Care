@@ -4,6 +4,7 @@ import type { AdminReviewRequest, AuditLog, ElderRow, SmsRelayDeviceRow, SmsRela
 const GET_CACHE_TTL_MS = 15_000;
 const responseCache = new Map<string, { expiresAt: number; data: unknown }>();
 const pendingGetRequests = new Map<string, Promise<unknown>>();
+const ADMIN_ROLE_KEY = 'sl_admin_role';
 let adminRole = '';
 
 interface ApiEnvelope<T> {
@@ -14,7 +15,28 @@ interface ApiEnvelope<T> {
 
 function clearAdminSession() {
   adminRole = '';
+  try {
+    window.localStorage.removeItem(ADMIN_ROLE_KEY);
+  } catch {
+    // ignore storage failures
+  }
   window.dispatchEvent(new CustomEvent('sl-admin-session-cleared'));
+}
+
+function readAdminRole() {
+  try {
+    return window.localStorage.getItem(ADMIN_ROLE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function persistAdminSession(role: string) {
+  try {
+    window.localStorage.setItem(ADMIN_ROLE_KEY, role);
+  } catch {
+    // ignore storage failures
+  }
 }
 
 function normalizeErrorMessage(text: string) {
@@ -158,19 +180,21 @@ function mapMedicationRows(rows: Array<Record<string, unknown>>) {
 }
 
 export async function loginAdmin(account: string, password: string) {
-  let result: { role: string; account?: string };
+  let result: { role?: string; account?: string };
   try {
-    result = await request<{ role: string; account?: string }>('/api/admin/login', {
+    result = await request<{ role?: string; account?: string }>('/api/admin/login', {
       method: 'POST',
       body: JSON.stringify({ account, password }),
     });
   } catch (error) {
-    if (error instanceof Error && error.message === 'Unauthorized') {
+    if (error instanceof Error && (error.message === 'Unauthorized' || error.message === '账号或密码错误')) {
       throw new Error('账号或密码错误');
     }
     throw error;
   }
-  adminRole = result.role || '系统管理员';
+  const session = await fetchAdminSession();
+  adminRole = session.role || result.role || '系统管理员';
+  persistAdminSession(adminRole);
   return { ok: true, role: adminRole };
 }
 
@@ -186,8 +210,9 @@ export async function logoutAdmin() {
 }
 
 export async function fetchAdminSession() {
-  const result = await request<{ role: string; account?: string }>('/api/admin/session');
-  adminRole = result.role || '系统管理员';
+  const result = await request<{ role?: string; account?: string }>('/api/admin/session');
+  adminRole = result.role || readAdminRole() || adminRole || '系统管理员';
+  persistAdminSession(adminRole);
   return { loggedIn: true, role: adminRole, account: result.account || '' };
 }
 

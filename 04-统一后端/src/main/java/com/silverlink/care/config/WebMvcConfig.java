@@ -14,7 +14,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     private final List<String> allowedOrigins;
 
     public WebMvcConfig(
-            @Value("${silverlink.security.allowed-origins:https://sxyq27.online,http://sxyq27.online,http://localhost:5173,http://localhost:5174,http://localhost:5175}") List<String> allowedOrigins
+            @Value("${silverlink.security.allowed-origins:https://sxyq27.online,http://localhost:5173,http://localhost:5174,http://localhost:5175}") List<String> allowedOrigins
     ) {
         this.allowedOrigins = allowedOrigins;
     }

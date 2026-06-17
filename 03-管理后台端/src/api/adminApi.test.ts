@@ -1,4 +1,3 @@
-import { webcrypto } from 'node:crypto';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   approveAdminReviewRequest,
@@ -64,29 +63,29 @@ describe('adminApi', () => {
     vi.restoreAllMocks();
     localStorage.clear();
     invalidateAdminCache();
-    Object.defineProperty(globalThis, 'crypto', {
-      configurable: true,
-      value: webcrypto,
-    });
   });
 
-  it('logs in, signs requests, caches GET responses and clears session on forbidden responses', async () => {
+  it('logs in with cookie session, caches GET responses and clears session on forbidden responses', async () => {
     const cleared = vi.fn();
     window.addEventListener('sl-admin-session-cleared', cleared);
     const fetchMock = queueFetch(
-      { token: 'token-1', role: '管理员' },
+      { role: '管理员' },
+      { role: '管理员', account: 'admin' },
       [{ id: 'elder-1', name: '老人', status: 'ACTIVE' }],
       new Response('Forbidden', { status: 403 }),
     );
 
     await expect(loginAdmin('admin', 'pass')).resolves.toEqual({ ok: true, role: '管理员' });
-    expect(localStorage.getItem('sl_admin_token')).toBe('token-1');
+    expect(localStorage.getItem('sl_admin_role')).toBe('管理员');
 
     await expect(fetchElders()).resolves.toHaveLength(1);
     await expect(fetchElders()).resolves.toHaveLength(1);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock.mock.calls[1][1].headers.Authorization).toBe('Bearer token-1');
-    expect(fetchMock.mock.calls[1][1].headers['X-Signature']).toMatch(/^[a-f0-9]{64}$/);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[2][1].credentials).toBe('same-origin');
+    expect(fetchMock.mock.calls[2][1].headers.Authorization).toBeUndefined();
+    expect(fetchMock.mock.calls[2][1].headers['X-Signature']).toBeUndefined();
+    expect(fetchMock.mock.calls[2][1].headers['X-Timestamp']).toBeUndefined();
+    expect(fetchMock.mock.calls[2][1].headers['X-Nonce']).toBeUndefined();
 
     invalidateAdminCache();
     await expect(fetchElders()).rejects.toThrow('登录态已失效');
@@ -344,17 +343,17 @@ describe('adminApi', () => {
   });
 
   it('returns default role when login response has empty role', async () => {
-    queueFetch({ token: 'tok', role: '' });
+    queueFetch({ role: '' }, { role: '' });
 
     const result = await loginAdmin('admin', 'pass');
     expect(result).toEqual({ ok: true, role: '系统管理员' });
   });
 
-  it('returns ok false when login response has empty token', async () => {
-    queueFetch({ token: '', role: '管理员' });
+  it('does not require token fields in cookie-based login responses', async () => {
+    queueFetch({ role: '登录响应角色' }, { role: '管理员' });
 
     const result = await loginAdmin('admin', 'pass');
-    expect(result).toEqual({ ok: false, role: '管理员' });
+    expect(result).toEqual({ ok: true, role: '管理员' });
   });
 
   it('deduplicates concurrent GET requests', async () => {
@@ -393,11 +392,14 @@ describe('adminApi', () => {
     expect(second).toEqual([expect.objectContaining({ id: 'elder-2' })]);
   });
 
-  it('sends requests without Authorization header when token is absent', async () => {
+  it('sends requests without legacy token or signature headers', async () => {
     const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
 
     await fetchElders();
     expect(fetchMock.mock.calls[0][1].headers.Authorization).toBeUndefined();
+    expect(fetchMock.mock.calls[0][1].headers['X-Signature']).toBeUndefined();
+    expect(fetchMock.mock.calls[0][1].headers['X-Timestamp']).toBeUndefined();
+    expect(fetchMock.mock.calls[0][1].headers['X-Nonce']).toBeUndefined();
   });
 
   it('handles response.text() rejection gracefully', async () => {
@@ -410,30 +412,6 @@ describe('adminApi', () => {
     }));
 
     await expect(fetchElders()).rejects.toThrow('请求失败');
-  });
-
-  it('falls back to the built-in HMAC implementation when crypto.subtle is unavailable', async () => {
-    Object.defineProperty(globalThis, 'crypto', {
-      configurable: true,
-      value: {},
-    });
-
-    const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
-    await expect(fetchElders()).resolves.toEqual([expect.objectContaining({ id: 'e1' })]);
-    expect(fetchMock.mock.calls[0][1].headers['X-Signature']).toMatch(/^[a-f0-9]{64}$/);
-  });
-
-  it('falls back to timestamp-based nonce when randomUUID is unavailable', async () => {
-    Object.defineProperty(globalThis, 'crypto', {
-      configurable: true,
-      value: { subtle: webcrypto.subtle },
-    });
-
-    const fetchMock = queueFetch([{ id: 'e1', name: '老人', status: 'ACTIVE' }]);
-    await fetchElders();
-
-    const nonce = fetchMock.mock.calls[0][1].headers['X-Nonce'];
-    expect(nonce).toMatch(/^\d+-[a-z0-9]+$/);
   });
 
   it('formats invitation with empty expiresAt as 未使用', async () => {

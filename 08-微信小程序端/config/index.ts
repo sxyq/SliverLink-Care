@@ -1,8 +1,16 @@
 import path from 'node:path';
-import { defineConfig, type UserConfigExport } from '@tarojs/cli';
 
 import devConfig from './dev';
 import prodConfig from './prod';
+
+type UserConfigExport<TCompiler extends string = 'vite'> = Record<string, unknown> & {
+  compiler?: TCompiler;
+};
+type MergeConfig = (...configs: Array<Record<string, unknown>>) => Record<string, unknown>;
+
+function defineConfig<T>(config: T): T {
+  return config;
+}
 
 const config: UserConfigExport<'vite'> = {
   projectName: 'silverlink-wechat-miniapp',
@@ -70,7 +78,7 @@ const config: UserConfigExport<'vite'> = {
   },
 };
 
-export default defineConfig(async (merge) => {
+export default defineConfig(async (merge: MergeConfig) => {
   const envConfig = process.env.NODE_ENV === 'development' ? devConfig : prodConfig;
   return merge({}, config, envConfig);
 });

@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     public SecurityConfig(
             JwtAuthenticationFilter jwtAuthenticationFilter,
-            @Value("${silverlink.security.allowed-origins:https://sxyq27.online,http://sxyq27.online,http://localhost:5173,http://localhost:5174,http://localhost:5175}") List<String> allowedOrigins
+            @Value("${silverlink.security.allowed-origins:https://sxyq27.online,http://localhost:5173,http://localhost:5174,http://localhost:5175}") List<String> allowedOrigins
     ) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.allowedOrigins = allowedOrigins;
@@ -44,6 +44,7 @@ public class SecurityConfig {
                             "/api/sms-relay/inbound",
                             "/api/sms-relay/heartbeat",
                             "/api/sms-relay/devices/*/config",
+                            "/api/qrcodes/image",
                             "/api/audit-logs/report",
                             "/api/admin/login",
                             "/api/volunteer/login",
@@ -56,7 +57,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/volunteer/me/**", "/api/elder/**").hasRole("VOLUNTEER")
                     .requestMatchers("/api/family/**").hasRole("FAMILY")
                     .requestMatchers("/api/nameplates/**").authenticated()
-                    .anyRequest().permitAll()
+                    .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(basic -> basic.disable())

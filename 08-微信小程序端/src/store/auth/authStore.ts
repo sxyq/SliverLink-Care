@@ -1,5 +1,7 @@
 import { ROLE_TYPES, STORAGE_KEYS, type RoleType } from '@/app/app.constants';
-import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
+import { clearAppSession } from '@/store/app/appSessionStore';
+import { clearCurrentElderSummary } from '@/store/elder/currentElderStore';
+import { getStorageValue, removeStorageValue, removeStorageValuesByPrefix, setStorageValue } from '@/utils/storage';
 
 export interface AuthSession {
   token: string;
@@ -11,6 +13,11 @@ export interface AuthSession {
 }
 
 let authSessionCache: AuthSession | null | undefined;
+
+const AUTH_SCOPED_STORAGE_PREFIXES = [
+  'api_cache__',
+  'sl_weapp_volunteer_medications__',
+];
 
 function normalizeRole(value: unknown): RoleType | null {
   if (value === ROLE_TYPES.volunteer || value === ROLE_TYPES.family) {
@@ -79,7 +86,8 @@ export function clearAuthSession() {
   removeStorageValue(STORAGE_KEYS.displayName);
   removeStorageValue(STORAGE_KEYS.authLoggedInAt);
   removeStorageValue(STORAGE_KEYS.authCookieBacked);
-  removeStorageValue(STORAGE_KEYS.currentElderSummary);
-  removeStorageValue(STORAGE_KEYS.appSession);
+  clearCurrentElderSummary();
+  clearAppSession();
   removeStorageValue(STORAGE_KEYS.launchContext);
+  removeStorageValuesByPrefix(AUTH_SCOPED_STORAGE_PREFIXES);
 }

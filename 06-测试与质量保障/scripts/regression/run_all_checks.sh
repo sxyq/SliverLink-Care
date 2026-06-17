@@ -24,6 +24,13 @@ run volunteer-test bash -lc "cd '02-志愿者填写端' && npm run test"
 run admin-build bash -lc "cd '03-管理后台端' && npm run build"
 run admin-test bash -lc "cd '03-管理后台端' && npm run test"
 
+run weapp-local bash "06-测试与质量保障/scripts/regression/run_weapp_local_checks.sh"
+run weapp-evidence node "06-测试与质量保障/scripts/regression/check_weapp_evidence.mjs"
+
+if [[ "${SILVERLINK_RUN_WEAPP_DEVTOOLS:-0}" == "1" ]]; then
+  run weapp-devtools bash "06-测试与质量保障/scripts/regression/run_weapp_devtools_checks.sh"
+fi
+
 run backend-test bash -lc "cd '04-统一后端' && ./mvnw test jacoco:report"
 run android-unit bash -lc "cd '05-安卓短信中转端' && bash ./gradlew testDebugUnitTest"
 

@@ -5,9 +5,20 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "dev:weapp": "npm exec --package=node@20 -- node ./node_modules/@tarojs/cli/bin/taro build --type weapp --watch",
-    "build:weapp": "npm exec --package=node@20 -- node ./node_modules/@tarojs/cli/bin/taro build --type weapp",
+    "dev:weapp": "npm exec --yes --package=node@20 --package=@tarojs/cli@4.2.0 -- taro build --type weapp --watch",
+    "build:weapp": "npm exec --yes --package=node@20 --package=@tarojs/cli@4.2.0 -- taro build --type weapp",
+    "test:unit": "node ./scripts/run-unit-tests.mjs",
+    "test:static": "node ./scripts/run-static-audit.mjs",
+    "test:route-contract": "node ./scripts/check-route-contract.mjs",
+    "test:platform-contract": "node ./scripts/check-platform-contract.mjs",
+    "test:page-privacy-render": "node ./scripts/check-page-privacy-render.mjs",
+    "test:dist-security": "node ./scripts/check-dist-security.mjs",
+    "test:artifact": "node ./scripts/check-build-artifact.mjs",
+    "test:performance-budget": "node ./scripts/check-performance-budget.mjs",
+    "test:build-performance": "node ./scripts/run-build-performance-check.mjs",
+    "test:backend-contract": "node ./scripts/check-backend-contract.mjs",
     "typecheck": "tsc --noEmit",
+    "preci:upload": "bash ../06-测试与质量保障/scripts/regression/run_weapp_local_checks.sh",
     "ci:upload": "node ./scripts/wechat-ci.mjs upload",
     "ci:preview": "node ./scripts/wechat-ci.mjs preview"
   },
@@ -24,7 +35,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.25.9",
-    "@tarojs/cli": "^4.0.7",
     "@tarojs/plugin-framework-react": "^4.0.7",
     "@tarojs/plugin-platform-weapp": "^4.0.7",
     "@tarojs/vite-runner": "^4.0.7",
@@ -32,8 +42,15 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.7.0",
-    "miniprogram-ci": "^2.1.31",
     "typescript": "^5.8.0",
     "vite": "^4.5.14"
+  },
+  "overrides": {
+    "esbuild": "0.25.12",
+    "glob": "10.5.0",
+    "got": "11.8.6",
+    "http-cache-semantics": "4.1.1",
+    "serialize-javascript": "7.0.5",
+    "swiper": "12.1.2"
   }
 }

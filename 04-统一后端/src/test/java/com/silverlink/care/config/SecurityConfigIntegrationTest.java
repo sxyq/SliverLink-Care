@@ -52,6 +52,16 @@ class SecurityConfigIntegrationTest {
     }
 
     @Test
+    void publicQrImageIsExplicitlyAllowedButUnknownApiDefaultsToAuthenticated() throws Exception {
+        mockMvc.perform(get("/api/qrcodes/image")
+                        .param("token", "sample-token"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/unclassified/protected"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
     void roleBoundariesAreEnforced() throws Exception {
         String adminToken = jwtTokenProvider.generateToken("admin", "SYSTEM_ADMIN", 60_000L);
         String volunteerToken = jwtTokenProvider.generateToken("volunteer", "VOLUNTEER", 60_000L);
@@ -125,6 +135,16 @@ class SecurityConfigIntegrationTest {
         @GetMapping("/api/volunteer/me/profile")
         ResponseEntity<String> protectedVolunteerEndpoint() {
             return ResponseEntity.ok("volunteer");
+        }
+
+        @GetMapping("/api/qrcodes/image")
+        ResponseEntity<String> publicQrImageEndpoint() {
+            return ResponseEntity.ok("png");
+        }
+
+        @GetMapping("/api/unclassified/protected")
+        ResponseEntity<String> unclassifiedEndpoint() {
+            return ResponseEntity.ok("should require auth by default");
         }
     }
 }

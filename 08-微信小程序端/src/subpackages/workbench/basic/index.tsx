@@ -142,8 +142,8 @@ export default function WorkbenchBasicPage() {
   }, [session, detail, formValue, saving, canEditAll, canEditContactOnly]);
 
   const handleBack = useCallback(() => {
-    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderDetail }));
-  }, []);
+    void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
+  }, [elderId]);
 
   if (!session) {
     return null;

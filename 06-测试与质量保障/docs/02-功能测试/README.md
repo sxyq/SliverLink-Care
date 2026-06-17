@@ -1,6 +1,6 @@
 # 功能测试
 
-**最后更新**：2026-05-31
+**最后更新**：2026-06-06
 
 ---
 
@@ -82,6 +82,22 @@
 
 这轮结果属于**真实浏览器交互证据**，但仍不是独立 Playwright CLI 回放矩阵，因为当前仍缺可用的 CLI 浏览器运行时。
 
+### 1.5 微信小程序端本地功能门禁
+
+2026-06-06 已将 `08-微信小程序端` 纳入本地功能门禁，当前已完成：
+
+1. `npm run build:weapp` 通过，Taro 产出首页、登录页、扫码分包 6 页、工作台分包 6 页。
+2. `npm run test:artifact` 通过，断言 `app.json` 页面/分包、`project.config.json`、扫码验证页关键按钮与防串档提示、工作台二维码复制/停用/名牌入口、名牌背面扫码与 PDF 文案。
+3. `npm run test:route-contract` 通过，确认 15 个路由常量和 15 个注册页面一致，12 条导航契约有效，且无 `switchTab` 非 tabBar 残留。
+4. `npm run test:platform-contract` 通过，确认 27 个 Taro 平台方法、9 条微信平台能力契约和唯一 H5 `window.location` 分支。
+5. `npm run ci:preview` 通过微信 CI 服务端编译、打包、上传预览，并生成预览二维码。
+6. `project.config.json` 已保留 12 条微信开发者工具 condition，覆盖扫码落地、验证、受保护页面、名牌、工作台老人详情/基础/用药/量表/二维码页面。
+
+本轮报告：
+
+- `06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/summary.md`
+- `06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/screenshots/miniprogram-ci-qrcode.png`
+
 ---
 
 ## 2. 当前保留的关键基线
@@ -93,6 +109,8 @@
 | 功能写操作脚本（可逆） | `06-测试与质量保障/scripts/functional/live_write_reversible_smoke.mjs` |
 | 功能写操作脚本（深回归） | `06-测试与质量保障/scripts/functional/live_write_deep_regression.mjs` |
 | 线上辅助脚本 | `06-测试与质量保障/scripts/common/live_api_helpers.mjs` |
+| 微信小程序本地综合报告 | `06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/summary.md` |
+| 微信小程序预览二维码 | `06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/screenshots/miniprogram-ci-qrcode.png` |
 
 ---
 
@@ -111,6 +129,7 @@
 2. **并发场景**：功能烟测仍以串行为主，未覆盖并发操作下的数据一致性
 3. **跨端联动**：未验证扫码端验证后志愿者端数据同步
 4. **E2E 自动化矩阵**：已有真实浏览器交互证据，但仍无 Playwright/Cypress 级自动化回放
+5. **微信小程序运行时/UI 专项**：已有构建、artifact、route contract、platform contract、page privacy render 和 CI 预览二维码证据；模拟器截图和真机点击链路仅在后续运行时/UI 专项中补充，不属于当前代码层功能结论
 
 ---
 
@@ -118,6 +137,8 @@
 
 - 本机缺少可用 Playwright CLI 浏览器运行时
 - 家属邀请码注册流程依赖短信验证码，当前仍需要可控测试号码或测试环境配合
+- 微信开发者工具 CLI 登录态仅影响后续小程序运行时/UI 专项，不阻塞当前代码层功能、契约和构建产物测试
+- `08-微信小程序端` 未安装 `miniprogram-automator`，仅影响后续小程序 UI 自动化回放
 
 ---
 
@@ -126,3 +147,4 @@
 1. 在线上或预发环境补“家属邀请码注册 -> 家属登录 -> 联系人更新”的完整浏览器闭环
 2. 增加跨端联动验证（扫码验证 → 志愿者端数据同步）
 3. 在具备可用浏览器 CLI 运行时后，补 Playwright/Cypress 自动化矩阵
+4. 若另开小程序运行时/UI 专项，登录微信开发者工具后按 `project.config.json` 的 condition 逐页截图并执行真机扫码预览

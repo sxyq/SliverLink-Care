@@ -1,0 +1,150 @@
+{
+  "module": "08-微信小程序端",
+  "generatedAt": "2026-06-06",
+  "layers": [
+    {
+      "layer": "unit",
+      "status": "passed",
+      "proves": [
+        "22 local logic and contract checks passed",
+        "route params, launch context, permission matrix, storage, stores, auth-scoped privacy cleanup, request queue, scan entry, http client, services, family medication void responses, qrcode and nameplate helpers are covered"
+      ],
+      "evidence": [
+        "08-微信小程序端/scripts/unit/logic.test.ts",
+        "08-微信小程序端/scripts/unit/taro-stub.ts",
+        "08-微信小程序端/scripts/run-unit-tests.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/commands.log"
+      ],
+      "nonTargets": [
+        "real WeChat platform API runtime behavior",
+        "real-device camera permission dialog",
+        "real-device filesystem behavior"
+      ]
+    },
+    {
+      "layer": "functional",
+      "status": "code-level-passed",
+      "proves": [
+        "Taro build emits expected top pages and subpackages",
+        "artifact checks lock key pages, text, QR/nameplate entries and 12 DevTools conditions",
+        "route contract checks lock 15 routes, 12 navigation contracts and 0 switchTab leftovers",
+        "platform contract checks lock 27 Taro methods and 9 platform capability contracts",
+        "page privacy render checks lock 15 pages, 14 components and dangerous render boundaries"
+      ],
+      "evidence": [
+        "08-微信小程序端/scripts/check-build-artifact.mjs",
+        "08-微信小程序端/scripts/check-route-contract.mjs",
+        "08-微信小程序端/scripts/check-platform-contract.mjs",
+        "08-微信小程序端/scripts/check-page-privacy-render.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/performance.json"
+      ],
+      "nonTargets": [
+        "DevTools simulator screenshots",
+        "page-level manual click evidence"
+      ]
+    },
+    {
+      "layer": "integration",
+      "status": "code-level-passed",
+      "proves": [
+        "mock Taro request covers backend URL, method, body, query and DTO compatibility",
+        "backend contract check confirms 38 miniapp API method/path contracts match backend controller routes and 15 response-shape contracts",
+        "route contract check confirms 10 protected query contracts",
+        "platform contract and unit tests cover download, PDF open, filesystem and fallback contracts",
+        "WeChat CI preview accepts and packages the current miniapp"
+      ],
+      "evidence": [
+        "08-微信小程序端/scripts/unit/logic.test.ts",
+        "08-微信小程序端/scripts/check-backend-contract.mjs",
+        "08-微信小程序端/scripts/check-route-contract.mjs",
+        "08-微信小程序端/scripts/check-platform-contract.mjs",
+        "08-微信小程序端/scripts/check-page-privacy-render.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/screenshots/miniprogram-ci-qrcode.png",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/logs/weapp-ci-preview-current.log"
+      ],
+      "nonTargets": [
+        "real-device or DevTools cookie behavior",
+        "WeChat legal-domain runtime behavior",
+        "real PDF download and filesystem integration"
+      ]
+    },
+    {
+      "layer": "performance",
+      "status": "code-level-passed",
+      "proves": [
+        "build and package size baselines exist",
+        "build duration budget passes: 13703/40000 ms",
+        "dist contains 73 files and totals 529578 bytes",
+        "local performance budget passes: total 529578/2097152 bytes, scan 55692/512000 bytes, workbench 78443/716800 bytes",
+        "WeChat CI package full size is 575877 bytes"
+      ],
+      "evidence": [
+        "08-微信小程序端/scripts/run-build-performance-check.mjs",
+        "08-微信小程序端/scripts/check-performance-budget.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/performance.json"
+      ],
+      "nonTargets": [
+        "real-device first-screen timing",
+        "runtime subpackage visible timing",
+        "real PDF open latency"
+      ]
+    },
+    {
+      "layer": "security",
+      "status": "code-level-covered",
+      "proves": [
+        "401 auth-scoped privacy cleanup is covered",
+        "role permission matrix is covered",
+        "sessionId and elderId anti-cross-elder fields are covered by unit, route contract and artifact checks",
+        "static audit covers publish ignore boundaries, CI private key placeholder boundaries, HTTPS API fallback, cookie/401 cleanup invariants and sensitive material scan",
+        "page privacy render covers public-before-verify, verified-only, auth-only and never-render field boundaries",
+        "page privacy render confirms dangerous render APIs, console output, sensitive query/storage sinks and unreviewed image sources are zero",
+        "dist security audit covers source maps, private keys, cloud secret literals, JWT literals, hard-coded phone and ID numbers, local paths, private network addresses, local preview artifacts and sensitive DevTools query keys"
+      ],
+      "evidence": [
+        "08-微信小程序端/scripts/unit/logic.test.ts",
+        "08-微信小程序端/scripts/check-build-artifact.mjs",
+        "08-微信小程序端/scripts/check-route-contract.mjs",
+        "08-微信小程序端/scripts/check-platform-contract.mjs",
+        "08-微信小程序端/scripts/check-page-privacy-render.mjs",
+        "08-微信小程序端/scripts/run-static-audit.mjs",
+        "08-微信小程序端/scripts/check-dist-security.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/summary.md"
+      ],
+      "nonTargets": [
+        "real-device legal-domain security behavior",
+        "runtime cookie and filesystem security behavior",
+        "real PDF rendering behavior"
+      ]
+    },
+    {
+      "layer": "regression",
+      "status": "code-level-local-passed",
+      "proves": [
+        "local miniapp regression gate passed",
+        "local miniapp regression gate includes static audit",
+        "local miniapp regression gate includes route contract audit",
+        "local miniapp regression gate includes platform contract audit",
+        "local miniapp regression gate includes backend contract audit",
+        "local miniapp regression gate includes page privacy render audit",
+        "local miniapp regression gate includes build duration audit",
+        "local miniapp regression gate includes dist security audit",
+        "local miniapp regression gate includes performance budget audit",
+        "ci:upload reuses the local miniapp regression gate through preci:upload",
+        "report evidence consistency check validates code-level matrix, command logs, CI preview QR and performance JSON"
+      ],
+      "evidence": [
+        "06-测试与质量保障/scripts/regression/run_weapp_local_checks.sh",
+        "06-测试与质量保障/scripts/regression/check_weapp_evidence.mjs",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/commands.log",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/performance.json",
+        "06-测试与质量保障/reports/regression/20260606-190933-weapp-local-comprehensive/failures.md"
+      ],
+      "nonTargets": [
+        "WeChat DevTools rerun script remains optional runtime evidence",
+        "12 page screenshots are outside the current code-level scope",
+        "real phone scan and click evidence is outside the current code-level scope"
+      ]
+    }
+  ]
+}

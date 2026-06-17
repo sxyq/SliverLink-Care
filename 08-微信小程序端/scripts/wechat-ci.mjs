@@ -1,10 +1,14 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
-import ci from 'miniprogram-ci';
+import { execFileSync } from 'node:child_process';
+import { pathToFileURL } from 'node:url';
 
 const projectRoot = path.resolve(process.cwd());
 const localConfigPath = path.join(projectRoot, '.local', 'wechat-ci', 'config.json');
+const ciSdkVersion = '2.1.31';
+const ciSdkRoot = path.join(projectRoot, '.local', 'wechat-ci-sdk');
+const ciSdkEntry = path.join(ciSdkRoot, 'node_modules', 'miniprogram-ci', 'dist', 'index.js');
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -14,6 +18,32 @@ function ensureFile(filePath, label) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`${label} 不存在: ${filePath}`);
   }
+}
+
+function normalizeCiModule(moduleValue) {
+  return moduleValue.default || moduleValue;
+}
+
+async function loadMiniProgramCi() {
+  try {
+    return normalizeCiModule(await import('miniprogram-ci'));
+  } catch (error) {
+    if (!error || error.code !== 'ERR_MODULE_NOT_FOUND') {
+      throw error;
+    }
+  }
+
+  if (!fs.existsSync(ciSdkEntry)) {
+    fs.mkdirSync(ciSdkRoot, { recursive: true });
+    console.log(`miniprogram-ci 未安装在项目依赖中，将按需安装到 .local/wechat-ci-sdk (v${ciSdkVersion})`);
+    execFileSync('npm', ['install', '--prefix', ciSdkRoot, '--no-audit', '--no-fund', `miniprogram-ci@${ciSdkVersion}`], {
+      cwd: projectRoot,
+      stdio: 'inherit',
+    });
+  }
+
+  ensureFile(ciSdkEntry, 'miniprogram-ci SDK');
+  return normalizeCiModule(await import(pathToFileURL(ciSdkEntry).href));
 }
 
 function parseArgs(argv) {
@@ -56,7 +86,7 @@ function resolveConfig(overrides) {
   };
 }
 
-function createProject(config) {
+function createProject(config, ci) {
   ensureFile(config.privateKeyPath, '上传密钥');
   ensureFile(path.join(config.projectPath, 'project.config.json'), 'project.config.json');
 
@@ -80,8 +110,9 @@ async function runUpload(config) {
     throw new Error('缺少上传版本号，请在 .local/wechat-ci/config.json 或命令行 --version 中提供');
   }
 
+  const ci = await loadMiniProgramCi();
   const result = await ci.upload({
-    project: createProject(config),
+    project: createProject(config, ci),
     version: config.uploadVersion,
     desc: config.uploadDesc,
     robot: config.robot,
@@ -96,8 +127,9 @@ async function runPreview(config) {
   const outputDir = path.dirname(config.qrcodeOutputDest);
   fs.mkdirSync(outputDir, { recursive: true });
 
+  const ci = await loadMiniProgramCi();
   const result = await ci.preview({
-    project: createProject(config),
+    project: createProject(config, ci),
     desc: config.previewDesc,
     robot: config.robot,
     setting: buildSetting(),

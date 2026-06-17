@@ -1,9 +1,11 @@
 package com.silverlink.care.module.invitation;
 
 import com.silverlink.care.module.audit.AuditLogService;
+import com.silverlink.care.security.AuthCookieService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
 
@@ -16,15 +18,19 @@ class InvitationControllerTest {
 
     private InvitationService invitationService;
     private AuditLogService auditLogService;
+    private AuthCookieService authCookieService;
     private InvitationController controller;
     private MockHttpServletRequest request;
+    private MockHttpServletResponse response;
 
     @BeforeEach
     void setUp() {
         invitationService = mock(InvitationService.class);
         auditLogService = mock(AuditLogService.class);
-        controller = new InvitationController(invitationService, auditLogService);
+        authCookieService = mock(AuthCookieService.class);
+        controller = new InvitationController(invitationService, auditLogService, authCookieService);
         request = new MockHttpServletRequest();
+        response = new MockHttpServletResponse();
     }
 
     @Test
@@ -42,7 +48,7 @@ class InvitationControllerTest {
         registerRequest.setPhone("13800000000");
         RegisterResultDto registerResult = new RegisterResultDto(true, "token-family", null);
         when(invitationService.register("ABC123", registerRequest)).thenReturn(registerResult);
-        assertEquals("token-family", controller.register("ABC123", registerRequest, request).getData().getToken());
+        assertEquals("token-family", controller.register("ABC123", registerRequest, request, response).getData().getToken());
 
         InvitationAdminDto adminDto = new InvitationAdminDto();
         adminDto.setId("inv-1");

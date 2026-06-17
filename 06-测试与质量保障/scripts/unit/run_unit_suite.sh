@@ -17,6 +17,7 @@ run function-inventory python3 "06-测试与质量保障/scripts/common/generate
 run scan-unit bash -lc "cd '01-扫码用户端' && npm run test"
 run volunteer-unit bash -lc "cd '02-志愿者填写端' && npm run test"
 run admin-unit bash -lc "cd '03-管理后台端' && npm run test"
+run weapp-unit bash -lc "cd '08-微信小程序端' && npm run test:unit"
 run backend-unit bash -lc "cd '04-统一后端' && ./mvnw test jacoco:report"
 run android-unit bash -lc "cd '05-安卓短信中转端' && bash ./gradlew testDebugUnitTest"
 run coverage-summary python3 "06-测试与质量保障/scripts/common/collect_coverage_summary.py"

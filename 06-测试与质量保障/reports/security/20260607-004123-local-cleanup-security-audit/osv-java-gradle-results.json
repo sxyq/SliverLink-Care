@@ -1,0 +1,555 @@
+{
+  "generatedAt": "2026-06-07T02:56:34+0800",
+  "mavenDependencyCount": 108,
+  "androidDependencyCount": 92,
+  "queriedDependencyCount": 200,
+  "vulnerableDependencyCount": 19,
+  "results": [
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.boot:spring-boot"
+        },
+        "version": "3.1.5",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-rc42-6c7j-7h5r",
+          "modified": "2026-02-04T02:35:01.941827Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "ch.qos.logback:logback-classic"
+        },
+        "version": "1.4.11",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-vmq6-5m68-f53m",
+          "modified": "2026-02-04T04:35:11.957026Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "ch.qos.logback:logback-core"
+        },
+        "version": "1.4.11",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-25qh-j22f-pwp8",
+          "modified": "2026-02-04T04:36:33.093619Z"
+        },
+        {
+          "id": "GHSA-6v67-2wr5-gvf4",
+          "modified": "2026-02-04T02:48:46.075919Z"
+        },
+        {
+          "id": "GHSA-pr98-23f8-jwxv",
+          "modified": "2026-02-04T04:15:26.157843Z"
+        },
+        {
+          "id": "GHSA-qqpg-mvqg-649v",
+          "modified": "2026-02-04T04:14:42.648926Z"
+        },
+        {
+          "id": "GHSA-vmq6-5m68-f53m",
+          "modified": "2026-02-04T04:35:11.957026Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.yaml:snakeyaml"
+        },
+        "version": "1.33",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-mjmj-j48q-9wg2",
+          "modified": "2026-03-13T22:00:52.408866Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.tomcat.embed:tomcat-embed-core"
+        },
+        "version": "10.1.15",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-25xr-qj8w-c4vf",
+          "modified": "2026-03-06T21:48:52.680071Z"
+        },
+        {
+          "id": "GHSA-27hp-xhwr-wr2m",
+          "modified": "2026-02-04T02:57:44.792035Z"
+        },
+        {
+          "id": "GHSA-3p2h-wqq4-wf4h",
+          "modified": "2026-02-04T02:33:55.411813Z"
+        },
+        {
+          "id": "GHSA-42wg-hm62-jcwg",
+          "modified": "2025-10-29T16:13:33.340454Z"
+        },
+        {
+          "id": "GHSA-563x-q5rq-57qp",
+          "modified": "2026-05-20T22:00:12.406423Z"
+        },
+        {
+          "id": "GHSA-5j33-cvvr-w245",
+          "modified": "2026-02-04T03:30:30.995863Z"
+        },
+        {
+          "id": "GHSA-5m62-pw8w-7w9f",
+          "modified": "2026-05-22T20:44:18.279901Z"
+        },
+        {
+          "id": "GHSA-5mp6-jrq3-r938",
+          "modified": "2026-05-19T20:44:22.991854Z"
+        },
+        {
+          "id": "GHSA-7w75-32cg-r6g2",
+          "modified": "2026-02-04T03:07:01.006225Z"
+        },
+        {
+          "id": "GHSA-83qj-6fr2-vhqg",
+          "modified": "2026-02-04T03:48:01.024680Z"
+        },
+        {
+          "id": "GHSA-9m3c-qcxr-9x87",
+          "modified": "2026-04-16T22:29:16.890064Z"
+        },
+        {
+          "id": "GHSA-9m89-8frq-c98c",
+          "modified": "2026-05-22T20:44:17.940496Z"
+        },
+        {
+          "id": "GHSA-fccv-jmmp-qg76",
+          "modified": "2026-02-04T03:57:13.832540Z"
+        },
+        {
+          "id": "GHSA-ff77-26x5-69cr",
+          "modified": "2026-02-04T03:34:54.323619Z"
+        },
+        {
+          "id": "GHSA-fpj8-gq4v-p354",
+          "modified": "2026-03-13T10:47:36.608928Z"
+        },
+        {
+          "id": "GHSA-fv25-8xcx-gqjc",
+          "modified": "2026-05-19T20:44:23.671441Z"
+        },
+        {
+          "id": "GHSA-gqp3-2cvr-x8m3",
+          "modified": "2026-05-13T16:35:26.549711Z"
+        },
+        {
+          "id": "GHSA-gx5v-xp9w-j4cg",
+          "modified": "2026-05-19T20:44:22.820021Z"
+        },
+        {
+          "id": "GHSA-h2fw-rfh5-95r3",
+          "modified": "2026-02-04T04:16:31.531863Z"
+        },
+        {
+          "id": "GHSA-h3gc-qfqq-6h8f",
+          "modified": "2026-02-04T02:50:56.702210Z"
+        },
+        {
+          "id": "GHSA-h6fc-48rj-7qqh",
+          "modified": "2026-05-19T20:44:23.373407Z"
+        },
+        {
+          "id": "GHSA-hgrr-935x-pq79",
+          "modified": "2026-05-13T16:35:19.482075Z"
+        },
+        {
+          "id": "GHSA-mgp5-rv84-w37q",
+          "modified": "2026-03-20T17:59:02.946416Z"
+        },
+        {
+          "id": "GHSA-qq5r-98hh-rxc9",
+          "modified": "2026-03-10T19:01:28.882481Z"
+        },
+        {
+          "id": "GHSA-r29c-68gh-xp6x",
+          "modified": "2026-05-19T20:44:23.818493Z"
+        },
+        {
+          "id": "GHSA-rv64-5gf8-9qq8",
+          "modified": "2026-04-16T22:29:18.579217Z"
+        },
+        {
+          "id": "GHSA-vfww-5hm6-hx2j",
+          "modified": "2026-05-13T16:35:23.699719Z"
+        },
+        {
+          "id": "GHSA-wc4r-xq3c-5cf3",
+          "modified": "2026-02-04T03:34:56.351825Z"
+        },
+        {
+          "id": "GHSA-wm9w-rjj3-j356",
+          "modified": "2026-02-04T02:28:53.223858Z"
+        },
+        {
+          "id": "GHSA-wmwf-9ccg-fff5",
+          "modified": "2026-05-13T16:35:28.966681Z"
+        },
+        {
+          "id": "GHSA-wr62-c79q-cv37",
+          "modified": "2026-03-06T22:01:30.941844Z"
+        },
+        {
+          "id": "GHSA-x4m4-345f-5h5g",
+          "modified": "2026-04-13T12:56:21.121765Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.tomcat.embed:tomcat-embed-websocket"
+        },
+        "version": "10.1.15",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-v682-8vv8-vpwr",
+          "modified": "2026-02-04T03:35:42.305341Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-web"
+        },
+        "version": "6.0.13",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-2rmj-mq67-h97g",
+          "modified": "2026-02-04T03:41:13.020256Z"
+        },
+        {
+          "id": "GHSA-2wrp-6fg6-hmc5",
+          "modified": "2026-04-17T19:29:23.512712Z"
+        },
+        {
+          "id": "GHSA-4gc7-5j7h-4qph",
+          "modified": "2026-02-04T04:13:07.093622Z"
+        },
+        {
+          "id": "GHSA-6r3c-xf4w-jxjm",
+          "modified": "2026-02-04T03:21:42.385504Z"
+        },
+        {
+          "id": "GHSA-ccgv-vj62-xf9h",
+          "modified": "2026-02-04T03:35:25.288455Z"
+        },
+        {
+          "id": "GHSA-hgjh-9rj2-g67j",
+          "modified": "2026-02-04T02:37:54.422465Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-webmvc"
+        },
+        "version": "6.0.13",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-4773-3jfm-qmx3",
+          "modified": "2026-03-26T18:29:19.494354Z"
+        },
+        {
+          "id": "GHSA-6hcq-hmm3-jj3c",
+          "modified": "2026-03-26T18:29:19.981865Z"
+        },
+        {
+          "id": "GHSA-cx7f-g6mp-7hqm",
+          "modified": "2026-02-04T02:37:27.897336Z"
+        },
+        {
+          "id": "GHSA-g5vr-rgqm-vf78",
+          "modified": "2025-05-28T14:22:33Z"
+        },
+        {
+          "id": "GHSA-r936-gwx5-v52f",
+          "modified": "2026-02-04T03:50:37.742858Z"
+        },
+        {
+          "id": "GHSA-v94h-hvhg-mf9h",
+          "modified": "2025-02-13T19:37:10.470310Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-context"
+        },
+        "version": "6.0.13",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-4gc7-5j7h-4qph",
+          "modified": "2026-02-04T04:13:07.093622Z"
+        },
+        {
+          "id": "GHSA-4wp7-92pw-q264",
+          "modified": "2026-02-04T04:04:31.136084Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-core"
+        },
+        "version": "6.1.5",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-f3jh-qvm4-mg39",
+          "modified": "2026-02-04T03:05:25.970671Z"
+        },
+        {
+          "id": "GHSA-q3v6-hm2v-pw99",
+          "modified": "2026-02-04T03:10:40.993970Z"
+        },
+        {
+          "id": "GHSA-w3w6-26f2-p474",
+          "modified": "2025-02-13T19:36:07.721740Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-crypto"
+        },
+        "version": "6.1.5",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-mg83-c7gq-rv5c",
+          "modified": "2026-02-04T02:24:34.415323Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework.security:spring-security-web"
+        },
+        "version": "6.1.5",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-c4q5-6c82-3qpw",
+          "modified": "2026-02-04T03:16:22.297406Z"
+        },
+        {
+          "id": "GHSA-mf92-479x-3373",
+          "modified": "2026-03-25T19:59:15.827722Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.netty:netty-common"
+        },
+        "version": "4.1.100.Final",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-389x-839f-4rhx",
+          "modified": "2026-02-04T04:31:00.174857Z"
+        },
+        {
+          "id": "GHSA-xq3w-v528-46rv",
+          "modified": "2026-02-04T03:40:54.362888Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.netty:netty-handler"
+        },
+        "version": "4.1.100.Final",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-4g8c-wm8x-jfhw",
+          "modified": "2026-02-04T02:54:33.253775Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "io.netty:netty-codec"
+        },
+        "version": "4.1.100.Final",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-3p8m-j85q-pgmj",
+          "modified": "2026-02-04T02:23:33.973208Z"
+        },
+        {
+          "id": "GHSA-mj4r-2hfc-f8p6",
+          "modified": "2026-05-14T20:52:02.730912Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.fasterxml.jackson.core:jackson-core"
+        },
+        "version": "2.15.3",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-72hv-8253-57qq",
+          "modified": "2026-04-07T16:47:43.107166Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.apache.commons:commons-lang3"
+        },
+        "version": "3.12.0",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-j288-q9x7-2f5v",
+          "modified": "2026-02-04T03:18:02.851501Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "com.mysql:mysql-connector-j"
+        },
+        "version": "8.0.33",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-m6vm-37g8-gqvh",
+          "modified": "2026-02-04T03:46:43.169210Z"
+        }
+      ]
+    },
+    {
+      "dependency": {
+        "package": {
+          "ecosystem": "Maven",
+          "name": "org.springframework:spring-core"
+        },
+        "version": "6.0.13",
+        "sources": [
+          "maven-runtime"
+        ]
+      },
+      "vulns": [
+        {
+          "id": "GHSA-jmp9-x22r-554x",
+          "modified": "2026-02-04T02:59:53.509459Z"
+        }
+      ]
+    }
+  ]
+}
