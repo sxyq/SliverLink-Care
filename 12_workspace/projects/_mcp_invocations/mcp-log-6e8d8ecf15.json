@@ -1,0 +1,32 @@
+{
+  "id": "mcp-log-6e8d8ecf15",
+  "event_type": "request",
+  "method": "unknown",
+  "tool_name": null,
+  "agent_name": null,
+  "model_name": null,
+  "prompt_text": null,
+  "prompt_source": null,
+  "request_payload": {
+    "jsonrpc": "2.0",
+    "error": {
+      "code": -32700,
+      "message": "Parse error"
+    }
+  },
+  "response_payload": {
+    "jsonrpc": "2.0",
+    "id": null,
+    "error": {
+      "code": -32601,
+      "message": "Unknown method: None"
+    }
+  },
+  "metadata": {
+    "jsonrpc_method": null,
+    "tool_name": null
+  },
+  "latency_ms": 0.007,
+  "success": false,
+  "created_at": "2026-07-04T04:23:26.851165"
+}

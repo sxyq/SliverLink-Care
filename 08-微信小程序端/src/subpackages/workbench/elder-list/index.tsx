@@ -351,7 +351,7 @@ export default function WorkbenchElderListPage() {
   return (
     <WorkbenchShell pageClassName='workbench-elder-list-page'>
       <WorkbenchHeader
-        title='智联名牌'
+        title='渝护银龄名牌'
         leadingAction={{ label: '账号', icon: '👤', onClick: handleShowAccount }}
         trailingAction={{ label: '退出', icon: '⇢', onClick: handleLogout, disabled: loggingOut }}
       />

@@ -215,7 +215,7 @@ export default function NameplatePreviewPage() {
                           <View className='scan-nameplate-card__tag'>随身携带</View>
                         </View>
                         <View className='scan-nameplate-front-hero'>
-                          <View className='scan-nameplate-front-hero__title'>智联名牌</View>
+                          <View className='scan-nameplate-front-hero__title'>渝护银龄名牌</View>
                           <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-front-grid'>

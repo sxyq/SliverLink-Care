@@ -64,7 +64,7 @@ function ScanVerifyHeader(props: {
         </View>
       </View>
       <View className='sl-page-header-copy'>
-        <View className='sl-page-header-copy__title'>智联名牌</View>
+        <View className='sl-page-header-copy__title'>渝护银龄名牌</View>
       </View>
       <View className='sl-page-header-action'>
         <View className='sl-page-header-icon scan-verify-header-toggle' onClick={props.onToggleMode}>

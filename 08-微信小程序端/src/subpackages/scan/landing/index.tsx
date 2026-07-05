@@ -34,7 +34,7 @@ function ScanLandingHeader() {
         </View>
       </View>
       <View className='sl-page-header-copy'>
-        <View className='sl-page-header-copy__title'>智联名牌</View>
+        <View className='sl-page-header-copy__title'>渝护银龄名牌</View>
       </View>
       <View className='sl-page-header-placeholder' />
     </View>

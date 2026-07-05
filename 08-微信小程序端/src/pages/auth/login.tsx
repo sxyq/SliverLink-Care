@@ -166,7 +166,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
               ) : null}
               <View className='auth-login-brand'>
                 <View className='auth-login-icon'>SL</View>
-                <View className='auth-login-brand__title'>智联名牌</View>
+                <View className='auth-login-brand__title'>渝护银龄名牌</View>
                 <Text className='auth-login-brand__subtitle'>用心守护 温暖相伴</Text>
               </View>
             </View>
@@ -334,7 +334,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
             </View>
 
             <View className='auth-login-footer'>
-              <Text className='auth-login-footer__line'>重庆医科大学护理学院 银龄守护团队</Text>
+              <Text className='auth-login-footer__line'>笙箫一曲</Text>
             </View>
           </View>
         </View>

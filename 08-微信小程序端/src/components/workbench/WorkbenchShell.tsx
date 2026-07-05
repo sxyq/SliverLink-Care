@@ -7,7 +7,7 @@ interface WorkbenchShellProps {
   footerText?: string;
 }
 
-const DEFAULT_FOOTER = '重庆医科大学护理学院 银龄守护团队';
+const DEFAULT_FOOTER = '笙箫一曲';
 
 export const WorkbenchShell = memo(function WorkbenchShell({ children, pageClassName = '', footerText = DEFAULT_FOOTER }: WorkbenchShellProps) {
   return (

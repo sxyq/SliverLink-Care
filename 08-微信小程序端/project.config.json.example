@@ -1,6 +1,6 @@
 {
   "appid": "your-appid-here",
-  "projectname": "智联名牌",
+  "projectname": "渝护银龄名牌",
   "compileType": "miniprogram",
   "miniprogramRoot": "dist",
   "srcMiniprogramRoot": "dist",

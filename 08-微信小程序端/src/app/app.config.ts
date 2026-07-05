@@ -11,7 +11,7 @@ export default {
     },
   ],
   window: {
-    navigationBarTitleText: '智联名牌',
+    navigationBarTitleText: '渝护银龄名牌',
     navigationBarBackgroundColor: '#edf6fb',
     navigationBarTextStyle: 'black',
     backgroundTextStyle: 'light',

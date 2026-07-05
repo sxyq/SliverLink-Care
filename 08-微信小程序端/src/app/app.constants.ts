@@ -1,4 +1,4 @@
-export const APP_NAME = '智联名牌';
+export const APP_NAME = '渝护银龄名牌';
 
 export const APP_ROUTES = {
   home: '/pages/home/index',

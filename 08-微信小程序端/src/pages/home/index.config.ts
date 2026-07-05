@@ -1,4 +1,4 @@
 export default {
-  navigationBarTitleText: '智联名牌',
+  navigationBarTitleText: '渝护银龄名牌',
   enablePullDownRefresh: false,
 };
