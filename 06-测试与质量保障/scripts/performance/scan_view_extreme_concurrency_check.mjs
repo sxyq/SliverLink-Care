@@ -42,6 +42,10 @@ async function requestText(path, options = {}) {
     status: response.status,
     bytes: Buffer.byteLength(text),
     text,
+    sessionCookie: response.headers.get('set-cookie')
+      ?.split(',')
+      .map((value) => value.trim().split(';', 1)[0])
+      .find((value) => value.startsWith('sl_admin_session=')) || '',
   };
 }
 
@@ -53,18 +57,17 @@ async function loginAdmin() {
   if (!result.ok) {
     throw new Error(`admin login failed: ${result.status} ${result.text}`);
   }
-  const token = JSON.parse(result.text)?.data?.token;
-  if (!token) {
-    throw new Error('admin login did not return token');
+  if (!result.sessionCookie) {
+    throw new Error('admin login did not return the session cookie');
   }
-  return token;
+  return result.sessionCookie;
 }
 
-async function fetchQrCodeSeed(token) {
+async function fetchQrCodeSeed(sessionCookie) {
   const response = await requestText('/api/admin/qrcodes', {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${token}`,
+      Cookie: sessionCookie,
       ...createSignatureHeaders('GET', '/api/admin/qrcodes'),
     },
   });

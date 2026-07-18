@@ -1,22 +1,17 @@
 package com.silverlink.care.module.scan;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeService;
 import com.silverlink.care.module.smsrelay.SmsRelayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.ObjectProvider;
-import org.springframework.data.redis.core.StringRedisTemplate;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,10 +33,7 @@ class ScanServiceTest {
         qrCodeService = mock(QrCodeService.class);
         data = mock(SilverLinkDataService.class);
         smsRelayService = mock(SmsRelayService.class);
-        ObjectProvider<StringRedisTemplate> provider = mock(ObjectProvider.class);
-        when(provider.getIfAvailable()).thenReturn(null);
-        JsonTwoLevelCache cache = new JsonTwoLevelCache(provider);
-        service = new ScanService(qrCodeService, data, smsRelayService, cache, new ObjectMapper());
+        service = new ScanService(qrCodeService, data, smsRelayService);
     }
 
     @Test
@@ -203,54 +195,13 @@ class ScanServiceTest {
     }
 
     @Test
-    void privateCacheHelpersCoverListAndBundleFallbackPaths() throws Exception {
-        ScanService localService = new ScanService(qrCodeService, data, smsRelayService);
-        org.springframework.test.util.ReflectionTestUtils.setField(localService, "protectedReadCacheTtlMs", 10_000L);
-        when(data.health("elder-3")).thenReturn(Map.of("summary", "archive"));
-        when(data.elderDetail("elder-3", false)).thenReturn(Map.of("name", "李奶奶"));
-        when(data.medications("elder-3")).thenReturn(List.of(Map.of("name", "阿司匹林")));
-        when(data.scaleSummaries("elder-3")).thenReturn(List.of(Map.of("name", "PHQ-9", "score", 4)));
+    void resolveCacheKeyDoesNotExposeQrToken() {
+        String token = "qr-token-with-access-capability";
 
-        Method readBundle = ScanService.class.getDeclaredMethod("readProtectedReadBundle", String.class);
-        readBundle.setAccessible(true);
-        Object bundle = readBundle.invoke(localService, "elder-3");
-        org.junit.jupiter.api.Assertions.assertNotNull(bundle);
+        String key = ScanService.resolveCacheKey(token);
 
-        Class<?> supplierType = Class.forName("com.silverlink.care.module.scan.ScanService$ThrowingSupplier");
-        Object supplier = Proxy.newProxyInstance(
-                supplierType.getClassLoader(),
-                new Class[]{supplierType},
-                (proxy, method, args) -> List.of(Map.of("name", "列表缓存"))
-        );
-        Method readCachedList = ScanService.class.getDeclaredMethod(
-                "readCachedList",
-                String.class,
-                long.class,
-                Class.forName("com.silverlink.care.infrastructure.cache.SimpleTtlCache"),
-                com.fasterxml.jackson.core.type.TypeReference.class,
-                supplierType
-        );
-        readCachedList.setAccessible(true);
-        @SuppressWarnings("unchecked")
-        List<Map<String, String>> first = (List<Map<String, String>>) readCachedList.invoke(
-                localService,
-                "scan:list:test",
-                10_000L,
-                new com.silverlink.care.infrastructure.cache.SimpleTtlCache<>(),
-                new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, String>>>() {},
-                supplier
-        );
-        @SuppressWarnings("unchecked")
-        List<Map<String, String>> second = (List<Map<String, String>>) readCachedList.invoke(
-                service,
-                "scan:list:test:redis",
-                10_000L,
-                new com.silverlink.care.infrastructure.cache.SimpleTtlCache<>(),
-                new com.fasterxml.jackson.core.type.TypeReference<List<Map<String, String>>>() {},
-                supplier
-        );
-
-        assertEquals("列表缓存", first.get(0).get("name"));
-        assertEquals("列表缓存", second.get(0).get("name"));
+        assertTrue(key.startsWith("scan:resolve:"));
+        assertFalse(key.contains(token));
+        assertEquals("scan:resolve:".length() + 64, key.length());
     }
 }

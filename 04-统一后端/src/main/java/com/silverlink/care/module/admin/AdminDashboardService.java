@@ -14,6 +14,8 @@ import java.util.Map;
 @Service
 public class AdminDashboardService {
 
+    private static final String SUMMARY_CACHE_KEY = "admin:dashboard:summary:v2";
+
     private final SilverLinkDataService data;
     private final JsonTwoLevelCache cache;
     private final ObjectMapper objectMapper;
@@ -49,21 +51,25 @@ public class AdminDashboardService {
 
     public Map<String, Object> summary() {
         if (cache == null || auditLogService == null) return buildSummary();
-        String payload = cache.getOrLoad("admin:dashboard:summary:v1", 1_000L, 15_000L, this::serializeSummary);
+        String payload = cache.getOrLoad(SUMMARY_CACHE_KEY, 1_000L, 15_000L, this::serializeMetrics);
+        Map<String, Object> summary;
         try {
-            return objectMapper.readValue(payload, new TypeReference<>() {});
+            summary = objectMapper.readValue(payload, new TypeReference<>() {});
         } catch (Exception ignored) {
-            return buildSummary();
+            cache.invalidate(SUMMARY_CACHE_KEY);
+            summary = new java.util.LinkedHashMap<>(data.dashboard());
         }
+        summary.put("recentAuditLogs", auditLogService.recentSummary());
+        return summary;
     }
 
     public void invalidateSummary() {
-        if (cache != null) cache.invalidate("admin:dashboard:summary:v1");
+        if (cache != null) cache.invalidate(SUMMARY_CACHE_KEY);
     }
 
-    private String serializeSummary() {
+    private String serializeMetrics() {
         try {
-            return objectMapper.writeValueAsString(buildSummary());
+            return objectMapper.writeValueAsString(data.dashboard());
         } catch (Exception exception) {
             throw new IllegalStateException("无法序列化仪表盘摘要", exception);
         }

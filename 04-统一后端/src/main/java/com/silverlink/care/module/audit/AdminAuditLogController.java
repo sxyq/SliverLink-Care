@@ -22,10 +22,16 @@ import java.util.Map;
 public class AdminAuditLogController {
 
     private final AuditLogService auditLogService;
+    private final AuditLogRollupService rollupService;
     private final AuditLogExportService exportService;
 
-    public AdminAuditLogController(AuditLogService auditLogService, AuditLogExportService exportService) {
+    public AdminAuditLogController(
+            AuditLogService auditLogService,
+            AuditLogRollupService rollupService,
+            AuditLogExportService exportService
+    ) {
         this.auditLogService = auditLogService;
+        this.rollupService = rollupService;
         this.exportService = exportService;
     }
 
@@ -51,20 +57,23 @@ public class AdminAuditLogController {
     }
 
     @GetMapping("/summary")
-    public ApiResponse<Map<String, Object>> summary(
-            @RequestParam(required = false) String from,
-            @RequestParam(required = false) String to,
-            @RequestParam(required = false) String operator,
-            @RequestParam(required = false) String action,
-            @RequestParam(required = false) String result,
-            @RequestParam(required = false) String role,
-            @RequestParam(required = false) String verificationMethod,
-            @RequestParam(required = false) String sourceIp,
-            @RequestParam(required = false) String target
-    ) {
-        return ApiResponse.ok(auditLogService.summary(
-                new AuditLogQuery(from, to, operator, action, result, role, verificationMethod, sourceIp, target)
-        ));
+    public ApiResponse<Map<String, Object>> summary(@RequestParam Map<String, String> params) {
+        return ApiResponse.ok(rollupService.summary(query(params)));
+    }
+
+    @GetMapping("/summary/overview")
+    public ApiResponse<Map<String, Object>> overview(@RequestParam Map<String, String> params) {
+        return ApiResponse.ok(rollupService.overview(query(params)));
+    }
+
+    @GetMapping("/summary/trend")
+    public ApiResponse<Map<String, Object>> trend(@RequestParam Map<String, String> params) {
+        return ApiResponse.ok(rollupService.trend(query(params)));
+    }
+
+    @GetMapping("/summary/distribution")
+    public ApiResponse<Map<String, Object>> distribution(@RequestParam Map<String, String> params) {
+        return ApiResponse.ok(rollupService.distribution(query(params)));
     }
 
     @PostMapping("/exports")
@@ -87,5 +96,19 @@ public class AdminAuditLogController {
                 .contentType(MediaType.parseMediaType("text/csv"))
                 .header(HttpHeaders.CONTENT_DISPOSITION, ContentDisposition.attachment().filename("audit-" + id + ".csv").build().toString())
                 .body(resource);
+    }
+
+    private AuditLogQuery query(Map<String, String> params) {
+        return new AuditLogQuery(
+                params.get("from"),
+                params.get("to"),
+                params.get("operator"),
+                params.get("action"),
+                params.get("result"),
+                params.get("role"),
+                params.get("verificationMethod"),
+                params.get("sourceIp"),
+                params.get("target")
+        );
     }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AlertTriangle, ClipboardList } from 'lucide-react';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
@@ -245,12 +245,13 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   const [exportId, setExportId] = useState('');
   const [exportMessage, setExportMessage] = useState('');
   const [selectedVisitorTarget, setSelectedVisitorTarget] = useState<{ log: AuditLog; elder: ElderRow } | null>(null);
+  const loadRequestIdRef = useRef(0);
   const columns = useTableColumnVisibility(`sl_columns_audit_${category}`, auditColumnOptions);
   const visitorDetailColumns = useTableColumnVisibility('sl_columns_audit_visitor_detail', visitorDetailColumnOptions);
   const visitorSummaryColumns = useTableColumnVisibility('sl_columns_audit_visitor_summary', visitorSummaryColumnOptions);
 
   const categoryRole: Record<AuditCategory, string> = {
-    admin: 'SYSTEM_ADMIN', medical: 'VOLUNTEER', family: 'FAMILY', visitor: 'VISITOR',
+    admin: 'SYSTEM_ADMIN', medical: 'VOLUNTEER', family: 'FAMILY', visitor: 'VISITOR_GROUP',
   };
 
   const verificationMethodValue: Record<string, string> = {
@@ -272,17 +273,25 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   }
 
   async function loadPage(cursor?: string | null, previous?: string[]) {
+    const requestId = ++loadRequestIdRef.current;
     setLoading(true);
     try {
       const filters = activeFilters();
-      const [page, nextSummary] = await Promise.all([fetchAuditLogPage(filters, cursor), fetchAuditLogSummary(filters)]);
+      const pageRequest = fetchAuditLogPage(filters, cursor);
+      const summaryRequest = fetchAuditLogSummary(filters)
+        .then((nextSummary) => {
+          if (requestId === loadRequestIdRef.current) setSummary(nextSummary);
+        })
+        .catch(() => undefined);
+      const page = await pageRequest;
+      if (requestId !== loadRequestIdRef.current) return;
       setLogs(page.items);
       setCurrentCursor(cursor || null);
       setNextCursor(page.nextCursor);
-      setSummary(nextSummary);
       setCursorHistory(previous || []);
+      void summaryRequest;
     } finally {
-      setLoading(false);
+      if (requestId === loadRequestIdRef.current) setLoading(false);
     }
   }
 

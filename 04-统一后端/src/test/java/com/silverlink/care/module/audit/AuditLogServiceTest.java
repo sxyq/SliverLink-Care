@@ -71,6 +71,7 @@ class AuditLogServiceTest {
         service.record("admin", "SYSTEM_ADMIN", "127.0.0.1", "elder-1", "VIEW", "SUCCESS", null, "req-1");
         SilverLinkDataService.AuditLogWrite write = captureSingleWrite(() ->
                 service.record("admin", "SYSTEM_ADMIN", "127.0.0.1", "elder-1", "VIEW", "SUCCESS", null, "req-1"));
+        assertFalse(write.id().isBlank());
         assertEquals("admin", write.operator());
         assertEquals("SYSTEM_ADMIN", write.role());
         assertEquals("127.0.0.1", write.ip());
@@ -199,6 +200,25 @@ class AuditLogServiceTest {
         service.flushPendingScheduled();
 
         verify(data, atLeastOnce()).recordAuditBatch(anyList());
+    }
+
+    @Test
+    void batchFailureRetriesWithTheSameAuditId() {
+        AtomicReference<SilverLinkDataService.AuditLogWrite> batched = new AtomicReference<>();
+        doAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            List<SilverLinkDataService.AuditLogWrite> writes = invocation.getArgument(0);
+            batched.set(writes.get(0));
+            throw new RuntimeException("batch failed");
+        }).when(data).recordAuditBatch(anyList());
+
+        service.record("admin", "SYSTEM_ADMIN", "127.0.0.1", "elder-1", "VIEW", "SUCCESS", null, "req-1");
+
+        var retried = org.mockito.ArgumentCaptor.forClass(SilverLinkDataService.AuditLogWrite.class);
+        verify(data).recordAudit(retried.capture());
+        assertNotNull(batched.get());
+        assertEquals(batched.get().id(), retried.getValue().id());
+        assertEquals(batched.get().time(), retried.getValue().time());
     }
 
     private SilverLinkDataService.AuditLogWrite captureSingleWrite(Runnable action) {

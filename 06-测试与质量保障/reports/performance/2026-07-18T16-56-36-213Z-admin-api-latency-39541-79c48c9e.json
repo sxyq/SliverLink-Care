@@ -1,0 +1,1314 @@
+{
+  "title": "SilverLink 管理后台只读 API 并发性能报告",
+  "generatedAt": "2026-07-18T16:56:36.207Z",
+  "apiBaseUrl": "https://sxyq27.online/silverlink-api",
+  "iterationsPerTarget": 20,
+  "concurrencyPerTarget": 4,
+  "adminAccount": "admin",
+  "elderId": "elder-1784363829015",
+  "summary": {
+    "requestCount": 160,
+    "successCount": 160,
+    "failureCount": 0,
+    "avgMs": 61,
+    "p50Ms": 46,
+    "p95Ms": 80,
+    "p99Ms": 549,
+    "maxMs": 550,
+    "avgBytes": 7031,
+    "totalBytes": 1124880,
+    "statuses": {
+      "200": 160
+    }
+  },
+  "targets": [
+    {
+      "name": "admin-dashboard-summary",
+      "path": "/api/admin/dashboard/summary",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 146,
+        "p50Ms": 46,
+        "p95Ms": 549,
+        "p99Ms": 550,
+        "maxMs": 550,
+        "avgBytes": 2592,
+        "totalBytes": 51840,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 547
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 548
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 550
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 549
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-dashboard-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 2592,
+          "durationMs": 42
+        }
+      ]
+    },
+    {
+      "name": "admin-audit-page",
+      "path": "/api/admin/audit-logs/page?limit=50",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 58,
+        "p50Ms": 54,
+        "p95Ms": 80,
+        "p99Ms": 80,
+        "maxMs": 80,
+        "avgBytes": 19162,
+        "totalBytes": 383240,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 78
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 78
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 80
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 80
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 55
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 55
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 65
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 62
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 62
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-audit-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19162,
+          "durationMs": 48
+        }
+      ]
+    },
+    {
+      "name": "admin-audit-overview",
+      "path": "/api/admin/audit-logs/summary/overview",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 45,
+        "p50Ms": 41,
+        "p95Ms": 57,
+        "p99Ms": 57,
+        "maxMs": 57,
+        "avgBytes": 207,
+        "totalBytes": 4140,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 57
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 57
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 57
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-audit-overview",
+          "ok": true,
+          "status": 200,
+          "bytes": 207,
+          "durationMs": 40
+        }
+      ]
+    },
+    {
+      "name": "admin-audit-trend",
+      "path": "/api/admin/audit-logs/summary/trend",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 43,
+        "p50Ms": 42,
+        "p95Ms": 51,
+        "p99Ms": 51,
+        "maxMs": 51,
+        "avgBytes": 218,
+        "totalBytes": 4360,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 50
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 38
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-audit-trend",
+          "ok": true,
+          "status": 200,
+          "bytes": 218,
+          "durationMs": 39
+        }
+      ]
+    },
+    {
+      "name": "admin-audit-distribution",
+      "path": "/api/admin/audit-logs/summary/distribution",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 43,
+        "p50Ms": 41,
+        "p95Ms": 51,
+        "p99Ms": 53,
+        "maxMs": 53,
+        "avgBytes": 1146,
+        "totalBytes": 22920,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-audit-distribution",
+          "ok": true,
+          "status": 200,
+          "bytes": 1146,
+          "durationMs": 39
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-summary",
+      "path": "/api/sms-relay/admin/summary",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 52,
+        "p50Ms": 42,
+        "p95Ms": 95,
+        "p99Ms": 95,
+        "maxMs": 95,
+        "avgBytes": 260,
+        "totalBytes": 5200,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 93
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 95
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 39
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 40
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-summary",
+          "ok": true,
+          "status": 200,
+          "bytes": 260,
+          "durationMs": 40
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-records-page",
+      "path": "/api/sms-relay/admin/records/page?limit=50",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 47,
+        "p50Ms": 46,
+        "p95Ms": 53,
+        "p99Ms": 54,
+        "maxMs": 54,
+        "avgBytes": 13386,
+        "totalBytes": 267720,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 53
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 43
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 42
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 44
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 41
+        },
+        {
+          "target": "admin-smsrelay-records-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 13386,
+          "durationMs": 42
+        }
+      ]
+    },
+    {
+      "name": "admin-smsrelay-sessions-page",
+      "path": "/api/sms-relay/admin/sessions/page?limit=50",
+      "summary": {
+        "requestCount": 20,
+        "successCount": 20,
+        "failureCount": 0,
+        "avgMs": 52,
+        "p50Ms": 51,
+        "p95Ms": 61,
+        "p99Ms": 62,
+        "maxMs": 62,
+        "avgBytes": 19273,
+        "totalBytes": 385460,
+        "statuses": {
+          "200": 20
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 54
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 55
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 56
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 52
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 51
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 61
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 59
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 59
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 62
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 47
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 46
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 48
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 49
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 45
+        },
+        {
+          "target": "admin-smsrelay-sessions-page",
+          "ok": true,
+          "status": 200,
+          "bytes": 19273,
+          "durationMs": 50
+        }
+      ]
+    }
+  ]
+}

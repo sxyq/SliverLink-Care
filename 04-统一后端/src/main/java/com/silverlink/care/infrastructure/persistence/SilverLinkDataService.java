@@ -8,6 +8,8 @@ import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
 import com.silverlink.care.module.audit.AuditLogQuery;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
@@ -29,6 +31,8 @@ public class SilverLinkDataService {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private static final long SCALE_ANSWERS_CACHE_TTL_MS = 30_000L;
+    private static final int SEED_ENCRYPTION_BATCH_SIZE = 200;
+    private static final Logger log = LoggerFactory.getLogger(SilverLinkDataService.class);
 
     private final JdbcTemplate jdbc;
     private final AesGcmCryptoService crypto;
@@ -45,41 +49,66 @@ public class SilverLinkDataService {
 
     @PostConstruct
     public void encryptSeedData() {
-        encryptColumn("app_user", "name_enc");
-        encryptColumn("app_user", "phone_enc");
-        encryptColumn("elder", "name_enc");
-        encryptColumn("elder", "residence_enc");
-        encryptColumn("elder", "emergency_contact_name_enc");
-        encryptColumn("elder", "emergency_phone_enc");
-        encryptColumn("elder", "backup_contact_name_enc");
-        encryptColumn("elder", "backup_phone_enc");
-        encryptColumn("elder", "allergy_enc");
-        encryptColumn("medication", "name_enc");
-        encryptColumn("medication", "dosage_enc");
-        encryptColumn("medication", "usage_text_enc");
-        encryptColumn("medication", "timing_enc");
-        encryptColumn("scale_record", "payload_enc");
-        encryptColumn("family_binding", "family_name_enc");
-        encryptColumn("family_binding", "family_phone_enc");
-        encryptColumn("audit_log", "visitor_name_enc");
-        encryptColumn("audit_log", "visitor_phone_enc");
-        encryptColumn("audit_log", "visitor_id_card_enc");
-        encryptColumn("scan_verification_session", "visitor_name_enc");
-        encryptColumn("scan_verification_session", "visitor_phone_enc");
-        encryptColumn("scan_verification_session", "visitor_id_card_enc");
+        encryptColumns("app_user", "id", "name_enc", "phone_enc");
+        encryptColumns("elder", "id", "name_enc", "residence_enc", "emergency_contact_name_enc",
+                "emergency_phone_enc", "backup_contact_name_enc", "backup_phone_enc", "allergy_enc");
+        encryptColumns("medication", "id", "name_enc", "dosage_enc", "usage_text_enc", "timing_enc");
+        encryptColumns("scale_record", "id", "payload_enc");
+        encryptColumns("family_binding", "id", "family_name_enc", "family_phone_enc");
+        encryptColumns("audit_log", "id", "visitor_name_enc", "visitor_phone_enc", "visitor_id_card_enc");
+        encryptColumns("scan_verification_session", "session_id",
+                "visitor_name_enc", "visitor_phone_enc", "visitor_id_card_enc");
     }
 
-    private void encryptColumn(String table, String column) {
+    private void encryptColumns(String table, String idColumn, String... columns) {
         try {
-            List<Map<String, Object>> rows = jdbc.queryForList("select id, " + column + " from " + table);
-            for (Map<String, Object> row : rows) {
-                String id = str(row.get("id"));
-                String value = str(row.get(column));
-                if (value.isBlank() || isEncrypted(value)) continue;
-                jdbc.update("update " + table + " set " + column + "=? where id=?", enc(value), id);
+            String prefix = crypto.encryptedPrefix();
+            if (prefix == null || prefix.isBlank()) {
+                throw new IllegalStateException("Missing encryption token prefix");
             }
-        } catch (Exception ignored) {
-            // Database may not be initialized during build-time tests.
+            StringBuilder candidate = new StringBuilder();
+            List<Object> fixedArgs = new ArrayList<>();
+            for (String column : columns) {
+                if (!candidate.isEmpty()) candidate.append(" or ");
+                candidate.append("(").append(column)
+                        .append(" is not null and ").append(column)
+                        .append(" <> '' and left(").append(column).append(", ?) <> ?)");
+                fixedArgs.add(prefix.length());
+                fixedArgs.add(prefix);
+            }
+
+            String selectedColumns = String.join(", ", columns);
+            String sql = "select " + idColumn + ", " + selectedColumns + " from " + table
+                    + " where " + idColumn + " > ? and (" + candidate + ")"
+                    + " order by " + idColumn + " limit ?";
+            String lastId = "";
+            long encryptedCount = 0L;
+            while (true) {
+                List<Object> args = new ArrayList<>();
+                args.add(lastId);
+                args.addAll(fixedArgs);
+                args.add(SEED_ENCRYPTION_BATCH_SIZE);
+                List<Map<String, Object>> rows = jdbc.queryForList(sql, args.toArray());
+                if (rows.isEmpty()) break;
+                for (Map<String, Object> row : rows) {
+                    String id = str(row.get(idColumn));
+                    for (String column : columns) {
+                        String value = str(row.get(column));
+                        if (value.isBlank() || isEncrypted(value)) continue;
+                        jdbc.update("update " + table + " set " + column + "=? where " + idColumn + "=?",
+                                enc(value), id);
+                        encryptedCount++;
+                    }
+                    lastId = id;
+                }
+                if (rows.size() < SEED_ENCRYPTION_BATCH_SIZE) break;
+            }
+            if (encryptedCount > 0) {
+                log.info("Encrypted {} legacy seed values in {}", encryptedCount, table);
+            }
+        } catch (Exception exception) {
+            // Some narrow integration-test schemas intentionally omit unrelated business tables.
+            log.debug("Skipping seed encryption for {}: {}", table, exception.getMessage());
         }
     }
 
@@ -107,8 +136,33 @@ public class SilverLinkDataService {
         map.put("volunteerCount", count("app_user", "role='VOLUNTEER' and status='ACTIVE'"));
         map.put("qrCodeCount", count("qr_code", "1=1"));
         map.put("familyCount", count("app_user", "role='FAMILY' and status='ACTIVE'"));
-        map.put("auditCount", count("audit_log", "1=1"));
+        map.put("auditCount", auditCount());
         return map;
+    }
+
+    private int auditCount() {
+        try {
+            Map<String, Object> state = jdbc.queryForMap("""
+                    select coalesce(sum(case
+                             when stat_day < utc_date() and status='READY' then source_row_count
+                             else 0 end), 0) past_count,
+                           sum(case when status='FAILED' then 1 else 0 end) failed_count,
+                           sum(case when stat_day=utc_date() and status='READY' then 1 else 0 end) today_ready
+                    from audit_log_rollup_day_state
+                    """);
+            if (longValue(state.get("failed_count")) == 0L && longValue(state.get("today_ready")) > 0L) {
+                Long todayCount = jdbc.queryForObject("""
+                        select count(*) from audit_log force index (idx_audit_time_id)
+                        where time >= concat(utc_date(), 'T00:00:00Z')
+                          and time < concat(date_add(utc_date(), interval 1 day), 'T00:00:00Z')
+                        """, Long.class);
+                long total = longValue(state.get("past_count")) + (todayCount == null ? 0L : todayCount);
+                return (int) Math.min(Integer.MAX_VALUE, Math.max(0L, total));
+            }
+        } catch (RuntimeException ignored) {
+            // V19 may not exist yet in narrow tests or during a migration rollback.
+        }
+        return count("audit_log", "1=1");
     }
 
     private int count(String table, String where) {
@@ -640,11 +694,7 @@ public class SilverLinkDataService {
             String visitorPhone,
             String visitorIdCard
     ) {
-        jdbc.update("""
-                        insert into audit_log
-                        (id, time, operator, role, source_ip, target, action, verification_method, visitor_name_enc, visitor_phone_enc, visitor_id_card_enc, result, fail_reason, request_id)
-                        values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-                        """,
+        recordAudit(new AuditLogWrite(
                 UUID.randomUUID().toString(),
                 Instant.now().toString(),
                 operator,
@@ -653,12 +703,35 @@ public class SilverLinkDataService {
                 target,
                 action,
                 verificationMethod,
-                enc(visitorName),
-                enc(visitorPhone),
-                enc(visitorIdCard),
+                visitorName,
+                visitorPhone,
+                visitorIdCard,
                 result,
                 failReason,
                 requestId
+        ));
+    }
+
+    public void recordAudit(AuditLogWrite entry) {
+        jdbc.update("""
+                        insert into audit_log
+                        (id, time, operator, role, source_ip, target, action, verification_method, visitor_name_enc, visitor_phone_enc, visitor_id_card_enc, result, fail_reason, request_id)
+                        values (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                        """,
+                entry.id(),
+                entry.time(),
+                entry.operator(),
+                entry.role(),
+                entry.ip(),
+                entry.target(),
+                entry.action(),
+                entry.verificationMethod(),
+                enc(entry.visitorName()),
+                enc(entry.visitorPhone()),
+                enc(entry.visitorIdCard()),
+                entry.result(),
+                entry.failReason(),
+                entry.requestId()
         );
     }
 
@@ -674,7 +747,7 @@ public class SilverLinkDataService {
                 entries,
                 entries.size(),
                 (PreparedStatement ps, AuditLogWrite entry) -> {
-                    ps.setString(1, UUID.randomUUID().toString());
+                    ps.setString(1, entry.id());
                     ps.setString(2, entry.time());
                     ps.setString(3, entry.operator());
                     ps.setString(4, entry.role());
@@ -721,27 +794,35 @@ public class SilverLinkDataService {
         return mapAuditRows(rows);
     }
 
-    public Map<String, Object> auditLogSummary(AuditLogQuery query) {
+    public Map<String, Object> auditLogStatistics(AuditLogQuery query) {
         QueryParts parts = auditWhere(query);
         Map<String, Object> summary = new LinkedHashMap<>();
         List<Object> args = parts.args();
         Map<String, Object> totals = jdbc.queryForMap("select count(*) total, "
                         + "sum(case when result in ('SUCCESS','成功') then 1 else 0 end) successCount, "
                         + "sum(case when result in ('FAIL','失败') then 1 else 0 end) failureCount, "
+                        + "sum(case when result = 'PENDING' then 1 else 0 end) pendingCount, "
                         + "count(distinct nullif(source_ip, '')) sourceIpCount from audit_log " + parts.sql(), args.toArray());
         summary.put("total", longValue(totals.get("total")));
         summary.put("successCount", longValue(totals.get("successCount")));
         summary.put("failureCount", longValue(totals.get("failureCount")));
+        summary.put("pendingCount", longValue(totals.get("pendingCount")));
         summary.put("sourceIpCount", longValue(totals.get("sourceIpCount")));
         summary.put("actions", auditDistribution("action", parts));
         summary.put("verificationMethods", auditDistribution("verification_method", parts));
         summary.put("trend", auditDailyTrend(parts));
+        return summary;
+    }
 
+    public List<Map<String, Object>> auditLogRecent(AuditLogQuery query, int limit) {
+        QueryParts parts = auditWhere(query);
+        List<Object> args = new ArrayList<>(parts.args());
+        args.add(Math.max(1, Math.min(10, limit)));
         List<Map<String, Object>> recent = jdbc.queryForList("""
                 select id, time, operator, role, source_ip, target, action, verification_method, result
                 from audit_log
-                """ + parts.sql() + " order by time desc, id desc limit 6", args.toArray());
-        summary.put("recent", recent.stream().map(row -> Map.<String, Object>of(
+                """ + parts.sql() + " order by time desc, id desc limit ?", args.toArray());
+        return recent.stream().map(row -> Map.<String, Object>of(
                 "id", str(row.get("id")),
                 "time", str(row.get("time")),
                 "operator", str(row.get("operator")),
@@ -751,7 +832,12 @@ public class SilverLinkDataService {
                 "action", str(row.get("action")),
                 "verificationMethod", str(row.get("verification_method")),
                 "result", str(row.get("result"))
-        )).toList());
+        )).toList();
+    }
+
+    public Map<String, Object> auditLogSummary(AuditLogQuery query) {
+        Map<String, Object> summary = new LinkedHashMap<>(auditLogStatistics(query));
+        summary.put("recent", auditLogRecent(query, 6));
         return summary;
     }
 
@@ -824,7 +910,7 @@ public class SilverLinkDataService {
         addAuditRange(where, args, safe.from(), safe.to());
         addExact(where, args, "action", safe.action());
         addResult(where, args, safe.result());
-        addExact(where, args, "role", safe.role());
+        addRole(where, args, safe.role());
         addExact(where, args, "verification_method", safe.verificationMethod());
         addPrefix(where, args, "operator", safe.operator());
         addPrefix(where, args, "source_ip", safe.sourceIp());
@@ -869,6 +955,15 @@ public class SilverLinkDataService {
         } else {
             addExact(where, args, "result", value);
         }
+    }
+
+    private void addRole(StringBuilder where, List<Object> args, String value) {
+        if (value == null || value.isBlank()) return;
+        if ("VISITOR_GROUP".equalsIgnoreCase(value)) {
+            where.append(" and role in ('VISITOR', 'SCAN', 'SCAN_USER', 'ANONYMOUS')");
+            return;
+        }
+        addExact(where, args, "role", value);
     }
 
     private void addPrefix(StringBuilder where, List<Object> args, String column, String value) {
@@ -1059,6 +1154,7 @@ public class SilverLinkDataService {
     }
 
     public record AuditLogWrite(
+            String id,
             String time,
             String operator,
             String role,

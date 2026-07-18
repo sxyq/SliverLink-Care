@@ -515,16 +515,25 @@ export async function fetchAuditLogPage(filters: AuditLogFilters = {}, cursor?: 
 }
 
 export async function fetchAuditLogSummary(filters: AuditLogFilters = {}) {
-  const summary = await request<Record<string, unknown>>(`/api/admin/audit-logs/summary${queryString(filters)}`);
+  const suffix = queryString(filters);
+  const [overview, trend, distribution] = await Promise.all([
+    request<Record<string, unknown>>(`/api/admin/audit-logs/summary/overview${suffix}`),
+    request<Record<string, unknown>>(`/api/admin/audit-logs/summary/trend${suffix}`),
+    request<Record<string, unknown>>(`/api/admin/audit-logs/summary/distribution${suffix}`),
+  ]);
   return {
-    total: Number(summary.total || 0),
-    successCount: Number(summary.successCount || 0),
-    failureCount: Number(summary.failureCount || 0),
-    sourceIpCount: Number(summary.sourceIpCount || 0),
-    actions: Array.isArray(summary.actions) ? summary.actions as Array<{ label: string; value: number }> : [],
-    verificationMethods: Array.isArray(summary.verificationMethods) ? summary.verificationMethods as Array<{ label: string; value: number }> : [],
-    trend: Array.isArray(summary.trend) ? summary.trend as Array<{ day: string; value: number }> : [],
-    recent: mapAuditRows(Array.isArray(summary.recent) ? summary.recent as Array<Record<string, unknown>> : []),
+    total: Number(overview.total || 0),
+    successCount: Number(overview.successCount || 0),
+    failureCount: Number(overview.failureCount || 0),
+    pendingCount: Number(overview.pendingCount || 0),
+    sourceIpCount: Number(overview.sourceIpCount || 0),
+    actions: Array.isArray(distribution.actions) ? distribution.actions as Array<{ label: string; value: number }> : [],
+    verificationMethods: Array.isArray(distribution.verificationMethods) ? distribution.verificationMethods as Array<{ label: string; value: number }> : [],
+    trend: Array.isArray(trend.trend) ? trend.trend as Array<{ day: string; value: number }> : [],
+    recent: [],
+    asOf: String(overview.asOf || ''),
+    lagSeconds: Number(overview.lagSeconds || 0),
+    source: String(overview.source || ''),
   } as AuditLogSummary;
 }
 

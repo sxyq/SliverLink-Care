@@ -15,7 +15,7 @@ const targetFilter = new Set(
 );
 
 const targets = [
-  { name: 'scan-web-home', type: 'page', url: `${webBaseUrl}/` },
+  { name: 'scan-web-home', type: 'page', url: `${webBaseUrl}/scan/` },
   { name: 'admin-web-home', type: 'page', url: `${webBaseUrl}/admin/` },
   { name: 'volunteer-web-home', type: 'page', url: `${webBaseUrl}/volunteer/` },
   { name: 'invitation-preview', type: 'api', url: `${apiBaseUrl}/api/invitations/INVITE001/preview` },

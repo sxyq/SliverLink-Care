@@ -1,6 +1,9 @@
 package com.silverlink.care.module.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import com.silverlink.care.module.audit.AuditLogService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -100,5 +105,30 @@ class AdminDashboardServiceTest {
         service.auditLogs();
 
         verify(data, times(1)).auditLogs(null, null, null);
+    }
+
+    @Test
+    void summaryCachesMetricsButNotRecentAuditDetails() {
+        JsonTwoLevelCache cache = mock(JsonTwoLevelCache.class);
+        AuditLogService auditLogService = mock(AuditLogService.class);
+        AdminDashboardService cachedService = new AdminDashboardService(data, cache, new ObjectMapper(), auditLogService);
+        when(data.dashboard()).thenReturn(Map.of("elderCount", 2));
+        when(auditLogService.recentSummary()).thenReturn(List.of(Map.of(
+                "operator", "admin", "sourceIp", "127.0.0.1")));
+        AtomicReference<String> cachedPayload = new AtomicReference<>();
+        when(cache.getOrLoad(anyString(), anyLong(), anyLong(), any())).thenAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            Supplier<String> loader = invocation.getArgument(3);
+            String loaded = loader.get();
+            cachedPayload.set(loaded);
+            return loaded;
+        });
+
+        Map<String, Object> result = cachedService.summary();
+
+        assertTrue(result.containsKey("recentAuditLogs"));
+        assertNotNull(cachedPayload.get());
+        assertFalse(cachedPayload.get().contains("recentAuditLogs"));
+        assertFalse(cachedPayload.get().contains("127.0.0.1"));
     }
 }

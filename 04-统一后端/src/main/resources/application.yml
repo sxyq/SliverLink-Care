@@ -40,6 +40,13 @@ silverlink:
   audit:
     batch-size: ${SILVERLINK_AUDIT_BATCH_SIZE:64}
     flush-interval-ms: ${SILVERLINK_AUDIT_FLUSH_INTERVAL_MS:150}
+    rollup-enabled: ${SILVERLINK_AUDIT_ROLLUP_ENABLED:true}
+    rollup-initial-delay-ms: ${SILVERLINK_AUDIT_ROLLUP_INITIAL_DELAY_MS:5000}
+    rollup-hot-interval-ms: ${SILVERLINK_AUDIT_ROLLUP_HOT_INTERVAL_MS:30000}
+    rollup-reconcile-cron: ${SILVERLINK_AUDIT_ROLLUP_RECONCILE_CRON:0 15 2 * * *}
+    rollup-full-reconcile-cron: ${SILVERLINK_AUDIT_ROLLUP_FULL_RECONCILE_CRON:0 45 3 * * SUN}
+    ip-hmac-key-base64: ${SILVERLINK_AUDIT_IP_HMAC_KEY_BASE64:${SILVERLINK_AES_KEY_BASE64:QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=}}
+    ip-hmac-key-version: ${SILVERLINK_AUDIT_IP_HMAC_KEY_VERSION:1}
     export-dir: ${SILVERLINK_AUDIT_EXPORT_DIR:/tmp/silverlink-care/audit-exports}
     export-cleanup-interval-ms: ${SILVERLINK_AUDIT_EXPORT_CLEANUP_INTERVAL_MS:3600000}
   cache:

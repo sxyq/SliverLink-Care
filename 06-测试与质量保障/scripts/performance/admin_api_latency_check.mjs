@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-import crypto from 'node:crypto';
 import { fetchAndDrain, runBenchmark, summarizeSamples, writeBenchmarkReports } from './benchmark_utils.mjs';
 
 const root = process.cwd();
@@ -9,7 +8,6 @@ const iterations = Number(process.env.SILVERLINK_ADMIN_PERF_ITERATIONS || proces
 const concurrency = Number(process.env.SILVERLINK_ADMIN_PERF_CONCURRENCY || process.env.SILVERLINK_PERF_CONCURRENCY || 4);
 const account = process.env.SILVERLINK_ADMIN_ACCOUNT || 'admin';
 const password = process.env.SILVERLINK_ADMIN_PASSWORD || 'admin';
-const signatureSecret = process.env.SILVERLINK_ADMIN_SIGNATURE_SECRET || 'demo-admin-signature-secret';
 const targetFilter = new Set(
   String(process.env.SILVERLINK_ADMIN_PERF_TARGETS || process.env.SILVERLINK_PERF_TARGETS || '')
     .split(',')
@@ -17,35 +15,25 @@ const targetFilter = new Set(
     .filter(Boolean),
 );
 
-function createSignatureHeaders(method, requestPath) {
-  const timestamp = String(Math.floor(Date.now() / 1000));
-  const nonce = crypto.randomUUID();
-  const pathOnly = requestPath.split('?')[0] || requestPath;
-  const canonical = `${method.toUpperCase()}\n${pathOnly}\n${timestamp}\n${nonce}`;
-  const signature = crypto.createHmac('sha256', signatureSecret).update(canonical).digest('hex');
-  return {
-    'X-Timestamp': timestamp,
-    'X-Nonce': nonce,
-    'X-Signature': signature,
-  };
-}
-
 async function requestJson(path, options = {}) {
-  const method = options.method || 'GET';
   const response = await fetch(`${apiBaseUrl}${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...createSignatureHeaders(method, path),
       ...(options.headers || {}),
     },
   });
   const text = await response.text();
+  const setCookie = response.headers.get('set-cookie') || '';
   return {
     ok: response.ok,
     status: response.status,
     bytes: Buffer.byteLength(text),
     text,
+    sessionCookie: setCookie
+      .split(',')
+      .map((value) => value.trim().split(';', 1)[0])
+      .find((value) => value.startsWith('sl_admin_session=')) || '',
   };
 }
 
@@ -57,30 +45,26 @@ async function login() {
   if (!result.ok) {
     throw new Error(`admin login failed: ${result.status} ${result.text}`);
   }
-  const parsed = JSON.parse(result.text);
-  const token = parsed?.data?.token;
-  if (!token) {
-    throw new Error('admin login response does not contain token');
+  if (!result.sessionCookie) {
+    throw new Error('admin login response does not contain the session cookie');
   }
-  return token;
+  return result.sessionCookie;
 }
 
-async function authedGet(path, token) {
+async function authedGet(path, sessionCookie) {
   return fetchAndDrain(`${apiBaseUrl}${path}`, {
     method: 'GET',
     headers: {
-      Authorization: `Bearer ${token}`,
-      ...createSignatureHeaders('GET', path),
+      Cookie: sessionCookie,
     },
   });
 }
 
-const token = await login();
+const sessionCookie = await login();
 const elderSeedResponse = await requestJson('/api/admin/elders', {
   method: 'GET',
   headers: {
-    Authorization: `Bearer ${token}`,
-    ...createSignatureHeaders('GET', '/api/admin/elders'),
+    Cookie: sessionCookie,
   },
 });
 if (!elderSeedResponse.ok) {
@@ -90,18 +74,22 @@ const elderRows = JSON.parse(elderSeedResponse.text)?.data;
 const elderId = Array.isArray(elderRows) && elderRows.length ? String(elderRows[0].id || 'elder-001') : 'elder-001';
 
 const targets = [
-  { name: 'admin-dashboard', path: '/api/admin/dashboard' },
+  { name: 'admin-dashboard-summary', path: '/api/admin/dashboard/summary' },
   { name: 'admin-elders', path: '/api/admin/elders' },
   { name: 'admin-volunteers', path: '/api/admin/volunteers' },
   { name: 'admin-qrcodes', path: '/api/admin/qrcodes' },
-  { name: 'admin-audit-logs', path: '/api/admin/audit-logs' },
+  { name: 'admin-audit-page', path: '/api/admin/audit-logs/page?limit=50' },
+  { name: 'admin-audit-overview', path: '/api/admin/audit-logs/summary/overview' },
+  { name: 'admin-audit-trend', path: '/api/admin/audit-logs/summary/trend' },
+  { name: 'admin-audit-distribution', path: '/api/admin/audit-logs/summary/distribution' },
   { name: 'admin-family-bindings', path: '/api/admin/family-bindings' },
   { name: 'admin-invitations', path: '/api/admin/invitations' },
   { name: 'admin-medications', path: `/api/admin/medications?elderId=${encodeURIComponent(elderId)}` },
   { name: 'admin-scales', path: `/api/admin/scales?elderId=${encodeURIComponent(elderId)}` },
   { name: 'admin-smsrelay-devices', path: '/api/sms-relay/admin/devices' },
-  { name: 'admin-smsrelay-records', path: '/api/sms-relay/admin/records' },
-  { name: 'admin-smsrelay-sessions', path: '/api/sms-relay/admin/sessions' },
+  { name: 'admin-smsrelay-summary', path: '/api/sms-relay/admin/summary' },
+  { name: 'admin-smsrelay-records-page', path: '/api/sms-relay/admin/records/page?limit=50' },
+  { name: 'admin-smsrelay-sessions-page', path: '/api/sms-relay/admin/sessions/page?limit=50' },
 ];
 
 const selectedTargets = targetFilter.size
@@ -110,7 +98,7 @@ const selectedTargets = targetFilter.size
 
 const benchmarkTargets = [];
 for (const target of selectedTargets) {
-  const samples = await runBenchmark(target.name, iterations, concurrency, () => authedGet(target.path, token));
+  const samples = await runBenchmark(target.name, iterations, concurrency, () => authedGet(target.path, sessionCookie));
   benchmarkTargets.push({
     ...target,
     summary: summarizeSamples(samples),

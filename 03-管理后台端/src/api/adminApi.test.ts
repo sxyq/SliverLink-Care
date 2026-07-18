@@ -13,6 +13,7 @@ import {
   fetchAdminReviewRequests,
   fetchAllScales,
   fetchAuditLogs,
+  fetchAuditLogSummary,
   fetchDashboard,
   fetchElderMedications,
   fetchElderScales,
@@ -117,6 +118,27 @@ describe('adminApi', () => {
     invalidateAdminCache();
     await expect(fetchVolunteers()).resolves.toEqual([
       expect.objectContaining({ id: 'vol-1', elderCount: 2, status: '停用' }),
+    ]);
+  });
+
+  it('loads audit overview, trend and distribution independently', async () => {
+    const fetchMock = queueFetch(
+      { total: 10, successCount: 8, failureCount: 1, pendingCount: 1, sourceIpCount: 2, source: 'ROLLUP' },
+      { trend: [{ day: '2026-07-18', value: 10 }] },
+      { actions: [{ label: 'LOGIN', value: 10 }], verificationMethods: [] },
+    );
+
+    await expect(fetchAuditLogSummary({ role: 'VISITOR_GROUP' })).resolves.toMatchObject({
+      total: 10,
+      pendingCount: 1,
+      source: 'ROLLUP',
+      trend: [{ day: '2026-07-18', value: 10 }],
+      actions: [{ label: 'LOGIN', value: 10 }],
+    });
+    expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
+      '/silverlink-api/api/admin/audit-logs/summary/overview?role=VISITOR_GROUP',
+      '/silverlink-api/api/admin/audit-logs/summary/trend?role=VISITOR_GROUP',
+      '/silverlink-api/api/admin/audit-logs/summary/distribution?role=VISITOR_GROUP',
     ]);
   });
 

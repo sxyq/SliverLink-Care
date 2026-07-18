@@ -31,6 +31,10 @@ public class AesGcmCryptoService {
         return new SecretKeySpec(key, ALGORITHM);
     }
 
+    public String encryptedPrefix() {
+        return keyId + ".";
+    }
+
     public String encrypt(String plaintext) throws Exception {
         byte[] iv = new byte[IV_LENGTH];
         new SecureRandom().nextBytes(iv);

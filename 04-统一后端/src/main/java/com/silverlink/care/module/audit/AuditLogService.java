@@ -7,6 +7,7 @@ import com.silverlink.care.common.CursorPage;
 import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import jakarta.annotation.PreDestroy;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -97,24 +98,25 @@ public class AuditLogService {
 
     public Map<String, Object> summary(AuditLogQuery query) {
         String key = "audit:summary:v1:" + data.hash(queryFingerprint(query));
-        if (cache == null) return data.auditLogSummary(query);
-        String payload = cache.getOrLoad(key, 3_000L, () -> toJson(data.auditLogSummary(query)));
-        return fromJson(payload);
+        Map<String, Object> statistics;
+        if (cache == null) {
+            statistics = data.auditLogStatistics(query);
+        } else {
+            String payload = cache.getOrLoad(key, 3_000L, () -> toJson(data.auditLogStatistics(query)));
+            statistics = fromJson(payload);
+            if (statistics == null) {
+                cache.invalidate(key);
+                statistics = data.auditLogStatistics(query);
+            }
+        }
+        Map<String, Object> result = new LinkedHashMap<>(statistics);
+        result.put("recent", data.auditLogRecent(query, 6));
+        return result;
     }
 
-    /** Recent summaries contain no visitor identity fields and are safe for the short cache window. */
+    /** Recent audit events are intentionally not cached because they contain operator and network context. */
     public List<Map<String, Object>> recentSummary() {
-        if (cache == null) return data.recentAuditSummaries(10);
-        String payload = cache.getOrLoad("audit:recent:v1", 1_000L, 3_000L, () -> toJson(Map.of("items", data.recentAuditSummaries(10))));
-        Object recent = fromJson(payload).get("items");
-        if (!(recent instanceof List<?> list)) return List.of();
-        List<Map<String, Object>> result = new ArrayList<>();
-        for (Object item : list) if (item instanceof Map<?, ?> map) {
-            Map<String, Object> copy = new LinkedHashMap<>();
-            map.forEach((key, value) -> copy.put(String.valueOf(key), value));
-            result.add(copy);
-        }
-        return result;
+        return data.recentAuditSummaries(10);
     }
 
     public void record(String operator, String role, String ip, String target, String action, String result, String failReason, String requestId) {
@@ -314,20 +316,7 @@ public class AuditLogService {
                     data.recordAuditBatch(batch);
                 } catch (RuntimeException ex) {
                     for (SilverLinkDataService.AuditLogWrite item : batch) {
-                        data.recordAudit(
-                                item.operator(),
-                                item.role(),
-                                item.ip(),
-                                item.target(),
-                                item.action(),
-                                item.result(),
-                                item.failReason(),
-                                item.requestId(),
-                                item.verificationMethod(),
-                                item.visitorName(),
-                                item.visitorPhone(),
-                                item.visitorIdCard()
-                        );
+                        data.recordAudit(item);
                     }
                 }
                 batch.clear();
@@ -370,6 +359,7 @@ public class AuditLogService {
             String visitorIdCard
     ) {
         return new SilverLinkDataService.AuditLogWrite(
+                java.util.UUID.randomUUID().toString(),
                 java.time.Instant.now().toString(),
                 operator,
                 role,
@@ -384,6 +374,22 @@ public class AuditLogService {
                 failReason,
                 requestId
         );
+    }
+
+    @PreDestroy
+    public void flushBeforeShutdown() {
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(2);
+        while (pendingWriteCount.get() > 0 && System.nanoTime() < deadline) {
+            flushPending();
+            if (pendingWriteCount.get() > 0) {
+                try {
+                    Thread.sleep(10L);
+                } catch (InterruptedException exception) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
     }
 
     private List<AuditLogEntity> toEntities(List<Map<String, Object>> rows) {
@@ -435,8 +441,7 @@ public class AuditLogService {
         try {
             return objectMapper.readValue(value, new TypeReference<>() {});
         } catch (Exception exception) {
-            // A malformed cache entry is discarded; the next read obtains authoritative DB data.
-            return data.auditLogSummary(null);
+            return null;
         }
     }
 }

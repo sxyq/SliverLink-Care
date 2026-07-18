@@ -127,11 +127,15 @@ export interface AuditLogSummary {
   total: number;
   successCount: number;
   failureCount: number;
+  pendingCount?: number;
   sourceIpCount: number;
   actions: Array<{ label: string; value: number }>;
   verificationMethods: Array<{ label: string; value: number }>;
   trend: Array<{ day: string; value: number }>;
   recent: AuditLog[];
+  asOf?: string;
+  lagSeconds?: number;
+  source?: string;
 }
 
 export interface SecurityModule {

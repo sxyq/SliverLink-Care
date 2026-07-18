@@ -434,6 +434,10 @@ describe('AuditLogPage', () => {
     render(<AuditLogPage category="visitor" />);
 
     expect((await screen.findAllByRole('heading', { name: '访问人员记录' })).length).toBeGreaterThan(0);
+    expect(fetchAuditLogPage).toHaveBeenCalledWith(
+      expect.objectContaining({ role: 'VISITOR_GROUP' }),
+      undefined,
+    );
     expect(await screen.findByText('当前分类下有 1 条失败记录，请重点检查来源 IP 和操作内容。')).toBeInTheDocument();
     expect(screen.getByText('访问记录数')).toBeInTheDocument();
     expect(screen.getAllByText('身份登记').length).toBeGreaterThan(0);

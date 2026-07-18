@@ -1,36 +1,25 @@
 package com.silverlink.care.module.scan;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeService;
 import com.silverlink.care.module.smsrelay.SmsRelayService;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 @Service
 public class ScanService {
 
-    private static final TypeReference<Map<String, Object>> MAP_TYPE = new TypeReference<>() {};
-    private static final TypeReference<List<Map<String, String>>> MEDICATIONS_TYPE = new TypeReference<>() {};
-    private static final TypeReference<List<Map<String, Object>>> SCALES_TYPE = new TypeReference<>() {};
-
     private final QrCodeService qrCodeService;
     private final SilverLinkDataService data;
     private final SmsRelayService smsRelayService;
-    private final JsonTwoLevelCache cache;
-    private final ObjectMapper objectMapper;
     private final SimpleTtlCache<String, Map<String, Object>> localResolveCache = new SimpleTtlCache<>();
-    private final SimpleTtlCache<String, Map<String, Object>> localArchiveCache = new SimpleTtlCache<>();
-    private final SimpleTtlCache<String, Map<String, Object>> localBasicInfoCache = new SimpleTtlCache<>();
-    private final SimpleTtlCache<String, List<Map<String, String>>> localMedicationsCache = new SimpleTtlCache<>();
-    private final SimpleTtlCache<String, List<Map<String, Object>>> localScalesCache = new SimpleTtlCache<>();
     private final SimpleTtlCache<String, Map<String, Object>> localScaleDetailCache = new SimpleTtlCache<>();
     private final SimpleTtlCache<String, ProtectedReadBundle> localProtectedReadBundleCache = new SimpleTtlCache<>();
 
@@ -41,29 +30,16 @@ public class ScanService {
     private long protectedReadCacheTtlMs = 15_000L;
 
     public ScanService(QrCodeService qrCodeService, SilverLinkDataService data, SmsRelayService smsRelayService) {
-        this(qrCodeService, data, smsRelayService, null, new ObjectMapper());
-    }
-
-    @Autowired
-    public ScanService(
-            QrCodeService qrCodeService,
-            SilverLinkDataService data,
-            SmsRelayService smsRelayService,
-            JsonTwoLevelCache cache,
-            ObjectMapper objectMapper
-    ) {
         this.qrCodeService = qrCodeService;
         this.data = data;
         this.smsRelayService = smsRelayService;
-        this.cache = cache;
-        this.objectMapper = objectMapper;
     }
 
     public Map<String, Object> resolve(String token) throws Exception {
         if (token == null || token.isBlank()) {
             throw new RuntimeException("二维码无效或已停用");
         }
-        Map<String, Object> cached = readCachedMap(cacheKey("scan:resolve:", token), resolveCacheTtlMs, localResolveCache, () -> {
+        Map<String, Object> cached = readCachedMap(resolveCacheKey(token), resolveCacheTtlMs, localResolveCache, () -> {
             try {
                 QrCodeEntity entity = qrCodeService.resolve(token);
                 if (entity == null || !"ENABLED".equals(entity.getStatus())) {
@@ -157,41 +133,22 @@ public class ScanService {
             SimpleTtlCache<String, Map<String, Object>> localFallbackCache,
             ThrowingSupplier<Map<String, Object>> loader
     ) {
-        if (cache == null) {
-            Map<String, Object> value = localFallbackCache.getOrLoad(cacheKey, ttlMillis, () -> new LinkedHashMap<>(loader.get()));
-            return new LinkedHashMap<>(value);
-        }
-        String payload = cache.getOrLoad(cacheKey, ttlMillis, () -> toJson(new LinkedHashMap<>(loader.get())));
-        return fromJson(payload, MAP_TYPE);
-    }
-
-    private <T> List<T> readCachedList(
-            String cacheKey,
-            long ttlMillis,
-            SimpleTtlCache<String, List<T>> localFallbackCache,
-            TypeReference<List<T>> typeReference,
-            ThrowingSupplier<List<T>> loader
-    ) {
-        if (cache == null) {
-            List<T> value = localFallbackCache.getOrLoad(cacheKey, ttlMillis, () -> new ArrayList<>(loader.get()));
-            return new ArrayList<>(value);
-        }
-        String payload = cache.getOrLoad(cacheKey, ttlMillis, () -> toJson(new ArrayList<>(loader.get())));
-        return fromJson(payload, typeReference);
+        Map<String, Object> value = localFallbackCache.getOrLoad(
+                cacheKey,
+                ttlMillis,
+                () -> new LinkedHashMap<>(loader.get())
+        );
+        return new LinkedHashMap<>(value);
     }
 
     private ProtectedReadBundle readProtectedReadBundle(String elderId) {
         String cacheKey = cacheKey("scan:bundle:", elderId);
-        if (cache == null) {
-            ProtectedReadBundle bundle = localProtectedReadBundleCache.getOrLoad(
-                    cacheKey,
-                    protectedReadCacheTtlMs,
-                    () -> loadProtectedReadBundle(elderId)
-            );
-            return bundle.copy();
-        }
-        String payload = cache.getOrLoad(cacheKey, protectedReadCacheTtlMs, () -> toJson(loadProtectedReadBundle(elderId)));
-        return fromJson(payload, ProtectedReadBundle.class).copy();
+        ProtectedReadBundle bundle = localProtectedReadBundleCache.getOrLoad(
+                cacheKey,
+                protectedReadCacheTtlMs,
+                () -> loadProtectedReadBundle(elderId)
+        );
+        return bundle.copy();
     }
 
     private ProtectedReadBundle loadProtectedReadBundle(String elderId) {
@@ -223,27 +180,13 @@ public class ScanService {
         return prefix + (suffix == null ? "" : suffix);
     }
 
-    private String toJson(Object value) {
+    static String resolveCacheKey(String token) {
         try {
-            return objectMapper.writeValueAsString(value);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to serialize scan cache value", exception);
-        }
-    }
-
-    private <T> T fromJson(String payload, TypeReference<T> typeReference) {
-        try {
-            return objectMapper.readValue(payload, typeReference);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to deserialize scan cache value", exception);
-        }
-    }
-
-    private <T> T fromJson(String payload, Class<T> type) {
-        try {
-            return objectMapper.readValue(payload, type);
-        } catch (Exception exception) {
-            throw new IllegalStateException("Failed to deserialize scan cache value", exception);
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest((token == null ? "" : token).getBytes(StandardCharsets.UTF_8));
+            return "scan:resolve:" + HexFormat.of().formatHex(digest);
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is unavailable", exception);
         }
     }
 

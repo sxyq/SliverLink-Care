@@ -49,6 +49,7 @@ class SilverLinkDataServiceTest {
     void setUp() throws Exception {
         ReflectionTestUtils.setField(service, "objectMapper", realMapper);
         lenient().when(crypto.encrypt(anyString())).thenAnswer(inv -> "enc:" + inv.getArgument(0));
+        lenient().when(crypto.encryptedPrefix()).thenReturn("enc:");
         lenient().when(crypto.decrypt(argThat(s -> s != null && s.startsWith("enc:")))).thenAnswer(inv -> ((String) inv.getArgument(0)).substring(4));
         lenient().when(crypto.decrypt(argThat(s -> s != null && !s.startsWith("enc:") && !s.isBlank()))).thenThrow(new Exception("not encrypted"));
         lenient().when(hashService.sha256(anyString())).thenAnswer(inv -> "hash:" + inv.getArgument(0));
@@ -413,6 +414,24 @@ class SilverLinkDataServiceTest {
             assertEquals(6, dash.size());
             assertTrue(dash.containsKey("elderCount"));
         }
+
+        @Test
+        void combinesHistoricalRollupWithCurrentDayRowsForAuditCount() {
+            when(jdbc.queryForObject(contains("elder"), eq(Integer.class))).thenReturn(10, 8);
+            when(jdbc.queryForObject(contains("app_user"), eq(Integer.class))).thenReturn(5, 3);
+            when(jdbc.queryForObject(contains("qr_code"), eq(Integer.class))).thenReturn(20);
+            when(jdbc.queryForMap(contains("audit_log_rollup_day_state"))).thenReturn(Map.of(
+                    "past_count", 594_000L,
+                    "failed_count", 0L,
+                    "today_ready", 1L
+            ));
+            when(jdbc.queryForObject(contains("force index (idx_audit_time_id)"), eq(Long.class))).thenReturn(363L);
+
+            Map<String, Object> dash = service.dashboard();
+
+            assertEquals(594_363, dash.get("auditCount"));
+            verify(jdbc, never()).queryForObject(eq("select count(*) from audit_log where 1=1"), eq(Integer.class));
+        }
     }
 
     @Nested
@@ -763,9 +782,11 @@ class SilverLinkDataServiceTest {
 
         @Test
         void duplicateAccountThrows() throws Exception {
-            stubExisting();
-            when(jdbc.queryForList(anyString(), (Object) any()))
-                    .thenReturn(List.of(existingUser()), List.of(existingUser()));
+            when(jdbc.queryForList(contains("status='ACTIVE'"), (Object) eq("vol1")))
+                    .thenReturn(List.of(existingUser()));
+            when(jdbc.queryForList(contains("account=? and role=?"),
+                    (Object) eq("vol2"), (Object) eq("VOLUNTEER")))
+                    .thenReturn(List.of(existingUser()));
             Map<String, Object> body = Map.of("account", "vol2");
 
             BizException ex = assertThrows(BizException.class, () -> service.updateVolunteerProfile("vol1", body));
@@ -1044,6 +1065,7 @@ class SilverLinkDataServiceTest {
 
             service.recordAuditBatch(List.of(
                     new SilverLinkDataService.AuditLogWrite(
+                            "audit-1",
                             "2026-05-29T00:00:00Z",
                             "admin",
                             "ADMIN",
@@ -1060,6 +1082,7 @@ class SilverLinkDataServiceTest {
                     )
             ));
 
+            verify(ps).setString(eq(1), eq("audit-1"));
             verify(ps).setString(eq(3), eq("admin"));
             verify(ps).setString(eq(9), eq("enc:访客"));
             verify(ps).setString(eq(10), eq("enc:13800000000"));
@@ -1070,6 +1093,21 @@ class SilverLinkDataServiceTest {
 
     @Nested
     class AuditLogsMethod {
+        @Test
+        void visitorGroupIncludesAllScanRoles() {
+            when(jdbc.queryForList(anyString(), any(Object[].class))).thenReturn(List.of());
+
+            service.auditLogPage(new com.silverlink.care.module.audit.AuditLogQuery(
+                    null, null, null, null, null, "VISITOR_GROUP", null, null, null
+            ), null, null, 51);
+
+            ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
+            ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
+            verify(jdbc).queryForList(sqlCaptor.capture(), argsCaptor.capture());
+            assertTrue(sqlCaptor.getValue().contains("role in ('VISITOR', 'SCAN', 'SCAN_USER', 'ANONYMOUS')"));
+            assertArrayEquals(new Object[]{51}, argsCaptor.getValue());
+        }
+
         @Test
         void returnsFilteredLogs() throws Exception {
             Map<String, Object> row = new HashMap<>();
@@ -1110,7 +1148,7 @@ class SilverLinkDataServiceTest {
             ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
             verify(jdbc).queryForList(sqlCaptor.capture(), argsCaptor.capture());
             assertTrue(sqlCaptor.getValue().contains("operator like ?"));
-            assertArrayEquals(new Object[]{"%admin%"}, argsCaptor.getValue());
+            assertArrayEquals(new Object[]{"admin%", 50}, argsCaptor.getValue());
         }
 
         @Test
@@ -1129,8 +1167,8 @@ class SilverLinkDataServiceTest {
             ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
             verify(jdbc).queryForList(sqlCaptor.capture(), argsCaptor.capture());
-            assertTrue(sqlCaptor.getValue().contains("order by time desc limit 500"));
-            assertArrayEquals(new Object[]{}, argsCaptor.getValue());
+            assertTrue(sqlCaptor.getValue().contains("order by time desc, id desc limit ?"));
+            assertArrayEquals(new Object[]{50}, argsCaptor.getValue());
         }
 
         @Test
@@ -1150,7 +1188,7 @@ class SilverLinkDataServiceTest {
             ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
             verify(jdbc).queryForList(sqlCaptor.capture(), argsCaptor.capture());
             assertTrue(sqlCaptor.getValue().contains("action = ?"));
-            assertArrayEquals(new Object[]{"CREATE"}, argsCaptor.getValue());
+            assertArrayEquals(new Object[]{"CREATE", 50}, argsCaptor.getValue());
         }
 
         @Test
@@ -1169,8 +1207,8 @@ class SilverLinkDataServiceTest {
             ArgumentCaptor<String> sqlCaptor = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<Object[]> argsCaptor = ArgumentCaptor.forClass(Object[].class);
             verify(jdbc).queryForList(sqlCaptor.capture(), argsCaptor.capture());
-            assertTrue(sqlCaptor.getValue().contains("result = ?"));
-            assertArrayEquals(new Object[]{"SUCCESS"}, argsCaptor.getValue());
+            assertTrue(sqlCaptor.getValue().contains("result in ('SUCCESS', '成功')"));
+            assertArrayEquals(new Object[]{50}, argsCaptor.getValue());
         }
     }
 
@@ -1364,7 +1402,7 @@ class SilverLinkDataServiceTest {
     class EncryptSeedDataMethod {
         @Test
         void handlesDbException() {
-            when(jdbc.queryForList(anyString())).thenThrow(new RuntimeException("db not ready"));
+            when(jdbc.queryForList(anyString(), any(Object[].class))).thenThrow(new RuntimeException("db not ready"));
             assertDoesNotThrow(() -> service.encryptSeedData());
         }
 
@@ -1373,11 +1411,27 @@ class SilverLinkDataServiceTest {
             Map<String, Object> row = new HashMap<>();
             row.put("id", "1");
             row.put("name_enc", "enc:already");
-            when(jdbc.queryForList(anyString())).thenReturn(List.of(row)).thenReturn(Collections.emptyList());
+            when(jdbc.queryForList(anyString(), any(Object[].class)))
+                    .thenReturn(List.of(row))
+                    .thenReturn(Collections.emptyList());
             when(crypto.decrypt("enc:already")).thenReturn("already");
 
             service.encryptSeedData();
             verify(jdbc, never()).update(contains("update"), (Object) any(), (Object) any());
+        }
+
+        @Test
+        void encryptsPlaintextInBoundedCandidatePage() {
+            Map<String, Object> row = new HashMap<>();
+            row.put("id", "1");
+            row.put("name_enc", "plain name");
+            when(jdbc.queryForList(anyString(), any(Object[].class)))
+                    .thenReturn(List.of(row))
+                    .thenReturn(Collections.emptyList());
+
+            service.encryptSeedData();
+
+            verify(jdbc).update(contains("update app_user set name_enc"), eq("enc:plain name"), eq("1"));
         }
     }
 }

@@ -1,0 +1,449 @@
+{
+  "title": "SilverLink 公开页面与只读资源并发读取性能报告",
+  "generatedAt": "2026-07-18T17:30:19.924Z",
+  "webBaseUrl": "https://sxyq27.online/silverlink",
+  "apiBaseUrl": "https://sxyq27.online/silverlink-api",
+  "iterationsPerTarget": 12,
+  "concurrencyPerTarget": 4,
+  "summary": {
+    "requestCount": 48,
+    "successCount": 48,
+    "failureCount": 0,
+    "avgMs": 50,
+    "p50Ms": 37,
+    "p95Ms": 120,
+    "p99Ms": 132,
+    "maxMs": 132,
+    "avgBytes": 391,
+    "totalBytes": 18768,
+    "statuses": {
+      "200": 48
+    }
+  },
+  "targets": [
+    {
+      "name": "scan-web-home",
+      "type": "page",
+      "url": "https://sxyq27.online/silverlink/scan/",
+      "summary": {
+        "requestCount": 12,
+        "successCount": 12,
+        "failureCount": 0,
+        "avgMs": 77,
+        "p50Ms": 36,
+        "p95Ms": 132,
+        "p99Ms": 132,
+        "maxMs": 132,
+        "avgBytes": 461,
+        "totalBytes": 5532,
+        "statuses": {
+          "200": 12
+        }
+      },
+      "samples": [
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 132
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 118
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 120
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 121
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 35
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 35
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 36
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 36
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 36
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 36
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 109
+        },
+        {
+          "target": "scan-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 461,
+          "durationMs": 107
+        }
+      ]
+    },
+    {
+      "name": "admin-web-home",
+      "type": "page",
+      "url": "https://sxyq27.online/silverlink/admin/",
+      "summary": {
+        "requestCount": 12,
+        "successCount": 12,
+        "failureCount": 0,
+        "avgMs": 42,
+        "p50Ms": 36,
+        "p95Ms": 114,
+        "p99Ms": 114,
+        "maxMs": 114,
+        "avgBytes": 446,
+        "totalBytes": 5352,
+        "statuses": {
+          "200": 12
+        }
+      },
+      "samples": [
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 34
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 37
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 36
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 37
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 36
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 35
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 36
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 35
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 36
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 35
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 36
+        },
+        {
+          "target": "admin-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 446,
+          "durationMs": 114
+        }
+      ]
+    },
+    {
+      "name": "volunteer-web-home",
+      "type": "page",
+      "url": "https://sxyq27.online/silverlink/volunteer/",
+      "summary": {
+        "requestCount": 12,
+        "successCount": 12,
+        "failureCount": 0,
+        "avgMs": 37,
+        "p50Ms": 37,
+        "p95Ms": 38,
+        "p99Ms": 38,
+        "maxMs": 38,
+        "avgBytes": 454,
+        "totalBytes": 5448,
+        "statuses": {
+          "200": 12
+        }
+      },
+      "samples": [
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 35
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 36
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 35
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 36
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 38
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        },
+        {
+          "target": "volunteer-web-home",
+          "ok": true,
+          "status": 200,
+          "bytes": 454,
+          "durationMs": 37
+        }
+      ]
+    },
+    {
+      "name": "invitation-preview",
+      "type": "api",
+      "url": "https://sxyq27.online/silverlink-api/api/invitations/INVITE001/preview",
+      "summary": {
+        "requestCount": 12,
+        "successCount": 12,
+        "failureCount": 0,
+        "avgMs": 43,
+        "p50Ms": 41,
+        "p95Ms": 47,
+        "p99Ms": 47,
+        "maxMs": 47,
+        "avgBytes": 203,
+        "totalBytes": 2436,
+        "statuses": {
+          "200": 12
+        }
+      },
+      "samples": [
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 47
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 38
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 40
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 40
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 42
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 40
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 40
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 41
+        },
+        {
+          "target": "invitation-preview",
+          "ok": true,
+          "status": 200,
+          "bytes": 203,
+          "durationMs": 41
+        }
+      ]
+    }
+  ]
+}
