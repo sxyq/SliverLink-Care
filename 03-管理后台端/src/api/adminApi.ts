@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../config/env';
-import type { AdminReviewRequest, AuditLog, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
+import type { AdminReviewRequest, AuditLog, AuditLogFilters, AuditLogSummary, CursorPage, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
+import { showAdminSuccess } from '../utils/adminNotice';
 
 const GET_CACHE_TTL_MS = 15_000;
 const responseCache = new Map<string, { expiresAt: number; data: unknown }>();
@@ -67,7 +68,7 @@ export function invalidateAdminCache() {
   pendingGetRequests.clear();
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit, successMessage?: string): Promise<T> {
   const isGet = isGetRequest(options);
   const cacheKey = getRequestCacheKey(path);
   if (isGet) {
@@ -119,6 +120,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   if (!isGet) {
     const result = await execute();
     invalidateAdminCache();
+    if (successMessage) showAdminSuccess(successMessage);
     return result;
   }
 
@@ -221,16 +223,24 @@ export function getAdminRole() {
 }
 
 export async function fetchDashboard() {
-  const stats = await request<Record<string, unknown>>('/api/admin/dashboard');
+  const stats = await fetchDashboardSummary();
   const elderRows = await fetchElders();
-  const auditLogs = await fetchAuditLogs();
+  const auditLogs = stats.recentAuditLogs;
   const dashboardMetrics = [
     { label: '老人档案', value: String(stats.elderCount || elderRows.length), trend: '实时数据' },
     { label: '志愿者账号', value: String(stats.volunteerCount || 0), trend: '实时数据' },
     { label: '二维码', value: String(stats.qrCodeCount || 0), trend: '加密 token' },
-    { label: '操作日志', value: String(stats.auditCount || auditLogs.length), trend: '可审计' },
+    { label: '操作日志', value: String(stats.auditCount || 0), trend: '可审计' },
   ];
   return { dashboardMetrics, elderRows, auditLogs };
+}
+
+export async function fetchDashboardSummary(): Promise<Record<string, unknown> & { recentAuditLogs: AuditLog[] }> {
+  const stats = await request<Record<string, unknown>>('/api/admin/dashboard/summary');
+  return {
+    ...stats,
+    recentAuditLogs: mapAuditRows(Array.isArray(stats.recentAuditLogs) ? stats.recentAuditLogs as Array<Record<string, unknown>> : []),
+  };
 }
 
 export async function fetchElders() {
@@ -256,18 +266,18 @@ export async function createElder(body: Record<string, unknown>) {
   return request<{ id: string }>('/api/admin/elders', {
     method: 'POST',
     body: JSON.stringify(body),
-  });
+  }, '老人档案新增成功');
 }
 
 export async function deleteElder(id: string) {
-  return request<void>(`/api/admin/elders/${id}`, { method: 'DELETE' });
+  return request<void>(`/api/admin/elders/${id}`, { method: 'DELETE' }, '老人档案删除成功');
 }
 
 export async function setElderStatus(id: string, status: 'ACTIVE' | 'DISABLED') {
   return request<void>(`/api/admin/elders/${id}/status`, {
     method: 'PUT',
     body: JSON.stringify({ status }),
-  });
+  }, '老人档案状态更新成功');
 }
 
 export async function fetchVolunteers() {
@@ -310,25 +320,25 @@ export async function createVolunteer(body: Record<string, unknown>) {
   return request<{ id: string }>('/api/admin/volunteers', {
     method: 'POST',
     body: JSON.stringify(body),
-  });
+  }, '志愿者账号新增成功');
 }
 
 export async function updateVolunteer(id: string, body: Record<string, unknown>) {
   return request<void>(`/api/admin/volunteers/${id}`, {
     method: 'PUT',
     body: JSON.stringify(body),
-  });
+  }, '志愿者信息修改成功');
 }
 
 export async function updateVolunteerScope(id: string, elderIds: string[]) {
   return request<void>(`/api/admin/volunteers/${id}/scope`, {
     method: 'PUT',
     body: JSON.stringify({ elderIds }),
-  });
+  }, '志愿者服务范围保存成功');
 }
 
 export async function deleteVolunteer(id: string) {
-  return request<void>(`/api/admin/volunteers/${id}`, { method: 'DELETE' });
+  return request<void>(`/api/admin/volunteers/${id}`, { method: 'DELETE' }, '志愿者账号删除成功');
 }
 
 export async function fetchQrCodes() {
@@ -352,22 +362,22 @@ export async function createQrCode(elderId: string, archiveNo: string) {
   return request<Record<string, string>>('/api/admin/qrcodes', {
     method: 'POST',
     body: JSON.stringify({ elderId, archiveNo }),
-  });
+  }, '二维码生成成功');
 }
 
 export async function disableQrCode(id: string) {
-  return request<void>(`/api/admin/qrcodes/${id}/disable`, { method: 'PUT' });
+  return request<void>(`/api/admin/qrcodes/${id}/disable`, { method: 'PUT' }, '二维码停用成功');
 }
 
 export async function regenerateQrCode(id: string) {
-  return request<Record<string, string>>(`/api/admin/qrcodes/${id}/regenerate`, { method: 'POST' });
+  return request<Record<string, string>>(`/api/admin/qrcodes/${id}/regenerate`, { method: 'POST' }, '二维码重新生成成功');
 }
 
 export async function updateQrCodeRelayDevice(id: string, relayDeviceId: string) {
   const row = await request<Record<string, unknown>>(`/api/admin/qrcodes/${encodeURIComponent(id)}/relay-device`, {
     method: 'PUT',
     body: JSON.stringify({ relayDeviceId }),
-  });
+  }, '短信接收设备绑定成功');
   return {
     id: String(row.id || ''),
     relayDeviceId: row.relayDeviceId ? String(row.relayDeviceId) : null,
@@ -395,15 +405,15 @@ export async function createInvitation(elderId: string, expiresInDays: number, m
   return request<Record<string, unknown>>('/api/admin/invitations', {
     method: 'POST',
     body: JSON.stringify({ elderId, expiresInDays, maxUses }),
-  });
+  }, '邀请码生成成功');
 }
 
 export async function disableInvitation(id: string) {
-  return request<void>(`/api/admin/invitations/${id}/disable`, { method: 'PUT' });
+  return request<void>(`/api/admin/invitations/${id}/disable`, { method: 'PUT' }, '邀请码停用成功');
 }
 
 export async function deleteInvitation(id: string) {
-  return request<void>(`/api/admin/invitations/${id}`, { method: 'DELETE' });
+  return request<void>(`/api/admin/invitations/${id}`, { method: 'DELETE' }, '邀请码删除成功');
 }
 
 export async function fetchFamilyBindings() {
@@ -423,7 +433,7 @@ export async function fetchFamilyBindings() {
 }
 
 export async function unbindFamily(id: string) {
-  return request<void>(`/api/admin/family-bindings/${id}/disable`, { method: 'PUT' });
+  return request<void>(`/api/admin/family-bindings/${id}/disable`, { method: 'PUT' }, '家属解绑成功');
 }
 
 function mapReviewRequest(row: Record<string, unknown>): AdminReviewRequest {
@@ -459,7 +469,7 @@ export async function fetchAdminReviewRequests(status = 'PENDING') {
 export async function approveAdminReviewRequest(id: string) {
   const row = await request<Record<string, unknown>>(`/api/admin/review-requests/${encodeURIComponent(id)}/approve`, {
     method: 'POST',
-  });
+  }, '审核已通过');
   return mapReviewRequest(row);
 }
 
@@ -467,13 +477,13 @@ export async function rejectAdminReviewRequest(id: string, note = '') {
   const row = await request<Record<string, unknown>>(`/api/admin/review-requests/${encodeURIComponent(id)}/reject`, {
     method: 'POST',
     body: JSON.stringify({ note }),
-  });
+  }, '审核已驳回');
   return mapReviewRequest(row);
 }
 
-export async function fetchAuditLogs() {
-  const rows = await request<Array<Record<string, unknown>>>('/api/admin/audit-logs');
+function mapAuditRows(rows: Array<Record<string, unknown>>) {
   return rows.map((row) => ({
+    id: String(row.id || ''),
     time: String(row.time || ''),
     operator: String(row.operator || ''),
     role: String(row.role || ''),
@@ -486,8 +496,66 @@ export async function fetchAuditLogs() {
     visitorIdCardMasked: String(row.visitorIdCardMasked || ''),
     target: String(row.target || ''),
     ip: String(row.sourceIp || row.ip || ''),
-    result: String(row.result || '').toUpperCase() === 'SUCCESS' ? '成功' : '失败',
+    result: ['SUCCESS', '成功'].includes(String(row.result || '').toUpperCase()) ? '成功' : '失败',
   })) as AuditLog[];
+}
+
+function queryString(params: object) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && String(value).trim() !== '') query.set(key, String(value));
+  });
+  const value = query.toString();
+  return value ? `?${value}` : '';
+}
+
+export async function fetchAuditLogPage(filters: AuditLogFilters = {}, cursor?: string | null) {
+  const page = await request<CursorPage<Record<string, unknown>>>(`/api/admin/audit-logs/page${queryString({ ...filters, cursor, limit: 50 })}`);
+  return { ...page, items: mapAuditRows(page.items || []) } as CursorPage<AuditLog>;
+}
+
+export async function fetchAuditLogSummary(filters: AuditLogFilters = {}) {
+  const summary = await request<Record<string, unknown>>(`/api/admin/audit-logs/summary${queryString(filters)}`);
+  return {
+    total: Number(summary.total || 0),
+    successCount: Number(summary.successCount || 0),
+    failureCount: Number(summary.failureCount || 0),
+    sourceIpCount: Number(summary.sourceIpCount || 0),
+    actions: Array.isArray(summary.actions) ? summary.actions as Array<{ label: string; value: number }> : [],
+    verificationMethods: Array.isArray(summary.verificationMethods) ? summary.verificationMethods as Array<{ label: string; value: number }> : [],
+    trend: Array.isArray(summary.trend) ? summary.trend as Array<{ day: string; value: number }> : [],
+    recent: mapAuditRows(Array.isArray(summary.recent) ? summary.recent as Array<Record<string, unknown>> : []),
+  } as AuditLogSummary;
+}
+
+export async function fetchAuditLogs() {
+  return (await fetchAuditLogPage()).items;
+}
+
+export async function createAuditLogExport(filters: AuditLogFilters) {
+  return request<{ id: string; status: string }>('/api/admin/audit-logs/exports', {
+    method: 'POST',
+    body: JSON.stringify(filters),
+  });
+}
+
+export async function fetchAuditLogExport(id: string) {
+  return request<{ id: string; status: string; rowCount: number; downloadReady: boolean; error: string }>(
+    `/api/admin/audit-logs/exports/${encodeURIComponent(id)}`,
+  );
+}
+
+export async function downloadAuditLogExport(id: string) {
+  const response = await fetch(`${API_BASE_URL}/api/admin/audit-logs/exports/${encodeURIComponent(id)}/download`, {
+    credentials: 'same-origin',
+  });
+  if (!response.ok) throw new Error('导出文件下载失败');
+  const url = URL.createObjectURL(await response.blob());
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `audit-${id}.csv`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export async function fetchMedications() {
@@ -506,7 +574,7 @@ export async function saveElderMedications(elderId: string, items: Array<Record<
   return request<{ recordId: string }>(`/api/elder/${elderId}/medications`, {
     method: 'POST',
     body: JSON.stringify(items),
-  });
+  }, '用药信息保存成功');
 }
 
 export async function fetchElderScales(elderId: string) {
@@ -546,7 +614,7 @@ export async function saveElderScales(elderId: string, items: Array<Record<strin
   return request<{ recordId: string }>(`/api/elder/${elderId}/scale-records`, {
     method: 'POST',
     body: JSON.stringify(items),
-  });
+  }, '量表记录保存成功');
 }
 
 function formatRelayStatus(status: unknown) {
@@ -588,7 +656,7 @@ export async function updateSmsRelayDevice(deviceId: string, body: Pick<SmsRelay
   const row = await request<Record<string, unknown>>(`/api/sms-relay/admin/devices/${encodeURIComponent(deviceId)}`, {
     method: 'PUT',
     body: JSON.stringify(body),
-  });
+  }, '短信中转设备配置保存成功');
   return {
     deviceId: String(row.deviceId || ''),
     receiverPhone: String(row.receiverPhone || ''),
@@ -602,6 +670,10 @@ export async function updateSmsRelayDevice(deviceId: string, body: Pick<SmsRelay
 
 export async function fetchSmsRelayRecords() {
   const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/records');
+  return mapSmsRelayRecords(rows);
+}
+
+function mapSmsRelayRecords(rows: Array<Record<string, unknown>>) {
   return rows.map((row) => ({
     id: String(row.id || ''),
     deviceId: String(row.deviceId || ''),
@@ -614,8 +686,17 @@ export async function fetchSmsRelayRecords() {
   })) as SmsRelayRecordRow[];
 }
 
+export async function fetchSmsRelayRecordPage(filters: Record<string, string> = {}, cursor?: string | null) {
+  const page = await request<CursorPage<Record<string, unknown>>>(`/api/sms-relay/admin/records/page${queryString({ ...filters, cursor, limit: 50 })}`);
+  return { ...page, items: mapSmsRelayRecords(page.items || []) } as CursorPage<SmsRelayRecordRow>;
+}
+
 export async function fetchSmsRelaySessions() {
   const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/sessions');
+  return mapSmsRelaySessions(rows);
+}
+
+function mapSmsRelaySessions(rows: Array<Record<string, unknown>>) {
   return rows.map((row) => ({
     sessionId: String(row.sessionId || ''),
     elderId: String(row.elderId || ''),
@@ -629,4 +710,13 @@ export async function fetchSmsRelaySessions() {
     senderPhoneMasked: String(row.senderPhoneMasked || '-'),
     createdAt: formatDateTime(row.createdAt),
   })) as SmsRelaySessionRow[];
+}
+
+export async function fetchSmsRelaySessionPage(filters: Record<string, string> = {}, cursor?: string | null) {
+  const page = await request<CursorPage<Record<string, unknown>>>(`/api/sms-relay/admin/sessions/page${queryString({ ...filters, cursor, limit: 50 })}`);
+  return { ...page, items: mapSmsRelaySessions(page.items || []) } as CursorPage<SmsRelaySessionRow>;
+}
+
+export async function fetchSmsRelaySummary() {
+  return request<Record<string, unknown>>('/api/sms-relay/admin/summary');
 }

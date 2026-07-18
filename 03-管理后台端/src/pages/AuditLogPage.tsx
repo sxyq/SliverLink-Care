@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { AlertTriangle, ClipboardList } from 'lucide-react';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
-import { fetchAuditLogs, fetchElders } from '../api/adminApi';
-import { exportAuditLogs } from '../features/audit/auditExport';
-import type { AuditLog, ElderRow } from '../types';
+import { createAuditLogExport, downloadAuditLogExport, fetchAuditLogExport, fetchAuditLogPage, fetchAuditLogSummary, fetchElders } from '../api/adminApi';
+import type { AuditLog, AuditLogFilters, AuditLogSummary, ElderRow } from '../types';
 
 type AuditCategory = 'admin' | 'medical' | 'family' | 'visitor';
 type AuditColumnKey = 'time' | 'operator' | 'action' | 'target' | 'ip' | 'result';
@@ -236,89 +235,96 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
   const [filterOperator, setFilterOperator] = useState('');
   const [filterTarget, setFilterTarget] = useState('');
   const [filterIp, setFilterIp] = useState('');
-  const [keyword, setKeyword] = useState('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [summary, setSummary] = useState<AuditLogSummary | null>(null);
+  const [cursorHistory, setCursorHistory] = useState<string[]>([]);
+  const [currentCursor, setCurrentCursor] = useState<string | null>(null);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [exportId, setExportId] = useState('');
+  const [exportMessage, setExportMessage] = useState('');
   const [selectedVisitorTarget, setSelectedVisitorTarget] = useState<{ log: AuditLog; elder: ElderRow } | null>(null);
   const columns = useTableColumnVisibility(`sl_columns_audit_${category}`, auditColumnOptions);
   const visitorDetailColumns = useTableColumnVisibility('sl_columns_audit_visitor_detail', visitorDetailColumnOptions);
   const visitorSummaryColumns = useTableColumnVisibility('sl_columns_audit_visitor_summary', visitorSummaryColumnOptions);
 
+  const categoryRole: Record<AuditCategory, string> = {
+    admin: 'SYSTEM_ADMIN', medical: 'VOLUNTEER', family: 'FAMILY', visitor: 'VISITOR',
+  };
+
+  const verificationMethodValue: Record<string, string> = {
+    '身份登记': 'IDENTITY', '短信中转': 'SMS_RELAY', '短信验证码': 'DIRECT_SMS',
+  };
+
+  function activeFilters(): AuditLogFilters {
+    return {
+      from: dateFrom || undefined,
+      to: dateTo || undefined,
+      operator: filterOperator.trim() || undefined,
+      target: filterTarget.trim() || undefined,
+      sourceIp: filterIp.trim() || undefined,
+      action: filterAction === '全部' ? undefined : filterAction,
+      result: filterResult === '全部' ? undefined : filterResult,
+      verificationMethod: filterVerificationMethod === '全部' ? undefined : verificationMethodValue[filterVerificationMethod],
+      role: categoryRole[category],
+    };
+  }
+
+  async function loadPage(cursor?: string | null, previous?: string[]) {
+    setLoading(true);
+    try {
+      const filters = activeFilters();
+      const [page, nextSummary] = await Promise.all([fetchAuditLogPage(filters, cursor), fetchAuditLogSummary(filters)]);
+      setLogs(page.items);
+      setCurrentCursor(cursor || null);
+      setNextCursor(page.nextCursor);
+      setSummary(nextSummary);
+      setCursorHistory(previous || []);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    Promise.all([fetchAuditLogs(), fetchElders()])
-      .then(([auditRows, elderRows]) => {
-        setLogs(auditRows);
-        setElders(elderRows);
-      })
-      .catch(() => undefined);
-  }, []);
+    fetchElders().then(setElders).catch(() => undefined);
+    loadPage().catch(() => undefined);
+  }, [category]);
+
+  useEffect(() => {
+    if (!exportId) return undefined;
+    const timer = window.setInterval(() => {
+      fetchAuditLogExport(exportId).then(async (task) => {
+        if (task.status === 'COMPLETED' && task.downloadReady) {
+          window.clearInterval(timer);
+          await downloadAuditLogExport(exportId);
+          setExportMessage(`已导出 ${task.rowCount} 条记录`);
+          setExportId('');
+        } else if (task.status === 'FAILED') {
+          window.clearInterval(timer);
+          setExportMessage(task.error || '导出失败');
+          setExportId('');
+        }
+      }).catch(() => undefined);
+    }, 800);
+    return () => window.clearInterval(timer);
+  }, [exportId]);
 
   const actions = Array.from(new Set(logs.map((item) => item.action).filter(Boolean)));
 
-  const filtered = useMemo(() => {
-    const operatorKeyword = filterOperator.trim().toLowerCase();
-    const targetKeyword = filterTarget.trim().toLowerCase();
-    const ipKeyword = filterIp.trim().toLowerCase();
-    const searchKeyword = keyword.trim().toLowerCase();
+  const filtered = logs;
 
-    return logs.filter((log) => {
-      const matchCategory = getLogGroup(log) === category;
-      const matchResult = filterResult === '全部' || log.result === filterResult;
-      const matchAction = filterAction === '全部' || log.action === filterAction;
-      const matchVerificationMethod =
-        filterVerificationMethod === '全部' || getVerificationMethodLabel(log.verificationMethod) === filterVerificationMethod;
-
-      const logDate = log.time.slice(0, 10);
-      const matchFrom = !dateFrom || logDate >= dateFrom;
-      const matchTo = !dateTo || logDate <= dateTo;
-
-      const displayOperator = getDisplayOperator(log, category).toLowerCase();
-      const visitorName = getVisitorName(log).toLowerCase();
-      const matchOperator = !operatorKeyword || displayOperator.includes(operatorKeyword) || visitorName.includes(operatorKeyword);
-      const matchTarget = !targetKeyword || (log.target || '').toLowerCase().includes(targetKeyword);
-      const matchIp = !ipKeyword || (log.ip || '').toLowerCase().includes(ipKeyword);
-
-      const combinedSearch = [
-        log.operator,
-        displayOperator,
-        getVisitorName(log),
-        log.visitorPhone || '',
-        log.visitorPhoneMasked || '',
-        log.visitorIdCard || '',
-        log.visitorIdCardMasked || '',
-        log.verificationMethod || '',
-        log.action,
-        log.target,
-        log.ip,
-        log.result,
-        log.role || '',
-      ]
-        .join(' ')
-        .toLowerCase();
-      const matchKeyword = !searchKeyword || combinedSearch.includes(searchKeyword);
-
-      return (
-        matchCategory &&
-        matchResult &&
-        matchAction &&
-        matchVerificationMethod &&
-        matchFrom &&
-        matchTo &&
-        matchOperator &&
-        matchTarget &&
-        matchIp &&
-        matchKeyword
-      );
-    });
-  }, [category, dateFrom, dateTo, filterAction, filterIp, filterOperator, filterResult, filterTarget, filterVerificationMethod, keyword, logs]);
-
-  const abnormalCount = filtered.filter((item) => item.result === '失败').length;
-  const successCount = filtered.filter((item) => item.result === '成功').length;
-  const uniqueIpCount = new Set(filtered.map((item) => item.ip).filter(Boolean)).size;
-  const visitorActionCounts = useMemo(() => groupCount(filtered, (item) => getActionLabel(item.action || '')), [filtered]);
+  const abnormalCount = summary?.failureCount ?? filtered.filter((item) => item.result === '失败').length;
+  const successCount = summary?.successCount ?? filtered.filter((item) => item.result === '成功').length;
+  const uniqueIpCount = summary?.sourceIpCount ?? new Set(filtered.map((item) => item.ip).filter(Boolean)).size;
+  const visitorActionCounts = useMemo(() => summary
+    ? Object.fromEntries(summary.actions.map((item) => [getActionLabel(item.label), item.value]))
+    : groupCount(filtered, (item) => getActionLabel(item.action || '')), [filtered, summary]);
   const visitorVerificationCounts = useMemo(
-    () => groupCount(filtered, (item) => getVerificationMethodLabel(item.verificationMethod)),
-    [filtered],
+    () => summary
+      ? Object.fromEntries(summary.verificationMethods.map((item) => [getVerificationMethodLabel(item.label), item.value]))
+      : groupCount(filtered, (item) => getVerificationMethodLabel(item.verificationMethod)),
+    [filtered, summary],
   );
   const identityRegistrationVisitors = useMemo(() => {
     const registry = new Map<string, { name: string; phone: string; idCard: string }>();
@@ -345,12 +351,10 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
     () => groupCount(filtered, (item) => resolveVisitorTarget(item, elders).label || '未标记对象'),
     [elders, filtered],
   );
-  const visitorDailyCounts = useMemo(() => groupCount(filtered, (item) => item.time?.slice(0, 10) || '未标记日期'), [filtered]);
+  const visitorDailyCounts = useMemo(() => summary
+    ? Object.fromEntries(summary.trend.map((item) => [item.day, item.value]))
+    : groupCount(filtered, (item) => item.time?.slice(0, 10) || '未标记日期'), [filtered, summary]);
   const latestVisitorLogs = useMemo(() => [...filtered].sort((a, b) => b.time.localeCompare(a.time)).slice(0, 6), [filtered]);
-
-  function handleExport() {
-    exportAuditLogs(filtered, `audit-${category}-${new Date().toISOString().slice(0, 10)}.csv`);
-  }
 
   function resetFilters() {
     setFilterResult('全部');
@@ -359,9 +363,17 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
     setFilterOperator('');
     setFilterTarget('');
     setFilterIp('');
-    setKeyword('');
     setDateFrom('');
     setDateTo('');
+    setCursorHistory([]);
+    setCurrentCursor(null);
+    setNextCursor(null);
+  }
+
+  async function handleExport() {
+    setExportMessage('正在生成导出文件');
+    const task = await createAuditLogExport(activeFilters());
+    setExportId(task.id);
   }
 
   const operatorHeader = category === 'visitor' ? '手机号' : category === 'family' ? '家属账号' : '操作人';
@@ -701,16 +713,16 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
             </div>
 
             <div className="audit-toolbar__row audit-toolbar__row--actions">
-              <input placeholder="关键词搜索" value={keyword} onChange={(event) => setKeyword(event.target.value)} />
               <div className="audit-toolbar__buttons">
-                <button onClick={() => undefined}>查询</button>
-                <button className="secondary" onClick={resetFilters}>重置</button>
-                <button className="secondary" onClick={handleExport}>导出</button>
+                <button onClick={() => loadPage(null, [])} disabled={loading}>{loading ? '查询中' : '查询'}</button>
+                <button className="secondary" onClick={() => { resetFilters(); window.setTimeout(() => loadPage(null, []), 0); }}>重置</button>
+                <button className="secondary" onClick={() => handleExport().catch((error) => setExportMessage(error instanceof Error ? error.message : '导出失败'))} disabled={Boolean(exportId)}>导出</button>
                 {category !== 'visitor' ? (
                   <TableColumnMenu options={auditColumnOptions} isVisible={columns.isVisible} onToggle={columns.toggle} onReset={columns.reset} />
                 ) : null}
               </div>
             </div>
+            {exportMessage ? <p className="form-error" style={{ color: 'var(--color-text-secondary)' }}>{exportMessage}</p> : null}
           </div>
 
           {category === 'visitor' ? (
@@ -719,18 +731,18 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                 <div className="audit-visitor-summary-grid">
                   <section className="audit-visitor-summary-card">
                     <p className="audit-visitor-summary-label">访问记录数</p>
-                    <strong className="audit-visitor-summary-value">{filtered.length}</strong>
+                    <strong className="audit-visitor-summary-value">{summary?.total ?? filtered.length}</strong>
                     <span className="audit-visitor-summary-meta">当前筛选条件下的访问行为</span>
                   </section>
                   <section className="audit-visitor-summary-card">
                     <p className="audit-visitor-summary-label">成功访问</p>
                     <strong className="audit-visitor-summary-value">{successCount}</strong>
-                    <span className="audit-visitor-summary-meta">{formatPercent(successCount, filtered.length)} 成功率</span>
+                    <span className="audit-visitor-summary-meta">{formatPercent(successCount, summary?.total ?? filtered.length)} 成功率</span>
                   </section>
                   <section className="audit-visitor-summary-card">
                     <p className="audit-visitor-summary-label">失败访问</p>
                     <strong className="audit-visitor-summary-value">{abnormalCount}</strong>
-                    <span className="audit-visitor-summary-meta">{formatPercent(abnormalCount, filtered.length)} 失败占比</span>
+                    <span className="audit-visitor-summary-meta">{formatPercent(abnormalCount, summary?.total ?? filtered.length)} 失败占比</span>
                   </section>
                   <section className="audit-visitor-summary-card">
                     <p className="audit-visitor-summary-label">来源 IP 数</p>
@@ -753,7 +765,7 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
             </>
         ) : (
           <>
-            <p style={{ margin: '0 0 12px', color: 'var(--color-text-secondary)', fontSize: 13 }}>共 {filtered.length} 条记录</p>
+            <p style={{ margin: '0 0 12px', color: 'var(--color-text-secondary)', fontSize: 13 }}>当前 {filtered.length} 条记录{nextCursor ? '，存在更多记录' : ''}</p>
 
             <div className="rbac-summary-table-wrap audit-scroll-table-wrap audit-scroll-table-wrap--main">
               <table className="data-table audit-log-table">
@@ -792,6 +804,13 @@ export function AuditLogPage({ category }: { category: AuditCategory }) {
                     )}
                   </tbody>
                 </table>
+              </div>
+              <div className="form-actions" style={{ justifyContent: 'flex-end', marginTop: 12 }}>
+                <button className="secondary" disabled={loading || cursorHistory.length === 0} onClick={() => {
+                  const previous = cursorHistory.slice(0, -1);
+                  loadPage(cursorHistory[cursorHistory.length - 1] || null, previous).catch(() => undefined);
+                }}>上一页</button>
+                <button className="secondary" disabled={loading || !nextCursor} onClick={() => loadPage(nextCursor, [...cursorHistory, currentCursor || '']).catch(() => undefined)}>下一页</button>
               </div>
             </>
           )}

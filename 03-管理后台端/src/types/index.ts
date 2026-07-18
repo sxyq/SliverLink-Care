@@ -89,6 +89,7 @@ export interface RolePermission {
 }
 
 export interface AuditLog {
+  id?: string;
   time: string;
   operator: string;
   role?: string;
@@ -102,6 +103,35 @@ export interface AuditLog {
   target: string;
   ip: string;
   result: '成功' | '失败' | string;
+}
+
+export interface CursorPage<T> {
+  items: T[];
+  nextCursor: string | null;
+  hasMore: boolean;
+}
+
+export interface AuditLogFilters {
+  from?: string;
+  to?: string;
+  operator?: string;
+  action?: string;
+  result?: string;
+  role?: string;
+  verificationMethod?: string;
+  sourceIp?: string;
+  target?: string;
+}
+
+export interface AuditLogSummary {
+  total: number;
+  successCount: number;
+  failureCount: number;
+  sourceIpCount: number;
+  actions: Array<{ label: string; value: number }>;
+  verificationMethods: Array<{ label: string; value: number }>;
+  trend: Array<{ day: string; value: number }>;
+  recent: AuditLog[];
 }
 
 export interface SecurityModule {

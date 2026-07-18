@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -578,6 +579,29 @@ class SilverLinkDataServiceTest {
             when(jdbc.update(anyString(), (Object) any(), (Object) any(), (Object) any())).thenReturn(1);
             String id = service.createVolunteer(body);
             assertTrue(id.startsWith("vol-"));
+        }
+
+        @Test
+        void rejectsExistingAccountBeforeInsert() {
+            when(jdbc.queryForList(anyString(), eq("vol1"), eq("VOLUNTEER")))
+                    .thenReturn(List.of(Map.of("id", "existing-volunteer")));
+
+            BizException exception = assertThrows(BizException.class,
+                    () -> service.createVolunteer(Map.of("account", "vol1")));
+
+            assertEquals("该登录账号已存在，请更换后重试", exception.getMessage());
+            verify(jdbc, never()).update(startsWith("insert into app_user"), any(), any(), any(), any(), any());
+        }
+
+        @Test
+        void translatesConcurrentDuplicateInsertIntoBusinessError() {
+            when(jdbc.update(startsWith("insert into app_user"), any(), any(), any(), any(), any()))
+                    .thenThrow(new DuplicateKeyException("duplicate"));
+
+            BizException exception = assertThrows(BizException.class,
+                    () -> service.createVolunteer(Map.of("account", "vol2")));
+
+            assertEquals("该登录账号已存在，请更换后重试", exception.getMessage());
         }
     }
 

@@ -1,6 +1,11 @@
 package com.silverlink.care.module.admin;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
+import com.silverlink.care.module.audit.AuditLogService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -10,9 +15,20 @@ import java.util.Map;
 public class AdminDashboardService {
 
     private final SilverLinkDataService data;
+    private final JsonTwoLevelCache cache;
+    private final ObjectMapper objectMapper;
+    private final AuditLogService auditLogService;
 
     public AdminDashboardService(SilverLinkDataService data) {
+        this(data, null, new ObjectMapper(), null);
+    }
+
+    @Autowired
+    public AdminDashboardService(SilverLinkDataService data, JsonTwoLevelCache cache, ObjectMapper objectMapper, AuditLogService auditLogService) {
         this.data = data;
+        this.cache = cache;
+        this.objectMapper = objectMapper;
+        this.auditLogService = auditLogService;
     }
 
     public Map<String, Object> stats() {
@@ -29,5 +45,33 @@ public class AdminDashboardService {
 
     public List<Map<String, Object>> auditLogs() {
         return data.auditLogs(null, null, null);
+    }
+
+    public Map<String, Object> summary() {
+        if (cache == null || auditLogService == null) return buildSummary();
+        String payload = cache.getOrLoad("admin:dashboard:summary:v1", 1_000L, 15_000L, this::serializeSummary);
+        try {
+            return objectMapper.readValue(payload, new TypeReference<>() {});
+        } catch (Exception ignored) {
+            return buildSummary();
+        }
+    }
+
+    public void invalidateSummary() {
+        if (cache != null) cache.invalidate("admin:dashboard:summary:v1");
+    }
+
+    private String serializeSummary() {
+        try {
+            return objectMapper.writeValueAsString(buildSummary());
+        } catch (Exception exception) {
+            throw new IllegalStateException("无法序列化仪表盘摘要", exception);
+        }
+    }
+
+    private Map<String, Object> buildSummary() {
+        Map<String, Object> summary = new java.util.LinkedHashMap<>(data.dashboard());
+        summary.put("recentAuditLogs", auditLogService == null ? List.of() : auditLogService.recentSummary());
+        return summary;
     }
 }

@@ -203,6 +203,51 @@ button, input, select {
   min-width: 0;
 }
 
+.admin-notice {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  z-index: 160;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) 32px;
+  align-items: center;
+  gap: 10px;
+  width: min(420px, calc(100vw - 32px));
+  min-height: 52px;
+  padding: 8px 8px 8px 14px;
+  border: 1px solid #b8ddd4;
+  border-radius: 8px;
+  color: #075c4b;
+  background: #f2fbf8;
+  box-shadow: 0 16px 36px rgba(12, 44, 57, 0.18);
+  transform: translateX(-50%);
+}
+
+.admin-notice span {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.admin-notice button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  color: #075c4b;
+  background: transparent;
+  cursor: pointer;
+}
+
+.admin-notice button:hover {
+  background: rgba(10, 128, 103, 0.1);
+}
+
 .topbar {
   display: flex;
   align-items: center;

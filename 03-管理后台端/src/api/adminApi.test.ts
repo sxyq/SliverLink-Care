@@ -116,6 +116,9 @@ describe('adminApi', () => {
   });
 
   it('sends elder, volunteer and qr mutations to the expected endpoints', async () => {
+    const notices: string[] = [];
+    const handleNotice = (event: Event) => notices.push((event as CustomEvent<string>).detail);
+    window.addEventListener('sl-admin-notice', handleNotice);
     const fetchMock = queueFetch(
       { id: 'elder-new' },
       {},
@@ -158,6 +161,30 @@ describe('adminApi', () => {
       '/silverlink-api/api/admin/qrcodes/qr-1/regenerate',
       '/silverlink-api/api/admin/qrcodes/qr-1/relay-device',
     ]);
+    expect(notices).toEqual([
+      '老人档案新增成功',
+      '老人档案删除成功',
+      '老人档案状态更新成功',
+      '志愿者账号新增成功',
+      '志愿者信息修改成功',
+      '志愿者服务范围保存成功',
+      '志愿者账号删除成功',
+      '二维码生成成功',
+      '二维码停用成功',
+      '二维码重新生成成功',
+      '短信接收设备绑定成功',
+    ]);
+    window.removeEventListener('sl-admin-notice', handleNotice);
+  });
+
+  it('does not show a success notice when a mutation fails', async () => {
+    const notice = vi.fn();
+    window.addEventListener('sl-admin-notice', notice);
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('保存失败', { status: 500 })));
+
+    await expect(createVolunteer({ account: 'vol' })).rejects.toThrow('保存失败');
+    expect(notice).not.toHaveBeenCalled();
+    window.removeEventListener('sl-admin-notice', notice);
   });
 
   it('maps qrcode, invitation, family binding and review workflows', async () => {

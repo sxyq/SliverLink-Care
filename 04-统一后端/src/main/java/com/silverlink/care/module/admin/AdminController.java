@@ -87,6 +87,11 @@ public class AdminController {
         return ApiResponse.ok(dashboardService.stats());
     }
 
+    @GetMapping("/dashboard/summary")
+    public ApiResponse<Map<String, Object>> dashboardSummary() {
+        return ApiResponse.ok(dashboardService.summary());
+    }
+
     @GetMapping("/elders")
     public ApiResponse<List<Map<String, Object>>> elders() {
         return ApiResponse.ok(dashboardService.elders());
@@ -97,6 +102,7 @@ public class AdminController {
         String id = data.createElder(body);
         Map<String, Object> elder = data.elderDetail(id, false);
         qrCodeService.generateWithToken(id, String.valueOf(elder.getOrDefault("archiveNo", "")));
+        dashboardService.invalidateSummary();
         auditLogService.record(authentication, request, String.valueOf(elder.getOrDefault("archiveNo", id)), "CREATE_ELDER", "SUCCESS");
         return ApiResponse.ok(Map.of("id", id));
     }
@@ -104,6 +110,7 @@ public class AdminController {
     @PutMapping("/elders/{id}")
     public ApiResponse<Void> updateElder(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         data.updateElder(id, body);
+        dashboardService.invalidateSummary();
         auditLogService.record(authentication, request, id, "UPDATE_ELDER", "SUCCESS");
         return ApiResponse.ok();
     }
@@ -111,6 +118,7 @@ public class AdminController {
     @DeleteMapping("/elders/{id}")
     public ApiResponse<Void> deleteElder(@PathVariable String id, Authentication authentication, HttpServletRequest request) {
         data.deleteElder(id);
+        dashboardService.invalidateSummary();
         disableCurrentQrCode(id);
         auditLogService.record(authentication, request, id, "DELETE_ELDER", "SUCCESS");
         return ApiResponse.ok();
@@ -120,6 +128,7 @@ public class AdminController {
     public ApiResponse<Void> updateElderStatus(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         String status = String.valueOf(body.getOrDefault("status", "DISABLED"));
         data.setElderStatus(id, status);
+        dashboardService.invalidateSummary();
         if (!"ACTIVE".equalsIgnoreCase(status)) {
             disableCurrentQrCode(id);
         }
@@ -142,6 +151,7 @@ public class AdminController {
     @PostMapping("/volunteers")
     public ApiResponse<Map<String, String>> createVolunteer(@RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         String id = data.createVolunteer(body);
+        dashboardService.invalidateSummary();
         auditLogService.record(authentication, request, id, "CREATE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok(Map.of("id", id));
     }
@@ -149,6 +159,7 @@ public class AdminController {
     @PutMapping("/volunteers/{id}")
     public ApiResponse<Void> updateVolunteer(@PathVariable String id, @RequestBody Map<String, Object> body, Authentication authentication, HttpServletRequest request) {
         data.updateVolunteer(id, body);
+        dashboardService.invalidateSummary();
         auditLogService.record(authentication, request, id, "UPDATE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok();
     }
@@ -158,6 +169,7 @@ public class AdminController {
         Object elderIds = body.get("elderIds");
         if (elderIds instanceof List<?> list) {
             data.setVolunteerScope(id, list.stream().map(String::valueOf).toList());
+            dashboardService.invalidateSummary();
         }
         auditLogService.record(authentication, request, id, "UPDATE_VOLUNTEER_SCOPE", "SUCCESS");
         return ApiResponse.ok();
@@ -166,6 +178,7 @@ public class AdminController {
     @DeleteMapping("/volunteers/{id}")
     public ApiResponse<Void> deleteVolunteer(@PathVariable String id, Authentication authentication, HttpServletRequest request) {
         data.deleteVolunteer(id);
+        dashboardService.invalidateSummary();
         auditLogService.record(authentication, request, id, "DELETE_VOLUNTEER", "SUCCESS");
         return ApiResponse.ok();
     }

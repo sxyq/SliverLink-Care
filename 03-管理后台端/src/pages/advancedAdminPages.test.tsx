@@ -210,6 +210,27 @@ describe('VolunteerManagePage', () => {
     expect(await screen.findByText('请至少保留 1 位负责老人')).toBeInTheDocument();
   });
 
+  it('shows duplicate account and API errors without closing the create dialog', async () => {
+    render(<VolunteerManagePage />);
+
+    expect(await screen.findByText('王志愿者')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '新增志愿者账号' }));
+    fireEvent.change(screen.getByLabelText('姓名'), { target: { value: '重复账号志愿者' } });
+    fireEvent.change(screen.getByLabelText('账号'), { target: { value: 'vol001' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+
+    expect(await screen.findByText('该登录账号已存在，请更换后重试')).toBeInTheDocument();
+    expect(createVolunteer).not.toHaveBeenCalled();
+
+    createVolunteer.mockRejectedValueOnce(new Error('服务暂时不可用'));
+    fireEvent.change(screen.getByLabelText('账号'), { target: { value: 'vol003' } });
+    fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
+
+    expect(await screen.findByText('服务暂时不可用')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: '新增志愿者账号' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '确认新增' })).toBeEnabled();
+  });
+
   it('covers volunteer query trim, status filter, scope rail toggle, chip remove and family empty state', async () => {
     fetchVolunteers.mockResolvedValueOnce([
       {

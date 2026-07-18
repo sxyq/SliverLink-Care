@@ -1,5 +1,10 @@
 package com.silverlink.care.module.audit;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.silverlink.care.common.CursorCodec;
+import com.silverlink.care.common.CursorPage;
+import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -32,6 +38,8 @@ public class AuditLogService {
 
     private final SilverLinkDataService data;
     private final Executor auditLogExecutor;
+    private final JsonTwoLevelCache cache;
+    private final ObjectMapper objectMapper;
     private final ConcurrentLinkedQueue<SilverLinkDataService.AuditLogWrite> pendingWrites = new ConcurrentLinkedQueue<>();
     private final AtomicInteger pendingWriteCount = new AtomicInteger();
     private final AtomicBoolean flushRunning = new AtomicBoolean(false);
@@ -40,13 +48,24 @@ public class AuditLogService {
     private int batchSize = 64;
 
     public AuditLogService(SilverLinkDataService data) {
-        this(data, Runnable::run);
+        this(data, Runnable::run, null, new ObjectMapper());
+    }
+
+    public AuditLogService(SilverLinkDataService data, Executor auditLogExecutor) {
+        this(data, auditLogExecutor, null, new ObjectMapper());
     }
 
     @Autowired
-    public AuditLogService(SilverLinkDataService data, @Qualifier("auditLogExecutor") Executor auditLogExecutor) {
+    public AuditLogService(
+            SilverLinkDataService data,
+            @Qualifier("auditLogExecutor") Executor auditLogExecutor,
+            JsonTwoLevelCache cache,
+            ObjectMapper objectMapper
+    ) {
         this.data = data;
         this.auditLogExecutor = auditLogExecutor;
+        this.cache = cache;
+        this.objectMapper = objectMapper;
     }
 
     public List<AuditLogEntity> listAll() {
@@ -55,6 +74,42 @@ public class AuditLogService {
 
     public List<AuditLogEntity> filter(String operator, String action, String result) {
         return toEntities(data.auditLogs(operator, action, result));
+    }
+
+    public CursorPage<AuditLogEntity> page(AuditLogQuery query, String cursor, Integer requestedLimit) {
+        int limit = requestedLimit == null ? 50 : Math.max(1, Math.min(100, requestedLimit));
+        Map<String, String> decoded = CursorCodec.decode(cursor);
+        List<AuditLogEntity> rows = toEntities(data.auditLogPage(query, decoded.get("time"), decoded.get("id"), limit + 1));
+        boolean hasMore = rows.size() > limit;
+        if (hasMore) rows = new ArrayList<>(rows.subList(0, limit));
+        String next = null;
+        if (hasMore && !rows.isEmpty()) {
+            AuditLogEntity last = rows.get(rows.size() - 1);
+            next = CursorCodec.encode(Map.of("time", last.getTime(), "id", last.getId()));
+        }
+        return new CursorPage<>(rows, next, hasMore);
+    }
+
+    public Map<String, Object> summary(AuditLogQuery query) {
+        String key = "audit:summary:v1:" + data.hash(queryFingerprint(query));
+        if (cache == null) return data.auditLogSummary(query);
+        String payload = cache.getOrLoad(key, 3_000L, () -> toJson(data.auditLogSummary(query)));
+        return fromJson(payload);
+    }
+
+    /** Recent summaries contain no visitor identity fields and are safe for the short cache window. */
+    public List<Map<String, Object>> recentSummary() {
+        if (cache == null) return data.recentAuditSummaries(10);
+        String payload = cache.getOrLoad("audit:recent:v1", 1_000L, 3_000L, () -> toJson(Map.of("items", data.recentAuditSummaries(10))));
+        Object recent = fromJson(payload).get("items");
+        if (!(recent instanceof List<?> list)) return List.of();
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Object item : list) if (item instanceof Map<?, ?> map) {
+            Map<String, Object> copy = new LinkedHashMap<>();
+            map.forEach((key, value) -> copy.put(String.valueOf(key), value));
+            result.add(copy);
+        }
+        return result;
     }
 
     public void record(String operator, String role, String ip, String target, String action, String result, String failReason, String requestId) {
@@ -308,5 +363,34 @@ public class AuditLogService {
             list.add(log);
         }
         return list;
+    }
+
+    private String queryFingerprint(AuditLogQuery query) {
+        AuditLogQuery safe = query == null ? new AuditLogQuery(null, null, null, null, null, null, null, null, null) : query;
+        return String.join("|",
+                nullToEmpty(safe.from()), nullToEmpty(safe.to()), nullToEmpty(safe.operator()), nullToEmpty(safe.action()),
+                nullToEmpty(safe.result()), nullToEmpty(safe.role()), nullToEmpty(safe.verificationMethod()),
+                nullToEmpty(safe.sourceIp()), nullToEmpty(safe.target()));
+    }
+
+    private String nullToEmpty(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String toJson(Map<String, Object> value) {
+        try {
+            return objectMapper.writeValueAsString(value);
+        } catch (Exception exception) {
+            throw new IllegalStateException("无法序列化审计摘要", exception);
+        }
+    }
+
+    private Map<String, Object> fromJson(String value) {
+        try {
+            return objectMapper.readValue(value, new TypeReference<>() {});
+        } catch (Exception exception) {
+            // A malformed cache entry is discarded; the next read obtains authoritative DB data.
+            return data.auditLogSummary(null);
+        }
     }
 }

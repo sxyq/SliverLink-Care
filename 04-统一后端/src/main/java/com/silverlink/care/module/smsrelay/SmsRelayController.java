@@ -1,9 +1,11 @@
 package com.silverlink.care.module.smsrelay;
 
 import com.silverlink.care.common.ApiResponse;
+import com.silverlink.care.common.CursorPage;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/sms-relay")
@@ -84,7 +86,22 @@ public class SmsRelayController {
     // 管理后台 - 查看短信中转记录
     @GetMapping("/admin/records")
     public ApiResponse<List<SmsRelayRecordDto>> listRecords() {
+        // Compatibility endpoint: bounded while older management clients roll over to /page.
         return ApiResponse.ok(smsRelayService.listRecords());
+    }
+
+    @GetMapping("/admin/records/page")
+    public ApiResponse<CursorPage<SmsRelayRecordDto>> pageRecords(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) String deviceId,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String receiverPhone,
+            @RequestParam(required = false) String senderPhone,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
+        return ApiResponse.ok(smsRelayService.pageRecords(cursor, limit, deviceId, status, receiverPhone, senderPhone, from, to));
     }
 
     // 管理后台 - 查看设备列表
@@ -102,6 +119,26 @@ public class SmsRelayController {
     // 管理后台 - 查看验证会话
     @GetMapping("/admin/sessions")
     public ApiResponse<List<ScanVerificationAdminDto>> listSessions() {
+        // Compatibility endpoint: bounded while older management clients roll over to /page.
         return ApiResponse.ok(smsRelayService.listVerificationSessions());
+    }
+
+    @GetMapping("/admin/sessions/page")
+    public ApiResponse<CursorPage<ScanVerificationAdminDto>> pageSessions(
+            @RequestParam(required = false) String cursor,
+            @RequestParam(required = false) Integer limit,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String relayDeviceId,
+            @RequestParam(required = false) String elderId,
+            @RequestParam(required = false) String receiverPhone,
+            @RequestParam(required = false) String from,
+            @RequestParam(required = false) String to
+    ) {
+        return ApiResponse.ok(smsRelayService.pageVerificationSessions(cursor, limit, status, relayDeviceId, elderId, receiverPhone, from, to));
+    }
+
+    @GetMapping("/admin/summary")
+    public ApiResponse<Map<String, Object>> summary() {
+        return ApiResponse.ok(smsRelayService.adminSummary());
     }
 }

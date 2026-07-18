@@ -2,6 +2,8 @@ package com.silverlink.care.module.smsrelay;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.silverlink.care.common.BizException;
+import com.silverlink.care.common.CursorCodec;
+import com.silverlink.care.common.CursorPage;
 import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
 import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
@@ -21,6 +23,7 @@ import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -336,6 +339,7 @@ public class SmsRelayService {
                 uploadedAt,
                 "UPLOADED"
         );
+        invalidateAdminSummary();
 
         String normalizedBody = normalize(request.getMessageBody());
         String normalizedBodyHash = sha256Hex(normalizedBody);
@@ -400,6 +404,7 @@ public class SmsRelayService {
                 "在线",
                 request.getDeviceId()
         );
+        invalidateAdminSummary();
     }
 
     public DeviceConfigDto getDeviceConfig(String deviceId, String deviceSecret) {
@@ -452,12 +457,53 @@ public class SmsRelayService {
     }
 
     public List<SmsRelayRecordDto> listRecords() {
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from sms_relay_record order by uploaded_at desc");
+        return pageRecords(null, 50, null, null, null, null, null, null).items();
+    }
+
+    public CursorPage<SmsRelayRecordDto> pageRecords(
+            String cursor,
+            Integer requestedLimit,
+            String deviceId,
+            String status,
+            String receiverPhone,
+            String senderPhone,
+            String from,
+            String to
+    ) {
+        int limit = requestedLimit == null ? 50 : Math.max(1, Math.min(100, requestedLimit));
+        Map<String, String> decoded = CursorCodec.decode(cursor);
+        StringBuilder sql = new StringBuilder("select * from sms_relay_record force index (")
+                .append(recordPageIndex(deviceId, status, receiverPhone, senderPhone)).append(") where 1=1");
+        List<Object> args = new ArrayList<>();
+        addExact(sql, args, "device_id", deviceId);
+        addExact(sql, args, "status", status);
+        addExact(sql, args, "receiver_phone", receiverPhone);
+        addExact(sql, args, "sender_phone", senderPhone);
+        addLongRange(sql, args, "uploaded_at", from, to);
+        String cursorUploadedAt = decoded.get("uploadedAt");
+        String cursorId = decoded.get("id");
+        if (cursorUploadedAt != null && cursorId != null) {
+            sql.append(" and (uploaded_at < ? or (uploaded_at = ? and id < ?))");
+            long timestamp = parseLong(cursorUploadedAt, "分页游标无效");
+            args.add(timestamp);
+            args.add(timestamp);
+            args.add(cursorId);
+        }
+        sql.append(" order by uploaded_at desc, id desc limit ?");
+        args.add(limit + 1);
+        List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
         List<SmsRelayRecordDto> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             result.add(mapRecord(row));
         }
-        return result;
+        boolean hasMore = result.size() > limit;
+        if (hasMore) result = new ArrayList<>(result.subList(0, limit));
+        String next = null;
+        if (hasMore && !result.isEmpty()) {
+            SmsRelayRecordDto last = result.get(result.size() - 1);
+            next = CursorCodec.encode(Map.of("uploadedAt", String.valueOf(last.getUploadedAt()), "id", last.getId()));
+        }
+        return new CursorPage<>(result, next, hasMore);
     }
 
     public List<DeviceConfigDto> listDevices() {
@@ -506,17 +552,64 @@ public class SmsRelayService {
 
         Map<String, Object> row = loadDeviceRow(deviceId);
         refreshDeviceCaches(deviceId, row);
+        invalidateAdminSummary();
         return mapDevice(row);
     }
 
     public List<ScanVerificationAdminDto> listVerificationSessions() {
+        return pageVerificationSessions(null, null, null, null, null, null, null, null).items();
+    }
+
+    public CursorPage<ScanVerificationAdminDto> pageVerificationSessions(
+            String cursor,
+            Integer requestedLimit,
+            String status,
+            String relayDeviceId,
+            String elderId,
+            String receiverPhone,
+            String from,
+            String to
+    ) {
         expirePendingSessions();
-        List<Map<String, Object>> rows = jdbc.queryForList("select * from scan_verification_session order by created_at desc");
+        int limit = requestedLimit == null ? 50 : Math.max(1, Math.min(100, requestedLimit));
+        Map<String, String> decoded = CursorCodec.decode(cursor);
+        StringBuilder sql = new StringBuilder("select * from scan_verification_session force index (")
+                .append(sessionPageIndex(status, relayDeviceId, elderId, receiverPhone)).append(") where 1=1");
+        List<Object> args = new ArrayList<>();
+        addExact(sql, args, "status", status);
+        addExact(sql, args, "relay_device_id", relayDeviceId);
+        addExact(sql, args, "elder_id", elderId);
+        addExact(sql, args, "receiver_phone", receiverPhone);
+        addDateRange(sql, args, "created_at", from, to);
+        String cursorCreatedAt = decoded.get("createdAt");
+        String cursorSessionId = decoded.get("sessionId");
+        if (cursorCreatedAt != null && cursorSessionId != null) {
+            sql.append(" and (created_at < ? or (created_at = ? and session_id < ?))");
+            args.add(java.sql.Timestamp.valueOf(cursorCreatedAt));
+            args.add(java.sql.Timestamp.valueOf(cursorCreatedAt));
+            args.add(cursorSessionId);
+        }
+        sql.append(" order by created_at desc, session_id desc limit ?");
+        args.add(limit + 1);
+        List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
         List<ScanVerificationAdminDto> result = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             result.add(mapAdminSession(row));
         }
-        return result;
+        boolean hasMore = result.size() > limit;
+        if (hasMore) result = new ArrayList<>(result.subList(0, limit));
+        String next = null;
+        if (hasMore && !result.isEmpty()) {
+            ScanVerificationAdminDto last = result.get(result.size() - 1);
+            next = CursorCodec.encode(Map.of("createdAt", normalizeSqlTimestamp(last.getCreatedAt()), "sessionId", last.getSessionId()));
+        }
+        return new CursorPage<>(result, next, hasMore);
+    }
+
+    public Map<String, Object> adminSummary() {
+        if (cache == null) return buildAdminSummary();
+        String payload = cache.getOrLoad("smsrelay:summary:v1", 1_000L, 5_000L, this::serializeAdminSummary);
+        return fromJsonMap(payload);
     }
 
     public VerifiedSessionContext authorizeVerifiedSession(String sessionId, String elderId, String target) {
@@ -601,15 +694,9 @@ public class SmsRelayService {
     }
 
     private void expirePendingSessions() {
-        for (Map<String, Object> row : jdbc.queryForList("select session_id, expires_at from scan_verification_session where status='PENDING'")) {
-            if (Instant.parse(str(row.get("expires_at"))).isBefore(Instant.now())) {
-                jdbc.update(
-                        "update scan_verification_session set status='EXPIRED', verified=0 where session_id=? and status='PENDING'",
-                        str(row.get("session_id"))
-                );
-                invalidateAuthorizedSession(str(row.get("session_id")));
-            }
-        }
+        // ISO-8601 values sort lexicographically. One SQL update avoids scanning all sessions in Java.
+        jdbc.update("update scan_verification_session set status='EXPIRED', verified=0 "
+                + "where status='PENDING' and expires_at < ?", Instant.now().toString());
     }
 
     private ScanVerificationSessionDto mapSession(Map<String, Object> row) {
@@ -845,6 +932,103 @@ public class SmsRelayService {
             return objectMapper.writeValueAsString(value);
         } catch (Exception exception) {
             throw new IllegalStateException("Failed to serialize sms relay cache value", exception);
+        }
+    }
+
+    private Map<String, Object> buildAdminSummary() {
+        Map<String, Object> summary = new LinkedHashMap<>();
+        summary.put("deviceCount", scalarLong("select count(*) from sms_relay_device"));
+        summary.put("onlineDeviceCount", scalarLong("select count(*) from sms_relay_device where status='在线'"));
+        summary.put("recordCount", scalarLong("select count(*) from sms_relay_record"));
+        summary.put("sessionCount", scalarLong("select count(*) from scan_verification_session"));
+        summary.put("recordStatus", groupedCounts("sms_relay_record"));
+        summary.put("sessionStatus", groupedCounts("scan_verification_session"));
+        return summary;
+    }
+
+    private String serializeAdminSummary() {
+        return toJson(buildAdminSummary());
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> fromJsonMap(String payload) {
+        try {
+            return objectMapper.readValue(payload, LinkedHashMap.class);
+        } catch (Exception ignored) {
+            return buildAdminSummary();
+        }
+    }
+
+    private long scalarLong(String sql) {
+        Number value = jdbc.queryForObject(sql, Number.class);
+        return value == null ? 0L : value.longValue();
+    }
+
+    private List<Map<String, Object>> groupedCounts(String table) {
+        return jdbc.queryForList("select status, count(*) value from " + table + " group by status")
+                .stream().map(row -> Map.<String, Object>of(
+                        "status", str(row.get("status")), "value", longValue(row.get("value"))
+                )).toList();
+    }
+
+    private void invalidateAdminSummary() {
+        if (cache != null) cache.invalidate("smsrelay:summary:v1");
+    }
+
+    private String recordPageIndex(String deviceId, String status, String receiverPhone, String senderPhone) {
+        if (deviceId != null && !deviceId.isBlank()) return "idx_sms_record_device_uploaded_id";
+        if (status != null && !status.isBlank()) return "idx_sms_record_status_uploaded_id";
+        if (receiverPhone != null && !receiverPhone.isBlank()) return "idx_sms_record_receiver_uploaded_id";
+        if (senderPhone != null && !senderPhone.isBlank()) return "idx_sms_record_sender_uploaded_id";
+        return "idx_sms_record_uploaded_id";
+    }
+
+    private String sessionPageIndex(String status, String relayDeviceId, String elderId, String receiverPhone) {
+        if (status != null && !status.isBlank()) return "idx_scan_session_status_created_id";
+        if (relayDeviceId != null && !relayDeviceId.isBlank()) return "idx_scan_session_device_created_id";
+        if (elderId != null && !elderId.isBlank()) return "idx_scan_session_elder_created_id";
+        if (receiverPhone != null && !receiverPhone.isBlank()) return "idx_scan_session_receiver_created_id";
+        return "idx_scan_session_created_id";
+    }
+
+    private void addExact(StringBuilder sql, List<Object> args, String column, String value) {
+        if (value == null || value.isBlank()) return;
+        sql.append(" and ").append(column).append(" = ?");
+        args.add(value);
+    }
+
+    private void addLongRange(StringBuilder sql, List<Object> args, String column, String from, String to) {
+        if (from != null && !from.isBlank()) {
+            sql.append(" and ").append(column).append(" >= ?");
+            args.add(parseLong(from, "时间参数无效"));
+        }
+        if (to != null && !to.isBlank()) {
+            sql.append(" and ").append(column).append(" <= ?");
+            args.add(parseLong(to, "时间参数无效"));
+        }
+    }
+
+    private void addDateRange(StringBuilder sql, List<Object> args, String column, String from, String to) {
+        if (from != null && !from.isBlank()) {
+            sql.append(" and ").append(column).append(" >= ?");
+            args.add(java.sql.Timestamp.valueOf(normalizeSqlTimestamp(from)));
+        }
+        if (to != null && !to.isBlank()) {
+            sql.append(" and ").append(column).append(" <= ?");
+            args.add(java.sql.Timestamp.valueOf(normalizeSqlTimestamp(to) + (to.length() == 10 ? " 23:59:59.999999" : "")));
+        }
+    }
+
+    private String normalizeSqlTimestamp(String value) {
+        String normalized = value.replace('T', ' ').replace("Z", "");
+        return normalized.length() == 10 ? normalized + " 00:00:00" : normalized;
+    }
+
+    private long parseLong(String value, String message) {
+        try {
+            return Long.parseLong(value);
+        } catch (RuntimeException exception) {
+            throw new BizException(400, message);
         }
     }
 

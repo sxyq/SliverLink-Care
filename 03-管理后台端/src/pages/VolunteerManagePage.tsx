@@ -137,6 +137,7 @@ export function VolunteerManagePage() {
   const [selectedFamilyGroup, setSelectedFamilyGroup] = useState<FamilyGroup | null>(null);
   const [form, setForm] = useState<VolunteerForm>(emptyForm);
   const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [scopeError, setScopeError] = useState('');
   const volunteerColumns = useTableColumnVisibility('sl_columns_volunteers', volunteerColumnOptions);
   const familyColumns = useTableColumnVisibility('sl_columns_family_groups', familyColumnOptions);
@@ -319,41 +320,54 @@ export function VolunteerManagePage() {
       return;
     }
 
-    if (editingId) {
-      const payload: Record<string, string> = {
-        name,
-        account,
-        phone: form.phone,
-        status: form.status === ACTIVE_STATUS ? 'ACTIVE' : 'DISABLED',
-      };
-      const password = form.password.trim();
-      if (password) {
-        payload.password = password;
-      }
-      await updateVolunteer(editingId, payload);
-    } else {
-      const createdAt = formatDateTime(new Date());
-      const result = await createVolunteer({
-        name,
-        account,
-        phone: form.phone,
-        password: form.password || 'Volunteer@123456',
-      });
-      if (result?.id) {
-        const nextMeta = {
-          ...volunteerMeta,
-          [result.id]: {
-            createdAt,
-            createMethod: '后台创建',
-          },
-        };
-        saveVolunteerMeta(nextMeta);
-        setVolunteerMeta(nextMeta);
-      }
+    if (rows.some((row) => row.account === account && row.id !== editingId)) {
+      setError('该登录账号已存在，请更换后重试');
+      return;
     }
 
-    closeDialog();
-    await load();
+    setError('');
+    setSubmitting(true);
+    try {
+      if (editingId) {
+        const payload: Record<string, string> = {
+          name,
+          account,
+          phone: form.phone,
+          status: form.status === ACTIVE_STATUS ? 'ACTIVE' : 'DISABLED',
+        };
+        const password = form.password.trim();
+        if (password) {
+          payload.password = password;
+        }
+        await updateVolunteer(editingId, payload);
+      } else {
+        const createdAt = formatDateTime(new Date());
+        const result = await createVolunteer({
+          name,
+          account,
+          phone: form.phone.trim(),
+          password: form.password || 'Volunteer@123456',
+        });
+        if (result?.id) {
+          const nextMeta = {
+            ...volunteerMeta,
+            [result.id]: {
+              createdAt,
+              createMethod: '后台创建',
+            },
+          };
+          saveVolunteerMeta(nextMeta);
+          setVolunteerMeta(nextMeta);
+        }
+      }
+
+      closeDialog();
+      await load();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : '保存失败，请稍后重试');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   async function handleDelete(id: string) {
@@ -690,8 +704,10 @@ export function VolunteerManagePage() {
             {error && <p className="form-error">{error}</p>}
 
             <div className="form-actions">
-              <button onClick={handleSubmit}>{editingId ? '保存修改' : '确认新增'}</button>
-              <button className="secondary" onClick={closeDialog}>
+              <button onClick={handleSubmit} disabled={submitting}>
+                {submitting ? '提交中...' : editingId ? '保存修改' : '确认新增'}
+              </button>
+              <button className="secondary" onClick={closeDialog} disabled={submitting}>
                 取消
               </button>
             </div>

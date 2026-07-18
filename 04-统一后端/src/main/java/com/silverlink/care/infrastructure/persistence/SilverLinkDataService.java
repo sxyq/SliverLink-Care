@@ -6,7 +6,9 @@ import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.crypto.AesGcmCryptoService;
 import com.silverlink.care.infrastructure.crypto.HashService;
+import com.silverlink.care.module.audit.AuditLogQuery;
 import jakarta.annotation.PostConstruct;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -242,10 +244,22 @@ public class SilverLinkDataService {
     }
 
     public String createVolunteer(Map<String, Object> body) {
+        String account = value(body, "account", "vol" + System.currentTimeMillis()).trim();
+        if (account.isBlank()) {
+            throw new BizException(400, "请输入登录账号");
+        }
+        if (findUser(account, "VOLUNTEER").isPresent()) {
+            throw new BizException(400, "该登录账号已存在，请更换后重试");
+        }
+
         String id = "vol-" + System.currentTimeMillis();
-        jdbc.update("insert into app_user (id, account, password_hash, name_enc, phone_enc, role, status) values (?,?,?,?,?,'VOLUNTEER','ACTIVE')",
-                id, value(body, "account", "vol" + System.currentTimeMillis()),
-                value(body, "password", "Volunteer@123456"), enc(value(body, "name", "志愿者")), enc(value(body, "phone", "")));
+        try {
+            jdbc.update("insert into app_user (id, account, password_hash, name_enc, phone_enc, role, status) values (?,?,?,?,?,'VOLUNTEER','ACTIVE')",
+                    id, account, value(body, "password", "Volunteer@123456"),
+                    enc(value(body, "name", "志愿者")), enc(value(body, "phone", "")));
+        } catch (DuplicateKeyException exception) {
+            throw new BizException(400, "该登录账号已存在，请更换后重试");
+        }
         Object scope = body.get("elderIds");
         if (scope instanceof List<?> list) {
             setVolunteerScope(id, list.stream().map(String::valueOf).toList());
@@ -654,29 +668,90 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, Object>> auditLogs(String operator, String action, String result) {
+        return auditLogPage(new AuditLogQuery(null, null, operator, action, result, null, null, null, null), null, null, 50);
+    }
+
+    /**
+     * Reads one keyset page only. The database filters first; encrypted visitor fields are
+     * decrypted only after the bounded result set is returned.
+     */
+    public List<Map<String, Object>> auditLogPage(AuditLogQuery query, String cursorTime, String cursorId, int limit) {
+        QueryParts parts = auditWhere(query);
         StringBuilder sql = new StringBuilder("""
                 select id, time, operator, role, source_ip, target, action, verification_method,
                        visitor_name_enc, visitor_phone_enc, visitor_id_card_enc,
                        result, fail_reason, request_id
-                from audit_log
-                where 1=1
-                """);
-        List<Object> args = new ArrayList<>();
-        if (operator != null && !operator.isBlank()) {
-            sql.append(" and operator like ?");
-            args.add("%" + operator + "%");
+                from audit_log force index (""").append(auditPageIndex(query)).append(")\n")
+                .append(parts.sql());
+        List<Object> args = new ArrayList<>(parts.args());
+        if (cursorTime != null && !cursorTime.isBlank() && cursorId != null && !cursorId.isBlank()) {
+            sql.append(" and (time < ? or (time = ? and id < ?))");
+            args.add(cursorTime);
+            args.add(cursorTime);
+            args.add(cursorId);
         }
-        if (action != null && !action.isBlank()) {
-            sql.append(" and action = ?");
-            args.add(action);
-        }
-        if (result != null && !result.isBlank()) {
-            sql.append(" and result = ?");
-            args.add(result);
-        }
-        sql.append(" order by time desc limit 500");
+        sql.append(" order by time desc, id desc limit ?");
+        args.add(Math.max(1, Math.min(101, limit)));
 
         List<Map<String, Object>> rows = jdbc.queryForList(sql.toString(), args.toArray());
+        return mapAuditRows(rows);
+    }
+
+    public Map<String, Object> auditLogSummary(AuditLogQuery query) {
+        QueryParts parts = auditWhere(query);
+        Map<String, Object> summary = new LinkedHashMap<>();
+        List<Object> args = parts.args();
+        Map<String, Object> totals = jdbc.queryForMap("select count(*) total, "
+                        + "sum(case when result in ('SUCCESS','成功') then 1 else 0 end) successCount, "
+                        + "sum(case when result in ('FAIL','失败') then 1 else 0 end) failureCount, "
+                        + "count(distinct nullif(source_ip, '')) sourceIpCount from audit_log " + parts.sql(), args.toArray());
+        summary.put("total", longValue(totals.get("total")));
+        summary.put("successCount", longValue(totals.get("successCount")));
+        summary.put("failureCount", longValue(totals.get("failureCount")));
+        summary.put("sourceIpCount", longValue(totals.get("sourceIpCount")));
+        summary.put("actions", auditDistribution("action", parts));
+        summary.put("verificationMethods", auditDistribution("verification_method", parts));
+        summary.put("trend", auditDailyTrend(parts));
+
+        List<Map<String, Object>> recent = jdbc.queryForList("""
+                select id, time, operator, role, source_ip, target, action, verification_method, result
+                from audit_log
+                """ + parts.sql() + " order by time desc, id desc limit 6", args.toArray());
+        summary.put("recent", recent.stream().map(row -> Map.<String, Object>of(
+                "id", str(row.get("id")),
+                "time", str(row.get("time")),
+                "operator", str(row.get("operator")),
+                "role", str(row.get("role")),
+                "sourceIp", str(row.get("source_ip")),
+                "target", str(row.get("target")),
+                "action", str(row.get("action")),
+                "verificationMethod", str(row.get("verification_method")),
+                "result", str(row.get("result"))
+        )).toList());
+        return summary;
+    }
+
+    /** Lightweight dashboard feed; intentionally excludes all visitor identity columns. */
+    public List<Map<String, Object>> recentAuditSummaries(int limit) {
+        int bounded = Math.max(1, Math.min(10, limit));
+        return jdbc.queryForList("""
+                select id, time, operator, role, source_ip, target, action, verification_method, result
+                from audit_log force index (idx_audit_time_id)
+                order by time desc, id desc limit ?
+                """, bounded).stream().map(row -> Map.<String, Object>of(
+                "id", str(row.get("id")),
+                "time", str(row.get("time")),
+                "operator", str(row.get("operator")),
+                "role", str(row.get("role")),
+                "sourceIp", str(row.get("source_ip")),
+                "target", str(row.get("target")),
+                "action", str(row.get("action")),
+                "verificationMethod", str(row.get("verification_method")),
+                "result", str(row.get("result"))
+        )).toList();
+    }
+
+    private List<Map<String, Object>> mapAuditRows(List<Map<String, Object>> rows) {
         List<Map<String, Object>> out = new ArrayList<>();
         for (Map<String, Object> row : rows) {
             Map<String, Object> map = new LinkedHashMap<>();
@@ -699,6 +774,100 @@ public class SilverLinkDataService {
             out.add(map);
         }
         return out;
+    }
+
+    private List<Map<String, Object>> auditDistribution(String column, QueryParts parts) {
+        // Column names are compile-time constants, never supplied by callers.
+        return jdbc.queryForList("select " + column + " label, count(*) value from audit_log " + parts.sql()
+                        + " group by " + column + " order by value desc limit 20", parts.args().toArray())
+                .stream().map(row -> Map.<String, Object>of(
+                        "label", str(row.get("label")), "value", longValue(row.get("value"))
+                )).toList();
+    }
+
+    private List<Map<String, Object>> auditDailyTrend(QueryParts parts) {
+        return jdbc.queryForList("select left(time, 10) day, count(*) value from audit_log " + parts.sql()
+                        + " and time >= ? group by left(time, 10) order by day asc", appendArgs(parts.args(), Instant.now().minusSeconds(7 * 24 * 3600L).toString()).toArray())
+                .stream().map(row -> Map.<String, Object>of(
+                        "day", str(row.get("day")), "value", longValue(row.get("value"))
+                )).toList();
+    }
+
+    private QueryParts auditWhere(AuditLogQuery query) {
+        AuditLogQuery safe = query == null ? new AuditLogQuery(null, null, null, null, null, null, null, null, null) : query;
+        StringBuilder where = new StringBuilder(" where 1=1");
+        List<Object> args = new ArrayList<>();
+        addAuditRange(where, args, safe.from(), safe.to());
+        addExact(where, args, "action", safe.action());
+        addResult(where, args, safe.result());
+        addExact(where, args, "role", safe.role());
+        addExact(where, args, "verification_method", safe.verificationMethod());
+        addPrefix(where, args, "operator", safe.operator());
+        addPrefix(where, args, "source_ip", safe.sourceIp());
+        addPrefix(where, args, "target", safe.target());
+        return new QueryParts(where.toString(), args);
+    }
+
+    private String auditPageIndex(AuditLogQuery query) {
+        AuditLogQuery safe = query == null ? new AuditLogQuery(null, null, null, null, null, null, null, null, null) : query;
+        if (safe.action() != null && !safe.action().isBlank()) return "idx_audit_action_time_id";
+        if (safe.operator() != null && !safe.operator().isBlank()) return "idx_audit_operator_time_id";
+        if (safe.role() != null && !safe.role().isBlank()) return "idx_audit_role_time_id";
+        if (safe.verificationMethod() != null && !safe.verificationMethod().isBlank()) return "idx_audit_verification_time_id";
+        if (safe.result() != null && !safe.result().isBlank()) return "idx_audit_result_time_id";
+        return "idx_audit_time_id";
+    }
+
+    private void addAuditRange(StringBuilder where, List<Object> args, String from, String to) {
+        if (from != null && !from.isBlank()) {
+            where.append(" and time >= ?");
+            args.add(normalizeStartTime(from));
+        }
+        if (to != null && !to.isBlank()) {
+            where.append(" and time <= ?");
+            args.add(normalizeEndTime(to));
+        }
+    }
+
+    private void addExact(StringBuilder where, List<Object> args, String column, String value) {
+        if (value != null && !value.isBlank()) {
+            where.append(" and ").append(column).append(" = ?");
+            args.add(value);
+        }
+    }
+
+    private void addResult(StringBuilder where, List<Object> args, String value) {
+        if (value == null || value.isBlank()) return;
+        if ("成功".equals(value) || "SUCCESS".equalsIgnoreCase(value)) {
+            where.append(" and result in ('SUCCESS', '成功')");
+        } else if ("失败".equals(value) || "FAIL".equalsIgnoreCase(value)) {
+            where.append(" and result in ('FAIL', '失败')");
+        } else {
+            addExact(where, args, "result", value);
+        }
+    }
+
+    private void addPrefix(StringBuilder where, List<Object> args, String column, String value) {
+        if (value == null || value.isBlank()) return;
+        where.append(" and ").append(column).append(" like ? escape '!'");
+        args.add(value.replace("!", "!!").replace("%", "!%").replace("_", "!_") + "%");
+    }
+
+    private String normalizeStartTime(String value) {
+        return value.length() == 10 ? value + "T00:00:00.000Z" : value;
+    }
+
+    private String normalizeEndTime(String value) {
+        return value.length() == 10 ? value + "T23:59:59.999Z" : value;
+    }
+
+    private List<Object> appendArgs(List<Object> args, Object extra) {
+        List<Object> result = new ArrayList<>(args);
+        result.add(extra);
+        return result;
+    }
+
+    private record QueryParts(String sql, List<Object> args) {
     }
 
     public Map<String, Object> one(String sql, Object... args) {
@@ -768,6 +937,15 @@ public class SilverLinkDataService {
             return Integer.parseInt(String.valueOf(value));
         } catch (Exception ignored) {
             return 0;
+        }
+    }
+
+    private long longValue(Object value) {
+        if (value instanceof Number number) return number.longValue();
+        try {
+            return Long.parseLong(str(value));
+        } catch (RuntimeException ignored) {
+            return 0L;
         }
     }
 

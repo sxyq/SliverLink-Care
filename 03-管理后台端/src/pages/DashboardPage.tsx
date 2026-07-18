@@ -9,7 +9,7 @@ import {
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
 import {
   fetchAllScales,
-  fetchAuditLogs,
+  fetchDashboardSummary,
   fetchElders,
   fetchFamilyBindings,
   fetchInvitations,
@@ -291,23 +291,23 @@ export function DashboardPage() {
       const elderRowsPromise = fetchElders();
       const volunteerRowsPromise = fetchVolunteers();
       const qrRowsPromise = fetchQrCodes();
-      const auditRowsPromise = fetchAuditLogs();
+      const dashboardSummaryPromise = fetchDashboardSummary();
       const invitationRowsPromise = fetchInvitations();
       const familyRowsPromise = fetchFamilyBindings();
       const medicationRowsPromise = fetchMedications();
 
-      const [elderRows, volunteerRows, qrRows, auditRows] = await Promise.all([
+      const [elderRows, volunteerRows, qrRows, dashboardSummary] = await Promise.all([
         elderRowsPromise,
         volunteerRowsPromise,
         qrRowsPromise,
-        auditRowsPromise,
+        dashboardSummaryPromise,
       ]);
 
       if (!active) return;
       setElders(elderRows);
       setVolunteers(volunteerRows);
       setQrCodes(qrRows);
-      setAuditLogs(auditRows);
+      setAuditLogs(dashboardSummary.recentAuditLogs as AuditLog[]);
       setError('');
 
       deferredTimer = window.setTimeout(async () => {

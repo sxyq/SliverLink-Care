@@ -14,6 +14,7 @@ import { InvitationManagePage } from '../pages/InvitationManagePage';
 import { FamilyBindingManagePage } from '../pages/FamilyBindingManagePage';
 import { SmsRelayManagePage } from '../pages/SmsRelayManagePage';
 import { AdminMessageCenter } from '../components/AdminMessageCenter';
+import { AdminNoticeCenter } from '../components/AdminNoticeCenter';
 import { hasMenuPermission } from '../features/rbac/permissionGuard';
 import { defaultRoles } from '../features/rbac/rolePermissionModel';
 
@@ -51,6 +52,7 @@ function AdminLayout({ role, onLogout }: { role: string; onLogout: () => void })
 
   return (
     <div className={`admin-shell${collapsed ? ' admin-shell--sidebar-collapsed' : ''}`}>
+      <AdminNoticeCenter />
       <Sidebar role={role} onLogout={onLogout} collapsed={collapsed} onToggleCollapse={() => setCollapsed((prev) => !prev)} />
       <section className="workspace">
         <Outlet />

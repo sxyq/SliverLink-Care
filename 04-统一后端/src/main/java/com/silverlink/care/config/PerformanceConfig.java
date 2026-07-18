@@ -30,4 +30,18 @@ public class PerformanceConfig {
                 new ThreadPoolExecutor.CallerRunsPolicy()
         );
     }
+
+    @Bean(name = "auditExportExecutor", destroyMethod = "shutdown")
+    public Executor auditExportExecutor() {
+        return new ThreadPoolExecutor(
+                1, 2, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue<>(16),
+                runnable -> {
+                    Thread thread = new Thread(runnable);
+                    thread.setName("silverlink-audit-export-" + thread.threadId());
+                    thread.setDaemon(true);
+                    return thread;
+                },
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
+    }
 }

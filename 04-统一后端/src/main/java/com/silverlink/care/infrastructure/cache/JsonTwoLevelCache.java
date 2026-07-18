@@ -28,6 +28,10 @@ public class JsonTwoLevelCache {
     }
 
     public String getOrLoad(String key, long ttlMillis, Supplier<String> loader) {
+        return getOrLoad(key, ttlMillis, ttlMillis, loader);
+    }
+
+    public String getOrLoad(String key, long localTtlMillis, long redisTtlMillis, Supplier<String> loader) {
         if (key == null || loader == null) {
             return loader == null ? null : loader.get();
         }
@@ -43,7 +47,7 @@ public class JsonTwoLevelCache {
                     return cached;
                 }
                 String loaded = loader.get();
-                put(key, loaded, ttlMillis);
+                put(key, loaded, localTtlMillis, redisTtlMillis);
                 return loaded;
             } finally {
                 keyLocks.remove(key, lock);
@@ -71,16 +75,20 @@ public class JsonTwoLevelCache {
     }
 
     public void put(String key, String value, long ttlMillis) {
-        if (key == null || value == null || ttlMillis <= 0L) {
+        put(key, value, ttlMillis, ttlMillis);
+    }
+
+    public void put(String key, String value, long localTtlMillis, long redisTtlMillis) {
+        if (key == null || value == null || localTtlMillis <= 0L || redisTtlMillis <= 0L) {
             invalidate(key);
             return;
         }
-        localCache.put(key, value, ttlMillis);
+        localCache.put(key, value, localTtlMillis);
         if (!isRedisAvailable()) {
             return;
         }
         try {
-            redisTemplate.opsForValue().set(fullKey(key), value, Duration.ofMillis(ttlMillis));
+            redisTemplate.opsForValue().set(fullKey(key), value, Duration.ofMillis(redisTtlMillis));
         } catch (Exception ignored) {
             // Fall back to local cache only when Redis is unavailable.
         }

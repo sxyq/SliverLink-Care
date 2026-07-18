@@ -2,6 +2,7 @@ package com.silverlink.care.common;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -20,6 +21,12 @@ public class GlobalExceptionHandler {
         }
         return ResponseEntity.status(status)
                 .body(ApiResponse.fail(e.getCode(), e.getMessage()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.fail(409, "数据冲突，请检查输入后重试"));
     }
 
     @ExceptionHandler(Exception.class)

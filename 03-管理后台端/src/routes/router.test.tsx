@@ -29,6 +29,10 @@ vi.mock('../components/AdminMessageCenter', () => ({
   AdminMessageCenter: () => <div>AdminMessageCenter</div>,
 }));
 
+vi.mock('../components/AdminNoticeCenter', () => ({
+  AdminNoticeCenter: () => <div>AdminNoticeCenter</div>,
+}));
+
 vi.mock('../pages/AdminLoginPage', () => ({
   AdminLoginPage: ({ onLogin }: { onLogin: (role: string) => void }) => (
     <div>
@@ -104,6 +108,7 @@ describe('createAdminRouter', () => {
     render(<RouterProvider router={router} />);
 
     expect(await screen.findByText('DashboardPage')).toBeInTheDocument();
+    expect(screen.getByText('AdminNoticeCenter')).toBeInTheDocument();
     expect(screen.getByText('重庆医科大学护理学院 银龄守护团队')).toBeInTheDocument();
     expect(screen.getByTestId('sidebar-state')).toHaveTextContent('expanded');
   });
