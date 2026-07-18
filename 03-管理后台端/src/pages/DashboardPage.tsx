@@ -316,7 +316,7 @@ export function DashboardPage() {
             invitationRowsPromise,
             familyRowsPromise,
             medicationRowsPromise,
-            fetchAllScales(elderRows),
+            fetchAllScales(),
           ]);
 
           if (!active) return;

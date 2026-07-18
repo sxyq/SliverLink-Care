@@ -1,0 +1,82 @@
+{
+  "generatedAt" : "2026-07-18T05:48:19.975143Z",
+  "environment" : {
+    "mode" : "local-nameplate-pdf-concurrency",
+    "renderer" : "pdfbox-plus-zxing",
+    "scope" : "pdf-generation-long-tail-baseline-not-host-benchmark"
+  },
+  "summary" : [ "preview: baseline P95 1060ms -> optimized P95 70ms, baseline P99 1217ms -> optimized P99 70ms", "pdf: baseline P95 467ms -> optimized P95 20ms, baseline P99 493ms -> optimized P99 20ms" ],
+  "scenarios" : [ {
+    "name" : "nameplate-preview-local-baseline",
+    "totalRequests" : 300,
+    "concurrency" : 24,
+    "successCount" : 300,
+    "failureCount" : 0,
+    "successRate" : 100.0,
+    "p50Ms" : 453,
+    "p95Ms" : 1060,
+    "p99Ms" : 1217,
+    "maxMs" : 1287,
+    "metrics" : {
+      "averagePayloadBytes" : 0,
+      "maxPayloadBytes" : 0
+    },
+    "errorBreakdown" : { },
+    "findings" : [ ],
+    "notes" : [ ]
+  }, {
+    "name" : "nameplate-preview-local-optimized",
+    "totalRequests" : 300,
+    "concurrency" : 24,
+    "successCount" : 300,
+    "failureCount" : 0,
+    "successRate" : 100.0,
+    "p50Ms" : 0,
+    "p95Ms" : 70,
+    "p99Ms" : 70,
+    "maxMs" : 70,
+    "metrics" : {
+      "averagePayloadBytes" : 0,
+      "maxPayloadBytes" : 0
+    },
+    "errorBreakdown" : { },
+    "findings" : [ ],
+    "notes" : [ ]
+  }, {
+    "name" : "nameplate-pdf-local-baseline",
+    "totalRequests" : 96,
+    "concurrency" : 12,
+    "successCount" : 96,
+    "failureCount" : 0,
+    "successRate" : 100.0,
+    "p50Ms" : 287,
+    "p95Ms" : 467,
+    "p99Ms" : 493,
+    "maxMs" : 493,
+    "metrics" : {
+      "averagePayloadBytes" : 31129,
+      "maxPayloadBytes" : 31129
+    },
+    "errorBreakdown" : { },
+    "findings" : [ "本地 PDF 生成的尾延迟目前仍在可控范围，没有出现极端抖动。" ],
+    "notes" : [ "这一段关注 PDF 生成的长尾，而不是浏览器下载链路。", "baseline 关闭 preview/pdf/qr 缓存，并关闭字体资源复用，接近优化前路径。" ]
+  }, {
+    "name" : "nameplate-pdf-local-optimized",
+    "totalRequests" : 96,
+    "concurrency" : 12,
+    "successCount" : 96,
+    "failureCount" : 0,
+    "successRate" : 100.0,
+    "p50Ms" : 0,
+    "p95Ms" : 20,
+    "p99Ms" : 20,
+    "maxMs" : 20,
+    "metrics" : {
+      "averagePayloadBytes" : 31129,
+      "maxPayloadBytes" : 31129
+    },
+    "errorBreakdown" : { },
+    "findings" : [ "当前样本出现了明显缓存命中，尾延迟已经远低于未优化路径。" ],
+    "notes" : [ "这一段关注 PDF 生成的长尾，而不是浏览器下载链路。", "optimized 开启 preview/pdf/qr 短缓存，并复用字体资源。" ]
+  } ]
+}

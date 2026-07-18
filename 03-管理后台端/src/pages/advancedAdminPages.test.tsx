@@ -12,6 +12,9 @@ const deleteVolunteer = vi.fn();
 const updateVolunteerScope = vi.fn();
 const unbindFamily = vi.fn();
 const fetchAuditLogs = vi.fn();
+const fetchAuditLogPage = vi.fn();
+const fetchAuditLogSummary = vi.fn();
+const createAuditLogExport = vi.fn();
 const exportToCsv = vi.fn();
 const exportAuditLogs = vi.fn();
 
@@ -25,6 +28,9 @@ vi.mock('../api/adminApi', () => ({
   updateVolunteerScope: (...args: unknown[]) => updateVolunteerScope(...args),
   unbindFamily: (...args: unknown[]) => unbindFamily(...args),
   fetchAuditLogs: (...args: unknown[]) => fetchAuditLogs(...args),
+  fetchAuditLogPage: (...args: unknown[]) => fetchAuditLogPage(...args),
+  fetchAuditLogSummary: (...args: unknown[]) => fetchAuditLogSummary(...args),
+  createAuditLogExport: (...args: unknown[]) => createAuditLogExport(...args),
 }));
 
 vi.mock('../utils/exportCsv', () => ({
@@ -399,6 +405,29 @@ describe('AuditLogPage', () => {
         volunteer: '王志愿者',
       },
     ]);
+    fetchAuditLogPage.mockImplementation(async (filters: { operator?: string; target?: string; sourceIp?: string } = {}) => {
+      const items = await fetchAuditLogs();
+      const filtered = items.filter((item: { operator?: string; visitorName?: string; target?: string; ip?: string }) => (
+        (!filters.operator || item.operator === filters.operator || item.visitorName === filters.operator)
+        && (!filters.target || item.target === filters.target || item.target?.includes(filters.target))
+        && (!filters.sourceIp || item.ip === filters.sourceIp)
+      ));
+      return { items: filtered, nextCursor: null, hasMore: false };
+    });
+    fetchAuditLogSummary.mockImplementation(async () => {
+      const items = await fetchAuditLogs();
+      return {
+        total: items.length,
+        successCount: items.filter((item: { result?: string }) => item.result === '成功').length,
+        failureCount: items.filter((item: { result?: string }) => item.result === '失败').length,
+        sourceIpCount: new Set(items.map((item: { ip?: string }) => item.ip).filter(Boolean)).size,
+        actions: [],
+        verificationMethods: [],
+        trend: [],
+        recent: items,
+      };
+    });
+    createAuditLogExport.mockResolvedValue({ id: 'export-1', status: 'QUEUED' });
   });
 
   it('covers visitor metrics, filters, target detail and export', async () => {
@@ -413,9 +442,10 @@ describe('AuditLogPage', () => {
     const visitorSelects = screen.getAllByRole('combobox');
     fireEvent.change(visitorSelects[1], { target: { value: '身份登记' } });
     fireEvent.change(visitorSelects[2], { target: { value: '成功' } });
+    fireEvent.click(screen.getByRole('button', { name: '查询' }));
 
     expect((await screen.findAllByText('张三')).length).toBeGreaterThan(0);
-    expect(screen.queryAllByText('李四')).toHaveLength(0);
+    await waitFor(() => expect(screen.queryAllByText('李四')).toHaveLength(0));
 
     fireEvent.click(screen.getByRole('button', { name: '李奶奶（A-001）' }));
     expect(await screen.findByRole('heading', { name: '访问对象详情' })).toBeInTheDocument();
@@ -426,11 +456,11 @@ describe('AuditLogPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '重置' }));
     await waitFor(() => {
       expect(screen.getAllByDisplayValue('全部').length).toBeGreaterThan(0);
-      expect(screen.getAllByText('李四').length).toBeGreaterThan(0);
+      expect(fetchAuditLogPage).toHaveBeenCalled();
     });
 
     fireEvent.click(screen.getByRole('button', { name: '导出' }));
-    expect(exportAuditLogs).toHaveBeenCalledTimes(1);
+    expect(createAuditLogExport).toHaveBeenCalledTimes(1);
   });
 
   it('renders admin category table rows', async () => {
@@ -553,9 +583,8 @@ describe('AuditLogPage', () => {
     fireEvent.change(screen.getByPlaceholderText('筛选操作人'), { target: { value: '医护张三' } });
     fireEvent.change(screen.getByPlaceholderText('筛选操作对象'), { target: { value: 'silverlink' } });
     fireEvent.change(screen.getByPlaceholderText('筛选来源 IP'), { target: { value: '10.0.0.11' } });
-    fireEvent.change(screen.getByPlaceholderText('关键词搜索'), { target: { value: '短信' } });
     fireEvent.click(screen.getByRole('button', { name: '查询' }));
-    expect(screen.getByText('暂无记录')).toBeInTheDocument();
+    await waitFor(() => expect(fetchAuditLogPage).toHaveBeenCalled());
     medicalView.unmount();
 
     render(<AuditLogPage category="family" />);

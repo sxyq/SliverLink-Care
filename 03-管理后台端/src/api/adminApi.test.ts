@@ -95,9 +95,14 @@ describe('adminApi', () => {
 
   it('maps dashboard, elder, volunteer and audit rows', async () => {
     queueFetch(
-      { elderCount: 2, volunteerCount: 3, qrCodeCount: 4, auditCount: 5 },
+      {
+        elderCount: 2,
+        volunteerCount: 3,
+        qrCodeCount: 4,
+        auditCount: 5,
+        recentAuditLogs: [{ time: 'now', operator: 'admin', result: 'SUCCESS', sourceIp: '127.0.0.1' }],
+      },
       [{ id: 'elder-1', archiveNo: 'A001', emergencyContactPhone: '13800000000', status: 'ACTIVE' }],
-      [{ time: 'now', operator: 'admin', result: 'SUCCESS', sourceIp: '127.0.0.1' }],
       [{ id: 'vol-1', scopeCount: 2, status: 'DISABLED', source: '后台创建' }],
     );
 
@@ -235,8 +240,10 @@ describe('adminApi', () => {
       { recordId: 'med-record' },
       [{ id: 'scale-1', name: 'ADL', score: '12', updatedAt: '2026-05-25' }],
       { recordId: 'scale-record' },
-      [{ id: 'scale-a', date: '2026-05-25' }],
-      [{ id: 'scale-b', date: '2026-05-24' }],
+      [
+        { id: 'scale-a', elderId: 'elder-a', date: '2026-05-25' },
+        { id: 'scale-b', elderId: 'elder-b', date: '2026-05-24' },
+      ],
       [{ deviceId: 'device-1', status: 'PENDING', lastHeartbeat: 1770000000000 }],
       { deviceId: 'device-1', status: '在线', lastHeartbeat: 'bad-date' },
       [{ id: 'record-1', status: 'UPLOADED', receivedAt: 1770000000000 }],
@@ -248,10 +255,7 @@ describe('adminApi', () => {
     await expect(saveElderMedications('elder-1', [{ drugName: '药品C' }])).resolves.toEqual({ recordId: 'med-record' });
     await expect(fetchElderScales('elder-1')).resolves.toEqual([expect.objectContaining({ scaleName: 'ADL', score: 12 })]);
     await expect(saveElderScales('elder-1', [{ scaleName: 'ADL' }])).resolves.toEqual({ recordId: 'scale-record' });
-    const allScales = await fetchAllScales([
-      { id: 'elder-a', archiveNo: 'A', name: '老人A' },
-      { id: 'elder-b', archiveNo: 'B', name: '老人B' },
-    ]);
+    const allScales = await fetchAllScales();
     expect(allScales.map((item) => item.id)).toEqual(['scale-a', 'scale-b']);
     expect(new Set(allScales.map((item) => item.elderId))).toEqual(new Set(['elder-a', 'elder-b']));
     await expect(fetchSmsRelayDevices()).resolves.toEqual([expect.objectContaining({ status: '等待验证' })]);
@@ -496,21 +500,17 @@ describe('adminApi', () => {
     expect(records[0].uploadedAt).toBe(new Date('2026-05-25T10:30:00Z').toLocaleString('zh-CN', { hour12: false }));
   });
 
-  it('skips elders without id in fetchAllScales', async () => {
+  it('maps the server-provided elder identity in fetchAllScales', async () => {
     queueFetch(
-      [{ id: 'scale-1', date: '2026-05-25' }],
+      [{ id: 'scale-1', elderId: 'elder-1', date: '2026-05-25' }],
     );
-    const allScales = await fetchAllScales([
-      { id: '', archiveNo: 'A', name: '无ID老人' },
-      { id: 'elder-1', archiveNo: 'B', name: '有ID老人' },
-    ]);
+    const allScales = await fetchAllScales();
     expect(allScales).toEqual([expect.objectContaining({ elderId: 'elder-1' })]);
   });
 
-  it('fetches all scales without eldersInput by calling fetchElders', async () => {
+  it('fetches all scales with one server request', async () => {
     queueFetch(
-      [{ id: 'elder-1', name: '老人', status: 'ACTIVE', archiveNo: 'A001' }],
-      [{ id: 'scale-1', date: '2026-05-25' }],
+      [{ id: 'scale-1', elderId: 'elder-1', archiveNo: 'A001', elderName: '老人', date: '2026-05-25' }],
     );
     const allScales = await fetchAllScales();
     expect(allScales).toEqual([expect.objectContaining({ elderId: 'elder-1' })]);

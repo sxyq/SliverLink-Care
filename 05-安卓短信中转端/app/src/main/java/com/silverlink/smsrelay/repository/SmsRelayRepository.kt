@@ -14,6 +14,7 @@ import com.silverlink.smsrelay.util.SmsParser
 import com.silverlink.smsrelay.util.SmsPermissionHelper
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 
 class SmsRelayRepository(
@@ -35,10 +36,10 @@ class SmsRelayRepository(
         advisoryMessage: String? = null,
     ): Result<Unit> {
         val config = relayPreferences.readConfig()
-        val recordId = "sms-${System.currentTimeMillis()}"
+        val recordId = stableRecordId(senderPhone, messageBody, receivedAt)
 
         // 保存为PENDING状态
-        saveRecord(
+        val isNewRecord = saveRecord(
             SmsRecord(
                 id = recordId,
                 senderPhone = senderPhone,
@@ -48,7 +49,9 @@ class SmsRelayRepository(
                 advisoryMessage = advisoryMessage,
             ),
         )
-        incrementStatsReceived()
+        if (isNewRecord) {
+            incrementStatsReceived()
+        }
 
         val payload = InboundSmsPayload(
             deviceId = config.deviceId,
@@ -57,6 +60,7 @@ class SmsRelayRepository(
             messageBody = messageBody,
             receivedAt = receivedAt,
             messagePrefix = config.messagePrefix,
+            clientRecordId = recordId,
         )
 
         val result = apiService.uploadInboundSms(
@@ -193,10 +197,13 @@ class SmsRelayRepository(
         return Result.success(uploadedCount)
     }
 
-    private fun saveRecord(record: SmsRecord) {
+    private fun saveRecord(record: SmsRecord): Boolean {
         val records = getAllRecords().toMutableList()
+        val isNewRecord = records.none { it.id == record.id }
+        records.removeAll { it.id == record.id }
         records.add(record)
         saveAllRecords(records)
+        return isNewRecord
     }
 
     private fun updateRecordStatus(id: String, status: UploadStatus, failReason: String? = null) {
@@ -214,7 +221,10 @@ class SmsRelayRepository(
 
     private fun saveAllRecords(records: List<SmsRecord>) {
         val array = JSONArray()
-        records.forEach { record ->
+        records
+            .sortedByDescending { it.receivedAt }
+            .take(MAX_STORED_RECORDS)
+            .forEach { record ->
             val obj = JSONObject()
             obj.put("id", record.id)
             obj.put("senderPhone", record.senderPhone)
@@ -248,9 +258,17 @@ class SmsRelayRepository(
         private const val KEY_RECORDS = "records_json"
         private const val TAG = "SmsRelayInboxSync"
         private const val INBOX_SCAN_LIMIT = 30
+        private const val MAX_STORED_RECORDS = 500
         private val INITIAL_INBOX_LOOKBACK_MS = TimeUnit.HOURS.toMillis(12)
         private val INBOX_SCAN_OVERLAP_MS = TimeUnit.MINUTES.toMillis(10)
         private val VERIFICATION_SESSION_TTL_MS = TimeUnit.MINUTES.toMillis(5)
+
+        private fun stableRecordId(senderPhone: String, messageBody: String, receivedAt: Long): String {
+            val input = "$receivedAt|$senderPhone|$messageBody"
+            val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
+            val hex = digest.joinToString("") { byte -> "%02x".format(byte) }
+            return "sms-${hex.take(32)}"
+        }
 
         private fun fingerprintOf(record: SmsRecord): String {
             return fingerprintOf(record.senderPhone, record.messageBody, record.receivedAt)

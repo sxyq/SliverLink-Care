@@ -237,7 +237,10 @@ public class AdminController {
     }
 
     @GetMapping("/scales")
-    public ApiResponse<List<Map<String, Object>>> scales(@RequestParam String elderId) {
+    public ApiResponse<List<Map<String, Object>>> scales(@RequestParam(required = false) String elderId) {
+        if (elderId == null || elderId.isBlank()) {
+            return ApiResponse.ok(data.allScaleSummariesForAdmin());
+        }
         Map<String, Object> elder = data.elderDetail(elderId, false);
         List<Map<String, Object>> rows = data.scales(elderId);
         for (Map<String, Object> row : rows) {

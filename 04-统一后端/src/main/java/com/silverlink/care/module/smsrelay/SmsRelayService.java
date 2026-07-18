@@ -12,7 +12,9 @@ import com.silverlink.care.module.scan.ScanVerificationStatusDto;
 import com.silverlink.care.module.sms.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import jakarta.annotation.PostConstruct;
@@ -322,23 +324,35 @@ public class SmsRelayService {
             throw new BizException(400, "Receiver phone does not match device configuration");
         }
 
-        String recordId = newRelayRecordId();
+        String recordId = normalizeClientRecordId(request.getClientRecordId());
+        if (recordId.isBlank()) {
+            recordId = newRelayRecordId();
+        }
         long uploadedAt = Instant.now().toEpochMilli();
-        jdbc.update("""
-                insert into sms_relay_record
-                (id, device_id, receiver_phone, sender_phone, message_body, received_at, message_prefix, uploaded_at, status)
-                values (?,?,?,?,?,?,?,?,?)
-                """,
-                recordId,
-                request.getDeviceId(),
-                request.getReceiverPhone(),
-                request.getSenderPhone(),
-                previewMessageBody(request.getMessageBody()),
-                request.getReceivedAt(),
-                request.getMessagePrefix(),
-                uploadedAt,
-                "UPLOADED"
-        );
+        int inserted;
+        try {
+            inserted = jdbc.update("""
+                    insert into sms_relay_record
+                    (id, device_id, receiver_phone, sender_phone, message_body, received_at, message_prefix, uploaded_at, status)
+                    values (?,?,?,?,?,?,?,?,?)
+                    """,
+                    recordId,
+                    request.getDeviceId(),
+                    request.getReceiverPhone(),
+                    request.getSenderPhone(),
+                    previewMessageBody(request.getMessageBody()),
+                    request.getReceivedAt(),
+                    request.getMessagePrefix(),
+                    uploadedAt,
+                    "UPLOADED"
+            );
+        } catch (DuplicateKeyException duplicate) {
+            // A client retry with the same signed ID already reached the database.
+            return;
+        }
+        if (inserted == 0) {
+            return;
+        }
         invalidateAdminSummary();
 
         String normalizedBody = normalize(request.getMessageBody());
@@ -570,7 +584,6 @@ public class SmsRelayService {
             String from,
             String to
     ) {
-        expirePendingSessions();
         int limit = requestedLimit == null ? 50 : Math.max(1, Math.min(100, requestedLimit));
         Map<String, String> decoded = CursorCodec.decode(cursor);
         StringBuilder sql = new StringBuilder("select * from scan_verification_session force index (")
@@ -693,7 +706,8 @@ public class SmsRelayService {
         return snapshot;
     }
 
-    private void expirePendingSessions() {
+    @Scheduled(fixedDelayString = "${silverlink.smsrelay.expire-pending-interval-ms:60000}")
+    public void expirePendingSessionsScheduled() {
         // ISO-8601 values sort lexicographically. One SQL update avoids scanning all sessions in Java.
         jdbc.update("update scan_verification_session set status='EXPIRED', verified=0 "
                 + "where status='PENDING' and expires_at < ?", Instant.now().toString());
@@ -836,6 +850,14 @@ public class SmsRelayService {
 
     private String newRelayRecordId() {
         return "rec-" + UUID.randomUUID();
+    }
+
+    private String normalizeClientRecordId(String clientRecordId) {
+        String value = str(clientRecordId).trim();
+        if (value.length() > 64 || !value.matches("[A-Za-z0-9._:-]+")) {
+            return "";
+        }
+        return value;
     }
 
     private void validateAuthorizedContext(VerifiedSessionContext context, String elderId, String target, Instant authorizedUntil) {

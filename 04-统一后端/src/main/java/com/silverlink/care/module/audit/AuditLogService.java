@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.silverlink.care.common.CursorCodec;
 import com.silverlink.care.common.CursorPage;
 import com.silverlink.care.infrastructure.cache.JsonTwoLevelCache;
+import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,9 +44,13 @@ public class AuditLogService {
     private final ConcurrentLinkedQueue<SilverLinkDataService.AuditLogWrite> pendingWrites = new ConcurrentLinkedQueue<>();
     private final AtomicInteger pendingWriteCount = new AtomicInteger();
     private final AtomicBoolean flushRunning = new AtomicBoolean(false);
+    private final SimpleTtlCache<String, Boolean> localReadDedupe = new SimpleTtlCache<>();
 
     @Value("${silverlink.audit.batch-size:64}")
     private int batchSize = 64;
+
+    @Value("${silverlink.audit.read-dedupe-ttl-ms:300000}")
+    private long readDedupeTtlMillis = 300_000L;
 
     public AuditLogService(SilverLinkDataService data) {
         this(data, Runnable::run, null, new ObjectMapper());
@@ -148,6 +153,47 @@ public class AuditLogService {
 
     public void record(String operator, String role, HttpServletRequest request, String target, String action, String result, String failReason, String requestId) {
         record(operator, role, resolveClientIp(request), target, action, result, failReason, requestId);
+    }
+
+    /**
+     * Coalesces repeated successful read events for the same short-lived access context.
+     * The cache key is a one-way digest and never contains visitor identity or audit content.
+     */
+    public void recordReadOnce(
+            String operator,
+            String role,
+            HttpServletRequest request,
+            String target,
+            String action,
+            String result,
+            String failReason,
+            String requestId,
+            String verificationMethod,
+            String visitorName,
+            String visitorPhone,
+            String visitorIdCard
+    ) {
+        if ("FAIL".equalsIgnoreCase(result)) {
+            record(operator, role, request, target, action, result, failReason, requestId,
+                    verificationMethod, visitorName, visitorPhone, visitorIdCard);
+            return;
+        }
+
+        String fingerprint = data.hash(String.join("\u0000",
+                data.str(role), data.str(action), data.str(target), data.str(requestId),
+                resolveClientIp(request)));
+        String key = "audit:read-dedupe:v1:" + fingerprint;
+        if (cache != null) {
+            if (cache.get(key) != null) return;
+            cache.put(key, "1", readDedupeTtlMillis, readDedupeTtlMillis);
+        } else if (localReadDedupe.get(key) != null) {
+            return;
+        } else {
+            localReadDedupe.put(key, Boolean.TRUE, readDedupeTtlMillis);
+        }
+
+        record(operator, role, request, target, action, result, failReason, requestId,
+                verificationMethod, visitorName, visitorPhone, visitorIdCard);
     }
 
     public void record(

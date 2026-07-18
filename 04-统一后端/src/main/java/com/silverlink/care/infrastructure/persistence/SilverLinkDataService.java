@@ -487,6 +487,30 @@ public class SilverLinkDataService {
         return scaleSummaries(elderId);
     }
 
+    public List<Map<String, Object>> allScaleSummariesForAdmin() {
+        List<Map<String, Object>> rows = jdbc.queryForList("""
+                select s.id, s.elder_id, s.scale_name, s.score, s.record_date, s.volunteer,
+                       e.archive_no, e.name_enc as elder_name_enc
+                from scale_record s
+                join elder e on e.id = s.elder_id
+                order by s.created_at desc, s.id desc
+                """);
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            map.put("id", str(row.get("id")));
+            map.put("elderId", str(row.get("elder_id")));
+            map.put("archiveNo", str(row.get("archive_no")));
+            map.put("elderName", dec(row.get("elder_name_enc")));
+            map.put("scaleName", str(row.get("scale_name")));
+            map.put("score", intValue(row.get("score")));
+            map.put("date", str(row.get("record_date")));
+            map.put("volunteer", str(row.get("volunteer")));
+            result.add(map);
+        }
+        return result;
+    }
+
     public List<Map<String, Object>> scaleSummaries(String elderId) {
         List<Map<String, Object>> rows = jdbc.queryForList("""
                 select id, scale_name, score, record_date, volunteer

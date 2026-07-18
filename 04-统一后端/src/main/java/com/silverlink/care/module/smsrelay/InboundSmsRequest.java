@@ -7,6 +7,7 @@ public class InboundSmsRequest {
     private String messageBody;
     private Long receivedAt;
     private String messagePrefix;
+    private String clientRecordId;
 
     public String getDeviceId() { return deviceId; }
     public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
@@ -20,4 +21,6 @@ public class InboundSmsRequest {
     public void setReceivedAt(Long receivedAt) { this.receivedAt = receivedAt; }
     public String getMessagePrefix() { return messagePrefix; }
     public void setMessagePrefix(String messagePrefix) { this.messagePrefix = messagePrefix; }
+    public String getClientRecordId() { return clientRecordId; }
+    public void setClientRecordId(String clientRecordId) { this.clientRecordId = clientRecordId; }
 }

@@ -7,4 +7,5 @@ data class InboundSmsPayload(
     val messageBody: String,
     val receivedAt: Long,
     val messagePrefix: String,
+    val clientRecordId: String = "",
 )

@@ -594,20 +594,18 @@ export async function fetchElderScales(elderId: string) {
 }
 
 export async function fetchAllScales(eldersInput?: Array<{ id?: string; archiveNo: string; name: string }>) {
-  const elders = eldersInput ?? (await fetchElders());
-  const nestedRows = await Promise.all(
-    elders.map(async (elder) => {
-      if (!elder.id) return [];
-      const rows = await fetchElderScales(elder.id);
-      return rows.map((row) => ({
-        ...row,
-        elderId: elder.id,
-        archiveNo: row.archiveNo || elder.archiveNo,
-        elderName: row.elderName || elder.name,
-      }));
-    }),
-  );
-  return nestedRows.flat().sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  void eldersInput;
+  const rows = await request<Array<Record<string, unknown>>>('/api/admin/scales');
+  return rows.map((row) => ({
+    id: String(row.id || ''),
+    elderId: String(row.elderId || ''),
+    archiveNo: String(row.archiveNo || ''),
+    elderName: String(row.elderName || ''),
+    scaleName: String(row.scaleName || row.name || row.scale || ''),
+    score: Number(row.score || 0),
+    date: String(row.date || row.updatedAt || ''),
+    volunteer: String(row.volunteer || ''),
+  }));
 }
 
 export async function saveElderScales(elderId: string, items: Array<Record<string, unknown>>) {

@@ -57,7 +57,7 @@ class SettingsFragmentTest {
         }
 
         val config = preferences.readConfig()
-        assertEquals("https://sxyq27.online/silverlink-api", config.serverBaseUrl)
+        assertEquals("http://sxyq27.online/silverlink-api", config.serverBaseUrl)
         assertEquals("device-a", config.deviceId)
         assertEquals("secret-a", config.deviceSecret)
         assertEquals("13800000000", config.receiverPhone)

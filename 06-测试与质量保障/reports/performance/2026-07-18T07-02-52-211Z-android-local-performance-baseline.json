@@ -1,0 +1,61 @@
+{
+  "generatedAt": "2026-07-18T07:02:51.777308Z",
+  "topic": "android-local-performance-baseline",
+  "environment": {
+    "mode": "local-jvm-robolectric-baseline",
+    "scope": "parser-signer-api-repository",
+    "network": "mockwebserver-loopback"
+  },
+  "scenarios": [
+    {
+      "name": "sms-parser-parse",
+      "iterations": 50000,
+      "unit": "us",
+      "avg": 0.37114,
+      "p50": 0,
+      "p95": 1,
+      "p99": 4,
+      "max": 1719
+    },
+    {
+      "name": "relay-request-signer-sign",
+      "iterations": 20000,
+      "unit": "us",
+      "avg": 6.64495,
+      "p50": 4,
+      "p95": 13,
+      "p99": 28,
+      "max": 2466
+    },
+    {
+      "name": "relay-api-upload-inbound-sms",
+      "iterations": 80,
+      "unit": "ms",
+      "avg": 0.3125,
+      "p50": 0,
+      "p95": 1,
+      "p99": 3,
+      "max": 3
+    },
+    {
+      "name": "relay-api-send-heartbeat",
+      "iterations": 80,
+      "unit": "ms",
+      "avg": 0.0625,
+      "p50": 0,
+      "p95": 1,
+      "p99": 1,
+      "max": 1
+    },
+    {
+      "name": "sms-relay-repository-upload-inbound-sms",
+      "iterations": 40,
+      "unit": "ms",
+      "avg": 2.275,
+      "p50": 2,
+      "p95": 3,
+      "p99": 6,
+      "max": 6
+    }
+  ]
+}

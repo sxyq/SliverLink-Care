@@ -31,18 +31,23 @@ class RelayApiService(
             .put("messageBody", payload.messageBody)
             .put("receivedAt", payload.receivedAt)
             .put("messagePrefix", payload.messagePrefix)
+            .put("clientRecordId", payload.clientRecordId)
         val path = "/api/sms-relay/inbound"
+        val signaturePayload = mutableListOf(
+            payload.deviceId,
+            payload.receiverPhone,
+            payload.senderPhone,
+            payload.messageBody,
+            payload.receivedAt.toString(),
+            payload.messagePrefix,
+        )
+        if (payload.clientRecordId.isNotBlank()) {
+            signaturePayload += payload.clientRecordId
+        }
         val signed = RelayRequestSigner.sign(
             method = "POST",
             path = path,
-            payload = listOf(
-                payload.deviceId,
-                payload.receiverPhone,
-                payload.senderPhone,
-                payload.messageBody,
-                payload.receivedAt.toString(),
-                payload.messagePrefix,
-            ).joinToString("\n"),
+            payload = signaturePayload.joinToString("\n"),
             secret = deviceSecret,
         )
 

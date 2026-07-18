@@ -6,6 +6,7 @@ import { DashboardPage } from './DashboardPage';
 const loginAdmin = vi.fn();
 const fetchAllScales = vi.fn();
 const fetchAuditLogs = vi.fn();
+const fetchDashboardSummary = vi.fn();
 const fetchElders = vi.fn();
 const fetchFamilyBindings = vi.fn();
 const fetchInvitations = vi.fn();
@@ -17,6 +18,7 @@ vi.mock('../api/adminApi', () => ({
   loginAdmin: (...args: unknown[]) => loginAdmin(...args),
   fetchAllScales: (...args: unknown[]) => fetchAllScales(...args),
   fetchAuditLogs: (...args: unknown[]) => fetchAuditLogs(...args),
+  fetchDashboardSummary: (...args: unknown[]) => fetchDashboardSummary(...args),
   fetchElders: (...args: unknown[]) => fetchElders(...args),
   fetchFamilyBindings: (...args: unknown[]) => fetchFamilyBindings(...args),
   fetchInvitations: (...args: unknown[]) => fetchInvitations(...args),
@@ -74,12 +76,14 @@ describe('DashboardPage', () => {
     sessionStorage.clear();
     fetchAllScales.mockReset();
     fetchAuditLogs.mockReset();
+    fetchDashboardSummary.mockReset();
     fetchElders.mockReset();
     fetchFamilyBindings.mockReset();
     fetchInvitations.mockReset();
     fetchMedications.mockReset();
     fetchQrCodes.mockReset();
     fetchVolunteers.mockReset();
+    fetchDashboardSummary.mockImplementation(async () => ({ recentAuditLogs: await fetchAuditLogs() }));
   });
 
   it('loads and renders dashboard metrics, panels and latest audits', async () => {

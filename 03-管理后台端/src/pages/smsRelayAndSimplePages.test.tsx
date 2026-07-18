@@ -8,6 +8,9 @@ import { FamilyBindingManagePage } from './FamilyBindingManagePage';
 const fetchSmsRelayDevices = vi.fn();
 const fetchSmsRelayRecords = vi.fn();
 const fetchSmsRelaySessions = vi.fn();
+const fetchSmsRelaySummary = vi.fn();
+const fetchSmsRelayRecordPage = vi.fn();
+const fetchSmsRelaySessionPage = vi.fn();
 const updateSmsRelayDevice = vi.fn();
 const fetchFamilyBindings = vi.fn();
 const unbindFamily = vi.fn();
@@ -17,6 +20,9 @@ vi.mock('../api/adminApi', () => ({
   fetchSmsRelayDevices: (...args: unknown[]) => fetchSmsRelayDevices(...args),
   fetchSmsRelayRecords: (...args: unknown[]) => fetchSmsRelayRecords(...args),
   fetchSmsRelaySessions: (...args: unknown[]) => fetchSmsRelaySessions(...args),
+  fetchSmsRelaySummary: (...args: unknown[]) => fetchSmsRelaySummary(...args),
+  fetchSmsRelayRecordPage: (...args: unknown[]) => fetchSmsRelayRecordPage(...args),
+  fetchSmsRelaySessionPage: (...args: unknown[]) => fetchSmsRelaySessionPage(...args),
   updateSmsRelayDevice: (...args: unknown[]) => updateSmsRelayDevice(...args),
   fetchFamilyBindings: (...args: unknown[]) => fetchFamilyBindings(...args),
   unbindFamily: (...args: unknown[]) => unbindFamily(...args),
@@ -75,6 +81,20 @@ describe('SmsRelayManagePage', () => {
         createdAt: '2026-05-26 09:00:00',
       },
     ]);
+    fetchSmsRelaySummary.mockResolvedValue({ deviceCount: 1, onlineDeviceCount: 1, recordCount: 1, sessionCount: 1 });
+    fetchSmsRelayRecordPage.mockResolvedValue({ items: [
+      {
+        id: 'record-1',
+        deviceId: 'device-1',
+        receiverPhone: '13800000000',
+        senderPhone: '13911112222',
+        messageBody: '验证码 123456',
+        receivedAt: '2026-05-26 09:00:01',
+        uploadedAt: '2026-05-26 09:00:02',
+        status: '已上传',
+      },
+    ], nextCursor: null, hasMore: false });
+    fetchSmsRelaySessionPage.mockResolvedValue({ items: [], nextCursor: null, hasMore: false });
     updateSmsRelayDevice.mockResolvedValue({
       deviceId: 'device-1',
       receiverPhone: '13900000000',
@@ -90,13 +110,20 @@ describe('SmsRelayManagePage', () => {
     render(<SmsRelayManagePage />);
 
     expect(await screen.findByText('短信中转管理')).toBeInTheDocument();
-    expect((await screen.findAllByText('验证码 123456')).length).toBeGreaterThan(0);
     expect(screen.getByText('设备总数')).toBeInTheDocument();
     expect(screen.getByText('在线设备')).toBeInTheDocument();
 
-    const searchInput = screen.getByPlaceholderText('搜索设备、手机号或短信内容');
+    fireEvent.click(screen.getByRole('button', { name: '回传记录' }));
+    expect((await screen.findAllByText('验证码 123456')).length).toBeGreaterThan(0);
+
+    const searchInput = screen.getByPlaceholderText('发送手机号（精确筛选）');
     fireEvent.change(searchInput, { target: { value: '1391111' } });
-    expect(screen.getAllByText('验证码 123456').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: '刷新' }));
+    await waitFor(() => {
+      expect(fetchSmsRelayRecordPage).toHaveBeenLastCalledWith({ senderPhone: '1391111' }, undefined);
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '设备' }));
 
     const serverUrlInputs = screen.getAllByDisplayValue('https://server-a');
     fireEvent.change(serverUrlInputs[0], { target: { value: 'https://server-b' } });
@@ -114,12 +141,10 @@ describe('SmsRelayManagePage', () => {
       expect(screen.getByDisplayValue('https://server-b')).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: '刷新' }));
-    await waitFor(() => {
-      expect(fetchSmsRelayDevices).toHaveBeenCalledTimes(2);
-      expect(fetchSmsRelayRecords).toHaveBeenCalledTimes(2);
-      expect(fetchSmsRelaySessions).toHaveBeenCalledTimes(2);
-    });
+    expect(fetchSmsRelayDevices).toHaveBeenCalledTimes(1);
+    expect(fetchSmsRelaySummary).toHaveBeenCalledTimes(1);
+    expect(fetchSmsRelayRecordPage).toHaveBeenCalledTimes(2);
+    expect(fetchSmsRelaySessionPage).not.toHaveBeenCalled();
   });
 
   it('shows save error when device update fails', async () => {

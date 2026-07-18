@@ -31,17 +31,25 @@ public class SmsRelayController {
                 "/api/sms-relay/inbound",
                 "POST",
                 new RelaySignatureHeaders(relayTimestamp, relayNonce, relaySignature),
-                String.join("\n",
-                        String.valueOf(request.getDeviceId()),
-                        String.valueOf(request.getReceiverPhone()),
-                        String.valueOf(request.getSenderPhone()),
-                        String.valueOf(request.getMessageBody()),
-                        String.valueOf(request.getReceivedAt()),
-                        String.valueOf(request.getMessagePrefix())
-                )
+                signedPayload(request)
         );
         smsRelayService.handleInbound(request, deviceSecret);
         return ApiResponse.ok(null);
+    }
+
+    private String signedPayload(InboundSmsRequest request) {
+        String payload = String.join("\n",
+                String.valueOf(request.getDeviceId()),
+                String.valueOf(request.getReceiverPhone()),
+                String.valueOf(request.getSenderPhone()),
+                String.valueOf(request.getMessageBody()),
+                String.valueOf(request.getReceivedAt()),
+                String.valueOf(request.getMessagePrefix())
+        );
+        if (request.getClientRecordId() != null && !request.getClientRecordId().isBlank()) {
+            return payload + "\n" + request.getClientRecordId();
+        }
+        return payload;
     }
 
     // 安卓端 - 心跳（需设备密钥认证）

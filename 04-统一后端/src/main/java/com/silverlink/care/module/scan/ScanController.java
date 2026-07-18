@@ -49,7 +49,7 @@ public class ScanController {
     @GetMapping("/verification/status")
     public ApiResponse<ScanVerificationStatusDto> verificationStatus(@RequestParam String sessionId, HttpServletRequest request) {
         ScanVerificationStatusDto status = scanService.getVerificationStatus(sessionId);
-        auditLogService.record("扫码用户", "SCAN", request, sessionId, "SMS_RELAY_STATUS", status.isVerified() ? "SUCCESS" : "PENDING", null, sessionId);
+        auditLogService.recordReadOnce("扫码用户", "SCAN", request, sessionId, "SMS_RELAY_STATUS", status.isVerified() ? "SUCCESS" : "PENDING", null, sessionId, "", "", "", "");
         return ApiResponse.ok(status);
     }
 
@@ -101,7 +101,7 @@ public class ScanController {
     public ApiResponse<Map<String, Object>> archive(@RequestParam String elderId, @RequestParam String sessionId, HttpServletRequest request) {
         var context = scanService.authorizeSession(sessionId, elderId, "health");
         Map<String, Object> archive = scanService.getArchiveData(elderId);
-        auditLogService.record(
+        auditLogService.recordReadOnce(
                 context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
                 "VISITOR",
                 request,
@@ -122,7 +122,7 @@ public class ScanController {
     public ApiResponse<Map<String, Object>> basicInfo(@RequestParam String elderId, @RequestParam String sessionId, HttpServletRequest request) {
         var context = scanService.authorizeSession(sessionId, elderId, "health");
         Map<String, Object> basicInfo = scanService.getVerifiedBasicInfoData(elderId);
-        auditLogService.record(
+        auditLogService.recordReadOnce(
                 context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
                 "VISITOR",
                 request,
@@ -143,7 +143,7 @@ public class ScanController {
     public ApiResponse<List<Map<String, String>>> medications(@RequestParam String elderId, @RequestParam String sessionId, HttpServletRequest request) {
         var context = scanService.authorizeSession(sessionId, elderId, "health");
         List<Map<String, String>> medications = scanService.getMedicationsData(elderId);
-        auditLogService.record(
+        auditLogService.recordReadOnce(
                 context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
                 "VISITOR",
                 request,
@@ -164,7 +164,7 @@ public class ScanController {
     public ApiResponse<List<Map<String, Object>>> scales(@RequestParam String elderId, @RequestParam String sessionId, HttpServletRequest request) {
         var context = scanService.authorizeSession(sessionId, elderId, "health");
         List<Map<String, Object>> scales = scanService.getScalesData(elderId);
-        auditLogService.record(
+        auditLogService.recordReadOnce(
                 context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
                 "VISITOR",
                 request,
@@ -190,7 +190,7 @@ public class ScanController {
     ) {
         var context = scanService.authorizeSession(sessionId, elderId, "health");
         Map<String, Object> scale = scanService.getScaleDetailData(elderId, scaleName);
-        auditLogService.record(
+        auditLogService.recordReadOnce(
                 context.getVisitorName().isBlank() ? "扫码用户" : context.getVisitorName(),
                 "VISITOR",
                 request,

@@ -141,6 +141,8 @@ class SmsRelayServiceTest {
                 Map.entry("created_at", "2026-05-28T23:59:59Z")
         )));
 
+        service.expirePendingSessionsScheduled();
+
         List<SmsRelayRecordDto> records = service.listRecords();
         List<DeviceConfigDto> devices = service.listDevices();
         List<ScanVerificationAdminDto> sessions = service.listVerificationSessions();
@@ -455,34 +457,34 @@ class SmsRelayServiceTest {
                 row.put("session_id", args[0]);
                 row.put("elder_id", args[1]);
                 row.put("target", args[2]);
-                if (args.length == 15) {
+                if (args.length == 16) {
                     row.put("verification_method", args[3]);
                     row.put("receiver_phone", args[4]);
                     row.put("message_body", args[5]);
-                    row.put("message_prefix", args[6]);
-                    row.put("status", args[7]);
-                    row.put("expires_at", args[8]);
-                    row.put("verified", args[9]);
-                    row.put("verified_at", args[10]);
-                    row.put("sender_phone_masked", args[11]);
-                    row.put("visitor_name_enc", args[12]);
-                    row.put("visitor_phone_enc", args[13]);
-                    row.put("visitor_id_card_enc", args[14]);
-                } else if (args.length == 10) {
+                    row.put("message_prefix", args[7]);
+                    row.put("status", args[8]);
+                    row.put("expires_at", args[9]);
+                    row.put("verified", args[10]);
+                    row.put("verified_at", args[11]);
+                    row.put("sender_phone_masked", args[12]);
+                    row.put("visitor_name_enc", args[13]);
+                    row.put("visitor_phone_enc", args[14]);
+                    row.put("visitor_id_card_enc", args[15]);
+                } else if (args.length == 11) {
                     row.put("relay_device_id", args[3]);
                     row.put("receiver_phone", args[4]);
                     row.put("message_body", args[5]);
+                    row.put("message_prefix", args[7]);
+                    row.put("status", args[8]);
+                    row.put("expires_at", args[9]);
+                    row.put("verified", args[10]);
+                } else if (args.length == 10) {
+                    row.put("receiver_phone", args[3]);
+                    row.put("message_body", args[4]);
                     row.put("message_prefix", args[6]);
                     row.put("status", args[7]);
                     row.put("expires_at", args[8]);
                     row.put("verified", args[9]);
-                } else if (args.length == 9) {
-                    row.put("receiver_phone", args[3]);
-                    row.put("message_body", args[4]);
-                    row.put("message_prefix", args[5]);
-                    row.put("status", args[6]);
-                    row.put("expires_at", args[7]);
-                    row.put("verified", args[8]);
                     row.put("verification_method", "DIRECT_SMS");
                 }
                 sessions.put(String.valueOf(args[0]), row);
@@ -501,6 +503,15 @@ class SmsRelayServiceTest {
                 return 1;
             }
             if (sql.contains("update scan_verification_session") && sql.contains("set status='EXPIRED'")) {
+                if (args.length == 1) {
+                    for (Map<String, Object> row : sessions.values()) {
+                        if ("PENDING".equals(row.get("status"))) {
+                            row.put("status", "EXPIRED");
+                            row.put("verified", false);
+                        }
+                    }
+                    return 1;
+                }
                 String sessionId = String.valueOf(args[0]);
                 Map<String, Object> row = sessions.get(sessionId);
                 if (row == null) {
@@ -532,7 +543,7 @@ class SmsRelayServiceTest {
             if (sql.contains("from sms_relay_device order by updated_at desc")) {
                 return new ArrayList<>(devices.values());
             }
-            if (sql.contains("from scan_verification_session order by created_at desc")) {
+            if (sql.contains("from scan_verification_session") && sql.contains("order by created_at desc")) {
                 return new ArrayList<>(sessions.values());
             }
             if (sql.contains("from scan_verification_session where status='PENDING'")) {
@@ -583,7 +594,7 @@ class SmsRelayServiceTest {
                 }
                 return rows;
             }
-            if (sql.contains("from scan_verification_session order by created_at desc")) {
+            if (sql.contains("from scan_verification_session") && sql.contains("order by created_at desc")) {
                 return new ArrayList<>(sessions.values());
             }
             return new ArrayList<>();
