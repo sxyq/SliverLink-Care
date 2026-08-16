@@ -7,6 +7,7 @@ import { fetchScales } from '@/services/scan/scanArchiveService';
 import type { ScanScaleSummaryItem } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -17,7 +18,7 @@ function formatDate(value: string, fallback: string) {
   return value.slice(0, 10);
 }
 
-export default function ScanScalesPage() {
+function ScanScalesPage() {
   const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
@@ -147,5 +148,13 @@ export default function ScanScalesPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function ScanScalesPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='scan.scaleRecords'>
+      <ScanScalesPage />
+    </I18nPageShell>
   );
 }

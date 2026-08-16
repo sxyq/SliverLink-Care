@@ -7,6 +7,7 @@ import { resolveScanToken } from '@/services/scan/scanAuthService';
 import type { ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -38,7 +39,7 @@ function ScanLandingHeader() {
   );
 }
 
-export default function ScanLandingPage() {
+function ScanLandingPage() {
   const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
@@ -187,5 +188,13 @@ export default function ScanLandingPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function ScanLandingPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='auth.scanView'>
+      <ScanLandingPage />
+    </I18nPageShell>
   );
 }

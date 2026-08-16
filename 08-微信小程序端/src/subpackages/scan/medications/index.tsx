@@ -7,10 +7,11 @@ import { fetchMedications } from '@/services/scan/scanArchiveService';
 import type { ScanMedicationItem } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
-export default function ScanMedicationsPage() {
+function ScanMedicationsPage() {
   const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
@@ -150,5 +151,13 @@ export default function ScanMedicationsPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function ScanMedicationsPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='scan.medicationRecords'>
+      <ScanMedicationsPage />
+    </I18nPageShell>
   );
 }

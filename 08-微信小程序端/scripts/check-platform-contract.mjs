@@ -10,7 +10,6 @@ const expectedTaroMethods = [
   'base64ToArrayBuffer',
   'downloadFile',
   'env',
-  'getCurrentPages',
   'getFileSystemManager',
   'getLaunchOptionsSync',
   'getMenuButtonBoundingClientRect',

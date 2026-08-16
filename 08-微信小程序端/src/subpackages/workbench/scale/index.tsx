@@ -19,6 +19,7 @@ import ScaleTabBar from '@/components/workbench/ScaleTabBar';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -107,7 +108,7 @@ function buildDraftFromRecord(type: WorkbenchScaleType, record?: WorkbenchScaleR
   };
 }
 
-export default function WorkbenchScalePage() {
+function WorkbenchScalePage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -313,5 +314,13 @@ export default function WorkbenchScalePage() {
         </>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchScalePageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.scale'>
+      <WorkbenchScalePage />
+    </I18nPageShell>
   );
 }

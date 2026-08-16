@@ -14,13 +14,33 @@ const reactPackage = path.join(projectRoot, 'node_modules/react');
 const outdir = path.join(os.tmpdir(), 'silverlink-weapp-unit-tests');
 const outfile = path.join(outdir, 'logic.test.mjs');
 
+async function collectTsxFiles(directory) {
+  const entries = await fsp.readdir(directory, { withFileTypes: true });
+  const nested = await Promise.all(entries.map(async (entry) => {
+    const entryPath = path.join(directory, entry.name);
+    if (entry.isDirectory()) {
+      return collectTsxFiles(entryPath);
+    }
+    return entry.isFile() && entry.name.endsWith('.tsx') ? [entryPath] : [];
+  }));
+
+  return nested.flat();
+}
+
 async function assertLanguageMenuContracts() {
-  const [switcherSource, appStyles, loginSource, formatterSource, qrcodeSource] = await Promise.all([
+  const [switcherSource, appStyles, loginSource, formatterSource, qrcodeSource, pageShellSource, i18nSource, appEntrySource, pageSources] = await Promise.all([
     fsp.readFile(path.join(projectRoot, 'src/components/LanguageSwitcher.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/app.scss'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/pages/auth/login.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/utils/formatters.ts'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/subpackages/workbench/qrcode/index.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/components/layout/I18nPageShell.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/i18n/index.ts'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/app/app-entry.tsx'), 'utf8'),
+    Promise.all([
+      collectTsxFiles(path.join(projectRoot, 'src/pages')),
+      collectTsxFiles(path.join(projectRoot, 'src/subpackages')),
+    ]).then((groups) => Promise.all(groups.flat().map((file) => fsp.readFile(file, 'utf8')))),
   ]);
 
   assert.match(switcherSource, /SUPPORTED_LOCALES/);
@@ -45,6 +65,24 @@ async function assertLanguageMenuContracts() {
   assert.ok(ltrDateText, 'QR creation time must render in an LTR Text node');
   assert.match(qrcodeSource, new RegExp(`\\b${ltrDateText[1]}\\s*=\\s*formatDateTimeLabel\\s*\\(`));
   assert.doesNotMatch(qrcodeSource, /\bt\(\s*['"]workbench\.qrCreatedAt['"]\s*,\s*\{\s*time\s*:\s*formatDateTimeLabel\s*\(/);
+
+  assert.match(pageShellSource, /<LanguageSwitcher\s*\/>/);
+  assert.match(pageShellSource, /sl-app-root sl-dir-\$\{direction\}/);
+  assert.match(pageShellSource, /dir: direction/);
+  assert.match(pageShellSource, /export function I18nPageShell/);
+  assert.match(pageShellSource, /<LanguageSwitcher\s*\/>/);
+  assert.match(pageShellSource, /Taro\.setNavigationBarTitle\(\{ title: t\(navigationTitleKey\) \}\)/);
+  assert.doesNotMatch(pageShellSource, /withI18nPage|useDidShow\(|getCurrentPages\(/);
+  assert.match(i18nSource, /localeListeners/);
+  assert.match(i18nSource, /i18nRuntime\.setLocale\(nextLocale\)/);
+  assert.match(i18nSource, /localeListeners\.forEach/);
+  assert.doesNotMatch(appEntrySource, /LanguageSwitcher|sl-app-root|I18nProvider/);
+
+  assert.equal(pageSources.length, 15, 'all registered page roots must be covered by the page-level i18n shell');
+  for (const pageSource of pageSources) {
+    assert.match(pageSource, /I18nPageShell/);
+    assert.match(pageSource, /export default function \w+Entry\(\)[\s\S]*<I18nPageShell navigationTitleKey=['"][a-z]+\.[A-Za-z]+['"]>/);
+  }
 }
 
 function resolveSourceImport(importPath) {

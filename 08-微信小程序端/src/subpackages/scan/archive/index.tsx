@@ -8,6 +8,7 @@ import { fetchArchive, fetchVerifiedBasicInfo } from '@/services/scan/scanArchiv
 import type { ScanArchiveRecord, ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -51,7 +52,7 @@ function ScanArchiveHeader() {
   );
 }
 
-export default function ScanArchivePage() {
+function ScanArchivePage() {
   const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
@@ -221,5 +222,13 @@ export default function ScanArchivePage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function ScanArchivePageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='scan.healthArchive'>
+      <ScanArchivePage />
+    </I18nPageShell>
   );
 }

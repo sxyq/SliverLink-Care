@@ -6,6 +6,7 @@ import { APP_ROUTES } from '@/app/app.constants';
 import { getScanVerificationStatus, startScanSmsVerification, verifyScanIdentity } from '@/services/scan/scanAuthService';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -77,7 +78,7 @@ function ScanVerifyHeader(props: {
   );
 }
 
-export default function ScanVerifyPage() {
+function ScanVerifyPage() {
   const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
@@ -376,5 +377,13 @@ export default function ScanVerifyPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function ScanVerifyPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='common.accessVerification'>
+      <ScanVerifyPage />
+    </I18nPageShell>
   );
 }

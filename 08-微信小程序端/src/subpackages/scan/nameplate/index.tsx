@@ -15,10 +15,11 @@ import {
 } from '@/services/workbench/qrcodeService';
 import { getAuthSession } from '@/store/auth/authStore';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
-export default function NameplatePreviewPage() {
+function NameplatePreviewPage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -281,5 +282,13 @@ export default function NameplatePreviewPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function NameplatePreviewPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='scan.nameplatePreview'>
+      <NameplatePreviewPage />
+    </I18nPageShell>
   );
 }

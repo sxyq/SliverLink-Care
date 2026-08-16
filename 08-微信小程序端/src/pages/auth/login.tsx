@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, Input, Text, View } from '@tarojs/components';
-import Taro, { useDidShow } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
 import { useScanEntry } from '@/hooks/useScanEntry';
@@ -13,6 +13,7 @@ import {
 import { updateAppSession } from '@/store/app/appSessionStore';
 import { getAuthSession, saveAuthSession } from '@/store/auth/authStore';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './login.scss';
 
@@ -346,13 +347,21 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
   );
 }
 
-export default function LoginPage() {
-  useDidShow(() => {
+function LoginPage() {
+  useEffect(() => {
     const session = getAuthSession();
     if (session) {
       void Taro.redirectTo({ url: APP_ROUTES.authRoleRedirect });
     }
-  });
+  }, []);
 
   return <AuthLoginShell />;
+}
+
+export default function LoginPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='common.brandTitle'>
+      <LoginPage />
+    </I18nPageShell>
+  );
 }

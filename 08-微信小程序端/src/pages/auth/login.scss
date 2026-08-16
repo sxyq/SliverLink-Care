@@ -254,6 +254,27 @@
   letter-spacing: 6rpx;
 }
 
+// The scan entry remains a physical-left control by design. Reserve that space
+// for RTL title copy so long Arabic-script brand names do not run underneath it.
+.sl-dir-rtl .auth-login-brand {
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 150rpx;
+  padding-right: 24rpx;
+}
+
+.sl-dir-rtl .auth-login-brand__title {
+  font-size: 42rpx;
+  letter-spacing: 1rpx;
+  line-height: 1.2;
+  overflow-wrap: normal;
+}
+
+.sl-dir-rtl .auth-login-brand__subtitle {
+  letter-spacing: 1rpx;
+  line-height: 1.4;
+}
+
 .auth-login-panel {
   position: relative;
   margin-top: -14rpx;

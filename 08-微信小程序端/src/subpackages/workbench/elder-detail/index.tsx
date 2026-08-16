@@ -10,6 +10,7 @@ import SummaryHero, { type SummaryHeroField } from '@/components/workbench/Summa
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -20,7 +21,7 @@ function toDisplayValue(value: string | number | undefined, fallback: string) {
   return String(value);
 }
 
-export default function WorkbenchElderDetailPage() {
+function WorkbenchElderDetailPage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -150,5 +151,13 @@ export default function WorkbenchElderDetailPage() {
         </>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchElderDetailPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.elderDetail'>
+      <WorkbenchElderDetailPage />
+    </I18nPageShell>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import Taro, { useDidShow } from '@tarojs/taro';
+import Taro from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
 import { getAuthSession } from '@/store/auth/authStore';
@@ -40,10 +40,6 @@ export function useRoleRedirect(): RoleRedirectState {
   useEffect(() => {
     redirect();
   }, []);
-
-  useDidShow(() => {
-    redirect();
-  });
 
   return state;
 }

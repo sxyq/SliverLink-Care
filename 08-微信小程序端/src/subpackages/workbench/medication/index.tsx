@@ -21,6 +21,7 @@ import FormSectionCard from '@/components/workbench/FormSectionCard';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -53,7 +54,7 @@ function toPersistDraft(item: WorkbenchMedicationItem): WorkbenchMedicationDraft
   };
 }
 
-export default function WorkbenchMedicationPage() {
+function WorkbenchMedicationPage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -341,5 +342,13 @@ export default function WorkbenchMedicationPage() {
         </>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchMedicationPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.medication'>
+      <WorkbenchMedicationPage />
+    </I18nPageShell>
   );
 }

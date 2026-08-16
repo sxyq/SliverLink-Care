@@ -15,6 +15,7 @@ import SearchPanel from '@/components/workbench/SearchPanel';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -63,7 +64,7 @@ function mapCarouselItem(item: WorkbenchElderListItem, t: (key: string, params?:
   };
 }
 
-export default function WorkbenchElderListPage() {
+function WorkbenchElderListPage() {
   const { t } = useI18n();
   const [items, setItems] = useState<WorkbenchElderListItem[]>([]);
   const [keyword, debouncedKeyword, setKeyword] = useDebouncedSearch('');
@@ -646,5 +647,13 @@ export default function WorkbenchElderListPage() {
         </View>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchElderListPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.elderArchives'>
+      <WorkbenchElderListPage />
+    </I18nPageShell>
   );
 }

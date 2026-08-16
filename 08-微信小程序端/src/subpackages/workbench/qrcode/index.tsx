@@ -19,6 +19,7 @@ import BottomNavGrid from '@/components/workbench/BottomNavGrid';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -71,7 +72,7 @@ function getStatusLabel(status: string, t: (key: string) => string) {
   return status || t('workbench.unknownQrStatus');
 }
 
-export default function WorkbenchQrCodePage() {
+function WorkbenchQrCodePage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -315,5 +316,13 @@ export default function WorkbenchQrCodePage() {
         </>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchQrCodePageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.qrViewManage'>
+      <WorkbenchQrCodePage />
+    </I18nPageShell>
   );
 }

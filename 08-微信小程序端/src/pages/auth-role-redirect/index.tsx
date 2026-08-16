@@ -2,6 +2,7 @@ import { Text, View } from '@tarojs/components';
 
 import { useRoleRedirect } from '@/hooks/useRoleRedirect';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -14,7 +15,7 @@ function RedirectHeader() {
   );
 }
 
-export default function AuthRoleRedirectPage() {
+function AuthRoleRedirectPage() {
   const state = useRoleRedirect();
 
   return (
@@ -33,5 +34,13 @@ export default function AuthRoleRedirectPage() {
         </View>
       </View>
     </View>
+  );
+}
+
+export default function AuthRoleRedirectPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='common.roleRouting'>
+      <AuthRoleRedirectPage />
+    </I18nPageShell>
   );
 }

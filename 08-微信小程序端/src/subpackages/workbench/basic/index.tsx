@@ -19,6 +19,7 @@ import FormSectionCard from '@/components/workbench/FormSectionCard';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
 import { useI18n } from '@/i18n';
+import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './index.scss';
 
@@ -44,7 +45,7 @@ function updateSummaryFromForm(detail: WorkbenchElderDetail, formValue: Workbenc
   });
 }
 
-export default function WorkbenchBasicPage() {
+function WorkbenchBasicPage() {
   const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
@@ -332,5 +333,13 @@ export default function WorkbenchBasicPage() {
         </>
       ) : null}
     </WorkbenchShell>
+  );
+}
+
+export default function WorkbenchBasicPageEntry() {
+  return (
+    <I18nPageShell navigationTitleKey='workbench.basicInfo'>
+      <WorkbenchBasicPage />
+    </I18nPageShell>
   );
 }
