@@ -1,5 +1,6 @@
 import React from 'react';
 import { Save } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 interface SubmitBarProps {
   onSubmit: () => void;
@@ -8,16 +9,17 @@ interface SubmitBarProps {
 }
 
 export const SubmitBar: React.FC<SubmitBarProps> = ({ onSubmit, onDraft, loading }) => {
+  const { t } = useI18n();
   return (
     <div className="sl-submit-bar">
       {onDraft && (
         <button type="button" className="sl-btn sl-btn-secondary" onClick={onDraft} disabled={loading}>
-          保存草稿
+          {t('workbench.saveDraft')}
         </button>
       )}
       <button type="button" className="sl-btn sl-btn-primary" onClick={onSubmit} disabled={loading}>
         <Save size={18} />
-        {loading ? '保存中…' : '提交保存'}
+        {loading ? t('common.saving') : t('workbench.submitSave')}
       </button>
     </div>
   );

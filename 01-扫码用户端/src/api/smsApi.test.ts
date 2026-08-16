@@ -43,7 +43,7 @@ describe('smsApi', () => {
       messagePrefix: 'SL',
       status: 'PENDING',
     });
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/scan/verification/start');
+    expect(fetchMock.mock.calls[0][0]).toBe('/silverlink-api/api/scan/verification/start');
   });
 
   it('ignores confirm sent for remote sessions', async () => {
@@ -62,7 +62,7 @@ describe('smsApi', () => {
       verified: true,
       senderPhoneMasked: '158****6543',
     });
-    expect(fetchMock.mock.calls[0][0]).toBe('/api/scan/verification/status?sessionId=session-1');
+    expect(fetchMock.mock.calls[0][0]).toBe('/silverlink-api/api/scan/verification/status?sessionId=session-1');
   });
 
   it('verifies identity access and normalizes backend response', async () => {

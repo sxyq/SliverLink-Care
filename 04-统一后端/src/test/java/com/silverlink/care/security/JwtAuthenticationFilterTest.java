@@ -70,8 +70,6 @@ class JwtAuthenticationFilterTest {
     void doFilter_bearerPrefixOnly_continuesWithoutAuth() throws ServletException, IOException {
         when(request.getHeader("Authorization")).thenReturn("Bearer ");
 
-        when(jwtTokenProvider.validateToken("")).thenReturn(false);
-
         filter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());

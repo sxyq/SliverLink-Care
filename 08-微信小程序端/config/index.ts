@@ -28,6 +28,7 @@ const config: UserConfigExport<'vite'> = {
   compiler: 'vite',
   alias: {
     '@': path.resolve(process.cwd(), 'src'),
+    '@shared-i18n': path.resolve(process.cwd(), '../shared/i18n'),
   },
   plugins: [],
   modifyViteConfig(viteConfig: any) {

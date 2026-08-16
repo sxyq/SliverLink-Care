@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,14 +28,14 @@ class ElderServiceTest {
         Map<String, Object> basic = Map.of("name", "李奶奶");
         Map<String, Object> health = Map.of("summary", "稳定");
         List<Map<String, String>> medications = List.of(Map.of("name", "阿司匹林"));
-        List<Map<String, Object>> scales = List.of(Map.of("scaleName", "PHQ-9"));
+        List<Map<String, Object>> scales = List.of(Map.of("scale", "PHQ-9"));
         when(data.scales("elder-1")).thenReturn(scales);
 
         service.saveBasic("elder-1", basic);
         service.saveHealth("elder-1", health);
         service.saveMedications("elder-1", medications);
         service.saveScales("elder-1", scales);
-        assertSame(scales, service.getScales("elder-1"));
+        assertEquals(scales, service.getScales("elder-1"));
 
         verify(data).saveBasic("elder-1", basic);
         verify(data).saveHealth("elder-1", health);

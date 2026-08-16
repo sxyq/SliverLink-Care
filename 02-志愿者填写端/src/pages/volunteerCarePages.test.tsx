@@ -245,7 +245,7 @@ describe('volunteer care pages', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '很好' }));
     fireEvent.click(screen.getByRole('button', { name: '完全自理' }));
-    fireEvent.click(screen.getByRole('button', { name: '正常' }));
+    fireEvent.click(screen.getByRole('button', { name: '正常范围' }));
     fireEvent.click(screen.getByRole('button', { name: '无明显异常' }));
     fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
 
@@ -286,7 +286,10 @@ describe('volunteer care pages', () => {
 
     render(<ScaleFormPage elder={elder} onBack={onBack} />);
 
-    expect(await screen.findByText(/最近保存：2026-05-01/)).toBeInTheDocument();
+    const savedDateNode = await screen.findByText('2026-05-01');
+    expect(savedDateNode).toHaveAttribute('dir', 'ltr');
+    expect(savedDateNode).toHaveClass('sl-ltr-data');
+    expect(savedDateNode.parentElement?.textContent).toContain('最近保存：');
     fireEvent.click(screen.getByRole('button', { name: '编辑量表' }));
     fireEvent.click(screen.getAllByRole('button', { name: '从不(0分)' })[0]);
     fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
@@ -428,7 +431,7 @@ describe('volunteer care pages', () => {
     render(<QrCodeManagePage elder={elder} onBack={onBack} />);
 
     expect(await screen.findByText('李奶奶 的二维码')).toBeInTheDocument();
-    expect(screen.getByText(/生成时间 未记录/)).toBeInTheDocument();
+    expect(screen.getByText('未记录')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '审核中' })).toBeDisabled();
 
     fireEvent.click(screen.getByRole('button', { name: '复制访问链接' }));
@@ -519,7 +522,7 @@ describe('volunteer care pages', () => {
     fireEvent.change(numberInputs[2], { target: { value: '85' } });
     fireEvent.click(screen.getByRole('button', { name: '很好' }));
     fireEvent.click(screen.getByRole('button', { name: '完全自理' }));
-    fireEvent.click(screen.getByRole('button', { name: '正常' }));
+    fireEvent.click(screen.getByRole('button', { name: '正常范围' }));
     fireEvent.click(screen.getByRole('button', { name: '无明显异常' }));
     fireEvent.click(screen.getByRole('button', { name: '提交保存' }));
 

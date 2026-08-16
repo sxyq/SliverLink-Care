@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import FamilyEntryApp from './App';
 import { AppRouter } from './routes/router';
+import { clearToken, setToken } from './api/httpClient';
 
 vi.mock('./pages/InviteLandingPage', () => ({
   default: () => <p>invite landing route</p>,
@@ -43,6 +44,7 @@ vi.mock('./pages/QrCodeViewPage', () => ({
 
 describe('family entry app and router', () => {
   afterEach(() => {
+    clearToken();
     window.location.hash = '';
   });
 
@@ -77,6 +79,8 @@ describe('family entry app and router', () => {
     );
     expect(screen.getByText('family login route')).toBeInTheDocument();
     third.unmount();
+
+    setToken('family-token');
 
     const fourth = render(
       <MemoryRouter initialEntries={['/elders/elder-1']}>

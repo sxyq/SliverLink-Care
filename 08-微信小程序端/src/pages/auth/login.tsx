@@ -12,6 +12,7 @@ import {
 } from '@/services/workbench/authService';
 import { updateAppSession } from '@/store/app/appSessionStore';
 import { getAuthSession, saveAuthSession } from '@/store/auth/authStore';
+import { useI18n } from '@/i18n';
 
 import './login.scss';
 
@@ -20,6 +21,7 @@ interface AuthLoginShellProps {
 }
 
 export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
+  const { t } = useI18n();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
@@ -46,7 +48,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
     }
 
     if (!account.trim() || !password.trim()) {
-      setErrorText('请输入完整的账号与密码');
+      setErrorText(t('errors.completeLoginFields'));
       return;
     }
 
@@ -74,7 +76,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
       await Taro.redirectTo({ url: APP_ROUTES.authRoleRedirect });
     } catch (error) {
-      setErrorText((error as Error)?.message || '登录失败，请稍后重试');
+      setErrorText((error as Error)?.message || t('errors.loginRetry'));
     } finally {
       setSubmitting(false);
     }
@@ -89,7 +91,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
     if (!code) {
       setInvitation(null);
-      setErrorText('请输入邀请码');
+      setErrorText(t('errors.invitationRequired'));
       return;
     }
 
@@ -101,7 +103,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
       setRegisterForm((current) => ({ ...current, invitationCode: code }));
     } catch (error) {
       setInvitation(null);
-      setErrorText((error as Error)?.message || '邀请码校验失败');
+      setErrorText((error as Error)?.message || t('errors.invitationCheckFailed'));
     } finally {
       setCheckingInvitation(false);
     }
@@ -132,7 +134,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
       await Taro.redirectTo({ url: APP_ROUTES.authRoleRedirect });
     } catch (error) {
-      setErrorText((error as Error)?.message || '注册失败，请稍后重试');
+      setErrorText((error as Error)?.message || t('errors.registerRetry'));
     } finally {
       setSubmitting(false);
     }
@@ -159,15 +161,15 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
                   </View>
                   <View className='auth-login-scan-entry__label'>
-                    <Text>扫码查看</Text>
-                    <Text>老人信息</Text>
+                    <Text>{t('auth.scanView')}</Text>
+                    <Text>{t('auth.scanElderInfo')}</Text>
                   </View>
                 </View>
               ) : null}
               <View className='auth-login-brand'>
                 <View className='auth-login-icon'>SL</View>
-                <View className='auth-login-brand__title'>渝护银龄名牌</View>
-                <Text className='auth-login-brand__subtitle'>用心守护 温暖相伴</Text>
+                <View className='auth-login-brand__title'>{t('common.brandTitle')}</View>
+                <Text className='auth-login-brand__subtitle'>{t('common.brandSubtitle')}</Text>
               </View>
             </View>
 
@@ -180,7 +182,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     setErrorText('');
                   }}
                 >
-                  志愿者登录
+                  {t('auth.volunteerLogin')}
                 </View>
                 <View
                   className={`auth-login-mode-tabs__item ${mode === 'register' ? 'is-active' : ''}`}
@@ -189,24 +191,24 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     setErrorText('');
                   }}
                 >
-                  邀请码注册
+                  {t('auth.invitationRegister')}
                 </View>
               </View>
 
               <View className='auth-login-panel__title'>
-                {mode === 'login' ? '志愿者登录' : '输入邀请码注册'}
+                {mode === 'login' ? t('auth.volunteerLogin') : t('auth.inputInvitationRegister')}
               </View>
 
               <View className='auth-login-form'>
                 {mode === 'login' ? (
                   <>
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>账号</Text>
+                      <Text className='auth-login-field__label'>{t('common.account')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={account}
-                          placeholder='请输入账号'
+                          placeholder={t('auth.inputAccount')}
                           type='text'
                           maxlength={40}
                           onInput={(event) => setAccount(event.detail.value)}
@@ -215,14 +217,14 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>密码</Text>
+                      <Text className='auth-login-field__label'>{t('common.password')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={password}
                           password
                           maxlength={64}
-                          placeholder='请输入登录密码'
+                          placeholder={t('auth.inputLoginPassword')}
                           onInput={(event) => setPassword(event.detail.value)}
                         />
                       </View>
@@ -231,20 +233,20 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     {errorText ? <View className='auth-login-error'>{errorText}</View> : null}
 
                     <Button className='sl-primary-button auth-login-submit' loading={submitting} onClick={handleLoginSubmit}>
-                      登录
+                      {t('auth.login')}
                     </Button>
                   </>
                 ) : (
                   <>
-                    <Text className='auth-login-hint'>请输入管理员发放的邀请码，注册后会自动关联到对应老人档案。</Text>
+                    <Text className='auth-login-hint'>{t('auth.adminInvitationHint')}</Text>
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>邀请码</Text>
+                      <Text className='auth-login-field__label'>{t('common.invitationCode')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={registerForm.invitationCode}
-                          placeholder='请输入邀请码'
+                          placeholder={t('errors.invitationRequired')}
                           type='text'
                           maxlength={40}
                           onInput={(event) =>
@@ -255,39 +257,40 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
 
                     <Button className='auth-login-secondary-button' loading={checkingInvitation} onClick={handleCheckInvitation}>
-                      {checkingInvitation ? '校验中...' : '验证邀请码'}
+                      {checkingInvitation ? t('auth.checkingInvitation') : t('common.verifyInvitation')}
                     </Button>
 
                     {invitation ? (
                       <View className='auth-login-preview'>
-                        <Text className='auth-login-preview__title'>邀请码可用</Text>
-                        <Text className='auth-login-preview__line'>关联老人：{invitation.elderName}，{invitation.elderAge} 岁</Text>
-                        <Text className='auth-login-preview__line'>档案编号：{invitation.elderArchiveNo}</Text>
-                        <Text className='auth-login-preview__line'>有效期至：{invitation.expiresAt}</Text>
+                        <Text className='auth-login-preview__title'>{t('auth.invitationAvailableForVolunteer')}</Text>
+                        <Text className='auth-login-preview__line'>{t('common.relatedElder')}：<Text className='sl-auto-data' {...{ dir: 'auto' }}>{invitation.elderName}</Text>，<Text className='sl-auto-data' {...{ dir: 'auto' }}>{t('common.yearsOld', { age: invitation.elderAge })}</Text></Text>
+                        <Text className='auth-login-preview__line'>{t('common.archiveNumber')}：<Text className='sl-ltr-data'>{invitation.elderArchiveNo}</Text></Text>
+                        <Text className='auth-login-preview__line'>{t('common.validUntil')}：<Text className='sl-ltr-data'>{invitation.expiresAt}</Text></Text>
                       </View>
                     ) : null}
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>姓名</Text>
+                      <Text className='auth-login-field__label'>{t('common.name')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-auto-data'
                           value={registerForm.name}
-                          placeholder='请输入姓名'
+                          placeholder={t('auth.inputName')}
                           type='text'
                           maxlength={30}
+                          {...{ dir: 'auto' }}
                           onInput={(event) => setRegisterForm((current) => ({ ...current, name: event.detail.value }))}
                         />
                       </View>
                     </View>
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>账号</Text>
+                      <Text className='auth-login-field__label'>{t('common.account')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={registerForm.account}
-                          placeholder='请设置登录账号'
+                          placeholder={t('auth.setLoginAccount')}
                           type='text'
                           maxlength={40}
                           onInput={(event) => setRegisterForm((current) => ({ ...current, account: event.detail.value }))}
@@ -296,12 +299,12 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>手机号</Text>
+                      <Text className='auth-login-field__label'>{t('common.phone')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={registerForm.phone}
-                          placeholder='选填，用于后续联系'
+                          placeholder={t('auth.optionalForContact')}
                           type='number'
                           maxlength={20}
                           onInput={(event) => setRegisterForm((current) => ({ ...current, phone: event.detail.value }))}
@@ -310,14 +313,14 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
 
                     <View className='auth-login-field'>
-                      <Text className='auth-login-field__label'>密码</Text>
+                      <Text className='auth-login-field__label'>{t('common.password')}</Text>
                       <View className='auth-login-field__input-wrap'>
                         <Input
-                          className='auth-login-field__input'
+                          className='auth-login-field__input sl-ltr-data'
                           value={registerForm.password}
                           password
                           maxlength={64}
-                          placeholder='请设置登录密码'
+                          placeholder={t('auth.setLoginPassword')}
                           onInput={(event) => setRegisterForm((current) => ({ ...current, password: event.detail.value }))}
                         />
                       </View>
@@ -326,7 +329,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     {errorText ? <View className='auth-login-error'>{errorText}</View> : null}
 
                     <Button className='sl-primary-button auth-login-submit' loading={submitting} onClick={handleRegisterSubmit}>
-                      注册并进入
+                      {t('auth.registerAndEnter')}
                     </Button>
                   </>
                 )}
@@ -334,7 +337,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
             </View>
 
             <View className='auth-login-footer'>
-              <Text className='auth-login-footer__line'>笙箫一曲</Text>
+              <Text className='auth-login-footer__line'>{t('common.footer')}</Text>
             </View>
           </View>
         </View>

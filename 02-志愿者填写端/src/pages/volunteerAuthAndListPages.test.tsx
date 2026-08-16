@@ -69,6 +69,12 @@ vi.mock('@shared/SubjectListPage', () => ({
   ),
 }));
 
+async function expectInvitationElderPreview() {
+  const elderName = await screen.findByText('李奶奶');
+  expect(elderName).toHaveAttribute('dir', 'auto');
+  expect(elderName.parentElement).toHaveTextContent(/关联老人：/);
+}
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -79,7 +85,10 @@ describe('LoginPage', () => {
 
     render(<LoginPage />);
 
-    fireEvent.change(screen.getByPlaceholderText('请输入账号'), { target: { value: 'vol1' } });
+    const accountInput = screen.getByPlaceholderText('请输入账号');
+    expect(accountInput).toHaveAttribute('dir', 'ltr');
+    expect(accountInput).toHaveClass('sl-ltr-data');
+    fireEvent.change(accountInput, { target: { value: 'vol1' } });
     fireEvent.change(screen.getByPlaceholderText('请输入密码'), { target: { value: 'pwd' } });
     fireEvent.click(screen.getByRole('button', { name: '登录' }));
 
@@ -101,14 +110,22 @@ describe('LoginPage', () => {
     render(<LoginPage />);
 
     fireEvent.click(screen.getByRole('button', { name: '邀请码注册' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入邀请码'), { target: { value: ' abc123 ' } });
+    const invitationInput = screen.getByPlaceholderText('请输入邀请码');
+    expect(invitationInput).toHaveAttribute('dir', 'ltr');
+    expect(invitationInput).toHaveClass('sl-ltr-data');
+    fireEvent.change(invitationInput, { target: { value: ' abc123 ' } });
     fireEvent.click(screen.getByRole('button', { name: '验证邀请码' }));
 
-    expect(await screen.findByText(/关联老人：李奶奶/)).toBeInTheDocument();
+    await expectInvitationElderPreview();
 
     fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '新志愿者' } });
     fireEvent.change(screen.getByPlaceholderText('请设置登录账号'), { target: { value: 'new-vol' } });
-    fireEvent.change(screen.getByPlaceholderText('选填，用于后续联系'), { target: { value: '13800000000' } });
+    const phoneInput = screen.getByPlaceholderText('选填，用于后续联系');
+    expect(phoneInput).toHaveAttribute('type', 'tel');
+    expect(phoneInput).toHaveAttribute('inputmode', 'numeric');
+    expect(phoneInput).toHaveAttribute('dir', 'ltr');
+    expect(phoneInput).toHaveClass('sl-ltr-data');
+    fireEvent.change(phoneInput, { target: { value: '13800000000' } });
     fireEvent.change(screen.getByPlaceholderText('请设置登录密码'), { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: '注册并进入' }));
 
@@ -157,7 +174,7 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByPlaceholderText('请输入账号'), { target: { value: '  vol1  ' } });
     fireEvent.change(screen.getByPlaceholderText('请输入密码'), { target: { value: 'pwd' } });
     fireEvent.click(screen.getByRole('button', { name: '登录' }));
-    expect(await screen.findByText('登录失败，请重试')).toBeInTheDocument();
+    expect(await screen.findByText('登录失败，请稍后重试')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '邀请码注册' }));
     fireEvent.click(screen.getByRole('button', { name: '验证邀请码' }));
@@ -174,10 +191,10 @@ describe('LoginPage', () => {
     fireEvent.change(screen.getByPlaceholderText('请设置登录账号'), { target: { value: ' new-vol ' } });
     fireEvent.change(screen.getByPlaceholderText('请设置登录密码'), { target: { value: ' secret ' } });
     fireEvent.click(screen.getByRole('button', { name: '注册并进入' }));
-    expect(await screen.findByText('注册失败，请重试')).toBeInTheDocument();
+    expect(await screen.findByText('注册失败，请稍后重试')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '志愿者登录' }));
-    expect(screen.queryByText('注册失败，请重试')).not.toBeInTheDocument();
+    expect(screen.queryByText('注册失败，请稍后重试')).not.toBeInTheDocument();
   });
 });
 
@@ -270,11 +287,11 @@ describe('AssignedElderListPage', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '张奶奶' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '张奶奶' } });
     fireEvent.change(screen.getByPlaceholderText('请输入住址'), { target: { value: '渝中区' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入联系人姓名'), { target: { value: '家属丙' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入联系电话'), { target: { value: '13911112222' } });
-    fireEvent.change(screen.getByPlaceholderText('如 女儿 / 儿子 / 配偶'), { target: { value: '女儿' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入紧急联系人姓名'), { target: { value: '家属丙' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入紧急联系人电话'), { target: { value: '13911112222' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入与老人关系'), { target: { value: '女儿' } });
     fireEvent.click(screen.getByText('男').closest('button') as HTMLButtonElement);
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
 
@@ -330,7 +347,7 @@ describe('AssignedElderListPage', () => {
 
     await screen.findByText('李奶奶');
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '张爷爷' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '张爷爷' } });
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
 
     await waitFor(() => {
@@ -354,7 +371,7 @@ describe('AssignedElderListPage', () => {
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
     expect(screen.getByText('请先填写老人姓名')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '张爷爷' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '张爷爷' } });
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
     expect(await screen.findByText('新增失败')).toBeInTheDocument();
   });
@@ -402,7 +419,7 @@ describe('AssignedElderListPage', () => {
     fireEvent.change(screen.getByPlaceholderText('请输入邀请码'), { target: { value: 'GOOD' } });
     fireEvent.click(screen.getByRole('button', { name: '验证邀请码' }));
 
-    await screen.findByText(/关联老人：李奶奶/);
+    await expectInvitationElderPreview();
 
     fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '新志愿者' } });
     fireEvent.change(screen.getByPlaceholderText('请设置登录账号'), { target: { value: 'dup' } });
@@ -437,7 +454,7 @@ describe('AssignedElderListPage', () => {
 
     await screen.findByText('李奶奶');
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '新老人' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '新老人' } });
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
 
     await waitFor(() => {
@@ -475,7 +492,7 @@ describe('AssignedElderListPage', () => {
     expect(updateVolunteerProfile).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '志愿者乙' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入登录账号'), { target: { value: 'vol2' } });
+    fireEvent.change(screen.getByPlaceholderText('请设置登录账号'), { target: { value: 'vol2' } });
     fireEvent.click(screen.getByRole('button', { name: '保存修改' }));
     expect(await screen.findByText('保存失败，请稍后重试')).toBeInTheDocument();
 
@@ -485,7 +502,7 @@ describe('AssignedElderListPage', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '新老人' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '新老人' } });
     fireEvent.click(screen.getByRole('button', { name: '确认新增' }));
 
     await waitFor(() => {
@@ -509,12 +526,12 @@ describe('AssignedElderListPage', () => {
     });
 
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '赵奶奶' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '赵奶奶' } });
     fireEvent.change(screen.getByPlaceholderText('请输入年龄'), { target: { value: '79' } });
     fireEvent.change(screen.getByPlaceholderText('请输入住址'), { target: { value: '江北区' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入联系人姓名'), { target: { value: '家属丁' } });
-    fireEvent.change(screen.getByPlaceholderText('如 女儿 / 儿子 / 配偶'), { target: { value: '儿子' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入联系电话'), { target: { value: '13711112222' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入紧急联系人姓名'), { target: { value: '家属丁' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入与老人关系'), { target: { value: '儿子' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入紧急联系人电话'), { target: { value: '13711112222' } });
     fireEvent.click(screen.getByText('男').closest('button') as HTMLButtonElement);
     fireEvent.click(screen.getByRole('button', { name: '关闭新增老人' }));
     await waitFor(() => {
@@ -550,7 +567,7 @@ describe('AssignedElderListPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '新增' }));
     expect(await screen.findByText('新增老人')).toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名'), { target: { value: '王奶奶' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入姓名'), { target: { value: '王奶奶' } });
     fireEvent.change(screen.getByPlaceholderText('请输入年龄'), { target: { value: '76' } });
     fireEvent.click(screen.getByRole('button', { name: '取消' }));
     await waitFor(() => {

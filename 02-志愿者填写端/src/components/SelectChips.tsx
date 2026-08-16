@@ -4,9 +4,10 @@ interface SelectChipsProps {
   options: string[];
   value: string;
   onChange: (value: string) => void;
+  getLabel?: (value: string) => string;
 }
 
-export const SelectChips: React.FC<SelectChipsProps> = ({ options, value, onChange }) => {
+export const SelectChips: React.FC<SelectChipsProps> = ({ options, value, onChange, getLabel = (option) => option }) => {
   return (
     <div className="sl-chips-row">
       {options.map((opt) => (
@@ -16,7 +17,7 @@ export const SelectChips: React.FC<SelectChipsProps> = ({ options, value, onChan
           className={value === opt ? 'sl-chip sl-chip-selected' : 'sl-chip'}
           onClick={() => onChange(opt)}
         >
-          {opt}
+          {getLabel(opt)}
         </button>
       ))}
     </div>

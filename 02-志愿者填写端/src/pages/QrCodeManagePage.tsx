@@ -4,17 +4,23 @@ import QRCode from 'qrcode';
 import { PageHeader } from '../components/PageHeader';
 import { disableVolunteerElderQrCode, fetchVolunteerElderQrCode, regenerateVolunteerElderQrCode } from '../api/volunteerApi';
 import type { AssignedElder, VolunteerQrCodeInfo } from '../types';
+import { useI18n } from '../i18n';
 
 interface QrCodeManagePageProps {
   elder: AssignedElder;
   onBack: () => void;
 }
 
-function formatTime(value: string) {
-  if (!value) return '未记录';
+function formatTime(value: string, fallback: string) {
+  if (!value) return fallback;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString('zh-CN', { hour12: false });
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  const hour = `${date.getHours()}`.padStart(2, '0');
+  const minute = `${date.getMinutes()}`.padStart(2, '0');
+  return `${year}-${month}-${day} ${hour}:${minute}`;
 }
 
 function statusClassName(status: string) {
@@ -73,6 +79,7 @@ function normalizeBase64Image(value?: string) {
 }
 
 export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
+  const { t } = useI18n();
   const [info, setInfo] = useState<VolunteerQrCodeInfo | null>(null);
   const [previewImage, setPreviewImage] = useState('');
   const [loading, setLoading] = useState(true);
@@ -126,7 +133,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     } catch (nextError) {
       setInfo(null);
       setPreviewImage('');
-      setError(nextError instanceof Error ? nextError.message : '二维码信息加载失败');
+      setError(nextError instanceof Error ? nextError.message : t('errors.loadQrFailed'));
     } finally {
       setLoading(false);
     }
@@ -143,10 +150,10 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     setMessage('');
     const copied = await copyText(link);
     if (copied) {
-      setMessage('二维码访问链接已复制。');
+      setMessage(t('workbench.copiedAccessLink'));
       return;
     }
-    setError('当前环境暂不支持自动复制，请手动长按二维码或链接复制。');
+    setError(t('workbench.copyNotSupported'));
   }
 
   async function handleDisable() {
@@ -158,9 +165,9 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
       const next = await disableVolunteerElderQrCode(elder.id);
       setInfo(next);
       await renderPreview(next);
-      setMessage(next.reviewMessage || '停用申请已提交，等待管理员审核。');
+      setMessage(next.reviewMessage || t('errors.requestDisableSubmitted'));
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : '停用失败');
+      setError(nextError instanceof Error ? nextError.message : t('workbench.disableFailed'));
     } finally {
       setBusy(null);
     }
@@ -174,9 +181,9 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
       const next = await regenerateVolunteerElderQrCode(elder.id);
       setInfo(next);
       await renderPreview(next);
-      setMessage('二维码已重新生成，旧二维码将被替换。');
+      setMessage(t('workbench.regeneratedNotice'));
     } catch (nextError) {
-      setError(nextError instanceof Error ? nextError.message : '重新生成失败');
+      setError(nextError instanceof Error ? nextError.message : t('workbench.regenerateFailed'));
     } finally {
       setBusy(null);
     }
@@ -184,46 +191,50 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
 
   return (
     <div className="sl-page">
-      <PageHeader title="二维码查看与管理" onBack={onBack} />
+      <PageHeader title={t('workbench.qrViewManage')} onBack={onBack} />
 
       <section className="sl-card sl-card-soft sl-qr-hero">
         <div className="sl-qr-hero-copy">
-          <span className="sl-overview-kicker">扫码名牌</span>
+          <span className="sl-overview-kicker">{t('workbench.scanNameplateKicker')}</span>
         </div>
 
         {loading ? (
-          <div className="sl-loading-text">二维码加载中...</div>
+          <div className="sl-loading-text">{t('workbench.qrLoading')}</div>
         ) : error ? (
           <p className="sl-login-error">{error}</p>
         ) : info ? (
           <div className="sl-qr-layout">
             <div className={qrPreviewStateClassName(info.status)}>
-              <span className={statusClassName(info.status)}>{info.status}</span>
-              <div className="sl-qr-preview-title">{elder.name} 的二维码</div>
-              <div className="sl-qr-preview-meta">生成时间 {formatTime(info.createdAt)}</div>
+              <span className={statusClassName(info.status)}>
+                {info.status === '已停用' ? t('workbench.disabled') : info.status === '启用' ? t('family.qrEnabled') : info.status}
+              </span>
+              <div className="sl-qr-preview-title">{t('workbench.qrOfElder', { name: elder.name })}</div>
+              <div className="sl-qr-preview-meta">
+                {t('workbench.generatedAt')} <span className="sl-ltr-data">{formatTime(info.createdAt, t('errors.unrecorded'))}</span>
+              </div>
               <div className="sl-qr-preview-frame">
                 {previewImage ? (
                   <img
                     className={qrImageStateClassName(info.status)}
                     src={previewImage}
-                    alt={`${elder.name} 的二维码`}
+                    alt={t('workbench.qrOfElder', { name: elder.name })}
                   />
                 ) : (
                   <div className="sl-qr-preview-fallback">
                     <QrCode size={96} />
-                    <span>二维码暂未生成成功</span>
+                    <span>{t('workbench.qrPreviewUnavailable')}</span>
                   </div>
                 )}
               </div>
               <button type="button" className="sl-secondary-btn sl-qr-inline-btn" onClick={() => void handleCopyLink()}>
                 <Copy size={15} />
-                复制访问链接
+                {t('workbench.copyAccessLink')}
               </button>
-              {getPreferredQrUrl(info) ? <div className="sl-qr-preview-link">访问链接 {getPreferredQrUrl(info)}</div> : null}
+              {getPreferredQrUrl(info) ? <div className="sl-qr-preview-link">{t('common.link')} <span className="sl-ltr-data">{getPreferredQrUrl(info)}</span></div> : null}
             </div>
           </div>
         ) : (
-          <div className="sl-empty-state">暂无二维码信息</div>
+          <div className="sl-empty-state">{t('family.noQrInfo')}</div>
         )}
       </section>
 
@@ -233,13 +244,13 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
         <section className="sl-action-grid">
           <button type="button" className="sl-action-card" onClick={() => void handleRegenerate()} disabled={busy !== null}>
             <div className="sl-action-card-head">
-              <strong>{busy === 'regenerate' ? '重新生成中' : '重新生成'}</strong>
+              <strong>{busy === 'regenerate' ? t('workbench.regenerating') : t('workbench.regenerate')}</strong>
               <div className="sl-qr-action-icon"><RefreshCcw size={18} /></div>
             </div>
           </button>
           <button type="button" className="sl-action-card sl-action-card-warning" onClick={() => void handleDisable()} disabled={busy !== null || info.status === '已停用' || disableReviewPending}>
             <div className="sl-action-card-head">
-              <strong>{busy === 'disable' ? '提交中' : info.status === '已停用' ? '已停用' : disableReviewPending ? '审核中' : '停用二维码'}</strong>
+              <strong>{busy === 'disable' ? t('workbench.submitPending') : info.status === '已停用' ? t('workbench.disabled') : disableReviewPending ? t('workbench.reviewing') : t('workbench.disableQr')}</strong>
               <div className="sl-qr-action-icon"><Ban size={18} /></div>
             </div>
           </button>

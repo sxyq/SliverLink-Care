@@ -1,5 +1,6 @@
 package com.silverlink.care.module.sms;
 
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -45,7 +46,7 @@ public class SmsService {
                 where phone_hash=? and scene=? and created_at > ?
                 """, Integer.class, phoneHash, scene, Timestamp.from(Instant.now().minusSeconds(60)));
         if (recent != null && recent > 0) {
-            throw new RuntimeException("发送过于频繁，请稍后再试");
+            throw new BizException(429, "发送过于频繁，请稍后再试", "errors.smsRateLimited");
         }
         String code = String.format("%06d", random.nextInt(1000000));
         smsProvider.sendCode(phone, code);

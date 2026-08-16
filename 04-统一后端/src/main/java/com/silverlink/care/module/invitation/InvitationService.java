@@ -15,7 +15,7 @@ import java.util.*;
 public class InvitationService {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    private static final int MAX_ELDERS_PER_FAMILY_ACCOUNT = 20;
+    private static final int MAX_ELDERS_PER_FAMILY_ACCOUNT = 4;
 
     private final JdbcTemplate jdbc;
     private final SilverLinkDataService data;
@@ -30,10 +30,18 @@ public class InvitationService {
     }
 
     public InvitationPreviewDto preview(String code) {
-        Map<String, Object> row = data.one("""
-                select i.*, e.name_enc, e.age, e.archive_no from invitation i
-                join elder e on e.id=i.elder_id where i.code=?
-                """, code);
+        Map<String, Object> row;
+        try {
+            row = data.one("""
+                    select i.*, e.name_enc, e.age, e.archive_no from invitation i
+                    join elder e on e.id=i.elder_id where i.code=?
+                    """, code);
+        } catch (BizException exception) {
+            if (exception.getCode() == 404) {
+                throw new BizException(404, "邀请码不存在", "errors.invitationNotFound");
+            }
+            throw exception;
+        }
         InvitationPreviewDto dto = new InvitationPreviewDto();
         dto.setCode(data.str(row.get("code")));
         dto.setElderName(data.maskName(data.dec(row.get("name_enc"))));
@@ -47,23 +55,39 @@ public class InvitationService {
     }
 
     public void sendSms(String code, String phone) {
-        Map<String, Object> row = data.one("select * from invitation where code=?", code);
+        Map<String, Object> row;
+        try {
+            row = data.one("select * from invitation where code=?", code);
+        } catch (BizException exception) {
+            if (exception.getCode() == 404) {
+                throw new BizException(404, "邀请码不存在", "errors.invitationNotFound");
+            }
+            throw exception;
+        }
         if (!"ACTIVE".equals(data.str(row.get("status")))) {
-            throw new BizException(400, "邀请码不可用");
+            throw new BizException(400, "邀请码不可用", "errors.invitationUnavailable");
         }
         smsService.sendCode(phone, "INVITATION:" + code);
     }
 
     public RegisterResultDto register(String code, RegisterRequest req) {
-        Map<String, Object> row = data.one("select * from invitation where code=?", code);
+        Map<String, Object> row;
+        try {
+            row = data.one("select * from invitation where code=?", code);
+        } catch (BizException exception) {
+            if (exception.getCode() == 404) {
+                return new RegisterResultDto(false, null, "邀请码不存在", "errors.invitationNotFound");
+            }
+            throw exception;
+        }
         if (!"ACTIVE".equals(data.str(row.get("status")))) {
-            return new RegisterResultDto(false, null, "邀请码不可用");
+            return new RegisterResultDto(false, null, "邀请码不可用", "errors.invitationUnavailable");
         }
         if (data.intValue(row.get("used_count")) >= data.intValue(row.get("max_uses"))) {
-            return new RegisterResultDto(false, null, "邀请码已用完");
+            return new RegisterResultDto(false, null, "邀请码已用完", "errors.invitationUsed");
         }
         if (!smsService.verify(req.getPhone(), req.getSmsCode(), "INVITATION:" + code)) {
-            return new RegisterResultDto(false, null, "验证码错误或已过期");
+            return new RegisterResultDto(false, null, "验证码错误或已过期", "errors.smsCodeInvalid");
         }
 
         String elderId = data.str(row.get("elder_id"));
@@ -79,7 +103,7 @@ public class InvitationService {
         } else {
             Map<String, Object> existingUser = existingUsers.get(0);
             if (!data.str(existingUser.get("password_hash")).equals(req.getPassword())) {
-                return new RegisterResultDto(false, null, "该手机号已注册，请输入原登录密码完成绑定");
+                return new RegisterResultDto(false, null, "该手机号已注册，请输入原登录密码完成绑定", "errors.familyAccountExists");
             }
             familyId = data.str(existingUser.get("id"));
 
@@ -88,7 +112,7 @@ public class InvitationService {
                     where family_user_id=? and elder_id=? and status='ACTIVE'
                     """, Integer.class, familyId, elderId);
             if (alreadyBound != null && alreadyBound > 0) {
-                return new RegisterResultDto(false, null, "该家属账号已绑定此老人");
+                return new RegisterResultDto(false, null, "该家属账号已绑定此老人", "errors.familyAlreadyBound");
             }
 
             Integer activeBindingCount = jdbc.queryForObject("""
@@ -96,7 +120,7 @@ public class InvitationService {
                     where family_user_id=? and status='ACTIVE'
                     """, Integer.class, familyId);
             if (activeBindingCount != null && activeBindingCount >= MAX_ELDERS_PER_FAMILY_ACCOUNT) {
-                return new RegisterResultDto(false, null, "一个家属账号最多绑定4位老人");
+                return new RegisterResultDto(false, null, "一个家属账号最多绑定4位老人", "errors.familyBindingLimit");
             }
         }
 
@@ -177,7 +201,7 @@ public class InvitationService {
                 return code;
             }
         }
-        throw new BizException(500, "邀请码生成失败，请稍后重试");
+        throw new BizException(500, "邀请码生成失败，请稍后重试", "errors.invitationCheckFailed");
     }
 
     private String randomAlphaNumericCode() {

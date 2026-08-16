@@ -1,5 +1,6 @@
 import type { Medication } from '../types';
 import { Pill, Edit2, Trash2 } from 'lucide-react';
+import { useI18n } from '../../i18n';
 
 interface MedCardProps {
   medication: Medication;
@@ -8,6 +9,7 @@ interface MedCardProps {
 }
 
 export default function MedCard({ medication, onEdit, onDelete }: MedCardProps) {
+  const { t } = useI18n();
   return (
     <div className="card">
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
@@ -25,12 +27,14 @@ export default function MedCard({ medication, onEdit, onDelete }: MedCardProps) 
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--sl-text)' }}>
+            <span className="sl-auto-data" dir="auto" style={{ fontSize: 15, fontWeight: 600, color: 'var(--sl-text)' }}>
               {medication.name}
             </span>
             <div style={{ display: 'flex', gap: 8 }}>
               {onEdit && (
-                <button
+                  <button
+                    type="button"
+                    aria-label={t('workbench.editMedication')}
                   onClick={() => onEdit(medication)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--sl-primary)' }}
                 >
@@ -39,6 +43,8 @@ export default function MedCard({ medication, onEdit, onDelete }: MedCardProps) 
               )}
               {onDelete && (
                 <button
+                  type="button"
+                  aria-label={t('workbench.deleteMedication')}
                   onClick={() => onDelete(medication)}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, color: 'var(--sl-danger)' }}
                 >
@@ -47,14 +53,14 @@ export default function MedCard({ medication, onEdit, onDelete }: MedCardProps) 
               )}
             </div>
           </div>
-          <div style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
-            剂量：{medication.dosage} · 用法：{medication.usage}
+          <div className="sl-auto-data" dir="auto" style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
+            {t('workbench.dosage')}：{medication.dosage} · {t('workbench.usage')}：{medication.usage}
           </div>
-          <div style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 2 }}>
-            时间：{medication.timing}
+          <div className="sl-auto-data" dir="auto" style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 2 }}>
+            {t('workbench.medicationTime')}：{medication.timing}
           </div>
           <div style={{ fontSize: 12, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
-            更新于 {medication.updatedAt}
+            {t('common.updatedAt')} {medication.updatedAt}
           </div>
         </div>
       </div>

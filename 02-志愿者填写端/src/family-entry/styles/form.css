@@ -176,7 +176,7 @@
 .field-value {
   font-size: 14px;
   color: var(--sl-text);
-  text-align: right;
+  text-align: end;
   flex: 1;
   word-break: break-all;
 }
@@ -184,8 +184,7 @@
 .modal-overlay {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  inset-inline: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.4);
   display: flex;
@@ -233,7 +232,7 @@
 
   .field-value {
     width: 100%;
-    text-align: left;
+    text-align: start;
   }
 
   .modal-content {

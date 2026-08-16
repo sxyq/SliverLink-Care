@@ -5,6 +5,7 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { formatDate } from '../utils/format';
 import type { ScaleSummary } from '../types';
+import { useI18n } from '../i18n';
 
 interface ScaleSummaryPageProps {
   data: ScaleSummary[] | null;
@@ -13,13 +14,14 @@ interface ScaleSummaryPageProps {
 
 export function ScaleSummaryPage({ data, loading }: ScaleSummaryPageProps) {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
-  if (loading) return <div className="sl-page loading">加载中...</div>;
-  if (!data || data.length === 0) return <div className="sl-page loading">暂无量表记录</div>;
+  if (loading) return <div className="sl-page loading">{t('common.loading')}</div>;
+  if (!data || data.length === 0) return <div className="sl-page loading">{t('scan.noScaleSummary')}</div>;
 
   return (
     <div className="sl-page sl-detail-page sl-has-bottom-nav">
-      <PageTopBar title="量表记录" leading="back" trailing="menu" />
+      <PageTopBar title={t('scan.scaleRecords')} leading="back" trailing="menu" />
 
       <div className="sl-list-stack">
         {data.map((item) => (
@@ -35,7 +37,7 @@ export function ScaleSummaryPage({ data, loading }: ScaleSummaryPageProps) {
             <div className="sl-list-card-body">
               <h3>{item.name}</h3>
               <p>
-                最近记录： {formatDate(item.updatedAt)} | 分数 <strong>{item.score}</strong>
+                {t('scan.recentUpdate')}： <span className="sl-ltr-data" dir="ltr">{formatDate(item.updatedAt)}</span> | {t('scan.score')} <strong className="sl-ltr-data" dir="ltr">{item.score}</strong>
               </p>
             </div>
           </button>
@@ -44,7 +46,7 @@ export function ScaleSummaryPage({ data, loading }: ScaleSummaryPageProps) {
 
       <div className="sl-privacy-pill">
         <Shield size={16} />
-        隐私保护
+        {t('common.privacyProtection')}
       </div>
 
       <AppAttribution />

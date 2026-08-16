@@ -13,9 +13,13 @@ export function MedicationList({ items }: MedicationListProps) {
         <div className="sl-medication-item" key={idx}>
           <Pill size={18} className="sl-medication-icon" />
           <div className="sl-medication-body">
-            <div className="sl-medication-name">{item.name}</div>
-            <div className="sl-medication-meta">
-              {item.dosage} · {item.usage} · {item.time}
+            <div className="sl-medication-name sl-auto-data" dir="auto">{item.name}</div>
+            <div className="sl-medication-meta sl-auto-data" dir="auto">
+              <span className="sl-ltr-data" dir="ltr">{item.dosage}</span>
+              <span aria-hidden="true"> · </span>
+              {item.usage}
+              <span aria-hidden="true"> · </span>
+              {item.time}
             </div>
           </div>
         </div>

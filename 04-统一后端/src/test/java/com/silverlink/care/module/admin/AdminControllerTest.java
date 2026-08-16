@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -55,8 +56,9 @@ class AdminControllerTest {
 
         var ok = controller.login(Map.of("account", "admin", "password", "pwd"), request, response);
         assertEquals(200, ok.getCode());
-        assertEquals("token-admin", ok.getData().get("token"));
+        assertNull(ok.getData().get("token"));
         assertEquals("系统管理员", ok.getData().get("role"));
+        verify(authCookieService).issueAdminCookie(request, response, "token-admin", 7200000L);
 
         when(data.login("admin", "bad", "SYSTEM_ADMIN")).thenReturn(Optional.empty());
         var fail = controller.login(Map.of("username", "admin", "password", "bad"), request, response);

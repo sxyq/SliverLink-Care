@@ -43,6 +43,7 @@ export const ENTRY_KEYS = {
   workbench: 'workbench',
 } as const;
 
+// 保留旧的非 React 调用方接口；页面提示由 i18n 运行时提供当前语言。
 export const ERROR_MESSAGES = {
   requestFailed: '请求失败，请稍后重试',
   networkFailed: '网络连接异常，请检查网络后重试',

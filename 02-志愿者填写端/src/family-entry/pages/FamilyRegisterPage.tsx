@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import TopBar from '../components/TopBar';
+import { useI18n } from '../../i18n';
 
 const RELATIONSHIPS = ['配偶', '子女', '兄弟姐妹', '其他'];
 
 export default function FamilyRegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const presetCode = (location.state as { code?: string } | null)?.code || '';
 
   const [inviteCode, setInviteCode] = useState(presetCode);
@@ -19,21 +21,21 @@ export default function FamilyRegisterPage() {
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    if (!inviteCode.trim()) newErrors['inviteCode'] = '请输入邀请码';
-    if (!name.trim()) newErrors['name'] = '请输入姓名';
+    if (!inviteCode.trim()) newErrors['inviteCode'] = t('errors.invitationRequired');
+    if (!name.trim()) newErrors['name'] = t('errors.nameRequired');
     if (!phone.trim()) {
-      newErrors['phone'] = '请输入手机号';
+      newErrors['phone'] = t('errors.phoneRequired');
     } else if (!/^1[3-9]\d{9}$/.test(phone)) {
-      newErrors['phone'] = '手机号格式不正确';
+      newErrors['phone'] = t('errors.phoneInvalid');
     }
-    if (!relationship) newErrors['relationship'] = '请选择与老人关系';
+    if (!relationship) newErrors['relationship'] = t('errors.relationshipRequired');
     if (!password) {
-      newErrors['password'] = '请输入密码';
+      newErrors['password'] = t('errors.passwordRequired');
     } else if (password.length < 6) {
-      newErrors['password'] = '密码至少6位';
+      newErrors['password'] = t('errors.passwordMin');
     }
     if (password !== confirmPassword) {
-      newErrors['confirmPassword'] = '两次密码不一致';
+      newErrors['confirmPassword'] = t('errors.passwordMismatch');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -46,14 +48,15 @@ export default function FamilyRegisterPage() {
 
   return (
     <div>
-      <TopBar title="家属协管账号注册" />
+      <TopBar title={t('auth.familyRegister')} />
       <div className="page-container">
         <div className="card">
           <div className="form-group">
-            <label className="form-label">邀请码</label>
+            <label className="form-label">{t('common.invitationCode')}</label>
             <input
-              className={`form-input${errors['inviteCode'] ? ' error' : ''}`}
-              placeholder="请输入后台发放的邀请码"
+              className={`form-input sl-ltr-data${errors['inviteCode'] ? ' error' : ''}`}
+              dir="ltr"
+              placeholder={t('family.inputBackendInvitation')}
               value={inviteCode}
               onChange={(e) => setInviteCode(e.target.value)}
             />
@@ -61,10 +64,11 @@ export default function FamilyRegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">姓名</label>
+            <label className="form-label">{t('common.name')}</label>
             <input
-              className={`form-input${errors['name'] ? ' error' : ''}`}
-              placeholder="请输入您的姓名"
+              className={`form-input sl-auto-data${errors['name'] ? ' error' : ''}`}
+              dir="auto"
+              placeholder={t('family.inputName')}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -72,10 +76,10 @@ export default function FamilyRegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">手机号</label>
+            <label className="form-label">{t('common.phone')}</label>
             <input
               className={`form-input${errors['phone'] ? ' error' : ''}`}
-              placeholder="请输入手机号"
+              placeholder={t('errors.phoneRequired')}
               type="tel"
               maxLength={11}
               value={phone}
@@ -85,7 +89,7 @@ export default function FamilyRegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">与老人关系</label>
+            <label className="form-label">{t('common.relationship')}</label>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {RELATIONSHIPS.map((rel) => (
                 <span
@@ -93,7 +97,7 @@ export default function FamilyRegisterPage() {
                   className={`chip${relationship === rel ? ' active' : ''}`}
                   onClick={() => setRelationship(rel)}
                 >
-                  {rel}
+                  {rel === '配偶' ? t('family.spouse') : rel === '子女' ? t('family.child') : rel === '兄弟姐妹' ? t('family.siblings') : t('family.other')}
                 </span>
               ))}
             </div>
@@ -101,10 +105,10 @@ export default function FamilyRegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">密码</label>
+            <label className="form-label">{t('common.password')}</label>
             <input
               className={`form-input${errors['password'] ? ' error' : ''}`}
-              placeholder="首次注册请设置密码；已有账号请输入原密码"
+              placeholder={t('family.passwordRegisterHint')}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -113,10 +117,10 @@ export default function FamilyRegisterPage() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">确认密码</label>
+            <label className="form-label">{t('auth.confirmPassword')}</label>
             <input
               className={`form-input${errors['confirmPassword'] ? ' error' : ''}`}
-              placeholder="请再次输入密码"
+              placeholder={t('family.confirmPasswordPlaceholder')}
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
@@ -126,11 +130,11 @@ export default function FamilyRegisterPage() {
         </div>
 
         <div className="info-banner mt-16">
-          仅支持通过邀请码注册或继续绑定老人。没有邀请码时暂时无法创建家属账号，忘记密码请联系管理员处理。
+          {t('auth.noInvitationHint')}
         </div>
 
         <button className="btn btn-primary btn-block mt-16" onClick={handleSubmit}>
-          下一步：短信验证
+          {t('common.nextSmsVerify')}
         </button>
       </div>
     </div>

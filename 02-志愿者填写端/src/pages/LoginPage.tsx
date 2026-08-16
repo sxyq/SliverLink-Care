@@ -3,9 +3,11 @@ import { KeyRound, LockKeyhole, Phone, User, UserRoundCheck } from 'lucide-react
 import { loginVolunteer, previewVolunteerInvitation, registerVolunteer } from '../api/volunteerApi';
 import { useAuth } from '../app/AuthProvider';
 import type { InvitationPreview } from '../family-entry/types';
+import { useI18n } from '../i18n';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const { t } = useI18n();
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
@@ -32,11 +34,11 @@ export const LoginPage: React.FC = () => {
           name: res.name?.trim() || account.trim(),
         });
       } else {
-        setError('账号或密码错误');
+        setError(t('errors.loginFailed'));
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : '';
-      setError(message || '登录失败，请重试');
+      setError(message || t('errors.loginRetry'));
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export const LoginPage: React.FC = () => {
   async function handleCheckInvitation() {
     const code = registerForm.invitationCode.trim().toUpperCase();
     if (!code) {
-      setError('请输入邀请码');
+      setError(t('errors.invitationRequired'));
       setInvitation(null);
       return;
     }
@@ -57,7 +59,7 @@ export const LoginPage: React.FC = () => {
       setRegisterForm((prev) => ({ ...prev, invitationCode: code }));
     } catch (inviteError) {
       setInvitation(null);
-      setError(inviteError instanceof Error ? inviteError.message : '邀请码校验失败');
+      setError(inviteError instanceof Error ? inviteError.message : t('errors.invitationCheckFailed'));
     } finally {
       setInviteChecking(false);
     }
@@ -70,11 +72,11 @@ export const LoginPage: React.FC = () => {
     const nextPassword = registerForm.password.trim();
 
     if (!invitationCode) {
-      setError('请输入邀请码');
+      setError(t('errors.invitationRequired'));
       return;
     }
     if (!name || !nextAccount || !nextPassword) {
-      setError('请完整填写邀请码、姓名、账号和密码');
+      setError(t('errors.completeVolunteerFields'));
       return;
     }
 
@@ -94,10 +96,10 @@ export const LoginPage: React.FC = () => {
           name: res.name?.trim() || name,
         });
       } else {
-        setError('注册失败，请稍后重试');
+        setError(t('errors.registerRetry'));
       }
     } catch (registerError) {
-      setError(registerError instanceof Error ? registerError.message : '注册失败，请重试');
+      setError(registerError instanceof Error ? registerError.message : t('errors.registerRetry'));
     } finally {
       setLoading(false);
     }
@@ -112,13 +114,13 @@ export const LoginPage: React.FC = () => {
               <div className="sl-login-icon">
                 <UserRoundCheck size={48} />
               </div>
-              <h1>智联名牌</h1>
-              <p>用 心 守 护  温 暖 相 伴</p>
+              <h1>{t('common.appName')}</h1>
+              <p>{t('common.brandSubtitle')}</p>
             </div>
           </div>
 
           <section className="sl-login-panel">
-            <div className="sl-login-mode-tabs" role="tablist" aria-label="登录或注册">
+            <div className="sl-login-mode-tabs" role="tablist" aria-label={t('auth.loginOrRegister')}>
               <button
                 type="button"
                 className={mode === 'login' ? 'is-active' : ''}
@@ -127,7 +129,7 @@ export const LoginPage: React.FC = () => {
                   setError('');
                 }}
               >
-                志愿者登录
+                {t('auth.volunteerLogin')}
               </button>
               <button
                 type="button"
@@ -137,20 +139,21 @@ export const LoginPage: React.FC = () => {
                   setError('');
                 }}
               >
-                邀请码注册
+                {t('auth.invitationRegister')}
               </button>
             </div>
             <div className="sl-login-fields">
               {mode === 'login' ? (
                 <>
-                  <h2 className="sl-login-title">志愿者登录</h2>
+                  <h2 className="sl-login-title">{t('auth.volunteerLogin')}</h2>
                   <label className="sl-label">
-                    <span className="sl-label-text">账号</span>
+                    <span className="sl-label-text">{t('common.account')}</span>
                     <div className="sl-input-wrap">
                       <User size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
-                        placeholder="请输入账号"
+                        className="sl-input sl-login-input sl-ltr-data"
+                        dir="ltr"
+                        placeholder={t('auth.inputAccount')}
                         value={account}
                         onChange={(e) => setAccount(e.target.value)}
                       />
@@ -158,13 +161,13 @@ export const LoginPage: React.FC = () => {
                   </label>
 
                   <label className="sl-label">
-                    <span className="sl-label-text">密码</span>
+                    <span className="sl-label-text">{t('common.password')}</span>
                     <div className="sl-input-wrap">
                       <LockKeyhole size={18} className="sl-login-input-icon" />
                       <input
                         className="sl-input sl-login-input"
                         type="password"
-                        placeholder="请输入密码"
+                        placeholder={t('auth.inputPassword')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                       />
@@ -173,16 +176,17 @@ export const LoginPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <h2 className="sl-login-title">输入邀请码注册</h2>
-                  <p className="sl-login-hint">请输入管理员发放的邀请码，注册后会自动关联到对应老人档案。</p>
+                  <h2 className="sl-login-title">{t('auth.inputInvitationRegister')}</h2>
+                  <p className="sl-login-hint">{t('auth.adminInvitationHint')}</p>
 
                   <label className="sl-label">
-                    <span className="sl-label-text">邀请码</span>
+                    <span className="sl-label-text">{t('common.invitationCode')}</span>
                     <div className="sl-input-wrap">
                       <KeyRound size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
-                        placeholder="请输入邀请码"
+                        className="sl-input sl-login-input sl-ltr-data"
+                        dir="ltr"
+                        placeholder={t('errors.invitationRequired')}
                         value={registerForm.invitationCode}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, invitationCode: e.target.value }))}
                       />
@@ -190,25 +194,26 @@ export const LoginPage: React.FC = () => {
                   </label>
 
                   <button className="sl-btn sl-btn-secondary" type="button" onClick={handleCheckInvitation} disabled={inviteChecking}>
-                    {inviteChecking ? '校验中…' : '验证邀请码'}
+                    {inviteChecking ? t('auth.checkingInvitation') : t('common.verifyInvitation')}
                   </button>
 
                   {invitation ? (
                     <div className="sl-login-preview">
-                      <strong>邀请码可用</strong>
-                      <span>关联老人：{invitation.elderName}，{invitation.elderAge} 岁</span>
-                      <span>档案编号：{invitation.elderArchiveNo}</span>
-                      <span>有效期至：{invitation.expiresAt}</span>
+                      <strong>{t('auth.invitationAvailableForVolunteer')}</strong>
+                      <span>{t('common.relatedElder')}：<span className="sl-auto-data" dir="auto">{invitation.elderName}</span>，{t('common.yearsOld', { age: invitation.elderAge })}</span>
+                      <span>{t('common.archiveNumber')}：<span className="sl-ltr-data">{invitation.elderArchiveNo}</span></span>
+                      <span>{t('common.validUntil')}：<span className="sl-ltr-data">{invitation.expiresAt}</span></span>
                     </div>
                   ) : null}
 
                   <label className="sl-label">
-                    <span className="sl-label-text">姓名</span>
+                    <span className="sl-label-text">{t('common.name')}</span>
                     <div className="sl-input-wrap">
                       <User size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
-                        placeholder="请输入姓名"
+                        className="sl-input sl-login-input sl-auto-data"
+                        dir="auto"
+                        placeholder={t('auth.inputName')}
                         value={registerForm.name}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, name: e.target.value }))}
                       />
@@ -216,12 +221,13 @@ export const LoginPage: React.FC = () => {
                   </label>
 
                   <label className="sl-label">
-                    <span className="sl-label-text">账号</span>
+                    <span className="sl-label-text">{t('common.account')}</span>
                     <div className="sl-input-wrap">
                       <User size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
-                        placeholder="请设置登录账号"
+                        className="sl-input sl-login-input sl-ltr-data"
+                        dir="ltr"
+                        placeholder={t('auth.setLoginAccount')}
                         value={registerForm.account}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, account: e.target.value }))}
                       />
@@ -229,12 +235,15 @@ export const LoginPage: React.FC = () => {
                   </label>
 
                   <label className="sl-label">
-                    <span className="sl-label-text">手机号</span>
+                    <span className="sl-label-text">{t('common.phone')}</span>
                     <div className="sl-input-wrap">
                       <Phone size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
-                        placeholder="选填，用于后续联系"
+                        className="sl-input sl-login-input sl-ltr-data"
+                        type="tel"
+                        inputMode="numeric"
+                        dir="ltr"
+                        placeholder={t('auth.optionalForContact')}
                         value={registerForm.phone}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, phone: e.target.value }))}
                       />
@@ -242,13 +251,13 @@ export const LoginPage: React.FC = () => {
                   </label>
 
                   <label className="sl-label">
-                    <span className="sl-label-text">密码</span>
+                    <span className="sl-label-text">{t('common.password')}</span>
                     <div className="sl-input-wrap">
                       <LockKeyhole size={18} className="sl-login-input-icon" />
                       <input
                         className="sl-input sl-login-input"
                         type="password"
-                        placeholder="请设置登录密码"
+                        placeholder={t('auth.setLoginPassword')}
                         value={registerForm.password}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
                       />
@@ -260,12 +269,12 @@ export const LoginPage: React.FC = () => {
               {error ? <p className="sl-login-error">{error}</p> : null}
 
               <button className="sl-btn sl-btn-primary" onClick={mode === 'login' ? handleLogin : handleRegister} disabled={loading}>
-                {loading ? (mode === 'login' ? '登录中…' : '注册中…') : (mode === 'login' ? '登录' : '注册并进入')}
+                {loading ? (mode === 'login' ? t('auth.loggingIn') : t('auth.registerLoading')) : (mode === 'login' ? t('auth.login') : t('auth.registerAndEnter'))}
               </button>
             </div>
           </section>
 
-          <div className="sl-attribution">重庆医科大学护理学院 银龄守护团队</div>
+          <div className="sl-attribution">{t('common.attribution')}</div>
         </div>
       </section>
     </div>

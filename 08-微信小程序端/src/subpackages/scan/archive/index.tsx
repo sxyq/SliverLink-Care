@@ -1,17 +1,19 @@
 import { useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { fetchArchive, fetchVerifiedBasicInfo } from '@/services/scan/scanArchiveService';
 import type { ScanArchiveRecord, ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
-function formatDate(value: string) {
+function formatDate(value: string, fallback: string) {
   if (!value) {
-    return '暂无记录';
+    return fallback;
   }
   return value.slice(0, 10);
 }
@@ -24,16 +26,25 @@ function buildVerifyUrl(elderId: string) {
   return `${APP_ROUTES.scanVerify}?elderId=${encodeURIComponent(elderId)}`;
 }
 
+type InfoRowDirection = 'auto' | 'ltr' | 'mixed';
+
+interface InfoRow {
+  label: string;
+  value: ReactNode;
+  direction: InfoRowDirection;
+}
+
 function ScanArchiveHeader() {
+  const { t } = useI18n();
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
         <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.home }))}>
-          返回
+          {t('common.back')}
         </View>
       </View>
       <View className='sl-page-header-copy'>
-        <View className='sl-page-header-copy__title'>健康档案</View>
+        <View className='sl-page-header-copy__title'>{t('scan.healthArchive')}</View>
       </View>
       <View className='sl-page-header-placeholder' />
     </View>
@@ -41,6 +52,7 @@ function ScanArchiveHeader() {
 }
 
 export default function ScanArchivePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const elderId = params.elderId || '';
@@ -55,7 +67,7 @@ export default function ScanArchivePage() {
   useEffect(() => {
     if (!elderId || !sessionId) {
       setLoading(false);
-      setErrorText('缺少访问会话，请返回验证页重新进入。');
+      setErrorText(t('errors.sessionRequired'));
       return;
     }
 
@@ -76,7 +88,7 @@ export default function ScanArchivePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+          setErrorText((error as Error)?.message || t('errors.requestFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -92,20 +104,26 @@ export default function ScanArchivePage() {
     };
   }, [elderId, sessionId]);
 
-  const infoRows = archive
+  const infoRows: InfoRow[] = archive
     ? [
-        { label: '慢病情况', value: archive.healthSelfAssessment || '暂无记录' },
-        { label: '过敏史', value: basicInfo?.allergySummary || '暂无记录' },
+        { label: t('scan.chronicDisease'), value: archive.healthSelfAssessment || t('common.noRecords'), direction: 'auto' },
+        { label: t('common.allergyHistory'), value: basicInfo?.allergySummary || t('common.noRecords'), direction: 'auto' },
         {
-          label: '基础体征',
-          value: `身高 ${archive.heightCm || 0}cm，体重 ${archive.weightKg || 0}kg，BMI ${archive.bmi ? archive.bmi.toFixed(1) : '0.0'}`,
+          label: t('scan.basicVitals'),
+          value: `${t('scan.height')} ${archive.heightCm || 0}cm，${t('scan.weight')} ${archive.weightKg || 0}kg，BMI ${archive.bmi ? archive.bmi.toFixed(1) : '0.0'}`,
+          direction: 'ltr',
         },
-        { label: '既往史', value: archive.emotionScreening || archive.cognitiveScreening || '暂无记录' },
+        { label: t('scan.pastHistory'), value: archive.emotionScreening || archive.cognitiveScreening || t('common.noRecords'), direction: 'auto' },
         {
-          label: '联系人',
-          value: `${basicInfo?.emergencyContactName || '未提供'}${basicInfo?.relationship ? `（${basicInfo.relationship}）` : ''}  ${
-            basicInfo?.emergencyPhoneDial || '未提供'
-          }`,
+          label: t('common.contact'),
+          value: (
+            <>
+              <Text className='sl-auto-data' {...{ dir: 'auto' }}>{basicInfo?.emergencyContactName || t('common.notProvided')}</Text>
+              {basicInfo?.relationship ? <Text className='sl-auto-data' {...{ dir: 'auto' }}>（{basicInfo.relationship}）</Text> : null}
+              {'  '}<Text className='sl-ltr-data'>{basicInfo?.emergencyPhoneDial || t('common.notProvided')}</Text>
+            </>
+          ),
+          direction: 'mixed',
         },
       ]
     : [];
@@ -124,61 +142,70 @@ export default function ScanArchivePage() {
                     className='sl-secondary-button'
                     onClick={() => Taro.navigateTo({ url: buildProtectedUrl(APP_ROUTES.scanMedications, elderId, sessionId) })}
                   >
-                    查看用药
+                    {t('scan.viewMedication')}
                   </Button>
                   <Button
                     className='sl-secondary-button'
                     onClick={() => Taro.navigateTo({ url: buildProtectedUrl(APP_ROUTES.scanScales, elderId, sessionId) })}
                   >
-                    查看量表
+                    {t('scan.viewScale')}
                   </Button>
                   <Button className='sl-secondary-button' onClick={() => Taro.redirectTo({ url: buildVerifyUrl(elderId) })}>
-                    重新验证
+                    {t('verification.reverify')}
                   </Button>
                 </View>
               ) : null}
 
               {loading ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>正在加载受保护档案信息...</View>
+                  <View className='sl-empty-state'>{t('common.reading')}</View>
                 </View>
               ) : errorText ? (
                 <View className='sl-card sl-form-panel'>
                   <View className='sl-error-card'>{errorText}</View>
                   <Button className='sl-secondary-button' onClick={() => Taro.redirectTo({ url: buildVerifyUrl(elderId) })}>
-                    返回验证页
+                    {t('scan.backToVerify')}
                   </Button>
                 </View>
               ) : basicInfo && archive ? (
                 <>
                   <View className='sl-permission-banner'>
-                    <Text>已通过短信验证</Text>
+                    <Text>{t('verification.passedLabel')}</Text>
                   </View>
 
                   <View className='sl-card scan-archive-number-card'>
                     <View className='scan-archive-info-block-head'>
-                      <View className='scan-archive-info-block-icon'>档</View>
+                      <View className='scan-archive-info-block-icon'>▣</View>
                       <View>
-                        <View className='scan-archive-number-card__label'>健康档案编号</View>
-                        <View className='scan-archive-number-card__value'>{basicInfo.archiveNo || '未提供'}</View>
+                        <View className='scan-archive-number-card__label'>{t('common.healthRecordNo')}</View>
+                        <View className='scan-archive-number-card__value sl-ltr-data'>{basicInfo.archiveNo || t('common.notProvided')}</View>
                       </View>
                     </View>
                   </View>
 
                   <View className='sl-card scan-archive-info-card'>
                     <View className='scan-archive-info-block-head'>
-                      <View className='scan-archive-info-block-icon'>康</View>
-                      <View className='scan-archive-info-card__title'>基础健康信息</View>
+                      <View className='scan-archive-info-block-icon'>♡</View>
+                      <View className='scan-archive-info-card__title'>{t('scan.basicInfo')}</View>
                     </View>
                     <View className='scan-archive-info-card__meta'>
-                      <Text>最近更新： {formatDate(archive.date)}</Text>
-                      <Text>记录人： {archive.volunteer || '暂无记录'}</Text>
+                      <Text>{t('scan.recentUpdate')}： <Text className='sl-ltr-data'>{formatDate(archive.date, t('common.noRecords'))}</Text></Text>
+                      <Text>{t('common.recorder')}： <Text className='sl-auto-data' {...{ dir: 'auto' }}>{archive.volunteer || t('common.noRecords')}</Text></Text>
                     </View>
                     <View className='scan-archive-list'>
                       {infoRows.map((item) => (
                         <View key={item.label} className='scan-archive-list__item'>
                           <Text className='scan-archive-list__label'>{item.label}</Text>
-                          <Text className='scan-archive-list__value'>{item.value}</Text>
+                          {item.direction === 'mixed' ? (
+                            <Text className='scan-archive-list__value'>{item.value}</Text>
+                          ) : (
+                            <Text
+                              className={item.direction === 'ltr' ? 'scan-archive-list__value sl-ltr-data' : 'scan-archive-list__value sl-auto-data'}
+                              {...{ dir: item.direction }}
+                            >
+                              {item.value}
+                            </Text>
+                          )}
                         </View>
                       ))}
                     </View>
@@ -186,7 +213,7 @@ export default function ScanArchivePage() {
                 </>
               ) : (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>暂无健康档案记录。</View>
+                  <View className='sl-empty-state'>{t('scan.noHealthArchive')}</View>
                 </View>
               )}
             </View>

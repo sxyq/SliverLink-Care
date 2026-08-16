@@ -2,22 +2,18 @@ import { useEffect, useState } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { resolveScanToken } from '@/services/scan/scanAuthService';
 import type { ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
-
-function formatEmergencyContact(info: ScanBasicInfo) {
-  const relation = info.relationship ? `（${info.relationship}）` : '';
-  return `${info.emergencyContactName || '未提供'}${relation}  ${info.emergencyPhoneMasked || '未提供'}`;
-}
 
 function maskName(name: string) {
   const value = String(name || '').trim();
   if (!value) {
-    return '未提供';
+    return '';
   }
   if (value.length <= 1) {
     return value;
@@ -26,15 +22,16 @@ function maskName(name: string) {
 }
 
 function ScanLandingHeader() {
+  const { t } = useI18n();
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
         <View className='sl-page-header-icon' onClick={() => Taro.redirectTo({ url: APP_ROUTES.home })}>
-          首页
+          {t('common.home')}
         </View>
       </View>
       <View className='sl-page-header-copy'>
-        <View className='sl-page-header-copy__title'>渝护银龄名牌</View>
+        <View className='sl-page-header-copy__title'>{t('common.brandTitle')}</View>
       </View>
       <View className='sl-page-header-placeholder' />
     </View>
@@ -42,6 +39,7 @@ function ScanLandingHeader() {
 }
 
 export default function ScanLandingPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const [basicInfo, setBasicInfo] = useState<ScanBasicInfo | null>(null);
@@ -53,7 +51,7 @@ export default function ScanLandingPage() {
 
     if (!qrToken) {
       setLoading(false);
-      setErrorText(ERROR_MESSAGES.invalidQr);
+      setErrorText(t('scan.notFoundInvalidQr'));
       return;
     }
 
@@ -69,7 +67,7 @@ export default function ScanLandingPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+          setErrorText((error as Error)?.message || t('errors.requestFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -93,7 +91,7 @@ export default function ScanLandingPage() {
 
   function handleEmergencyCall(phone: string) {
     if (!phone) {
-      void Taro.showToast({ title: '暂未提供联系电话', icon: 'none' });
+      void Taro.showToast({ title: t('scan.noPhone'), icon: 'none' });
       return;
     }
     void Taro.makePhoneCall({ phoneNumber: phone });
@@ -109,20 +107,20 @@ export default function ScanLandingPage() {
 
               {loading ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>正在解析二维码，请稍候。</View>
+                  <View className='sl-empty-state'>{t('scan.parseQrLoading')}</View>
                 </View>
               ) : errorText ? (
                 <View className='sl-card sl-form-panel'>
                   <View className='sl-error-card'>{errorText}</View>
                   <Button className='sl-secondary-button scan-landing-panel__button' onClick={() => Taro.redirectTo({ url: APP_ROUTES.home })}>
-                    返回首页
+                    {t('common.backHome')}
                   </Button>
                 </View>
               ) : basicInfo ? (
                 <>
                   <View className='sl-section-heading'>
-                    <Text className='scan-landing-heading__title'>基本信息</Text>
-                    <Text className='scan-landing-heading__badge'>盾</Text>
+                    <Text className='scan-landing-heading__title'>{t('scan.basicInfo')}</Text>
+                    <Text className='scan-landing-heading__badge'>✓</Text>
                   </View>
 
                   <View className='sl-card scan-landing-profile-panel'>
@@ -134,50 +132,54 @@ export default function ScanLandingPage() {
                         </View>
                       </View>
                       <View className='scan-landing-profile-lines'>
-                        <Text>姓名： {maskName(basicInfo.name)}</Text>
-                        <Text>性别： {basicInfo.gender || '未提供'}</Text>
-                        <Text>年龄： {basicInfo.age ? `${basicInfo.age} 岁` : '未提供'}</Text>
+                        <Text> {t('common.name')}： <Text className='sl-auto-data' {...{ dir: 'auto' }}>{maskName(basicInfo.name) || t('common.notProvided')}</Text></Text>
+                        <Text>{t('common.gender')}： {basicInfo.gender === '男' ? t('common.male') : basicInfo.gender === '女' ? t('common.female') : basicInfo.gender || t('common.notProvided')}</Text>
+                        <Text>{t('common.age')}： <Text className='sl-auto-data' {...{ dir: 'auto' }}>{basicInfo.age ? t('common.yearsOld', { age: basicInfo.age }) : t('common.notProvided')}</Text></Text>
                       </View>
                     </View>
-                    <View className='scan-landing-archive-line'>健康档案编号： {basicInfo.archiveNo || '未提供'}</View>
+                    <View className='scan-landing-archive-line'>{t('common.healthRecordNo')}： <Text className='sl-ltr-data'>{basicInfo.archiveNo || t('common.notProvided')}</Text></View>
                   </View>
 
                   <View className='sl-card scan-landing-address-panel'>
                     <View className='scan-landing-mini-heading'>
-                      <Text className='scan-landing-mini-heading__title'>住址信息</Text>
-                      <Text className='scan-landing-mini-heading__icon'>盾</Text>
+                      <Text className='scan-landing-mini-heading__title'>{t('scan.addressInfo')}</Text>
+                      <Text className='scan-landing-mini-heading__icon'>✓</Text>
                     </View>
-                    <View className='scan-landing-address-line'>完成验证后可查看老人详细住址信息</View>
+                    <View className='scan-landing-address-line'>{t('scan.completeVerifyToViewAddress')}</View>
                   </View>
 
                   <View className='sl-card scan-landing-contact-panel'>
                     <View className='scan-landing-contact-line'>
-                      <Text>紧急联系人： {formatEmergencyContact(basicInfo)}</Text>
+                      <Text>
+                        {t('scan.emergencyContact')}： <Text className='sl-auto-data' {...{ dir: 'auto' }}>{basicInfo.emergencyContactName || t('common.notProvided')}</Text>
+                        {basicInfo.relationship ? <Text className='sl-auto-data' {...{ dir: 'auto' }}>（{basicInfo.relationship}）</Text> : null}
+                        {'  '}<Text className='sl-ltr-data'>{basicInfo.emergencyPhoneMasked || t('common.notProvided')}</Text>
+                      </Text>
                     </View>
                     <Button className='sl-secondary-button scan-landing-contact-button' onClick={() => handleEmergencyCall(basicInfo.emergencyPhoneDial)}>
-                      一键拨打
+                      {t('scan.callNow')}
                     </Button>
                   </View>
 
                   <View className='sl-card scan-landing-medical-panel'>
                     <View className='scan-landing-mini-heading'>
-                      <Text className='scan-landing-mini-heading__title'>医疗信息</Text>
-                      <Text className='scan-landing-mini-heading__icon'>十</Text>
+                      <Text className='scan-landing-mini-heading__title'>{t('scan.medicalInfo')}</Text>
+                      <Text className='scan-landing-mini-heading__icon'>+</Text>
                     </View>
                     <View className='scan-landing-medical-list'>
-                      <Text>ABO 血型： {basicInfo.aboType || '未提供'}</Text>
-                      <Text>Rh 血型： {basicInfo.rhType || '未提供'}</Text>
-                      <Text>过敏史摘要： {basicInfo.allergySummary || '未提供'}</Text>
+                      <Text>{t('scan.aboType')}： <Text className='sl-ltr-data'>{basicInfo.aboType || t('common.notProvided')}</Text></Text>
+                      <Text>{t('scan.rhType')}： <Text className='sl-ltr-data'>{basicInfo.rhType || t('common.notProvided')}</Text></Text>
+                      <Text>{t('scan.allergySummary')}： <Text className='sl-auto-data' {...{ dir: 'auto' }}>{basicInfo.allergySummary || t('common.notProvided')}</Text></Text>
                     </View>
                   </View>
 
                   <Button className='sl-primary-button' onClick={() => handleContinueVerify(basicInfo.elderId || '')}>
-                    查看健康档案
+                    {t('scan.viewHealthArchive')}
                   </Button>
                 </>
               ) : (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>暂未识别到老人信息，请重新扫码。</View>
+                  <View className='sl-empty-state'>{t('scan.scanAgain')}</View>
                 </View>
               )}
             </View>

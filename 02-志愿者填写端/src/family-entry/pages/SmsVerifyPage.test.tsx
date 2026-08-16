@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -126,14 +126,18 @@ describe('family SmsVerifyPage', () => {
     expect(await screen.findByText('138****6666')).toBeInTheDocument();
     expect(sendSmsCode).toHaveBeenCalledWith('13800006666');
 
-    store.state = { ...store.state, canResend: true };
-    store.notify();
+    act(() => {
+      store.state = { ...store.state, canResend: true };
+      store.notify();
+    });
     await user.click(await screen.findByRole('button', { name: '重新发送' }));
     expect(sendSmsCode).toHaveBeenLastCalledWith('13800006666');
     expect(resetCountdown).toHaveBeenCalledTimes(1);
 
-    store.state = { ...store.state, canSwitchBackup: true };
-    store.notify();
+    act(() => {
+      store.state = { ...store.state, canSwitchBackup: true };
+      store.notify();
+    });
     await user.click(await screen.findByRole('button', { name: '切换备用手机号' }));
     expect(switchToBackup).toHaveBeenCalledTimes(1);
     expect(sendSmsCode).toHaveBeenLastCalledWith('13900007777');

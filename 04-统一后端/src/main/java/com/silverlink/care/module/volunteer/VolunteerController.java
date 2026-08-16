@@ -58,7 +58,7 @@ public class VolunteerController {
             return ApiResponse.ok(map);
         }
         auditLogService.record(account, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
-        return ApiResponse.fail(401, "账号或密码错误");
+        return ApiResponse.fail(401, "账号或密码错误", "errors.loginFailed");
     }
 
     @PostMapping("/register")

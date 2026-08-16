@@ -5,6 +5,7 @@ import { useAuth } from '../app/AuthProvider';
 import type { AssignedElder, CreateAssignedElderInput } from '../types';
 import { SubjectListPage } from '@shared/SubjectListPage';
 import type { CareSubject } from '@shared/types';
+import { useI18n } from '../i18n';
 
 interface Props {
   onSelect: (elder: AssignedElder) => void;
@@ -44,6 +45,7 @@ function toCareSubject(elder: AssignedElder): CareSubject {
 
 export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }) => {
   const { login, logout, user, updateUser } = useAuth();
+  const { t } = useI18n();
   const [elders, setElders] = useState<AssignedElder[]>([]);
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
@@ -94,7 +96,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
         });
       })
       .catch((error) => {
-        setAccountError(error instanceof Error ? error.message : '加载账号信息失败');
+        setAccountError(error instanceof Error ? error.message : t('errors.profileLoadFailed'));
       });
   }, [showAccountPanel, user?.account, user?.name]);
 
@@ -121,7 +123,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
 
   async function handleCreateElder() {
     if (!createForm.name.trim() || createSaving) {
-      setCreateError('请先填写老人姓名');
+      setCreateError(t('errors.volunteerNameRequired'));
       return;
     }
     setCreateSaving(true);
@@ -136,7 +138,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
         onEditBasic(next);
       }
     } catch (error) {
-      setCreateError(error instanceof Error ? error.message : '新增失败，请稍后重试');
+      setCreateError(error instanceof Error ? error.message : t('errors.createElderFailed'));
     } finally {
       setCreateSaving(false);
     }
@@ -145,7 +147,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
   async function handleSaveAccount() {
     if (!accountForm.name.trim() || !accountForm.account.trim() || accountSaving) return;
     if (accountForm.password && !accountForm.currentPassword.trim()) {
-      setAccountError('修改密码前请输入当前密码');
+      setAccountError(t('errors.currentPasswordRequired'));
       return;
     }
     setAccountSaving(true);
@@ -169,9 +171,9 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
         currentPassword: '',
         password: '',
       }));
-      setAccountSuccess('账号信息已更新');
+      setAccountSuccess(t('common.accountUpdated'));
     } catch (error) {
-      setAccountError(error instanceof Error ? error.message : '保存失败，请稍后重试');
+      setAccountError(error instanceof Error ? error.message : t('errors.profileSaveFailed'));
     } finally {
       setAccountSaving(false);
     }
@@ -191,7 +193,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
   return (
     <>
       <SubjectListPage
-        title="智联名牌"
+        title={t('common.appName')}
         loading={loading}
         subjects={filtered.map(toCareSubject)}
         keyword={keyword}
@@ -201,14 +203,14 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
             type="button"
             className="sl-page-header-icon"
             onClick={() => setShowAccountPanel(true)}
-            aria-label="本账号管理"
-            title="本账号管理"
+            aria-label={t('common.accountManage')}
+            title={t('common.accountManage')}
           >
             <CircleUserRound size={18} />
           </button>
         }
         headerAction={
-          <button type="button" className="sl-page-header-icon" onClick={handleLogout} aria-label="退出登录" title="退出登录">
+          <button type="button" className="sl-page-header-icon" onClick={handleLogout} aria-label={t('workbench.logout')} title={t('workbench.logout')}>
             <LogOut size={18} />
           </button>
         }
@@ -219,22 +221,22 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
         onSecondaryAction={(_subject) => {
           openCreatePanel();
         }}
-        secondaryActionLabel="新增"
-        secondaryActionDescription={`直接新增老人档案，当前已负责 ${elders.length} 位`}
-        emptyText="暂无已分配老人"
-        searchPlaceholder="请输入老人姓名或档案编号"
+        secondaryActionLabel={t('common.add')}
+        secondaryActionDescription={`${t('common.directAddDescription', { count: elders.length })}`}
+        emptyText={t('workbench.noAssignedElders')}
+        searchPlaceholder={t('workbench.elderNameOrArchivePlaceholder')}
       />
 
       {showAccountPanel ? (
         <div className="sl-modal-overlay" onClick={() => setShowAccountPanel(false)}>
           <div className="sl-modal-card" onClick={(event) => event.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <h3>本账号管理</h3>
+              <h3>{t('common.accountManage')}</h3>
               <button
                 type="button"
                 className="sl-page-header-icon"
                 onClick={() => setShowAccountPanel(false)}
-                aria-label="关闭账号管理"
+                aria-label={t('common.closeAccountManage')}
               >
                 <X size={18} />
               </button>
@@ -243,58 +245,62 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
             <div className="sl-form-stack">
               <div className="sl-card sl-card-soft">
                 <div className="sl-section-title">
-                  <h2>{user?.name || '当前志愿者'}</h2>
+                  <h2>{user?.name || t('common.currentVolunteer')}</h2>
                 </div>
                 <div className="sl-form-grid">
                   <label className="sl-label">
-                    <span className="sl-label-text">姓名</span>
+                    <span className="sl-label-text">{t('common.name')}</span>
                     <input
                       className="sl-input"
                       value={accountForm.name}
                       onChange={(event) => updateAccountForm('name', event.target.value)}
-                      placeholder="请输入姓名"
+                      placeholder={t('workbench.namePlaceholder')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">登录账号</span>
+                    <span className="sl-label-text">{t('common.loginAccount')}</span>
                     <input
-                      className="sl-input"
+                      className="sl-input sl-ltr-data"
+                      dir="ltr"
                       value={accountForm.account}
                       onChange={(event) => updateAccountForm('account', event.target.value)}
-                      placeholder="请输入登录账号"
+                      placeholder={t('auth.setLoginAccount')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">手机号</span>
+                    <span className="sl-label-text">{t('common.phone')}</span>
                     <input
-                      className="sl-input"
+                      className="sl-input sl-ltr-data"
+                      type="tel"
+                      inputMode="numeric"
+                      dir="ltr"
                       value={accountForm.phone}
                       onChange={(event) => updateAccountForm('phone', event.target.value)}
-                      placeholder="请输入手机号"
+                      placeholder={t('errors.phoneRequired')}
                     />
                   </label>
                   <div className="sl-label">
-                    <span className="sl-label-text">负责老人数量</span>
-                    <div className="sl-summary-value">{elders.length} 位</div>
+                    <span className="sl-label-text">{t('common.elderCount')}</span>
+                    <div className="sl-summary-value">{t('common.totalElders', { count: elders.length })}</div>
                   </div>
                   <label className="sl-label sl-label-full">
-                    <span className="sl-label-text">当前密码</span>
+                    <span className="sl-label-text">{t('auth.currentPassword')}</span>
                     <input
                       className="sl-input"
                       type="password"
                       value={accountForm.currentPassword}
                       onChange={(event) => updateAccountForm('currentPassword', event.target.value)}
-                      placeholder="修改密码时必须填写"
+                      placeholder={t('common.currentPasswordRequired')}
                     />
                   </label>
                   <label className="sl-label sl-label-full">
-                    <span className="sl-label-text">新密码</span>
+                    <span className="sl-label-text">{t('common.password')}</span>
                     <input
                       className="sl-input"
                       type="password"
                       value={accountForm.password}
                       onChange={(event) => updateAccountForm('password', event.target.value)}
-                      placeholder="不修改可留空"
+                      placeholder={t('common.leaveBlankToKeep')}
                     />
                   </label>
                 </div>
@@ -306,10 +312,10 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
 
             <div className="sl-modal-actions">
               <button type="button" className="sl-btn sl-btn-secondary" onClick={() => setShowAccountPanel(false)}>
-                关闭
+                {t('common.close')}
               </button>
               <button type="button" className="sl-btn sl-btn-secondary" onClick={handleSaveAccount} disabled={accountSaving}>
-                {accountSaving ? '保存中...' : '保存修改'}
+                {accountSaving ? t('common.saving') : t('common.saveChanges')}
               </button>
               <button
                 type="button"
@@ -317,7 +323,7 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
                 onClick={handleLogout}
               >
                 <LogOut size={16} />
-                退出登录
+                {t('workbench.logout')}
               </button>
             </div>
           </div>
@@ -328,12 +334,12 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
         <div className="sl-modal-overlay" onClick={() => setShowCreatePanel(false)}>
           <div className="sl-modal-card" onClick={(event) => event.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <h3>新增老人</h3>
+              <h3>{t('common.addElder')}</h3>
               <button
                 type="button"
                 className="sl-page-header-icon"
                 onClick={() => setShowCreatePanel(false)}
-                aria-label="关闭新增老人"
+                aria-label={t('common.closeAddElder')}
               >
                 <X size={18} />
               </button>
@@ -343,16 +349,16 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
               <div className="sl-card sl-card-soft">
                 <div className="sl-form-grid">
                   <label className="sl-label">
-                    <span className="sl-label-text">老人姓名</span>
+                    <span className="sl-label-text">{t('common.elderName')}</span>
                     <input
                       className="sl-input"
                       value={createForm.name}
                       onChange={(event) => updateCreateForm('name', event.target.value)}
-                      placeholder="请输入老人姓名"
+                      placeholder={t('workbench.namePlaceholder')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">性别</span>
+                    <span className="sl-label-text">{t('common.gender')}</span>
                     <div className="sl-chips-row">
                       {(['男', '女'] as const).map((option) => (
                         <button
@@ -361,56 +367,56 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
                           className={createForm.gender === option ? 'sl-chip sl-chip-selected' : 'sl-chip'}
                           onClick={() => updateCreateForm('gender', option)}
                         >
-                          {option}
+                          {option === '男' ? t('common.male') : t('common.female')}
                         </button>
                       ))}
                     </div>
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">年龄</span>
+                    <span className="sl-label-text">{t('common.age')}</span>
                     <input
                       className="sl-input"
                       type="number"
                       value={createForm.age}
                       onChange={(event) => updateCreateForm('age', event.target.value)}
-                      placeholder="请输入年龄"
+                      placeholder={t('workbench.agePlaceholder')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">居住地</span>
+                    <span className="sl-label-text">{t('common.address')}</span>
                     <input
                       className="sl-input"
                       value={createForm.residence}
                       onChange={(event) => updateCreateForm('residence', event.target.value)}
-                      placeholder="请输入住址"
+                      placeholder={t('workbench.residencePlaceholder')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">联系人</span>
+                    <span className="sl-label-text">{t('common.contact')}</span>
                     <input
                       className="sl-input"
                       value={createForm.emergencyContactName}
                       onChange={(event) => updateCreateForm('emergencyContactName', event.target.value)}
-                      placeholder="请输入联系人姓名"
+                      placeholder={t('workbench.contactNamePlaceholder')}
                     />
                   </label>
                   <label className="sl-label">
-                    <span className="sl-label-text">与老人关系</span>
+                    <span className="sl-label-text">{t('common.relationship')}</span>
                     <input
                       className="sl-input"
                       value={createForm.emergencyContactRelation}
                       onChange={(event) => updateCreateForm('emergencyContactRelation', event.target.value)}
-                      placeholder="如 女儿 / 儿子 / 配偶"
+                      placeholder={t('workbench.relationshipPlaceholder')}
                     />
                   </label>
                   <label className="sl-label sl-label-full">
-                    <span className="sl-label-text">联系电话</span>
+                    <span className="sl-label-text">{t('common.contactPhone')}</span>
                     <input
                       className="sl-input"
                       type="tel"
                       value={createForm.emergencyContactPhone}
                       onChange={(event) => updateCreateForm('emergencyContactPhone', event.target.value)}
-                      placeholder="请输入联系电话"
+                      placeholder={t('workbench.contactPhonePlaceholder')}
                     />
                   </label>
                 </div>
@@ -421,10 +427,10 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
 
             <div className="sl-modal-actions">
               <button type="button" className="sl-btn sl-btn-secondary" onClick={() => setShowCreatePanel(false)}>
-                取消
+                {t('common.cancel')}
               </button>
               <button type="button" className="sl-btn sl-btn-primary" onClick={handleCreateElder} disabled={createSaving}>
-                {createSaving ? '新增中...' : '确认新增'}
+                {createSaving ? t('common.adding') : t('common.confirmAdd')}
               </button>
             </div>
           </div>

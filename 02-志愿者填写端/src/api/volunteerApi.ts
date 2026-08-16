@@ -49,7 +49,7 @@ export async function registerVolunteer(input: VolunteerRegisterInput): Promise<
     method: 'POST',
     body: JSON.stringify(input),
   });
-  return { ok: true, token: res.token || '', name: res.name, account: res.account };
+  return { ok: Boolean(res.token || res.account || res.name), token: res.token || '', name: res.name, account: res.account };
 }
 
 export async function fetchAssignedElders(): Promise<AssignedElder[]> {

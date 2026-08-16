@@ -1,5 +1,7 @@
 import { ROLE_TYPES, type RoleType } from '@/app/app.constants';
 import { httpClient } from '@/services/api/httpClient';
+import { i18nRuntime } from '@/i18n';
+import { resolveApiMessage } from '@shared-i18n/messages';
 
 export interface WorkbenchProfileResult {
   account: string;
@@ -52,6 +54,7 @@ interface FamilyLoginResponse {
   ok?: boolean;
   token?: string;
   message?: string;
+  messageKey?: string;
 }
 
 interface VolunteerProfileResponse {
@@ -77,7 +80,7 @@ export async function loginWorkbenchAccount(formValue: LoginFormValue): Promise<
   const account = formValue.account.trim();
 
   if (!account || !password) {
-    throw new Error('请输入账号与密码');
+    throw new Error(i18nRuntime.t('errors.completeLoginFields'));
   }
 
   async function loginVolunteer() {
@@ -102,7 +105,7 @@ export async function loginWorkbenchAccount(formValue: LoginFormValue): Promise<
     });
 
     if (!result.ok || !result.token) {
-      throw new Error(result.message || '登录失败，请稍后重试');
+      throw new Error(resolveApiMessage(result, i18nRuntime.t, 'errors.loginRetry').message);
     }
 
     return {
@@ -130,7 +133,7 @@ export async function loginWorkbenchAccount(formValue: LoginFormValue): Promise<
     } catch (familyError) {
       const volunteerMessage = (volunteerError as Error)?.message;
       const familyMessage = (familyError as Error)?.message;
-      throw new Error(familyMessage || volunteerMessage || '登录失败，请稍后重试');
+      throw new Error(familyMessage || volunteerMessage || i18nRuntime.t('errors.loginRetry'));
     }
   }
 }
@@ -139,7 +142,7 @@ export async function previewVolunteerInvitation(code: string): Promise<Voluntee
   const normalizedCode = code.trim().toUpperCase();
 
   if (!normalizedCode) {
-    throw new Error('请输入邀请码');
+    throw new Error(i18nRuntime.t('errors.invitationRequired'));
   }
 
   return httpClient.get<VolunteerInvitationPreview>(`/api/invitations/${encodeURIComponent(normalizedCode)}/preview`);
@@ -153,10 +156,10 @@ export async function registerVolunteerAccount(formValue: VolunteerRegisterFormV
   const phone = String(formValue.phone || '').trim();
 
   if (!invitationCode) {
-    throw new Error('请输入邀请码');
+    throw new Error(i18nRuntime.t('errors.invitationRequired'));
   }
   if (!name || !account || !password) {
-    throw new Error('请完整填写邀请码、姓名、账号和密码');
+    throw new Error(i18nRuntime.t('errors.completeVolunteerFields'));
   }
 
   const result = await httpClient.post<VolunteerRegisterResponse>('/api/volunteer/register', {
@@ -168,7 +171,7 @@ export async function registerVolunteerAccount(formValue: VolunteerRegisterFormV
   });
 
   if (!result.token) {
-    throw new Error('注册失败，请稍后重试');
+    throw new Error(i18nRuntime.t('errors.registerRetry'));
   }
 
   return {
@@ -219,11 +222,11 @@ export async function updateWorkbenchProfile(input: UpdateWorkbenchProfileInput)
   const password = input.password.trim();
 
   if (!account || !name) {
-    throw new Error('请完整填写姓名和登录账号');
+    throw new Error(i18nRuntime.t('errors.completeProfileFields'));
   }
 
   if (password && !currentPassword) {
-    throw new Error('修改密码前请输入当前密码');
+    throw new Error(i18nRuntime.t('errors.currentPasswordRequired'));
   }
 
   const result = await httpClient.put<VolunteerProfileUpdateResponse>('/api/volunteer/me/profile', {

@@ -1,4 +1,5 @@
 import { build } from 'esbuild';
+import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
 import os from 'node:os';
@@ -9,8 +10,42 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const testEntry = path.join(projectRoot, 'scripts/unit/logic.test.ts');
 const taroStub = path.join(projectRoot, 'scripts/unit/taro-stub.ts');
 const qrcodeStub = path.join(projectRoot, 'scripts/unit/qrcode-stub.ts');
+const reactPackage = path.join(projectRoot, 'node_modules/react');
 const outdir = path.join(os.tmpdir(), 'silverlink-weapp-unit-tests');
 const outfile = path.join(outdir, 'logic.test.mjs');
+
+async function assertLanguageMenuContracts() {
+  const [switcherSource, appStyles, loginSource, formatterSource, qrcodeSource] = await Promise.all([
+    fsp.readFile(path.join(projectRoot, 'src/components/LanguageSwitcher.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/app.scss'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/pages/auth/login.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/utils/formatters.ts'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/subpackages/workbench/qrcode/index.tsx'), 'utf8'),
+  ]);
+
+  assert.match(switcherSource, /SUPPORTED_LOCALES/);
+  assert.match(switcherSource, /LOCALE_META/);
+  assert.match(switcherSource, /Button, Text, View/);
+  assert.match(switcherSource, /sl-language-switcher__scrim/);
+  assert.match(switcherSource, /dir: getDirection\(optionLocale\)/);
+  assert.match(switcherSource, /is-\$\{getDirection\(optionLocale\)\}/);
+  assert.doesNotMatch(switcherSource, /\bdocument\b/);
+
+  assert.match(appStyles, /safe-area-inset-top/);
+  assert.match(appStyles, /\.sl-language-menu[\s\S]*?right: 0;[\s\S]*?left: auto;/);
+  assert.match(appStyles, /\.sl-language-switcher__scrim[\s\S]*?position: fixed;/);
+
+  const ltrLoginFields = loginSource.match(/auth-login-field__input sl-ltr-data/g) || [];
+  assert.ok(ltrLoginFields.length >= 5, 'account, password, invitation code and phone fields must stay LTR');
+  assert.doesNotMatch(formatterSource, /locale\s*===\s*['"]zh-CN['"]/);
+  assert.match(formatterSource, /\$\{year\}-\$\{month\}-\$\{day\} \$\{hour\}:\$\{minute\}/);
+
+  assert.match(qrcodeSource, /t\(\s*['"]workbench\.qrCreatedAt['"]\s*\)\s*\.split\(\s*['"]\{time\}['"]\s*\)/);
+  const ltrDateText = qrcodeSource.match(/<Text\b(?=[^>]*\bclassName\s*=\s*(?:'[^']*\bsl-ltr-data\b[^']*'|"[^"]*\bsl-ltr-data\b[^"]*"))(?=[^>]*\bdir\s*[:=]\s*['"]ltr['"])[^>]*>\s*\{([A-Za-z_$][\w$]*)\}\s*<\/Text>/);
+  assert.ok(ltrDateText, 'QR creation time must render in an LTR Text node');
+  assert.match(qrcodeSource, new RegExp(`\\b${ltrDateText[1]}\\s*=\\s*formatDateTimeLabel\\s*\\(`));
+  assert.doesNotMatch(qrcodeSource, /\bt\(\s*['"]workbench\.qrCreatedAt['"]\s*,\s*\{\s*time\s*:\s*formatDateTimeLabel\s*\(/);
+}
 
 function resolveSourceImport(importPath) {
   const basePath = path.join(projectRoot, 'src', importPath.slice(2));
@@ -23,7 +58,13 @@ function resolveSourceImport(importPath) {
     path.join(basePath, 'index.ts'),
     path.join(basePath, 'index.tsx'),
   ];
-  return candidates.find((candidate) => fs.existsSync(candidate)) || basePath;
+  return candidates.find((candidate) => {
+    try {
+      return fs.statSync(candidate).isFile();
+    } catch {
+      return false;
+    }
+  }) || basePath;
 }
 
 const testAliasPlugin = {
@@ -31,12 +72,16 @@ const testAliasPlugin = {
   setup(builder) {
     builder.onResolve({ filter: /^@tarojs\/taro$/ }, () => ({ path: taroStub }));
     builder.onResolve({ filter: /^qrcode$/ }, () => ({ path: qrcodeStub }));
+    builder.onResolve({ filter: /^react(?:\/.*)?$/ }, (args) => ({
+      path: args.path === 'react' ? path.join(reactPackage, 'index.js') : path.join(reactPackage, `${args.path.slice('react/'.length)}.js`),
+    }));
     builder.onResolve({ filter: /^@\// }, (args) => ({ path: resolveSourceImport(args.path) }));
   },
 };
 
 await fsp.rm(outdir, { recursive: true, force: true });
 await fsp.mkdir(outdir, { recursive: true });
+await assertLanguageMenuContracts();
 
 await build({
   entryPoints: [testEntry],

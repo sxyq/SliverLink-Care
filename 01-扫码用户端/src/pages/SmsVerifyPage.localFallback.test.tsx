@@ -81,6 +81,7 @@ describe('SmsVerifyPage local fallback', () => {
 
   it('supports demo bypass tap and keyboard activation after five attempts', async () => {
     vi.spyOn(Date, 'now').mockReturnValue(1234567890);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     startRelayVerification.mockResolvedValue({
       sessionId: 'session-demo',
       elderId: 'elder-1',
@@ -105,6 +106,9 @@ describe('SmsVerifyPage local fallback', () => {
       expect(startAuthTimer).toHaveBeenCalledTimes(1);
       expect(screen.getByText('health page')).toBeInTheDocument();
     });
+    expect(consoleError).not.toHaveBeenCalledWith(
+      expect.stringContaining('Cannot update a component while rendering a different component'),
+    );
   });
 });
 

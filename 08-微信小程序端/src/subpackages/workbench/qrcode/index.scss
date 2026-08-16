@@ -27,7 +27,7 @@
 .workbench-qrcode-page .sl-qr-status-chip {
   position: absolute;
   top: 24rpx;
-  right: 24rpx;
+  inset-inline-end: 24rpx;
   z-index: 1;
   font-size: 28rpx;
   font-weight: 800;
@@ -40,7 +40,7 @@
   font-size: 34rpx;
   font-weight: 800;
   line-height: 1.2;
-  text-align: left;
+  text-align: start;
 }
 
 .workbench-qrcode-page .sl-qr-preview-meta {
@@ -48,7 +48,7 @@
   margin-top: -4rpx;
   font-size: 24rpx;
   line-height: 1.4;
-  text-align: left;
+  text-align: start;
 }
 
 .workbench-qrcode-page .sl-qr-preview-frame {
@@ -64,7 +64,7 @@
 .workbench-qrcode-export-button {
   position: absolute;
   top: 24rpx;
-  right: 24rpx;
+  inset-inline-end: 24rpx;
   z-index: 2;
   min-width: 148rpx;
   height: 56rpx;

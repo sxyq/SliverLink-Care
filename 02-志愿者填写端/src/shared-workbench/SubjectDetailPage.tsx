@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { ArrowRight } from 'lucide-react';
 import type { CareActionCard, CareSubject } from './types';
 import { PageHeader } from '../components/PageHeader';
+import { useI18n } from '../i18n';
 
 interface SubjectDetailPageProps {
   title: string;
@@ -13,6 +14,7 @@ interface SubjectDetailPageProps {
 
 export function SubjectDetailPage({ title, subject, onBack, actions, headerAction }: SubjectDetailPageProps) {
   const bloodText = [subject.bloodType].filter(Boolean).join(' ');
+  const { t } = useI18n();
 
   return (
     <div className="sl-page">
@@ -21,35 +23,35 @@ export function SubjectDetailPage({ title, subject, onBack, actions, headerActio
       <section className="sl-summary-hero">
         <div className="sl-summary-top">
           <div>
-            <h2>{subject.name}</h2>
+            <h2 className="sl-auto-data" dir="auto">{subject.name}</h2>
             <p>
-              档案编号 {subject.archiveNo}
-              {subject.gender ? `  ${subject.gender}` : ''}
-              {subject.age ? `  ${subject.age}岁` : ''}
+              {t('common.archiveNumber')} <span className="sl-ltr-data">{subject.archiveNo}</span>
+              {subject.gender ? `  ${subject.gender === '男' ? t('common.male') : subject.gender === '女' ? t('common.female') : subject.gender}` : ''}
+              {subject.age ? `  ${t('common.yearsOld', { age: subject.age })}` : ''}
             </p>
           </div>
         </div>
 
         <div className="sl-summary-grid">
           <div className="sl-summary-cell">
-            <div className="sl-summary-label">住址信息</div>
-            <div className="sl-summary-value">{subject.residence || '-'}</div>
+            <div className="sl-summary-label">{t('scan.addressInfo')}</div>
+            <div className="sl-summary-value sl-auto-data" dir="auto">{subject.residence || '-'}</div>
           </div>
           <div className="sl-summary-cell">
-            <div className="sl-summary-label">紧急联系人（关系）</div>
-            <div className="sl-summary-value">
+            <div className="sl-summary-label">{t('scan.emergencyContact')}（{t('common.relationship')}）</div>
+            <div className="sl-summary-value sl-auto-data" dir="auto">
               {subject.emergencyContactName
                 ? `${subject.emergencyContactName}${subject.emergencyContactRelation ? `（${subject.emergencyContactRelation}）` : ''}`
                 : '-'}
             </div>
           </div>
           <div className="sl-summary-cell">
-            <div className="sl-summary-label">联系电话</div>
-            <div className="sl-summary-value">{subject.emergencyContactPhone || '-'}</div>
+            <div className="sl-summary-label">{t('common.contactPhone')}</div>
+            <div className="sl-summary-value sl-ltr-data">{subject.emergencyContactPhone || '-'}</div>
           </div>
           <div className="sl-summary-cell">
-            <div className="sl-summary-label">血型 / 过敏史</div>
-            <div className="sl-summary-value">{bloodText || subject.allergyHistory || '-'}</div>
+            <div className="sl-summary-label">{t('scan.aboType')} / {t('scan.allergySummary')}</div>
+            <div className="sl-summary-value sl-auto-data" dir="auto">{bloodText || subject.allergyHistory || '-'}</div>
           </div>
         </div>
       </section>

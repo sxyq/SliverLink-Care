@@ -1,5 +1,6 @@
 import type { ElderInfo } from '../types';
 import { User } from 'lucide-react';
+import { useI18n } from '../../i18n';
 
 interface ElderCardProps {
   elder: ElderInfo;
@@ -12,6 +13,7 @@ function maskArchiveNo(no: string): string {
 }
 
 export default function ElderCard({ elder, onClick }: ElderCardProps) {
+  const { t } = useI18n();
   return (
     <div
       className="card card-clickable"
@@ -32,10 +34,10 @@ export default function ElderCard({ elder, onClick }: ElderCardProps) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--sl-text)' }}>
-            {elder.name}
+            <span className="sl-auto-data" dir="auto">{elder.name}</span>
           </div>
           <div style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
-            {elder.gender} · {elder.age}岁 · {maskArchiveNo(elder.archiveNo)}
+            {elder.gender === '男' ? t('common.male') : elder.gender === '女' ? t('common.female') : elder.gender} · {t('common.yearsOld', { age: elder.age })} · <span className="sl-ltr-data">{maskArchiveNo(elder.archiveNo)}</span>
           </div>
         </div>
       </div>

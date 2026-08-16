@@ -46,7 +46,7 @@ export default function SmsVerifyInput({ length = 6, onComplete }: SmsVerifyInpu
   };
 
   return (
-    <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }} onPaste={handlePaste}>
+    <div dir="ltr" style={{ display: 'flex', gap: 8, justifyContent: 'center' }} onPaste={handlePaste}>
       {values.map((val, i) => (
         <input
           key={i}

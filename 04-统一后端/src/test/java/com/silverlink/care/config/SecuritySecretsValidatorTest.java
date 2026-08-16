@@ -43,6 +43,7 @@ class SecuritySecretsValidatorTest {
         ReflectionTestUtils.setField(validator, "adminSignatureSecret", adminSignatureSecret);
         ReflectionTestUtils.setField(validator, "defaultDeviceId", defaultDeviceId);
         ReflectionTestUtils.setField(validator, "defaultDeviceSecret", defaultDeviceSecret);
+        ReflectionTestUtils.setField(validator, "smsRelayServerUrl", "https://test.silverlink.local/api");
         return validator;
     }
 }

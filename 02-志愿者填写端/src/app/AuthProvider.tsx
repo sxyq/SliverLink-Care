@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { clearAuthToken, setAuthToken } from '../api/httpClient';
 import { fetchVolunteerProfile } from '../api/volunteerApi';
+import { useI18n } from '../i18n';
 
 interface VolunteerProfile {
   account: string;
@@ -24,6 +25,7 @@ const AuthContext = createContext<AuthContextValue>({
 });
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { t } = useI18n();
   const [loggedIn, setLoggedIn] = useState(false);
   const [user, setUser] = useState<VolunteerProfile | null>(null);
   const [hydrating, setHydrating] = useState(true);
@@ -72,7 +74,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   if (hydrating) {
-    return <div className="sl-page loading">正在校验登录状态...</div>;
+    return <div className="sl-page loading">{t('common.reading')}</div>;
   }
 
   return (

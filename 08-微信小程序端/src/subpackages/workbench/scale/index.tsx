@@ -18,6 +18,7 @@ import { canEditScales, canViewScales } from '@/utils/permissions';
 import ScaleTabBar from '@/components/workbench/ScaleTabBar';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
@@ -44,11 +45,25 @@ const scaleQuestions: Record<WorkbenchScaleType, string[]> = {
   ],
   UCLA: [
     '你多久感到缺乏陪伴？',
-    '你多久感到被冷落？',
-    '你多久感到与他人隔绝？',
+    '你多久感到被遗弃？',
     '你多久感到无人可求助？',
-    '你多久感到和周围人不够亲近？',
-    '你多久感到孤独？',
+    '你多久感到孤立无援？',
+    '你多久感到与朋友隔绝？',
+    '你多久感到与周围人关系不和谐？',
+    '你多久感到自己是群体的一员？（反向计分）',
+    '你多久感到没有人真正理解你？',
+    '你多久感到被冷落？',
+    '你多久感到与他人的关系密切？（反向计分）',
+    '你多久感到在社交场合感到孤独？',
+    '你多久感到与他人的联系中断？',
+    '你多久感到身边没有人可以倾诉？',
+    '你多久感到无人可以倾诉？',
+    '你多久感到没有人真正亲近你？',
+    '你多久感到没有人可以求助？',
+    '你多久感到被排斥？',
+    '你多久感到与他人隔绝？',
+    '你多久感到在人群中仍然孤独？',
+    '你多久感到与他人的关系没有意义？',
   ],
 };
 
@@ -56,6 +71,18 @@ const optionLabels: Record<WorkbenchScaleType, string[]> = {
   'PHQ-9': ['从不(0分)', '几天(1分)', '一半以上(2分)', '几乎每天(3分)'],
   'GAD-7': ['从不(0分)', '几天(1分)', '一半以上(2分)', '几乎每天(3分)'],
   UCLA: ['从不(0分)', '很少(1分)', '有时(2分)', '经常(3分)'],
+};
+
+const optionLabelKeys: Record<WorkbenchScaleType, string[]> = {
+  'PHQ-9': ['scan.answerNever', 'scan.answerFewDays', 'scan.answerMoreThanHalf', 'scan.answerNearlyEveryDay'],
+  'GAD-7': ['scan.answerNotAtAll', 'scan.answerSeveralDays', 'scan.answerOverAWeek', 'scan.answerNearlyEveryDay'],
+  UCLA: ['scan.answerNever', 'scan.answerRarely', 'scan.answerSometimes', 'scan.answerAlways'],
+};
+
+const questionKeys: Record<WorkbenchScaleType, string[]> = {
+  'PHQ-9': Array.from({ length: 9 }, (_, index) => `scan.scalePhqQuestion${index + 1}`),
+  'GAD-7': Array.from({ length: 7 }, (_, index) => `scan.scaleGadQuestion${index + 1}`),
+  UCLA: Array.from({ length: 20 }, (_, index) => `workbench.scaleUclaQuestion${index + 1}`),
 };
 
 function createDraft(type: WorkbenchScaleType): WorkbenchScaleDraft {
@@ -81,6 +108,7 @@ function buildDraftFromRecord(type: WorkbenchScaleType, record?: WorkbenchScaleR
 }
 
 export default function WorkbenchScalePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
@@ -107,13 +135,13 @@ export default function WorkbenchScalePage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText('缺少老人标识，请返回详情页重新进入');
+      setErrorText(t('errors.noElderIdentifier'));
       return;
     }
 
     if (!canViewScales(session.role)) {
       setLoading(false);
-      setErrorText('当前角色暂不开放量表功能');
+      setErrorText(t('errors.roleScaleUnavailable'));
       return;
     }
 
@@ -134,7 +162,7 @@ export default function WorkbenchScalePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载量表记录失败');
+          setErrorText((error as Error)?.message || t('errors.loadScaleFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -148,7 +176,7 @@ export default function WorkbenchScalePage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, session?.role]);
+  }, [elderId, session?.role, t]);
 
   const activeDraft = drafts[activeType];
   const activeRecord = useMemo(() => records.find((item) => item.name === activeType) || null, [activeType, records]);
@@ -185,15 +213,15 @@ export default function WorkbenchScalePage() {
       setRecords(nextRecords);
       setEditing(false);
       void Taro.showToast({
-        title: '量表已保存',
+        title: t('errors.scaleSaved'),
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || '保存量表失败');
+      setErrorText((error as Error)?.message || t('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
-  }, [elderId, saving, session?.role, activeDraft]);
+  }, [elderId, saving, session?.role, activeDraft, t]);
 
   const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
@@ -205,10 +233,10 @@ export default function WorkbenchScalePage() {
 
   return (
     <WorkbenchShell pageClassName='workbench-scale-page'>
-      <WorkbenchHeader title='量表填写' subtitle={elderName || undefined} leadingAction={{ label: '返回', icon: '←', onClick: handleBack }} />
+      <WorkbenchHeader title={t('workbench.completeScale')} subtitle={elderName || undefined} leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }} />
 
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
-      {loading ? <View className='sl-card'><View className='sl-empty-state'>量表记录加载中...</View></View> : null}
+      {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('scan.scaleRecords')}</View></View> : null}
 
       {!loading ? (
         <>
@@ -218,25 +246,25 @@ export default function WorkbenchScalePage() {
 
           <View className='sl-scale-progress-card'>
             <View className='sl-scale-progress-row'>
-              <Text>进度 {answeredCount}/{activeDraft.answers.length}</Text>
-              <Text>{progressPercent}%</Text>
+              <Text>{t('common.progress')} <Text className='sl-ltr-data'>{answeredCount}/{activeDraft.answers.length}</Text></Text>
+              <Text className='sl-ltr-data'>{progressPercent}%</Text>
             </View>
             <View className='sl-progress-track'>
               <View className='sl-progress-bar' style={{ width: `${progressPercent}%` }} />
             </View>
             <View className='sl-scale-progress-row sl-scale-progress-row--strong'>
-              <Text>当前量表：{activeType}</Text>
-              <Text style={{ color: 'var(--sl-primary-deep)', fontWeight: '700' }}>总分 {displayScore}</Text>
+              <Text>{t('common.currentScale')}：<Text className='sl-ltr-data'>{activeType}</Text></Text>
+              <Text style={{ color: 'var(--sl-primary-deep)', fontWeight: '700' }}>{t('scan.scaleTotal')} <Text className='sl-ltr-data'>{displayScore}</Text></Text>
             </View>
             <View className='sl-scale-progress-row'>
-              <Text>最近保存：{formatDateTimeLabel(activeRecord?.date)}</Text>
+              <Text>{t('common.recentSaved')}：<Text className='sl-ltr-data'>{formatDateTimeLabel(activeRecord?.date)}</Text></Text>
               {canEditScales(session.role) ? (
                 <Button
                   className={editing ? 'sl-secondary-button' : 'sl-primary-button'}
                   loading={saving}
                   onClick={editing ? handleSave : () => setEditing(true)}
                 >
-                  {editing ? '提交保存' : '编辑量表'}
+                  {editing ? t('common.submit') : t('common.editScale')}
                 </Button>
               ) : null}
             </View>
@@ -244,22 +272,22 @@ export default function WorkbenchScalePage() {
 
           <View className='sl-card sl-scale-window'>
             <View className='sl-scale-window-head'>
-              <Text className='sl-scale-window-head__title'>{activeType} 题目</Text>
-              <Text className='sl-scale-window-head__meta'>{editing ? '编辑模式：可直接修改' : '查看模式：点击编辑后才可修改'}</Text>
+              <Text className='sl-scale-window-head__title'><Text className='sl-ltr-data'>{activeType}</Text> {t('workbench.scaleQuestions')}</Text>
+              <Text className='sl-scale-window-head__meta'>{editing ? t('common.editMode') : t('common.viewMode')}</Text>
             </View>
 
             {hasPersistedScoreOnly ? (
-              <Text className='sl-scale-window-note'>当前已保存历史总分，但旧记录未保留逐题答案。点击编辑后可重新完整填写本量表。</Text>
+                <Text className='sl-scale-window-note'>{t('common.scoreOnlyNotice')}</Text>
             ) : null}
 
             <ScrollView scrollY className='sl-scale-window-body'>
               {activeDraft.answers.map((answer: WorkbenchScaleAnswer, index) => (
                 <View key={`${activeType}-${index}`} className='sl-question'>
-                  <Text className='sl-question-text'><Text className='sl-question-num'>{index + 1}.</Text>{answer.question}</Text>
+                  <Text className='sl-question-text'><Text className='sl-question-num'>{index + 1}.</Text>{t(questionKeys[activeType][index])}</Text>
                   <View className='sl-scale-options'>
-                    {optionLabels[activeType].map((label, value) => (
+                    {optionLabels[activeType].map((_label, value) => (
                       <View
-                        key={`${activeType}-${index}-${label}`}
+                        key={`${activeType}-${index}-${value}`}
                         className={
                           answer.value === value
                             ? 'sl-scale-option is-active'
@@ -269,7 +297,7 @@ export default function WorkbenchScalePage() {
                         }
                         onClick={editing ? () => updateAnswer(index, value) : undefined}
                       >
-                        {label}
+                        {t(optionLabelKeys[activeType][value])}({value}{t('common.points')})
                       </View>
                     ))}
                   </View>
@@ -280,7 +308,7 @@ export default function WorkbenchScalePage() {
 
           <View className='sl-disclaimer'>
             <Text>!</Text>
-            <Text>量表结果仅作为随访记录，不作为临床诊断结论。请结合老人近况和实际评估综合判断。</Text>
+            <Text>{t('common.scaleDisclaimer')}</Text>
           </View>
         </>
       ) : null}

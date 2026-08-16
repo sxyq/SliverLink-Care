@@ -1,3 +1,6 @@
+import { useI18n } from '../i18n';
+
 export function AppAttribution() {
-  return <div className="sl-attribution">重庆医科大学护理学院 银龄守护团队</div>;
+  const { t } = useI18n();
+  return <div className="sl-attribution">{t('common.attribution')}</div>;
 }

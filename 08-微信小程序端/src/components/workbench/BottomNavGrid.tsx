@@ -3,6 +3,7 @@ import { Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useI18n } from '@/i18n';
 
 type WorkbenchNavKey = 'basic' | 'medication' | 'scale' | 'qrcode';
 
@@ -11,14 +12,14 @@ interface BottomNavGridProps {
   activeKey: WorkbenchNavKey;
 }
 
-const NAV_ITEMS: Array<{ key: WorkbenchNavKey; title: string; desc: string; route: string }> = [
-  { key: 'basic', title: '基本信息', desc: '档案资料', route: APP_ROUTES.workbenchBasic },
-  { key: 'medication', title: '主要用药', desc: '用药记录', route: APP_ROUTES.workbenchMedication },
-  { key: 'scale', title: '量表信息', desc: '评估记录', route: APP_ROUTES.workbenchScale },
-  { key: 'qrcode', title: '二维码管理', desc: '扫码名牌', route: APP_ROUTES.workbenchQrCode },
-];
-
 export const BottomNavGrid = memo(function BottomNavGrid({ elderId, activeKey }: BottomNavGridProps) {
+  const { t } = useI18n();
+  const navItems: Array<{ key: WorkbenchNavKey; title: string; desc: string; route: string }> = [
+    { key: 'basic', title: t('workbench.basicInfo'), desc: t('workbench.archiveData'), route: APP_ROUTES.workbenchBasic },
+    { key: 'medication', title: t('workbench.medication'), desc: t('workbench.medicationRecords'), route: APP_ROUTES.workbenchMedication },
+    { key: 'scale', title: t('workbench.scale'), desc: t('workbench.assessmentRecords'), route: APP_ROUTES.workbenchScale },
+    { key: 'qrcode', title: t('workbench.qrManagement'), desc: t('workbench.scanNameplate'), route: APP_ROUTES.workbenchQrCode },
+  ];
   const handleOpen = useCallback((route: string) => {
     if (!elderId) {
       return;
@@ -36,7 +37,7 @@ export const BottomNavGrid = memo(function BottomNavGrid({ elderId, activeKey }:
   return (
     <View className='sl-bottom-nav-shell'>
       <View className='sl-bottom-nav-grid'>
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <View
             key={item.key}
             className={item.key === activeKey ? 'sl-bottom-nav-card is-active' : 'sl-bottom-nav-card'}

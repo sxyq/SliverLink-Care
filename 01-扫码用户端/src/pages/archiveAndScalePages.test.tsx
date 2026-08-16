@@ -31,7 +31,8 @@ describe('archive and scale pages', () => {
     );
     expect(screen.getByText('健康档案编号')).toBeInTheDocument();
     expect(screen.getByText('身高 160cm，体重 55kg，BMI 21.5')).toBeInTheDocument();
-    expect(screen.getByText((text) => text.includes('王女士') && text.includes('138****6666'))).toBeInTheDocument();
+    expect(screen.getByText('王女士')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('138****6666')).toHaveAttribute('dir', 'ltr');
 
     rerender(
       <MemoryRouter>
@@ -39,7 +40,8 @@ describe('archive and scale pages', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('记录人： 暂无记录')).toBeInTheDocument();
-    expect(screen.getByText((text) => text.includes('王丽') && text.includes('13800006666'))).toBeInTheDocument();
+    expect(screen.getByText('王丽')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('13800006666')).toHaveAttribute('dir', 'ltr');
     expect(screen.getAllByText('暂无记录').length).toBeGreaterThan(0);
   });
 

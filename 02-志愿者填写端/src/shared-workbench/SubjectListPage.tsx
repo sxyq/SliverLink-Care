@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, ArrowRight, FilePenLine, Search, ShieldCheck, User } from 'lucide-react';
 import type { CareSubject } from './types';
 import { PageHeader } from '../components/PageHeader';
+import { useI18n } from '../i18n';
 
 interface SubjectListPageProps {
   title: string;
@@ -29,15 +30,16 @@ export function SubjectListPage({
   onKeywordChange,
   onSelect,
   primaryHint,
-  emptyText = '暂无可管理对象',
-  searchPlaceholder = '请输入姓名或档案编号',
+  emptyText,
+  searchPlaceholder,
   secondaryActionLabel,
-  secondaryActionDescription = '快速维护基础资料、联系人和联系方式',
+  secondaryActionDescription,
   onSecondaryAction,
   headerLeadingAction,
   headerAction,
   preProfilePanel,
 }: SubjectListPageProps) {
+  const { t } = useI18n();
   const [activeIndex, setActiveIndex] = useState(0);
   const carouselRef = useRef<HTMLDivElement | null>(null);
 
@@ -93,15 +95,15 @@ export function SubjectListPage({
   const activeSubject = subjects[activeIndex] ?? subjects[0];
 
   function getBloodLabel(subject: CareSubject) {
-    return subject.bloodType || '待补充';
+    return subject.bloodType || t('common.pendingSupplement');
   }
 
   function getStatusLabel(subject: CareSubject) {
-    return subject.status || '待补充';
+    return subject.status || t('common.pendingSupplement');
   }
 
   function getAllergyLabel(subject: CareSubject) {
-    return subject.allergyHistory || '暂无明确过敏史';
+    return subject.allergyHistory || t('workbench.noKnownAllergy');
   }
 
   return (
@@ -119,35 +121,36 @@ export function SubjectListPage({
         <div className="sl-search-box">
           <Search size={18} />
           <input
-            className="sl-search-input"
+            className="sl-search-input sl-auto-data"
+            dir="auto"
             value={keyword}
             onChange={(event) => onKeywordChange(event.target.value)}
-            placeholder={searchPlaceholder}
+            placeholder={searchPlaceholder || t('workbench.elderNameOrArchivePlaceholder')}
           />
           <span className="sl-search-divider" />
           <button type="button" className="sl-search-btn">
-            搜索
+            {t('common.search')}
           </button>
         </div>
       </section>
 
       {loading ? (
         <section className="sl-card">
-          <div className="sl-empty-state">加载中...</div>
+          <div className="sl-empty-state">{t('common.loading')}</div>
         </section>
       ) : subjects.length === 0 ? (
         <section className="sl-card">
-          <div className="sl-empty-state">{emptyText}</div>
+          <div className="sl-empty-state">{emptyText || t('workbench.noAssignedElders')}</div>
         </section>
       ) : (
         <section className="sl-archive-layout">
           <section className="sl-archive-overview">
             <div className="sl-archive-overview-copy">
-              <span className="sl-overview-kicker">老人档案</span>
-              <h2>{subjects.length > 1 ? '左右滑动切换档案' : '当前负责老人档案'}</h2>
+              <span className="sl-overview-kicker">{t('workbench.elderArchives')}</span>
+              <h2>{subjects.length > 1 ? t('workbench.swipeToSwitch') : t('workbench.currentElderArchive')}</h2>
               <p>
-                当前共 {subjects.length} 位老人
-                {subjects.length > 1 ? `，正在查看第 ${activeIndex + 1} 位` : ''}
+                {t('common.currentCount', { count: subjects.length })}
+                {subjects.length > 1 ? t('common.currentPosition', { position: activeIndex + 1 }) : ''}
               </p>
             </div>
 
@@ -158,7 +161,7 @@ export function SubjectListPage({
                   className="sl-carousel-btn"
                   onClick={() => scrollToIndex(Math.max(0, activeIndex - 1))}
                   disabled={activeIndex === 0}
-                  aria-label="上一位老人"
+                  aria-label={t('common.previous')}
                 >
                   <ArrowLeft size={16} />
                 </button>
@@ -167,7 +170,7 @@ export function SubjectListPage({
                   className="sl-carousel-btn"
                   onClick={() => scrollToIndex(Math.min(subjects.length - 1, activeIndex + 1))}
                   disabled={activeIndex === subjects.length - 1}
-                  aria-label="下一位老人"
+                  aria-label={t('common.next')}
                 >
                   <ArrowRight size={16} />
                 </button>
@@ -197,37 +200,37 @@ export function SubjectListPage({
                   </div>
                   <div className="sl-archive-card-copy">
                     <div className="sl-elder-name-row">
-                      <h3 className="sl-archive-card-name">{subject.name}</h3>
+                    <h3 className="sl-archive-card-name sl-auto-data" dir="auto">{subject.name}</h3>
                     </div>
                     <div className="sl-archive-card-subtitle">
-                      档案编号 {subject.archiveNo || '待生成'} {subject.gender || '待补充'} {subject.age ? `${subject.age}岁` : '年龄待补充'}
+                      {t('common.archiveNumber')} <span className="sl-ltr-data">{subject.archiveNo || t('common.generatedPending')}</span> {subject.gender === '男' ? t('common.male') : subject.gender === '女' ? t('common.female') : subject.gender || t('common.pendingSupplement')} {subject.age ? t('common.yearsOld', { age: subject.age }) : t('common.agePending')}
                     </div>
                     <div className="sl-archive-card-subtitle sl-archive-card-residence">
-                      住址 {subject.residence || '待补充'}
+                      {t('workbench.residence')} <span className="sl-auto-data" dir="auto">{subject.residence || t('common.pendingSupplement')}</span>
                     </div>
                   </div>
                 </div>
 
                 <div className="sl-archive-card-grid">
                   <div className="sl-archive-data-pill">
-                    <span>状态</span>
+                    <span>{t('common.status')}</span>
                     <strong>{getStatusLabel(subject)}</strong>
                   </div>
                   <div className="sl-archive-data-pill">
-                    <span>联系人</span>
-                    <strong>
+                    <span>{t('common.contact')}</span>
+                    <strong className="sl-auto-data" dir="auto">
                       {subject.emergencyContactName
                         ? `${subject.emergencyContactName}${subject.emergencyContactRelation ? `（${subject.emergencyContactRelation}）` : ''}`
-                        : '待补充'}
+                        : t('common.pendingSupplement')}
                     </strong>
                   </div>
                   <div className="sl-archive-data-pill">
-                    <span>联系电话</span>
-                    <strong>{subject.emergencyContactPhone || '待补充'}</strong>
+                    <span>{t('common.contactPhone')}</span>
+                    <strong className="sl-ltr-data">{subject.emergencyContactPhone || t('common.pendingSupplement')}</strong>
                   </div>
                   <div className="sl-archive-data-pill">
-                    <span>{subject.bloodType ? '血型' : '过敏史'}</span>
-                    <strong>{subject.bloodType ? getBloodLabel(subject) : getAllergyLabel(subject)}</strong>
+                    <span>{subject.bloodType ? t('common.bloodType') : t('common.allergyHistory')}</span>
+                    <strong className="sl-auto-data" dir="auto">{subject.bloodType ? getBloodLabel(subject) : getAllergyLabel(subject)}</strong>
                   </div>
                 </div>
 
@@ -240,7 +243,7 @@ export function SubjectListPage({
                       onSelect(subject);
                     }}
                   >
-                    <span>进入档案</span>
+                    <span>{t('workbench.enterArchive')}</span>
                     <ArrowRight size={15} />
                   </button>
                 </div>
@@ -248,14 +251,14 @@ export function SubjectListPage({
             ))}
           </div>
 
-          <div className="sl-carousel-dots" aria-label="老人档案分页">
+          <div className="sl-carousel-dots" aria-label={t('workbench.elderArchives')}>
             {subjects.map((subject, index) => (
               <button
                 key={subject.id}
                 type="button"
                 className={`sl-carousel-dot${index === activeIndex ? ' is-active' : ''}`}
                 onClick={() => scrollToIndex(index)}
-                aria-label={`切换到${subject.name}`}
+                aria-label={`${t('common.switchTo')}${subject.name}`}
               />
             ))}
           </div>
@@ -280,7 +283,7 @@ export function SubjectListPage({
         </section>
       )}
 
-      <p className="sl-list-footer">共 {subjects.length} 位老人</p>
+      <p className="sl-list-footer">{t('common.totalElders', { count: subjects.length })}</p>
     </div>
   );
 }

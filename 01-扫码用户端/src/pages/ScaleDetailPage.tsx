@@ -6,6 +6,7 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { formatDate } from '../utils/format';
 import type { ScaleAnswerDetail, ScaleSummary } from '../types';
+import { useI18n } from '../i18n';
 
 interface ScaleDetailPageProps {
   data: ScaleSummary[] | null;
@@ -19,42 +20,58 @@ function getScaleCopy(item: ScaleSummary) {
 
   if (item.name === 'PHQ-9') {
     return {
-      title: '抑郁情绪筛查',
-      level: score <= 4 ? '当前分值处于较轻范围' : score <= 9 ? '当前分值提示需持续关注' : '当前分值建议进一步随访',
-      note: 'PHQ-9 用于了解近两周情绪、兴趣和睡眠等变化，分值越高越需要持续关注。',
+      titleKey: 'scan.scaleDepressionDetailTitle',
+      levelKey: score <= 4 ? 'scan.scoreMild' : score <= 9 ? 'scan.scoreAttention' : 'scan.scoreFollowup',
+      noteKey: 'scan.phqNote',
     };
   }
 
   if (item.name === 'GAD-7') {
     return {
-      title: '焦虑情绪筛查',
-      level: score <= 4 ? '当前分值处于较轻范围' : score <= 9 ? '当前分值提示需持续关注' : '当前分值建议进一步随访',
-      note: 'GAD-7 用于了解紧张、担忧和坐立不安等焦虑表现，分值越高越需要持续关注。',
+      titleKey: 'scan.scaleAnxietyDetailTitle',
+      levelKey: score <= 4 ? 'scan.scoreMild' : score <= 9 ? 'scan.scoreAttention' : 'scan.scoreFollowup',
+      noteKey: 'scan.gadNote',
     };
   }
 
   return {
-    title: '孤独感筛查',
-    level: score <= 20 ? '当前分值处于较轻范围' : score <= 40 ? '当前分值提示需持续关注' : '当前分值建议进一步随访',
-    note: 'UCLA 用于了解老人近阶段的孤独感和社会联结状态，可结合陪伴与沟通情况一起判断。',
+    titleKey: 'scan.scaleLonelinessDetailTitle',
+    levelKey: score <= 20 ? 'scan.scoreMild' : score <= 40 ? 'scan.scoreAttention' : 'scan.scoreFollowup',
+    noteKey: 'scan.uclaNote',
   };
 }
 
-function getAnswerLabel(scaleName: ScaleSummary['name'], value: number | null) {
-  if (value == null) return '未填写';
+function getAnswerLabel(scaleName: ScaleSummary['name'], value: number | null, translate: (key: string) => string) {
+  if (value == null) return translate('scan.unanswered');
 
-  const optionLabels: Record<ScaleSummary['name'], string[]> = {
-    'PHQ-9': ['从不', '几天', '一半以上', '几乎每天'],
-    'GAD-7': ['完全不会', '好几天', '超过一周', '几乎每天'],
-    UCLA: ['从不', '很少', '有时', '一直'],
+  const optionKeys: Record<ScaleSummary['name'], string[]> = {
+    'PHQ-9': ['scan.answerNever', 'scan.answerFewDays', 'scan.answerMoreThanHalf', 'scan.answerNearlyEveryDay'],
+    'GAD-7': ['scan.answerNotAtAll', 'scan.answerSeveralDays', 'scan.answerOverAWeek', 'scan.answerNearlyEveryDay'],
+    UCLA: ['scan.answerNever', 'scan.answerRarely', 'scan.answerSometimes', 'scan.answerAlways'],
   };
 
-  return optionLabels[scaleName][value] || `选项 ${value}`;
+  return optionKeys[scaleName][value] ? translate(optionKeys[scaleName][value]) : translate('scan.optionNumber').replace('{value}', String(value));
+}
+
+function getQuestionLabel(
+  scaleName: ScaleSummary['name'],
+  index: number,
+  question: string,
+  translate: (key: string) => string,
+) {
+  const questionKey = scaleName === 'PHQ-9'
+    ? `scan.scalePhqQuestion${index + 1}`
+    : scaleName === 'GAD-7'
+      ? `scan.scaleGadQuestion${index + 1}`
+      : `workbench.scaleUclaQuestion${index + 1}`;
+  const localized = translate(questionKey);
+  return localized === questionKey ? question : localized;
 }
 
 export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }: ScaleDetailPageProps) {
   const navigate = useNavigate();
   const params = useParams();
+  const { t } = useI18n();
   const [resolvedDetail, setResolvedDetail] = useState<ScaleSummary | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
@@ -92,8 +109,8 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
     };
   }, [current, elderId, sessionId]);
 
-  if (loading) return <div className="sl-page loading">加载中...</div>;
-  if (!current) return <div className="sl-page loading">未找到量表详情</div>;
+  if (loading) return <div className="sl-page loading">{t('common.loading')}</div>;
+  if (!current) return <div className="sl-page loading">{t('scan.scaleNotFoundDetail')}</div>;
 
   const detail = resolvedDetail || current;
   const copy = getScaleCopy(detail);
@@ -105,12 +122,12 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
 
       <section className="sl-panel sl-scale-detail-hero">
         <div className="sl-scale-detail-score">
-          <div className="sl-scale-detail-score-label">当前分数</div>
-          <strong>{detail.score}</strong>
+          <div className="sl-scale-detail-score-label">{t('scan.currentScore')}</div>
+          <strong className="sl-ltr-data" dir="ltr">{detail.score}</strong>
         </div>
         <div className="sl-scale-detail-copy">
-          <h2>{copy.title}</h2>
-          <p>{copy.level}</p>
+          <h2>{t(copy.titleKey)}</h2>
+          <p>{t(copy.levelKey)}</p>
         </div>
       </section>
 
@@ -119,7 +136,7 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
           <span className="sl-info-block-icon is-blue">
             <ClipboardList size={18} />
           </span>
-          <div className="sl-info-block-title">记录详情</div>
+          <div className="sl-info-block-title">{t('scan.recordDetails')}</div>
         </div>
 
         <div className="sl-detail-rows">
@@ -127,24 +144,24 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
             <span className="sl-detail-row-icon">
               <CalendarDays size={16} />
             </span>
-            <span className="sl-detail-row-label">记录日期：</span>
-            <strong>{formatDate(detail.updatedAt)}</strong>
+            <span className="sl-detail-row-label">{t('common.recordDate')}：</span>
+            <strong className="sl-ltr-data">{formatDate(detail.updatedAt)}</strong>
           </div>
 
           <div className="sl-detail-row">
             <span className="sl-detail-row-icon">
               <UserRound size={16} />
             </span>
-            <span className="sl-detail-row-label">记录人员：</span>
-            <strong>{detail.volunteer || '暂无记录'}</strong>
+            <span className="sl-detail-row-label">{t('common.recorder')}：</span>
+            <strong>{detail.volunteer || t('common.noRecords')}</strong>
           </div>
 
           <div className="sl-detail-row">
             <span className="sl-detail-row-icon">
               <BadgeInfo size={16} />
             </span>
-            <span className="sl-detail-row-label">结果说明：</span>
-            <strong>{copy.note}</strong>
+            <span className="sl-detail-row-label">{t('scan.resultDescription')}：</span>
+            <strong>{t(copy.noteKey)}</strong>
           </div>
         </div>
       </section>
@@ -155,8 +172,8 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
             <BadgeInfo size={18} />
           </span>
           <div>
-            <div className="sl-info-block-title">各题填写结果</div>
-            <div className="sl-scale-answer-meta">作为子窗口查看，可在内部上下滑动</div>
+            <div className="sl-info-block-title">{t('scan.questionRecords')}</div>
+            <div className="sl-scale-answer-meta">{t('scan.viewAsChildWindow')}</div>
           </div>
         </div>
 
@@ -165,26 +182,26 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
             <div className="sl-scale-answer-list">
               {detailLoading ? (
                 <div className="sl-detail-row">
-                  <span className="sl-detail-row-label">正在读取逐题记录</span>
-                  <strong>请稍候...</strong>
+                  <span className="sl-detail-row-label">{t('scan.currentlyLoadingAnswers')}</span>
+                  <strong>{t('scan.pleaseWait')}</strong>
                 </div>
               ) : answers.length > 0 ? (
                 answers.map((answer, index) => (
                   <div key={`${detail.name}-${index}`} className="sl-scale-answer-row">
                     <div className="sl-scale-answer-question">
                       <span className="sl-scale-answer-index">{index + 1}</span>
-                      <p>{answer.question}</p>
+                      <p>{getQuestionLabel(detail.name, index, answer.question, t)}</p>
                     </div>
                     <div className="sl-scale-answer-value">
-                      <strong>{getAnswerLabel(detail.name, answer.value)}</strong>
-                      <span>{answer.value == null ? '未作答' : `${answer.value} 分`}</span>
+                      <strong>{getAnswerLabel(detail.name, answer.value, t)}</strong>
+                      <span>{answer.value == null ? t('scan.notAnswered') : (<><span className="sl-ltr-data" dir="ltr">{answer.value}</span>{' '}{t('common.points')}</>)}</span>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className="sl-detail-row">
-                  <span className="sl-detail-row-label">暂无逐题记录</span>
-                  <strong>当前数据源还未保存每题答案</strong>
+                  <span className="sl-detail-row-label">{t('scan.noStepRecordsTitle')}</span>
+                  <strong>{t('scan.noStepRecords')}</strong>
                 </div>
               )}
             </div>
@@ -194,15 +211,15 @@ export function ScaleDetailPage({ data, loading, sessionId = '', elderId = '' }:
 
       <button type="button" className="sl-panel sl-scale-next-card" onClick={() => navigate('/scale')}>
         <div>
-          <div className="sl-scale-next-title">返回量表列表</div>
-          <div className="sl-scale-next-subtitle">继续查看其他量表记录</div>
+          <div className="sl-scale-next-title">{t('scan.scaleList')}</div>
+          <div className="sl-scale-next-subtitle">{t('scan.continueOtherScales')}</div>
         </div>
-        <ChevronRight size={18} />
+        <ChevronRight className="is-directional" size={18} />
       </button>
 
       <div className="sl-privacy-pill">
         <Shield size={16} />
-        隐私保护
+        {t('common.privacyProtection')}
       </div>
 
       <BottomTabBar />

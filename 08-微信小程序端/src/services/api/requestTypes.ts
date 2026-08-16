@@ -1,6 +1,7 @@
 export interface ApiEnvelope<T> {
   code?: number;
   message?: string;
+  messageKey?: string;
   data?: T;
 }
 

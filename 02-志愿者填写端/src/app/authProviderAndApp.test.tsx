@@ -4,10 +4,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const setAuthToken = vi.fn();
 const clearAuthToken = vi.fn();
+const fetchVolunteerProfile = vi.fn();
 
 vi.mock('../api/httpClient', () => ({
   setAuthToken: (...args: unknown[]) => setAuthToken(...args),
   clearAuthToken: (...args: unknown[]) => clearAuthToken(...args),
+}));
+
+vi.mock('../api/volunteerApi', () => ({
+  fetchVolunteerProfile: (...args: unknown[]) => fetchVolunteerProfile(...args),
 }));
 
 vi.mock('../pages/LoginPage', () => ({
@@ -111,13 +116,14 @@ describe('volunteer auth provider and app flow', () => {
     vi.restoreAllMocks();
     setAuthToken.mockReset();
     clearAuthToken.mockReset();
+    fetchVolunteerProfile.mockReset();
+    fetchVolunteerProfile.mockRejectedValue(new Error('not authenticated'));
     localStorage.clear();
     window.location.hash = '';
   });
 
-  it('hydrates, logs in, updates user and logs out', () => {
-    localStorage.setItem('sl_user', JSON.stringify({ account: 'seed', name: '初始' }));
-    localStorage.setItem('sl_token', 'seed-token');
+  it('hydrates, logs in, updates user and logs out', async () => {
+    fetchVolunteerProfile.mockResolvedValue({ account: 'seed', name: '初始', phone: '' });
 
     render(
       <AuthProvider>
@@ -125,26 +131,22 @@ describe('volunteer auth provider and app flow', () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText('logged:true')).toBeInTheDocument();
+    expect(await screen.findByText('logged:true')).toBeInTheDocument();
     expect(screen.getByText('user:seed')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'login' }));
     expect(setAuthToken).toHaveBeenCalledWith('token-1');
-    expect(localStorage.getItem('sl_user')).toContain('vol-1');
+    expect(screen.getByText('user:vol-1')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'update' }));
     expect(screen.getByText('user:vol-2')).toBeInTheDocument();
-    expect(localStorage.getItem('sl_user')).toContain('vol-2');
 
     fireEvent.click(screen.getByRole('button', { name: 'logout' }));
     expect(clearAuthToken).toHaveBeenCalled();
     expect(screen.getByText('logged:false')).toBeInTheDocument();
   });
 
-  it('falls back safely when persisted user json is invalid and login has no profile payload', () => {
-    localStorage.setItem('sl_token', 'seed-token');
-    localStorage.setItem('sl_user', '{bad-json');
-
+  it('falls back safely when profile hydration fails and login has no profile payload', async () => {
     function LoginWithoutProfileProbe() {
       const auth = useAuth();
       return (
@@ -162,17 +164,16 @@ describe('volunteer auth provider and app flow', () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText('logged:true')).toBeInTheDocument();
+    expect(await screen.findByText('logged:false')).toBeInTheDocument();
     expect(screen.getByText('user:-')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'login without profile' }));
     expect(setAuthToken).toHaveBeenCalledWith('token-2');
-    expect(localStorage.getItem('sl_user')).toBeNull();
+    expect(screen.getByText('logged:true')).toBeInTheDocument();
   });
 
-  it('ignores persisted user objects without account field', () => {
-    localStorage.setItem('sl_token', 'seed-token');
-    localStorage.setItem('sl_user', JSON.stringify({ name: '只有姓名' }));
+  it('keeps a hydrated profile without an account safely displayable', async () => {
+    fetchVolunteerProfile.mockResolvedValue({ account: '', name: '只有姓名', phone: '' });
 
     render(
       <AuthProvider>
@@ -180,7 +181,7 @@ describe('volunteer auth provider and app flow', () => {
       </AuthProvider>,
     );
 
-    expect(screen.getByText('logged:true')).toBeInTheDocument();
+    expect(await screen.findByText('logged:true')).toBeInTheDocument();
     expect(screen.getByText('user:-')).toBeInTheDocument();
   });
 
@@ -198,29 +199,28 @@ describe('volunteer auth provider and app flow', () => {
     expect(clearAuthToken).not.toHaveBeenCalled();
   });
 
-  it('renders login page when not logged in and family app when hash enters family entry', () => {
+  it('renders login page when not logged in and family app when hash enters family entry', async () => {
     const first = render(<App />);
-    expect(screen.getByText('volunteer login page')).toBeInTheDocument();
+    expect(await screen.findByText('volunteer login page')).toBeInTheDocument();
     first.unmount();
 
     window.location.hash = '#/family/login';
     render(<App />);
-    expect(screen.getByText('family entry app')).toBeInTheDocument();
+    expect(await screen.findByText('family entry app')).toBeInTheDocument();
   });
 
-  it('renders list, detail and quick-nav forms when logged in', () => {
-    localStorage.setItem('sl_token', 'token-1');
-    localStorage.setItem('sl_user', JSON.stringify({ account: 'vol', name: '志愿者' }));
+  it('renders list, detail and quick-nav forms when logged in', async () => {
+    fetchVolunteerProfile.mockResolvedValue({ account: 'vol', name: '志愿者', phone: '' });
 
     render(<App />);
-    expect(screen.getByText('assigned elder list')).toBeInTheDocument();
+    expect(await screen.findByText('assigned elder list')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'select elder' }));
     expect(screen.getByText('elder detail')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'go medication' }));
     expect(screen.getByText('medication form:王桂兰')).toBeInTheDocument();
-    expect(screen.getByRole('navigation', { name: '档案快捷切换' })).toBeInTheDocument();
+    expect(screen.getByRole('navigation', { name: '档案资料' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /基本信息/ }));
     expect(screen.getByText('basic form:王桂兰')).toBeInTheDocument();
@@ -241,19 +241,20 @@ describe('volunteer auth provider and app flow', () => {
     expect(screen.getByText('assigned elder list')).toBeInTheDocument();
   });
 
-  it('allows direct basic editing from list', () => {
-    localStorage.setItem('sl_token', 'token-1');
+  it('allows direct basic editing from list', async () => {
+    fetchVolunteerProfile.mockResolvedValue({ account: 'vol', name: '志愿者', phone: '' });
     render(<App />);
 
+    expect(await screen.findByText('assigned elder list')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'edit elder' }));
     expect(screen.getByText('basic form:王桂兰')).toBeInTheDocument();
   });
 
-  it('supports direct detail shortcuts for basic, scale and qrcode pages', () => {
-    localStorage.setItem('sl_token', 'token-1');
-    localStorage.setItem('sl_user', JSON.stringify({ account: 'vol', name: '志愿者' }));
+  it('supports direct detail shortcuts for basic, scale and qrcode pages', async () => {
+    fetchVolunteerProfile.mockResolvedValue({ account: 'vol', name: '志愿者', phone: '' });
 
     render(<App />);
+    expect(await screen.findByText('assigned elder list')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'select elder' }));
     expect(screen.getByText('elder detail')).toBeInTheDocument();
 
@@ -272,10 +273,10 @@ describe('volunteer auth provider and app flow', () => {
   });
 
   it('switches into family entry when hash changes after initial render', async () => {
-    localStorage.setItem('sl_token', 'token-1');
+    fetchVolunteerProfile.mockResolvedValue({ account: 'vol', name: '志愿者', phone: '' });
     render(<App />);
 
-    expect(screen.getByText('assigned elder list')).toBeInTheDocument();
+    expect(await screen.findByText('assigned elder list')).toBeInTheDocument();
 
     await act(async () => {
       window.location.hash = '#/family/';
@@ -285,12 +286,11 @@ describe('volunteer auth provider and app flow', () => {
     expect(await screen.findByText('family entry app')).toBeInTheDocument();
   });
 
-  it('treats #/family as a family entry route', () => {
-    localStorage.setItem('sl_token', 'token-1');
+  it('treats #/family as a family entry route', async () => {
     window.location.hash = '#/family';
 
     render(<App />);
-    expect(screen.getByText('family entry app')).toBeInTheDocument();
+    expect(await screen.findByText('family entry app')).toBeInTheDocument();
   });
 });
 

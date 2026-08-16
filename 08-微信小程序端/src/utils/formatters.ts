@@ -1,6 +1,8 @@
+import { i18nRuntime } from '@/i18n';
+
 export function formatDateLabel(value?: string) {
   if (!value) {
-    return '暂无记录';
+    return i18nRuntime.t('common.noRecords');
   }
 
   if (value.length >= 10) {
@@ -12,7 +14,7 @@ export function formatDateLabel(value?: string) {
 
 export function formatDateTimeLabel(value?: string) {
   if (!value) {
-    return '暂无记录';
+    return i18nRuntime.t('common.noRecords');
   }
 
   const date = new Date(value);
@@ -30,7 +32,7 @@ export function formatDateTimeLabel(value?: string) {
 
 export function formatPhoneLabel(value?: string) {
   if (!value) {
-    return '未填写';
+    return i18nRuntime.t('common.unfilled');
   }
 
   const normalized = value.replace(/\s+/g, '');
@@ -42,21 +44,21 @@ export function formatPhoneLabel(value?: string) {
 }
 
 export function formatArchiveNoLabel(value?: string) {
-  return value || '未分配';
+  return value || i18nRuntime.t('common.unassigned');
 }
 
 export function formatAgeLabel(value?: string | number) {
   if (value == null || value === '' || Number(value) <= 0) {
-    return '未填写';
+    return i18nRuntime.t('common.unfilled');
   }
 
-  return `${Number(value)} 岁`;
+  return i18nRuntime.t('common.yearsOld', { age: Number(value) });
 }
 
 export function formatScoreLabel(value?: string | number) {
   if (value == null || value === '') {
-    return '未评分';
+    return i18nRuntime.t('common.unrated');
   }
 
-  return `${Number(value)} 分`;
+  return `${Number(value)} ${i18nRuntime.t('common.points')}`;
 }

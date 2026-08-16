@@ -87,16 +87,16 @@ describe('volunteer and elder api', () => {
     await disableVolunteerElderQrCode('elder-1');
 
     expect(fetchMock.mock.calls.map((call) => call[0])).toEqual([
-      '/api/volunteer/login',
-      '/api/invitations/code%201/preview',
-      '/api/volunteer/register',
-      '/api/volunteer/me/elders',
-      '/api/volunteer/me/elders',
-      '/api/volunteer/me/profile',
-      '/api/volunteer/me/profile',
-      '/api/volunteer/me/elders/elder-1/qr-manage',
-      '/api/volunteer/me/elders/elder-1/qr-regenerate',
-      '/api/volunteer/me/elders/elder-1/qr-disable',
+      '/silverlink-api/api/volunteer/login',
+      '/silverlink-api/api/invitations/code%201/preview',
+      '/silverlink-api/api/volunteer/register',
+      '/silverlink-api/api/volunteer/me/elders',
+      '/silverlink-api/api/volunteer/me/elders',
+      '/silverlink-api/api/volunteer/me/profile',
+      '/silverlink-api/api/volunteer/me/profile',
+      '/silverlink-api/api/volunteer/me/elders/elder-1/qr-manage',
+      '/silverlink-api/api/volunteer/me/elders/elder-1/qr-regenerate',
+      '/silverlink-api/api/volunteer/me/elders/elder-1/qr-disable',
     ]);
   });
 

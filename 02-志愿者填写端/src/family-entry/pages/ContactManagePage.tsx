@@ -4,10 +4,12 @@ import { ShieldAlert } from 'lucide-react';
 import type { ElderInfo } from '../types';
 import { getElderDetail, updateElderContacts } from '../api/familyElderApi';
 import TopBar from '../components/TopBar';
+import { useI18n } from '../../i18n';
 
 export default function ContactManagePage() {
   const { elderId } = useParams<{ elderId: string }>();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [elder, setElder] = useState<ElderInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -55,13 +57,13 @@ export default function ContactManagePage() {
         backupContactRelation: backupRelation,
       });
       if (result.success) {
-        alert('保存成功');
+        alert(t('common.save'));
         navigate(-1);
       } else {
         alert(result.message);
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
+      alert(error instanceof Error ? error.message : t('errors.profileSaveFailed'));
     } finally {
       setSaving(false);
     }
@@ -70,68 +72,68 @@ export default function ContactManagePage() {
   if (loading) {
     return (
       <div>
-        <TopBar title="联系人维护" />
-        <div className="page-container text-center text-secondary">加载中...</div>
+        <TopBar title={t('family.contactManage')} />
+        <div className="page-container text-center text-secondary">{t('common.loading')}</div>
       </div>
     );
   }
 
   return (
     <div>
-      <TopBar title="联系人维护" />
+      <TopBar title={t('family.contactManage')} />
       <div className="page-container">
         <div className="card">
-          <div className="section-title" style={{ marginTop: 0 }}>主联系人</div>
+          <div className="section-title" style={{ marginTop: 0 }}>{t('family.primaryContactTitle')}</div>
           <div className="form-group">
-            <label className="form-label">姓名</label>
-            <input className="form-input" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} />
+            <label className="form-label">{t('common.name')}</label>
+            <input className="form-input sl-auto-data" dir="auto" value={emergencyName} onChange={(e) => setEmergencyName(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">电话</label>
+            <label className="form-label">{t('common.phoneLabel')}</label>
             <input
-              className="form-input"
+              className="form-input sl-ltr-data"
               type="tel"
               value={emergencyPhone}
               onChange={(e) => setEmergencyPhone(e.target.value)}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">关系</label>
-            <input className="form-input" value={emergencyRelation} onChange={(e) => setEmergencyRelation(e.target.value)} />
+            <label className="form-label">{t('common.relationship')}</label>
+            <input className="form-input sl-auto-data" dir="auto" value={emergencyRelation} onChange={(e) => setEmergencyRelation(e.target.value)} />
           </div>
         </div>
 
         <div className="card">
-          <div className="section-title" style={{ marginTop: 0 }}>备用联系人</div>
+          <div className="section-title" style={{ marginTop: 0 }}>{t('family.backupContactTitle')}</div>
           <div className="form-group">
-            <label className="form-label">姓名</label>
-            <input className="form-input" value={backupName} onChange={(e) => setBackupName(e.target.value)} />
+            <label className="form-label">{t('common.name')}</label>
+            <input className="form-input sl-auto-data" dir="auto" value={backupName} onChange={(e) => setBackupName(e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">电话</label>
+            <label className="form-label">{t('common.phoneLabel')}</label>
             <input
-              className="form-input"
+              className="form-input sl-ltr-data"
               type="tel"
               value={backupPhone}
               onChange={(e) => setBackupPhone(e.target.value)}
             />
           </div>
           <div className="form-group">
-            <label className="form-label">关系</label>
-            <input className="form-input" value={backupRelation} onChange={(e) => setBackupRelation(e.target.value)} />
+            <label className="form-label">{t('common.relationship')}</label>
+            <input className="form-input sl-auto-data" dir="auto" value={backupRelation} onChange={(e) => setBackupRelation(e.target.value)} />
           </div>
         </div>
 
         {phoneChanged && (
           <div className="warn-banner">
             <ShieldAlert size={16} />
-            <span>修改电话号码后需短信验真确认</span>
+            <span>{t('family.phoneVerificationRequired')}</span>
           </div>
         )}
 
         <div className="info-banner">
           <ShieldAlert size={16} />
-          <span>主联系人收不到验证码120秒后可切换备用手机号</span>
+          <span>{t('family.mainContactCannotCode')}</span>
         </div>
 
         <button
@@ -139,7 +141,7 @@ export default function ContactManagePage() {
           onClick={handleSave}
           disabled={saving}
         >
-          {saving ? '保存中...' : '保存'}
+          {saving ? t('common.saving') : t('common.save')}
         </button>
       </div>
     </div>

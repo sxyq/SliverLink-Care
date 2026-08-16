@@ -3,6 +3,7 @@ import { MedicationEditorPage } from '@shared/MedicationEditorPage';
 import type { CareMedicationRecord } from '@shared/types';
 import { saveMedications } from '../api';
 import type { AssignedElder, Medication } from '../types';
+import { useI18n } from '../i18n';
 
 interface MedicationFormPageProps {
   elder: AssignedElder;
@@ -18,6 +19,7 @@ function createSeedMedications(): Medication[] {
 }
 
 export function MedicationFormPage({ elder, onBack }: MedicationFormPageProps) {
+  const { t } = useI18n();
   const [medications] = useState<Medication[]>(createSeedMedications());
 
   const items = useMemo<CareMedicationRecord[]>(
@@ -34,17 +36,17 @@ export function MedicationFormPage({ elder, onBack }: MedicationFormPageProps) {
 
   return (
     <MedicationEditorPage
-      title={`${elder.name} 的用药记录`}
+      title={`${elder.name} ${t('workbench.medicationRecords')}`}
       medications={items}
       onBack={onBack}
-      saveLabel="提交保存"
+      saveLabel={t('workbench.submitSave')}
       onSaveBatch={async (records) => {
         try {
           await saveMedications(elder.id, records);
-          alert('用药记录已保存');
+          alert(t('errors.medicationSaved'));
           onBack();
         } catch (e) {
-          alert('保存失败，请重试');
+          alert(t('errors.saveFailed'));
         }
       }}
     />

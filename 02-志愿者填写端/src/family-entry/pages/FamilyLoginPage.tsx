@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserRoundCheck } from 'lucide-react';
 import { familyLogin } from '../api/familyAuthApi';
+import { useI18n } from '../../i18n';
 
 export default function FamilyLoginPage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,7 +15,7 @@ export default function FamilyLoginPage() {
   const handleLogin = async () => {
     setError('');
     if (!phone.trim() || !password) {
-      setError('请输入手机号和密码');
+      setError(t('errors.completeFamilyFields'));
       return;
     }
     setLoading(true);
@@ -22,7 +24,7 @@ export default function FamilyLoginPage() {
       if (result.success) {
         navigate('/', { replace: true });
       } else {
-        setError(result.message);
+        setError(result.message || t('errors.loginRetry'));
       }
     } finally {
       setLoading(false);
@@ -44,17 +46,18 @@ export default function FamilyLoginPage() {
         }}>
           <UserRoundCheck size={32} color="var(--sl-primary)" />
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--sl-text)' }}>家属协管登录</h1>
-        <p className="text-secondary mt-8">登录后可管理已绑定老人的联系人、用药和二维码信息</p>
+        <h1 style={{ fontSize: 22, fontWeight: 600, color: 'var(--sl-text)' }}>{t('auth.familyLogin')}</h1>
+        <p className="text-secondary mt-8">{t('auth.familyLoginHint')}</p>
       </div>
 
       <div className="card">
         <div className="form-group">
-          <label className="form-label">手机号</label>
+          <label className="form-label">{t('common.phone')}</label>
           <input
-            className="form-input"
-            placeholder="请输入手机号"
+            className="form-input sl-ltr-data"
+            placeholder={t('errors.phoneRequired')}
             type="tel"
+            dir="ltr"
             maxLength={11}
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -62,10 +65,10 @@ export default function FamilyLoginPage() {
         </div>
 
         <div className="form-group">
-          <label className="form-label">密码</label>
+          <label className="form-label">{t('common.password')}</label>
           <input
             className="form-input"
-            placeholder="请输入密码"
+            placeholder={t('auth.inputPassword')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -82,7 +85,7 @@ export default function FamilyLoginPage() {
           onClick={handleLogin}
           disabled={loading}
         >
-          {loading ? '登录中...' : '登录'}
+          {loading ? t('auth.loggingIn') : t('auth.login')}
         </button>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, gap: 12 }}>
@@ -99,18 +102,18 @@ export default function FamilyLoginPage() {
               cursor: 'pointer',
             }}
           >
-            注册家属账号
+            {t('auth.registerFamilyAccount')}
           </button>
           <span style={{ color: 'var(--sl-text-secondary)', fontSize: 13 }}>
-            忘记密码请联系管理员
+            {t('auth.forgetPasswordHint')}
           </span>
         </div>
       </div>
 
       <div style={{ textAlign: 'center', marginTop: 24, color: 'var(--sl-text-secondary)', fontSize: 13, lineHeight: 1.7 }}>
-        家属账号需通过专属邀请码注册
+        {t('auth.familyRegistrationHint')}
         <br />
-        单个家属账号最多可绑定 4 位老人
+        {t('auth.familyBindingHint')}
       </div>
     </div>
   );

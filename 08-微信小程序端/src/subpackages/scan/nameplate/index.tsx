@@ -14,10 +14,12 @@ import {
   type NameplatePreviewInfo,
 } from '@/services/workbench/qrcodeService';
 import { getAuthSession } from '@/store/auth/authStore';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
 export default function NameplatePreviewPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
@@ -37,7 +39,7 @@ export default function NameplatePreviewPage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText('缺少老人标识，请返回后重试');
+      setErrorText(t('errors.noElderIdentifier'));
       return;
     }
 
@@ -53,7 +55,7 @@ export default function NameplatePreviewPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载名牌预览失败');
+          setErrorText((error as Error)?.message || t('errors.nameplateOpenFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -67,7 +69,7 @@ export default function NameplatePreviewPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, session]);
+  }, [elderId, session, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -156,7 +158,7 @@ export default function NameplatePreviewPage() {
       setErrorText('');
       await openNameplatePdf(elderId);
     } catch (error) {
-      setErrorText((error as Error)?.message || '打开 PDF 失败');
+      setErrorText((error as Error)?.message || t('errors.pdfDownloadFailed'));
     } finally {
       setOpeningPdf(false);
     }
@@ -178,19 +180,19 @@ export default function NameplatePreviewPage() {
             <View className='sl-page scan-nameplate-page'>
               <View className='sl-page-header-bar'>
                 <View className='sl-page-header-action'>
-                  <View className='sl-page-header-icon' onClick={handleBack}>
-                    返回
+                <View className='sl-page-header-icon' onClick={handleBack}>
+                    {t('common.back')}
                   </View>
                 </View>
                 <View className='sl-page-header-copy'>
-                  <View className='sl-page-header-copy__title'>实体名牌预览</View>
+                  <View className='sl-page-header-copy__title'>{t('scan.entityNameplate')}</View>
                 </View>
                 <View className='sl-page-header-placeholder' />
               </View>
 
               {loading ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>名牌预览加载中...</View>
+                  <View className='sl-empty-state'>{t('common.loading')} {t('scan.nameplatePreview')}</View>
                 </View>
               ) : null}
               {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
@@ -200,8 +202,8 @@ export default function NameplatePreviewPage() {
                   {pdfPreviewImage ? (
                     <View className='sl-card scan-nameplate-pdf-preview-card'>
                       <View className='scan-nameplate-pdf-preview-card__header'>
-                        <View className='scan-nameplate-card__kicker'>PDF 实际预览</View>
-                        <View className='scan-nameplate-card__tag'>与导出一致</View>
+                        <View className='scan-nameplate-card__kicker'>{t('scan.pdfActualPreview')}</View>
+                        <View className='scan-nameplate-card__tag'>{t('scan.matchesExport')}</View>
                       </View>
                       <View className='scan-nameplate-pdf-preview-frame'>
                         <Image className='scan-nameplate-pdf-preview-image' mode='widthFix' src={pdfPreviewImage} />
@@ -211,33 +213,33 @@ export default function NameplatePreviewPage() {
                     <View className='scan-nameplate-card-list'>
                       <View className='sl-card scan-nameplate-card scan-nameplate-card--front'>
                         <View className='scan-nameplate-card__header'>
-                          <View className='scan-nameplate-card__kicker'>正面</View>
-                          <View className='scan-nameplate-card__tag'>随身携带</View>
+                          <View className='scan-nameplate-card__kicker'>{t('scan.frontNameplate')}</View>
+                          <View className='scan-nameplate-card__tag'>{t('scan.carryWithYou')}</View>
                         </View>
                         <View className='scan-nameplate-front-hero'>
-                          <View className='scan-nameplate-front-hero__title'>渝护银龄名牌</View>
+                          <View className='scan-nameplate-front-hero__title'>{t('common.brandTitle')}</View>
                           <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-front-grid'>
                           <View className='scan-nameplate-field scan-nameplate-field--compact'>
-                            <Text className='scan-nameplate-label'>姓名</Text>
-                            <Text className='scan-nameplate-value'>{preview.frontName || '未填写'}</Text>
+                            <Text className='scan-nameplate-label'>{t('common.name')}</Text>
+                            <Text className='scan-nameplate-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontName || t('scan.unanswered')}</Text>
                           </View>
                           <View className='scan-nameplate-field scan-nameplate-field--compact'>
-                            <Text className='scan-nameplate-label'>年龄</Text>
-                            <Text className='scan-nameplate-value'>{preview.frontAge ? `${preview.frontAge} 岁` : '未填写'}</Text>
+                            <Text className='scan-nameplate-label'>{t('common.age')}</Text>
+                            <Text className='scan-nameplate-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontAge ? t('common.yearsOld', { age: preview.frontAge }) : t('scan.unanswered')}</Text>
                           </View>
                           <View className='scan-nameplate-field scan-nameplate-field--full'>
-                            <Text className='scan-nameplate-label'>联系电话</Text>
-                            <Text className='scan-nameplate-value'>{preview.frontPhone || '未填写'}</Text>
+                            <Text className='scan-nameplate-label'>{t('common.contactPhone')}</Text>
+                            <Text className='scan-nameplate-value sl-ltr-data'>{preview.frontPhone || t('scan.unanswered')}</Text>
                           </View>
                         </View>
                       </View>
 
                       <View className='sl-card scan-nameplate-card scan-nameplate-card--back'>
                         <View className='scan-nameplate-card__header'>
-                          <View className='scan-nameplate-card__kicker'>背面</View>
-                          <View className='scan-nameplate-card__tag'>扫码查看</View>
+                          <View className='scan-nameplate-card__kicker'>{t('scan.backNameplate')}</View>
+                          <View className='scan-nameplate-card__tag'>{t('auth.scanView')}</View>
                         </View>
                         <View className='scan-nameplate-qr-area'>
                           <View className='scan-nameplate-qr-box'>
@@ -246,17 +248,17 @@ export default function NameplatePreviewPage() {
                             ) : (
                               <View className='scan-nameplate-qr-empty'>
                                 <Text className='scan-nameplate-qr-empty__icon'>⌁</Text>
-                                <Text className='scan-nameplate-qr-empty__title'>二维码暂不可预览</Text>
-                                <Text className='scan-nameplate-qr-empty__caption'>请稍后重试，或直接生成 PDF 查看</Text>
+                                <Text className='scan-nameplate-qr-empty__title'>{t('workbench.qrPreviewUnavailable')}</Text>
+                                <Text className='scan-nameplate-qr-empty__caption'>{t('scan.qrPreviewRetry')}</Text>
                               </View>
                             )}
                           </View>
-                          <Text className='scan-nameplate-qr-hint'>{preview.backHint || '微信扫码查看健康档案'}</Text>
+                          <Text className='scan-nameplate-qr-hint sl-auto-data' {...{ dir: 'auto' }}>{preview.backHint || t('scan.wechatScanHealthArchive')}</Text>
                         </View>
                         <View className='scan-nameplate-divider' />
                         <View className='scan-nameplate-field scan-nameplate-field--compact'>
-                          <Text className='scan-nameplate-label'>档案编号</Text>
-                          <Text className='scan-nameplate-value'>{preview.backArchiveNo || preview.archiveNo || '未生成'}</Text>
+                          <Text className='scan-nameplate-label'>{t('common.archiveNumber')}</Text>
+                          <Text className='scan-nameplate-value sl-ltr-data'>{preview.backArchiveNo || preview.archiveNo || t('common.generatedPending')}</Text>
                         </View>
                       </View>
                     </View>
@@ -264,14 +266,14 @@ export default function NameplatePreviewPage() {
 
                   <View className='scan-nameplate-actions'>
                     <Button className='sl-secondary-button scan-nameplate-actions__button' loading={openingPdf} onClick={handleOpenPdf}>
-                      生成 PDF
+                      {t('scan.generatePdf')}
                     </Button>
                     <Button className='sl-primary-button scan-nameplate-actions__button' loading={openingPdf} onClick={handleOpenPdf}>
-                      下载 PDF
+                      {t('scan.downloadPdf')}
                     </Button>
                   </View>
 
-                  <Text className='scan-nameplate-note'>实体名牌用于随身携带，建议与后台二维码状态保持一致。</Text>
+                  <Text className='scan-nameplate-note'>{t('scan.nameplateNote')}</Text>
                 </>
               ) : null}
             </View>

@@ -1,5 +1,6 @@
 import { ROLE_TYPES, type RoleType } from '@/app/app.constants';
 import { httpClient } from '@/services/api/httpClient';
+import { i18nRuntime } from '@/i18n';
 import { getCurrentElderSummary, type CurrentElderSummary } from '@/store/elder/currentElderStore';
 
 interface VolunteerElderRow {
@@ -165,7 +166,7 @@ export async function fetchWorkbenchElderDetail(role: RoleType, elderId: string)
   const matched = elders.find((item) => item.id === elderId);
 
   if (!matched) {
-    throw new Error('未找到对应老人信息');
+    throw new Error(i18nRuntime.t('errors.noElderInfo'));
   }
 
   return {

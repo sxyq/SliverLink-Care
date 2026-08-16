@@ -88,6 +88,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("邀请码不可用", result.getMessage());
+        assertEquals("errors.invitationUnavailable", result.getMessageKey());
     }
 
     @Test
@@ -106,6 +107,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("邀请码已用完", result.getMessage());
+        assertEquals("errors.invitationUsed", result.getMessageKey());
     }
 
     @Test
@@ -126,6 +128,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("验证码错误或已过期", result.getMessage());
+        assertEquals("errors.smsCodeInvalid", result.getMessageKey());
     }
 
     @Test
@@ -181,6 +184,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("该手机号已注册，请输入原登录密码完成绑定", result.getMessage());
+        assertEquals("errors.familyAccountExists", result.getMessageKey());
     }
 
     @Test
@@ -209,6 +213,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("该家属账号已绑定此老人", result.getMessage());
+        assertEquals("errors.familyAlreadyBound", result.getMessageKey());
     }
 
     @Test
@@ -238,6 +243,7 @@ class InvitationServiceTest {
         var result = service.register("ABC12345", req);
         assertFalse(result.getOk());
         assertEquals("一个家属账号最多绑定4位老人", result.getMessage());
+        assertEquals("errors.familyBindingLimit", result.getMessageKey());
     }
 
     @Test

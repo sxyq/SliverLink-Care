@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { clearResolvedScanContext, fetchBasicInfo } from '../api/scanApi';
+import { i18nRuntime } from '../i18n';
 import type { ElderBasicInfo } from '../types';
 
 export function useScanBasicInfo(qrToken: string | null) {
@@ -12,7 +13,7 @@ export function useScanBasicInfo(qrToken: string | null) {
       clearResolvedScanContext();
       setData(null);
       setLoading(false);
-      setError('二维码参数缺失');
+      setError(i18nRuntime.t('errors.qrTokenMissing'));
       return;
     }
     setData(null);
@@ -20,7 +21,7 @@ export function useScanBasicInfo(qrToken: string | null) {
     setLoading(true);
     fetchBasicInfo(qrToken)
       .then(setData)
-      .catch(() => setError('二维码无效或已过期'))
+      .catch(() => setError(i18nRuntime.t('errors.qrInvalidOrExpired')))
       .finally(() => setLoading(false));
   }, [qrToken]);
 

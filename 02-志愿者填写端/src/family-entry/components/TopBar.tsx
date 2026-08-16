@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
+import { useI18n } from '../../i18n';
 
 interface TopBarProps {
   title: string;
@@ -9,6 +10,7 @@ interface TopBarProps {
 
 export default function TopBar({ title, showBack = true, onBack }: TopBarProps) {
   const navigate = useNavigate();
+  const { t } = useI18n();
 
   const handleBack = () => {
     if (onBack) {
@@ -32,6 +34,9 @@ export default function TopBar({ title, showBack = true, onBack }: TopBarProps) 
     }}>
       {showBack && (
         <button
+          type="button"
+          className="sl-family-topbar-back"
+          aria-label={t('common.back')}
           onClick={handleBack}
           style={{
             background: 'none',
@@ -52,7 +57,7 @@ export default function TopBar({ title, showBack = true, onBack }: TopBarProps) 
         fontSize: 16,
         fontWeight: 600,
         color: 'var(--sl-text)',
-        marginRight: showBack ? 30 : 0,
+          marginInlineEnd: showBack ? 30 : 0,
       }}>
         {title}
       </span>

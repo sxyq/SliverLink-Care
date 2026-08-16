@@ -1,6 +1,7 @@
 package com.silverlink.care.module.sms;
 
 import com.silverlink.care.common.ApiResponse;
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.module.audit.AuditLogService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,10 +42,12 @@ class SmsControllerTest {
 
     @Test
     void sendReturns429OnRateLimit() {
-        when(smsService.sendCode("13800001111", "SCAN")).thenThrow(new RuntimeException("发送过于频繁，请稍后再试"));
+        when(smsService.sendCode("13800001111", "SCAN"))
+                .thenThrow(new BizException(429, "发送过于频繁，请稍后再试", "errors.smsRateLimited"));
 
         var result = controller.send(Map.of("phone", "13800001111"), request);
         assertEquals(429, result.getCode());
+        assertEquals("errors.smsRateLimited", result.getMessageKey());
         verify(auditLogService).record(eq("扫码用户"), eq("SCAN"), eq(request), eq("138****1111"), eq("SMS_SEND"), eq("FAIL"), any(), any());
     }
 

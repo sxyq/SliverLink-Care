@@ -7,23 +7,25 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { formatMaskedContact, maskName } from '../utils/mask';
 import type { ElderBasicInfo } from '../types';
+import { useI18n } from '../i18n';
 
 interface BasicInfoPageProps {
   data: ElderBasicInfo;
   verified?: boolean;
 }
 
-function formatEmergencyContact(data: ElderBasicInfo) {
-  return `${formatMaskedContact(data.emergencyContact, data.relationship)}  ${data.emergencyPhoneMasked}`;
+function formatMaskedEmergencyContactName(data: ElderBasicInfo) {
+  return formatMaskedContact(data.emergencyContact, data.relationship);
 }
 
-function formatVerifiedEmergencyContact(data: ElderBasicInfo) {
+function formatVerifiedEmergencyContactName(data: ElderBasicInfo) {
   const relation = data.relationship ? `（${data.relationship}）` : '';
-  return `${data.emergencyContact}${relation}  ${data.emergencyPhoneDial}`;
+  return `${data.emergencyContact}${relation}`;
 }
 
 export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [showConsentDialog, setShowConsentDialog] = useState(false);
 
   function handleViewArchive() {
@@ -41,10 +43,10 @@ export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
 
   return (
     <div className="sl-page sl-home-page sl-has-bottom-nav">
-      <PageTopBar title="智联名牌" leading="home" trailing="menu" />
+      <PageTopBar title={t('common.appName')} leading="home" trailing="menu" />
 
       <section className="sl-section-heading">
-        <h2>基本信息</h2>
+        <h2>{t('scan.basicInfo')}</h2>
         <span className="sl-section-heading-badge">
           <ShieldCheck size={18} />
         </span>
@@ -56,53 +58,61 @@ export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
             <UserRound size={42} />
           </div>
           <div className="sl-profile-lines">
-            <p>姓名： {verified ? data.name : maskName(data.name)}</p>
-            <p>性别： {data.gender}</p>
-            <p>年龄： {data.age} 岁</p>
+            <p>{t('common.name')}： <span className="sl-auto-data" dir="auto">{verified ? data.name : maskName(data.name)}</span></p>
+            <p>{t('common.gender')}： <span className="sl-auto-data" dir="auto">{data.gender}</span></p>
+            <p>{t('common.age')}： {t('common.yearsOld', { age: data.age })}</p>
           </div>
         </div>
         <div className="sl-archive-line">
-          健康档案编号： {data.archiveNo}
+          <span>{t('common.healthRecordNo')}： </span><span className="sl-ltr-data">{data.archiveNo}</span>
         </div>
       </section>
 
       <section className="sl-panel sl-address-panel">
         <div className="sl-mini-heading">
-          <h3>住址信息</h3>
+          <h3>{t('scan.addressInfo')}</h3>
           <span className="sl-mini-heading-icon">
             <ShieldCheck size={16} />
           </span>
         </div>
         <div className="sl-address-line">
-          {verified ? (data.residence || '待补充') : '完成验证后可查看老人详细住址信息'}
+          <span className="sl-auto-data" dir="auto">
+            {verified ? (data.residence || t('common.pendingSupplement')) : t('scan.completeVerifyToViewAddress')}
+          </span>
         </div>
       </section>
 
       <section className="sl-panel sl-contact-panel">
         <div className="sl-contact-line">
-          <span>紧急联系人： {verified ? formatVerifiedEmergencyContact(data) : formatEmergencyContact(data)}</span>
+          <span>{t('scan.emergencyContact')}： </span>
+          <span className="sl-auto-data" dir="auto">
+            {verified ? formatVerifiedEmergencyContactName(data) : formatMaskedEmergencyContactName(data)}
+          </span>{' '}
+          <span className="sl-ltr-data" dir="ltr">
+            {verified ? data.emergencyPhoneDial : data.emergencyPhoneMasked}
+          </span>
         </div>
         <ActionButton icon={Phone} variant="emergency" href={`tel:${data.emergencyPhoneDial}`}>
-          一键拨打
+          {t('scan.callNow')}
         </ActionButton>
       </section>
 
       <section className="sl-panel sl-medical-panel">
         <div className="sl-mini-heading">
-          <h3>医疗信息</h3>
+          <h3>{t('scan.medicalInfo')}</h3>
           <span className="sl-mini-heading-icon">
             <PlusSquare size={16} />
           </span>
         </div>
         <div className="sl-medical-list">
-          <div>ABO 血型： {data.aboType}型</div>
-          <div>Rh 血型： {data.rhType}</div>
-          <div>过敏史摘要： {data.allergySummary}</div>
+          <div>{t('scan.aboType')}： <span className="sl-ltr-data" dir="ltr">{data.aboType}{t('common.bloodTypeSuffix')}</span></div>
+          <div>{t('scan.rhType')}： <span className="sl-ltr-data" dir="ltr">{data.rhType}</span></div>
+          <div>{t('scan.allergySummary')}： <span className="sl-auto-data" dir="auto">{data.allergySummary}</span></div>
         </div>
       </section>
 
       <ActionButton variant="primary" onClick={handleViewArchive}>
-        查看健康档案
+        {t('scan.viewHealthArchive')}
       </ActionButton>
 
       <AppAttribution />
@@ -111,16 +121,16 @@ export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
       {showConsentDialog ? (
         <div className="sl-consent-overlay" role="dialog" aria-modal="true" aria-labelledby="sl-consent-title">
           <div className="sl-consent-dialog">
-            <h3 id="sl-consent-title">查看详细信息前请先完成登记</h3>
-            <p>为保护老人隐私，查看健康档案、主要用药和量表记录前，需要先完成验证或登记身份信息。</p>
-            <p>继续操作后，系统将记录您的验证方式、登记姓名、手机号、身份证信息与来源 IP，用于访问审计与安全留痕。</p>
-            <p className="sl-consent-emphasis">点击“继续查看”即视为您已知晓并同意上述信息登记与审计记录。</p>
+            <h3 id="sl-consent-title">{t('scan.consentTitle')}</h3>
+            <p>{t('scan.consentDescription')}</p>
+            <p>{t('scan.consentAudit')}</p>
+            <p className="sl-consent-emphasis">{t('scan.consentAgreement')}</p>
             <div className="sl-consent-actions">
               <button type="button" className="sl-consent-btn secondary" onClick={() => setShowConsentDialog(false)}>
-                暂不查看
+                {t('scan.dontView')}
               </button>
               <button type="button" className="sl-consent-btn primary" onClick={handleContinueVerify}>
-                继续查看
+                {t('common.continueView')}
               </button>
             </div>
           </div>

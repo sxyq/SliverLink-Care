@@ -1,7 +1,13 @@
 silverlink:
+  audit:
+    ip-hmac-key-base64: QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=
   security:
     jwt-secret: test-jwt-secret-key-2026-silverlink-care-0123456789
     admin-signature-secret: test-admin-signature-secret-2026-0123456789
+    aes-key-base64: QUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUE=
+  qrcode:
+    public-base-url: https://test.silverlink.local/scan/?token=
   smsrelay:
     default-device-id: test-relay-device-01
     default-device-secret: test-relay-device-secret-2026
+    server-url: http://127.0.0.1:8080

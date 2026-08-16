@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useI18n } from '../i18n';
 
 interface ContentProtectionProps {
   enabled: boolean;
   watermarkText: string;
 }
 
-const BLOCK_MESSAGE = '当前页面已开启隐私保护，禁止复制与传播';
-
 export function ContentProtection({ enabled, watermarkText }: ContentProtectionProps) {
+  const { t } = useI18n();
   const [notice, setNotice] = useState('');
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export function ContentProtection({ enabled, watermarkText }: ContentProtectionP
     let timer = 0;
     const showNotice = () => {
       window.clearTimeout(timer);
-      setNotice(BLOCK_MESSAGE);
+      setNotice(t('errors.copyBlocked'));
       timer = window.setTimeout(() => setNotice(''), 1800);
     };
 
@@ -58,7 +58,7 @@ export function ContentProtection({ enabled, watermarkText }: ContentProtectionP
       document.removeEventListener('selectstart', prevent);
       document.removeEventListener('keydown', handleKeydown);
     };
-  }, [enabled]);
+  }, [enabled, t]);
 
   const watermarks = useMemo(
     () =>

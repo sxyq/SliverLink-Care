@@ -1,22 +1,24 @@
 import { ClipboardList, FileText, Pill, UserRound } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSecurity } from '../app/SecurityProvider';
+import { useI18n } from '../i18n';
 
 const navItems = [
-  { key: 'basic', label: '基本信息', path: '/', icon: UserRound },
-  { key: 'health', label: '健康档案', path: '/health', icon: FileText },
-  { key: 'medication', label: '主要用药', path: '/medication', icon: Pill },
-  { key: 'scale', label: '量表记录', path: '/scale', icon: ClipboardList },
+  { key: 'basic', labelKey: 'scan.basicInfo', path: '/', icon: UserRound },
+  { key: 'health', labelKey: 'scan.healthArchive', path: '/health', icon: FileText },
+  { key: 'medication', labelKey: 'scan.viewMedicationRecords', path: '/medication', icon: Pill },
+  { key: 'scale', labelKey: 'scan.scaleRecords', path: '/scale', icon: ClipboardList },
 ] as const;
 
 export function BottomTabBar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { verified } = useSecurity();
+  const { t } = useI18n();
   const canOpenSensitiveTabs = verified;
 
   return (
-    <nav className="sl-bottom-nav" aria-label="页面导航">
+    <nav className="sl-bottom-nav" aria-label={t('common.home')}>
       {navItems.map((item) => {
         const active = item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path);
         const Icon = item.icon;
@@ -34,7 +36,7 @@ export function BottomTabBar() {
             aria-disabled={disabled}
           >
             <Icon size={20} strokeWidth={2.2} />
-            <span>{item.label}</span>
+            <span>{t(item.labelKey)}</span>
           </button>
         );
       })}

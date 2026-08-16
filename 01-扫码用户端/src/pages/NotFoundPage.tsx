@@ -1,4 +1,5 @@
 import { AlertTriangle } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 type NotFoundPageVariant = 'missing-token' | 'invalid-qr';
 
@@ -6,28 +7,29 @@ interface NotFoundPageProps {
   variant?: NotFoundPageVariant;
 }
 
-const pageCopy: Record<NotFoundPageVariant, { title: string; description?: string; hint: string }> = {
+const pageCopy: Record<NotFoundPageVariant, { titleKey: string; descriptionKey?: string; hintKey: string }> = {
   'missing-token': {
-    title: '请扫码二维码',
-    hint: '请回到微信或相机，重新扫描名牌上的二维码。',
+    titleKey: 'errors.scanQr',
+    hintKey: 'errors.scanAgainFromCamera',
   },
   'invalid-qr': {
-    title: '该二维码已经过期',
-    description: '可能是二维码已经停用、链接不完整，或者这张名牌已经更换了新二维码。',
-    hint: '请重新扫描老人名牌上的二维码；如果多次尝试仍打不开，请联系工作人员核对或更换名牌。',
+    titleKey: 'errors.qrExpired',
+    descriptionKey: 'errors.qrInvalidDescription',
+    hintKey: 'errors.qrInvalidHint',
   },
 };
 
 export function NotFoundPage({ variant = 'invalid-qr' }: NotFoundPageProps) {
   const copy = pageCopy[variant];
+  const { t } = useI18n();
 
   return (
     <div className="sl-page center">
       <div className="sl-empty">
         <AlertTriangle size={48} />
-        <h2>{copy.title}</h2>
-        {copy.description ? <p>{copy.description}</p> : null}
-        <p>{copy.hint}</p>
+        <h2>{t(copy.titleKey)}</h2>
+        {copy.descriptionKey ? <p>{t(copy.descriptionKey)}</p> : null}
+        <p>{t(copy.hintKey)}</p>
       </div>
     </div>
   );

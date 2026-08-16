@@ -1,5 +1,6 @@
 package com.silverlink.care.module.scan;
 
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeService;
@@ -7,6 +8,8 @@ import com.silverlink.care.module.smsrelay.SmsRelayService;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -15,6 +18,8 @@ import java.util.*;
 
 @Service
 public class ScanService {
+
+    private static final Logger log = LoggerFactory.getLogger(ScanService.class);
 
     private final QrCodeService qrCodeService;
     private final SilverLinkDataService data;
@@ -37,21 +42,22 @@ public class ScanService {
 
     public Map<String, Object> resolve(String token) throws Exception {
         if (token == null || token.isBlank()) {
-            throw new RuntimeException("二维码无效或已停用");
+            throw new BizException(400, "二维码无效或已停用", "errors.invalidQr");
         }
         Map<String, Object> cached = readCachedMap(resolveCacheKey(token), resolveCacheTtlMs, localResolveCache, () -> {
             try {
                 QrCodeEntity entity = qrCodeService.resolve(token);
                 if (entity == null || !"ENABLED".equals(entity.getStatus())) {
-                    throw new RuntimeException("二维码无效或已停用");
+                    throw new BizException(400, "二维码无效或已停用", "errors.invalidQr");
                 }
                 Map<String, Object> result = new LinkedHashMap<>(data.scanBasic(entity.getElderId()));
                 result.put("elderId", entity.getElderId());
                 return new LinkedHashMap<>(result);
+            } catch (BizException exception) {
+                throw exception;
             } catch (Exception exception) {
-                throw exception instanceof RuntimeException runtimeException
-                        ? runtimeException
-                        : new IllegalStateException("二维码解析失败", exception);
+                log.error("Failed to resolve QR code", exception);
+                throw new IllegalStateException("二维码解析失败", exception);
             }
         });
         return new LinkedHashMap<>(cached);

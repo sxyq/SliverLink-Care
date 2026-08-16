@@ -34,7 +34,7 @@ export const ActionTileGrid = memo(function ActionTileGrid({ items, detail = fal
             <Text className='sl-action-card__title'>{item.title}</Text>
             {item.description ? <Text className='sl-action-card__desc'>{item.description}</Text> : null}
           </View>
-          <View className='sl-action-card__arrow'>{item.icon || '→'}</View>
+          <View className={item.icon ? 'sl-action-card__arrow' : 'sl-action-card__arrow is-directional'}>{item.icon || '→'}</View>
         </View>
       ))}
     </View>

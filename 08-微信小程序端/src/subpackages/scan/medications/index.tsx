@@ -2,14 +2,16 @@ import { useEffect, useState } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { fetchMedications } from '@/services/scan/scanArchiveService';
 import type { ScanMedicationItem } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
 export default function ScanMedicationsPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const elderId = params.elderId || '';
@@ -31,7 +33,7 @@ export default function ScanMedicationsPage() {
   useEffect(() => {
     if (!elderId || !sessionId) {
       setLoading(false);
-      setErrorText('缺少访问会话，请返回验证页重新进入。');
+      setErrorText(t('errors.sessionRequired'));
       return;
     }
 
@@ -47,7 +49,7 @@ export default function ScanMedicationsPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+          setErrorText((error as Error)?.message || t('errors.requestFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -76,11 +78,11 @@ export default function ScanMedicationsPage() {
               <View className='sl-page-header-bar'>
                 <View className='sl-page-header-action'>
                   <View className='sl-page-header-icon' onClick={handleBack}>
-                    返回
+                    {t('common.back')}
                   </View>
                 </View>
                 <View className='sl-page-header-copy'>
-                  <View className='sl-page-header-copy__title'>主要用药</View>
+                  <View className='sl-page-header-copy__title'>{t('scan.viewMedicationRecords')}</View>
                 </View>
                 <View className='sl-page-header-placeholder' />
               </View>
@@ -88,7 +90,7 @@ export default function ScanMedicationsPage() {
               {hasProtectedContext ? (
                 <View className='sl-action-grid scan-medications-actions'>
                   <Button className='sl-secondary-button' onClick={() => Taro.redirectTo({ url: buildArchiveUrl() })}>
-                    返回档案
+                    {t('scan.backToArchive')}
                   </Button>
                   <Button
                     className='sl-secondary-button'
@@ -96,36 +98,38 @@ export default function ScanMedicationsPage() {
                       Taro.redirectTo({ url: `${APP_ROUTES.scanScales}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}` })
                     }
                   >
-                    查看量表
+                    {t('scan.viewScale')}
                   </Button>
                 </View>
               ) : null}
 
               {loading ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>正在加载用药记录...</View>
+                  <View className='sl-empty-state'>{t('common.reading')}</View>
                 </View>
               ) : errorText ? (
                 <View className='sl-card sl-form-panel'>
                   <View className='sl-error-card'>{errorText}</View>
                   <Button className='sl-secondary-button scan-medications-panel__button' onClick={() => Taro.redirectTo({ url: buildVerifyUrl() })}>
-                    返回验证页
+                    {t('scan.backToVerify')}
                   </Button>
                 </View>
               ) : items.length === 0 ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>暂无用药记录。</View>
+                  <View className='sl-empty-state'>{t('scan.noMedicationRecords')}</View>
                 </View>
               ) : (
                 <>
                   <View className='scan-medications-list'>
                     {items.map((item, index) => (
                       <View key={`${item.name}-${index}`} className='sl-card scan-medications-item'>
-                        <View className='scan-medications-item__icon'>药</View>
+                        <View className='scan-medications-item__icon'>{t('workbench.medicationName').slice(0, 1)}</View>
                         <View className='scan-medications-item__body'>
-                          <View className='scan-medications-item__title'>{item.name || '未命名药品'}</View>
+                          <View className='scan-medications-item__title sl-auto-data' {...{ dir: 'auto' }}>{item.name || t('common.unknownMedication')}</View>
                           <View className='scan-medications-item__meta'>
-                            <Text>{item.dosage || '暂无剂量'} | {item.time || '暂无频次'}</Text>
+                            <Text className='sl-ltr-data'>{item.dosage || t('common.notProvided')}</Text>
+                            {' | '}
+                            <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.time || t('common.notProvided')}</Text>
                           </View>
                         </View>
                       </View>
@@ -135,8 +139,8 @@ export default function ScanMedicationsPage() {
                   <View className='sl-card scan-medications-warning'>
                     <View className='scan-medications-warning__icon'>!</View>
                     <View className='scan-medications-warning__copy'>
-                      <Text>用药信息仅供照护参考，</Text>
-                      <Text>请遵医嘱</Text>
+                      <Text>{t('scan.medicationReference')}</Text>
+                      <Text>{t('scan.followDoctor')}</Text>
                     </View>
                   </View>
                 </>

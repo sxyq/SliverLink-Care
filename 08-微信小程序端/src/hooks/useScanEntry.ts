@@ -1,7 +1,8 @@
 import Taro from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { parseRouteText } from '@/utils/routeParams';
+import { i18nRuntime } from '@/i18n';
 
 const CAMERA_SCOPE = 'scope.camera';
 
@@ -13,7 +14,7 @@ function isPermissionError(message: string) {
   return message.includes('auth deny') || message.includes('auth denied') || message.includes('authorize no response');
 }
 
-async function ensureCameraPermission() {
+async function ensureCameraPermission(t: (key: string) => string) {
   const setting = await Taro.getSetting();
   const cameraPermission = setting.authSetting?.[CAMERA_SCOPE];
 
@@ -23,10 +24,10 @@ async function ensureCameraPermission() {
 
   if (cameraPermission === false) {
     const modal = await Taro.showModal({
-      title: '需要相机权限',
-      content: '扫码查看需要使用相机，请在设置中允许访问相机后重试。',
-      confirmText: '去设置',
-      cancelText: '取消',
+      title: t('errors.cameraPermissionTitle'),
+      content: t('errors.cameraPermissionDescription'),
+      confirmText: t('common.goToSettings'),
+      cancelText: t('common.cancel'),
     });
 
     if (!modal.confirm) {
@@ -49,10 +50,10 @@ async function ensureCameraPermission() {
 
     if (isPermissionError(errMsg)) {
       const modal = await Taro.showModal({
-        title: '需要相机权限',
-        content: '未开启相机权限，无法直接扫码。是否现在前往设置开启？',
-        confirmText: '去设置',
-        cancelText: '取消',
+        title: t('errors.cameraPermissionTitle'),
+        content: t('errors.cameraPermissionNotEnabled'),
+        confirmText: t('common.goToSettings'),
+        cancelText: t('common.cancel'),
       });
 
       if (!modal.confirm) {
@@ -83,9 +84,14 @@ function buildScanLandingUrl(rawResult: string) {
 }
 
 export function useScanEntry() {
+  const t = (key: string) => i18nRuntime.t(key);
+  const ERROR_MESSAGES = {
+    invalidQr: t('errors.invalidQr'),
+  };
+
   return async function openScan() {
     try {
-      const cameraGranted = await ensureCameraPermission();
+      const cameraGranted = await ensureCameraPermission(t);
 
       if (!cameraGranted) {
         return;
@@ -109,16 +115,16 @@ export function useScanEntry() {
       }
 
       if (isPermissionError(errMsg)) {
-        await Taro.showToast({ title: '未获得相机权限', icon: 'none' });
+        await Taro.showToast({ title: t('errors.cameraPermissionDenied'), icon: 'none' });
         return;
       }
 
       if (errMsg.includes('not supported') || errMsg.includes('fail')) {
-        await Taro.showToast({ title: '当前环境暂不支持直接调起扫码', icon: 'none' });
+        await Taro.showToast({ title: t('errors.scanUnsupported'), icon: 'none' });
         return;
       }
 
-      await Taro.showToast({ title: ERROR_MESSAGES.requestFailed, icon: 'none' });
+      await Taro.showToast({ title: t('errors.requestFailed'), icon: 'none' });
     }
   };
 }

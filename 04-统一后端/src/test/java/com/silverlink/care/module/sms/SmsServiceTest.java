@@ -1,5 +1,6 @@
 package com.silverlink.care.module.sms;
 
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,9 @@ class SmsServiceTest {
         when(jdbc.queryForObject(anyString(), eq(Integer.class), anyString(), anyString(), any(Timestamp.class)))
                 .thenReturn(1);
 
-        assertThrows(RuntimeException.class, () -> service.sendCode("13800001111"));
+        BizException exception = assertThrows(BizException.class, () -> service.sendCode("13800001111"));
+        assertEquals(429, exception.getCode());
+        assertEquals("errors.smsRateLimited", exception.getMessageKey());
     }
 
     @Test

@@ -198,7 +198,11 @@ describe('ScaleDetailPage', () => {
       answers: [{ question: '做事提不起劲', value: 2 }],
     });
     renderPage([item], 'PHQ-9');
-    expect(screen.getByText('2 分')).toBeInTheDocument();
+    const valueNode = screen.getByText('2');
+    expect(valueNode).toHaveAttribute('dir', 'ltr');
+    expect(valueNode).toHaveClass('sl-ltr-data');
+    expect(valueNode.parentElement?.textContent).toContain('分');
+    expect(screen.getByText('5').className).toContain('sl-ltr-data');
   });
 
   it('loads scale detail lazily when list item has no answers and falls back to fetched detail', async () => {

@@ -59,22 +59,22 @@ describe('BasicInfoPage', () => {
 
   it('shows verified emergency contact with relationship when verified', () => {
     renderPage(baseData, true);
-    expect(screen.getByText(/李家属（女儿）/)).toBeInTheDocument();
-    expect(screen.getByText(/13800000000/)).toBeInTheDocument();
+    expect(screen.getByText('李家属（女儿）')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('13800000000')).toHaveAttribute('dir', 'ltr');
   });
 
   it('shows verified emergency contact without relationship when relationship is empty', () => {
     const noRelData = { ...baseData, relationship: '' };
     renderPage(noRelData, true);
-    const contactLine = screen.getByText(/李家属/);
-    expect(contactLine.textContent).toContain('李家属');
-    expect(contactLine.textContent).toContain('13800000000');
-    expect(contactLine.textContent).not.toContain('（）');
+    const contactName = screen.getByText('李家属');
+    expect(contactName).toHaveAttribute('dir', 'auto');
+    expect(contactName).not.toHaveTextContent('（）');
+    expect(screen.getByText('13800000000')).toHaveClass('sl-ltr-data');
   });
 
   it('shows residence when verified', () => {
     renderPage(baseData, true);
-    expect(screen.getByText(/滨江社区/)).toBeInTheDocument();
+    expect(screen.getByText('滨江社区')).toHaveAttribute('dir', 'auto');
   });
 
   it('shows placeholder when verified but residence is empty', () => {

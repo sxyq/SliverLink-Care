@@ -1,6 +1,7 @@
 package com.silverlink.care.module.sms;
 
 import com.silverlink.care.common.ApiResponse;
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.module.audit.AuditLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,9 @@ public class SmsController {
             return ApiResponse.ok(map);
         } catch (RuntimeException e) {
             auditLogService.record("扫码用户", "SCAN", request, maskPhone(phone), "SMS_SEND", "FAIL", e.getMessage(), null);
-            return ApiResponse.fail(429, e.getMessage());
+            return e instanceof BizException bizException
+                    ? ApiResponse.fail(bizException.getCode(), e.getMessage(), bizException.getMessageKey())
+                    : ApiResponse.fail(429, e.getMessage());
         }
     }
 

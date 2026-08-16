@@ -15,25 +15,25 @@ export function maskArchiveNo(no: string): string {
 
 function inferContactSuffix(relationship: string): string {
   const normalized = (relationship || '').trim();
-  if (!normalized) return '家属';
+  if (!normalized) return i18nRuntime.t('common.familyLabel');
 
   const femaleHints = ['女', '母', '妻', '姐', '妹', '姨', '姑', '奶', '姥'];
   if (femaleHints.some((hint) => normalized.includes(hint))) {
-    return '女士';
+    return i18nRuntime.t('common.ladyLabel');
   }
 
   const maleHints = ['男', '父', '夫', '哥', '弟', '叔', '伯', '爷', '舅'];
   if (maleHints.some((hint) => normalized.includes(hint))) {
-    return '男士';
+    return i18nRuntime.t('common.manLabel');
   }
 
-  return '家属';
+  return i18nRuntime.t('common.familyLabel');
 }
 
 function inferContactSurname(name: string): string {
   const normalized = (name || '').trim();
-  if (!normalized) return '某';
-  return normalized[0] || '某';
+  if (!normalized) return i18nRuntime.t('common.unknownSurname');
+  return normalized[0] || i18nRuntime.t('common.unknownSurname');
 }
 
 export function formatMaskedContact(name: string, relationship: string): string {
@@ -41,3 +41,4 @@ export function formatMaskedContact(name: string, relationship: string): string 
   const suffix = inferContactSuffix(relationship);
   return `${surname}${suffix}`;
 }
+import { i18nRuntime } from '../i18n';

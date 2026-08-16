@@ -1,3 +1,5 @@
+import { i18nRuntime } from '../i18n';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 type DownloadNameplatePdfOptions = {
@@ -16,7 +18,7 @@ export async function downloadNameplatePdf({ elderId, archiveNo, tokenStorageKey
     credentials: 'same-origin',
   });
   if (!response.ok) {
-    throw new Error('导出名牌失败，请重新登录后重试');
+    throw new Error(i18nRuntime.t('errors.exportRetry'));
   }
   const blob = await response.blob();
   const objectUrl = window.URL.createObjectURL(blob);

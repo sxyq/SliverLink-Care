@@ -6,6 +6,7 @@ import type { ElderInfo } from '../types';
 import { SubjectDetailPage } from '@shared/SubjectDetailPage';
 import type { CareActionCard, CareSubject } from '@shared/types';
 import { downloadNameplatePdf } from '../../shared-workbench/nameplateExport';
+import { useI18n } from '../../i18n';
 
 function toCareSubject(elder: ElderInfo): CareSubject {
   return {
@@ -25,6 +26,7 @@ function toCareSubject(elder: ElderInfo): CareSubject {
 export default function ElderBasicManagePage() {
   const { elderId } = useParams<{ elderId: string }>();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [elder, setElder] = useState<ElderInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -41,13 +43,13 @@ export default function ElderBasicManagePage() {
   }, [elderId]);
 
   if (loading) {
-    return <div className="page-container text-center text-secondary">加载中...</div>;
+    return <div className="page-container text-center text-secondary">{t('common.loading')}</div>;
   }
 
   if (!elder) {
     return (
       <div className="page-container empty-state">
-        <p>未找到老人信息</p>
+        <p>{t('errors.noElderInfo')}</p>
       </div>
     );
   }
@@ -64,7 +66,7 @@ export default function ElderBasicManagePage() {
         tokenStorageKey: 'family_token',
       });
     } catch (error) {
-      alert(error instanceof Error ? error.message : '导出失败，请稍后重试');
+      alert(error instanceof Error ? error.message : t('errors.exportRetry'));
     } finally {
       setExporting(false);
     }
@@ -73,20 +75,20 @@ export default function ElderBasicManagePage() {
   const actions: CareActionCard[] = [
     {
       key: 'contacts',
-      title: '联系人维护',
-      description: '更新主联系人、备用联系人及与老人的关系。',
+      title: t('family.contactManage'),
+      description: t('family.contactManageDescription'),
       onClick: () => navigate(`/elders/${elder.id}/contacts`),
     },
     {
       key: 'medications',
-      title: '用药信息',
-      description: '查看并维护当前药物名称、剂量、用法和时间。',
+      title: t('family.medicationInfo'),
+      description: t('family.medicationManageDescription'),
       onClick: () => navigate(`/elders/${elder.id}/medications`),
     },
     {
       key: 'qrcode',
-      title: '二维码查看',
-      description: '查看当前老人二维码及名牌 PDF 相关信息。',
+      title: t('family.qrView'),
+      description: t('family.qrViewDescription'),
       onClick: () => navigate(`/elders/${elder.id}/qrcode`),
     },
   ];
@@ -94,7 +96,7 @@ export default function ElderBasicManagePage() {
   return (
     <div className="page-container">
       <SubjectDetailPage
-        title="老人信息"
+        title={t('workbench.elderInfo')}
         subject={toCareSubject(elder)}
         onBack={() => navigate('/')}
         actions={actions}
@@ -104,11 +106,11 @@ export default function ElderBasicManagePage() {
             className="sl-page-header-icon sl-page-header-icon-label"
             onClick={handleExport}
             disabled={exporting}
-            aria-label="导出名牌 PDF"
-            title="导出名牌 PDF"
+            aria-label={t('workbench.exportNameplatePdf')}
+            title={t('workbench.exportNameplatePdf')}
           >
             <Download size={18} />
-            <span>{exporting ? '导出中' : '导出'}</span>
+            <span>{exporting ? t('common.exporting') : t('common.export')}</span>
           </button>
         }
       />

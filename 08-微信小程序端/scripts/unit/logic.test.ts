@@ -41,6 +41,7 @@ import {
   setStorageValueAsync,
 } from '@/utils/storage';
 import { httpClient } from '@/services/api/httpClient';
+import { i18nRuntime } from '@/i18n';
 import {
   getScanVerificationStatus,
   resolveScanToken,
@@ -223,6 +224,9 @@ test('role permission matrix keeps volunteer and family scopes separated', () =>
 
 test('formatters normalize empty values, dates, phones, ages, and scores', () => {
   assert.equal(formatDateLabel(), '暂无记录');
+  assert.equal(formatDateTimeLabel(), '暂无记录');
+  assert.equal(formatDateTimeLabel(undefined), '暂无记录');
+  assert.equal(formatDateTimeLabel(null as unknown as string), '暂无记录');
   assert.equal(formatDateLabel('2026-06-06T01:15:00Z'), '2026-06-06');
   assert.equal(formatDateTimeLabel('bad-date'), 'bad-date');
   assert.match(formatDateTimeLabel('2026-06-05T17:15:00Z'), /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
@@ -612,6 +616,47 @@ test('http client surfaces API errors and downloadFile contract', async () => {
   assert.equal((taroTestApi.__getDownloads()[0].header as Record<string, string>)['Content-Type'], 'application/json');
   assert.equal(taroTestApi.__getDownloads()[0].enableCookie, true);
   await assert.rejects(() => httpClient.download('/api/bad'), /请求失败，请稍后重试/);
+});
+
+test('http client localizes Kazakh keys and keeps unknown-key server messages', async () => {
+  resetStorage();
+  i18nRuntime.setLocale('kk-Arab-CN');
+  taroTestApi.__setRequestHandler((option) => {
+    const url = String(option.url);
+    if (url.includes('/known-key')) {
+      return {
+        statusCode: 401,
+        data: { message: '账号或密码错误', messageKey: 'errors.loginFailed' },
+      };
+    }
+    if (url.includes('/unknown-key')) {
+      return {
+        statusCode: 400,
+        data: { message: '服务端自定义提示', messageKey: 'errors.unknownKey' },
+      };
+    }
+    return {
+      statusCode: 500,
+      data: { message: '   ', messageKey: 'errors.unknownKey' },
+    };
+  });
+
+  try {
+    await assert.rejects(
+      () => httpClient.get('/api/known-key', { useQueue: false }),
+      /ەسەپتىك جازبا نەمەسە قۇپياسوز دۇرىس ەمەس/,
+    );
+    await assert.rejects(
+      () => httpClient.get('/api/unknown-key', { useQueue: false }),
+      /服务端自定义提示/,
+    );
+    await assert.rejects(
+      () => httpClient.get('/api/empty-message', { useQueue: false }),
+      /سۇراۋ ءساتسىز اياقتالدى, كەيىنىرەك قايتالاپ كورىڭىز/,
+    );
+  } finally {
+    i18nRuntime.setLocale('zh-CN');
+  }
 });
 
 test('scan services call backend paths and normalize verification payloads', async () => {

@@ -34,9 +34,8 @@ describe('shared volunteer and family components', () => {
     expect(screen.getByText('content body')).toBeInTheDocument();
     expect(screen.getByText('重庆医科大学护理学院 银龄守护团队')).toBeInTheDocument();
     expect(screen.getByText('副标题')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '返回' }));
+    screen.getAllByRole('button', { name: '返回' }).forEach((button) => fireEvent.click(button));
     fireEvent.click(screen.getByRole('button', { name: 'action' }));
-    fireEvent.click(screen.getAllByRole('button')[2]);
     expect(onBack).toHaveBeenCalled();
   });
 
@@ -88,13 +87,14 @@ describe('shared volunteer and family components', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.change(screen.getByPlaceholderText('请输入姓名或档案编号'), { target: { value: '张' } });
+    fireEvent.change(screen.getByPlaceholderText('请输入老人姓名或档案编号'), { target: { value: '张' } });
     expect(onKeywordChange).toHaveBeenCalledWith('张');
-    fireEvent.click(screen.getByRole('button', { name: '下一位老人' }));
+    expect(screen.getByText('王桂兰1')).toHaveAttribute('dir', 'auto');
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }));
     fireEvent.click(screen.getByText('王桂兰2'));
     fireEvent.keyDown(screen.getByText('王桂兰1').closest('[data-elder-card="true"]') as HTMLElement, { key: 'Enter' });
     fireEvent.click(screen.getAllByRole('button', { name: '进入档案' })[0]);
-    fireEvent.click(screen.getByRole('button', { name: /新增快速维护基础资料/ }));
+    fireEvent.click(screen.getByRole('button', { name: '新增' }));
     expect(onSelect).toHaveBeenCalled();
     expect(onSecondaryAction).toHaveBeenCalled();
   });
@@ -116,8 +116,8 @@ describe('shared volunteer and family components', () => {
 
     expect(screen.getByText('profile panel')).toBeInTheDocument();
     expect(screen.queryByText('快速维护基础资料、联系人和联系方式')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: '下一位老人' }));
-    fireEvent.click(screen.getByRole('button', { name: '上一位老人' }));
+    fireEvent.click(screen.getByRole('button', { name: '下一步' }));
+    fireEvent.click(screen.getByRole('button', { name: '上一步' }));
     fireEvent.click(screen.getByLabelText('切换到王桂兰2'));
     fireEvent.click(screen.getAllByText('进入档案')[0]);
     expect(onSelect).toHaveBeenCalled();
@@ -154,7 +154,7 @@ describe('shared volunteer and family components', () => {
     );
 
     expect(screen.getByText('当前负责老人档案')).toBeInTheDocument();
-    expect(screen.getAllByText('待补充')).toHaveLength(3);
+    expect(screen.getAllByText('待补充')).toHaveLength(4);
     expect(screen.getByText('暂无明确过敏史')).toBeInTheDocument();
 
     const card = screen.getByText('独居老人').closest('[data-elder-card="true"]') as HTMLElement;
@@ -181,7 +181,8 @@ describe('shared volunteer and family components', () => {
     );
 
     expect(screen.getByText('住址信息')).toBeInTheDocument();
-    expect(screen.getByText('王丽（女儿）')).toBeInTheDocument();
+    expect(screen.getByText('王桂兰1')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('王丽（女儿）')).toHaveAttribute('dir', 'auto');
     fireEvent.click(screen.getByRole('button', { name: '返回' }));
     fireEvent.click(screen.getByRole('button', { name: /基本信息/ }));
     fireEvent.click(screen.getByRole('button', { name: /警示动作/ }));
@@ -208,11 +209,12 @@ describe('shared volunteer and family components', () => {
     );
 
     expect(screen.getByText('暂无用药记录')).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: /添加用药/ }));
+    fireEvent.click(screen.getByRole('button', { name: /新增用药/ }));
     fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
-    expect(alert).toHaveBeenCalledWith('请输入药品名称');
+    expect(alert).toHaveBeenCalledWith('请先填写药品名称');
 
     fireEvent.change(screen.getByLabelText('药品名称'), { target: { value: '阿司匹林' } });
+    expect(screen.getByLabelText('药品名称')).toHaveAttribute('dir', 'auto');
     fireEvent.change(screen.getByLabelText('剂量'), { target: { value: '1片' } });
     fireEvent.change(screen.getByLabelText('用法'), { target: { value: '口服' } });
     fireEvent.change(screen.getByLabelText('用药时间'), { target: { value: '早' } });
@@ -282,7 +284,7 @@ describe('shared volunteer and family components', () => {
       </MemoryRouter>,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: '添加用药' }));
+    fireEvent.click(screen.getByRole('button', { name: '新增用药' }));
     fireEvent.change(screen.getByLabelText('药品名称'), { target: { value: '氯吡格雷' } });
     fireEvent.click(screen.getByRole('button', { name: '确认保存' }));
     await waitFor(() => expect(onCreate).toHaveBeenCalled());

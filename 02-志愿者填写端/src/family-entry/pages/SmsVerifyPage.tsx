@@ -13,10 +13,12 @@ import {
   setVerified,
   subscribe,
 } from '../features/verification/verificationStore';
+import { useI18n } from '../../i18n';
 
 export default function SmsVerifyPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useI18n();
   const state = location.state as {
     code?: string;
     name?: string;
@@ -40,7 +42,7 @@ export default function SmsVerifyPage() {
       ? await sendInvitationSms(state.code, phone)
       : await sendSmsCode(phone);
     if (!result.success) {
-      alert(result.message || '验证码发送失败');
+      alert(result.message || t('errors.sendSmsFailed'));
     }
   };
 
@@ -95,7 +97,7 @@ export default function SmsVerifyPage() {
 
   return (
     <div>
-      <TopBar title="短信验证" />
+      <TopBar title={t('verification.sms')} />
       <div className="page-container">
         <div style={{ textAlign: 'center', marginBottom: 32, marginTop: 20 }}>
           <div style={{
@@ -110,9 +112,9 @@ export default function SmsVerifyPage() {
           }}>
             <ShieldAlert size={24} color="var(--sl-warn)" />
           </div>
-          <h2 style={{ fontSize: 18, fontWeight: 600 }}>短信验真</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 600 }}>{t('verification.smsVerify')}</h2>
           <p className="text-secondary mt-8">
-            验证码已发送至 <span style={{ fontWeight: 500, color: 'var(--sl-text)' }}>{vState.maskedPhone}</span>
+            {t('verification.codeSentTo')} <span className="sl-ltr-data" style={{ fontWeight: 500, color: 'var(--sl-text)' }}>{vState.maskedPhone}</span>
           </p>
         </div>
 
@@ -121,11 +123,11 @@ export default function SmsVerifyPage() {
         <div style={{ textAlign: 'center', marginTop: 20 }}>
           {vState.canResend ? (
             <button className="btn btn-outline btn-sm" onClick={handleResend}>
-              重新发送
+              {t('verification.resend')}
             </button>
           ) : (
             <span className="text-secondary" style={{ fontSize: 13 }}>
-              {vState.countdown} 秒后可重新发送
+              {t('verification.secondsToResend', { seconds: vState.countdown })}
             </span>
           )}
         </div>
@@ -134,11 +136,11 @@ export default function SmsVerifyPage() {
           <div style={{ textAlign: 'center', marginTop: 16 }}>
             {vState.canSwitchBackup ? (
               <button className="btn btn-outline btn-sm" onClick={handleSwitchBackup}>
-                切换备用手机号
+                {t('verification.switchBackupPhone')}
               </button>
             ) : (
               <span className="text-secondary" style={{ fontSize: 12 }}>
-                主手机号收不到验证码，{vState.backupCountdown} 秒后可切换备用手机号
+                {t('verification.backupPhoneHint', { seconds: vState.backupCountdown })}
               </span>
             )}
           </div>
@@ -146,7 +148,7 @@ export default function SmsVerifyPage() {
 
         <div className="info-banner mt-24">
           <ShieldAlert size={16} />
-          <span>邀请码注册后会绑定到当前家属账号；单个家属账号最多可绑定 4 位老人。</span>
+          <span>{t('verification.invitationBindingHint')}</span>
         </div>
       </div>
     </div>

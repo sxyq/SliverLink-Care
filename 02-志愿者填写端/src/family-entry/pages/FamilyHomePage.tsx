@@ -5,6 +5,7 @@ import { getBoundElders } from '../api/familyElderApi';
 import type { ElderInfo } from '../types';
 import { SubjectListPage } from '@shared/SubjectListPage';
 import type { CareSubject } from '@shared/types';
+import { useI18n } from '../../i18n';
 
 function toCareSubject(elder: ElderInfo): CareSubject {
   return {
@@ -18,12 +19,13 @@ function toCareSubject(elder: ElderInfo): CareSubject {
     emergencyContactRelation: elder.emergencyContactRelation,
     bloodType: elder.bloodType,
     allergyHistory: elder.allergyHistory,
-    summary: '仅显示当前账号已绑定的老人档案',
+    summary: '',
   };
 }
 
 export default function FamilyHomePage() {
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [elders, setElders] = useState<ElderInfo[]>([]);
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,8 @@ export default function FamilyHomePage() {
     return elders.filter((elder) => !lower || elder.name.includes(lower) || elder.archiveNo.includes(lower));
   }, [elders, keyword]);
 
+  const subjectSummary = t('family.boundEldersHint');
+
   const maxBindings = 4;
   const remainingSlots = Math.max(0, maxBindings - elders.length);
   const limitReached = elders.length >= maxBindings;
@@ -57,24 +61,24 @@ export default function FamilyHomePage() {
   return (
     <div className="page-container">
       <SubjectListPage
-        title="已绑定老人"
+        title={t('family.boundElders')}
         loading={loading}
-        subjects={filtered.map(toCareSubject)}
+        subjects={filtered.map((elder) => ({ ...toCareSubject(elder), summary: subjectSummary }))}
         keyword={keyword}
         onKeywordChange={setKeyword}
         onSelect={(subject) => navigate(`/elders/${subject.id}`)}
-        primaryHint={`当前家属账号已绑定 ${elders.length}/4 位老人，仅可查看和维护已绑定档案。`}
-        emptyText="暂无已绑定老人"
-        searchPlaceholder="请输入老人姓名或档案编号"
+        primaryHint={t('family.manageBoundHint', { count: elders.length })}
+        emptyText={t('workbench.noBoundElders')}
+        searchPlaceholder={t('workbench.elderNameOrArchivePlaceholder')}
         preProfilePanel={
           <section className={`sl-add-archive-panel${limitReached ? ' is-disabled' : ''}`}>
             <div className="sl-add-archive-copy">
-              <span className="sl-add-archive-kicker">邀请码绑定</span>
-              <strong>增加档案</strong>
+              <span className="sl-add-archive-kicker">{t('workbench.inviteBind')}</span>
+              <strong>{t('family.increaseArchive')}</strong>
               <p>
                 {limitReached
-                  ? `当前已绑定 ${elders.length}/${maxBindings} 位，已达到上限。`
-                  : `当前已绑定 ${elders.length}/${maxBindings} 位，还可新增 ${remainingSlots} 位。`}
+                  ? t('family.currentBoundLimit', { count: elders.length, max: maxBindings })
+                  : t('common.bindingSlotsAvailable', { count: elders.length, max: maxBindings, remaining: remainingSlots })}
               </p>
             </div>
 
@@ -89,7 +93,7 @@ export default function FamilyHomePage() {
                 onClick={() => setShowBindModal(true)}
               >
                 <Plus size={16} />
-                输入邀请码
+                {t('family.inputInvitation')}
               </button>
             </div>
           </section>
@@ -100,12 +104,12 @@ export default function FamilyHomePage() {
         <div className="sl-modal-overlay" onClick={() => setShowBindModal(false)}>
           <div className="sl-modal-card" onClick={(event) => event.stopPropagation()}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-              <h3>增加档案</h3>
+              <h3>{t('family.increaseArchive')}</h3>
               <button
                 type="button"
                 className="sl-page-header-icon"
                 onClick={() => setShowBindModal(false)}
-                aria-label="关闭增加档案"
+                aria-label={t('family.closeIncreaseArchive')}
               >
                 <X size={18} />
               </button>
@@ -115,16 +119,17 @@ export default function FamilyHomePage() {
               <div className="sl-card sl-card-soft">
                 <div className="sl-form-stack">
                   <div>
-                    <div className="sl-summary-label">绑定上限</div>
+                    <div className="sl-summary-label">{t('family.bindingLimitTitle')}</div>
                     <div className="sl-summary-value">
-                      当前已绑定 {elders.length}/4 位老人
+                      {t('common.archiveCount', { count: elders.length, max: 4 })}
                     </div>
                   </div>
                   <label className="sl-label">
-                    <span className="sl-label-text">邀请码</span>
+                    <span className="sl-label-text">{t('common.invitationCode')}</span>
                     <input
-                      className="sl-input"
-                      placeholder="请输入后台发放的邀请码"
+                      className="sl-input sl-ltr-data"
+                      dir="ltr"
+                      placeholder={t('family.inputBackendInvitation')}
                       value={inviteCode}
                       onChange={(event) => setInviteCode(event.target.value)}
                     />
@@ -135,7 +140,7 @@ export default function FamilyHomePage() {
 
             <div className="sl-modal-actions">
               <button type="button" className="sl-btn sl-btn-secondary" onClick={() => setShowBindModal(false)}>
-                取消
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
@@ -143,7 +148,7 @@ export default function FamilyHomePage() {
                 disabled={!inviteCode.trim()}
                 onClick={handleBindConfirm}
               >
-                继续绑定
+                {t('family.continueBind')}
               </button>
             </div>
           </div>

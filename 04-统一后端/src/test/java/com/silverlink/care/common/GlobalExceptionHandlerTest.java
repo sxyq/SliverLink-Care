@@ -11,7 +11,9 @@ class GlobalExceptionHandlerTest {
     void mapsBizExceptionCodesToHttpStatus() {
         GlobalExceptionHandler handler = new GlobalExceptionHandler();
 
-        assertEquals(HttpStatus.UNAUTHORIZED, handler.handleBiz(new BizException(401, "unauthorized")).getStatusCode());
+        var localized = handler.handleBiz(new BizException(401, "unauthorized", "errors.loginFailed"));
+        assertEquals(HttpStatus.UNAUTHORIZED, localized.getStatusCode());
+        assertEquals("errors.loginFailed", localized.getBody().getMessageKey());
         assertEquals(HttpStatus.FORBIDDEN, handler.handleBiz(new BizException(403, "forbidden")).getStatusCode());
         assertEquals(HttpStatus.NOT_FOUND, handler.handleBiz(new BizException(404, "missing")).getStatusCode());
         assertEquals(HttpStatus.BAD_REQUEST, handler.handleBiz(new BizException(422, "bad")).getStatusCode());

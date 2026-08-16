@@ -10,6 +10,53 @@ const resolvedScanContext = {
   emergencyPhoneMasked: '',
 };
 
+const STORAGE_KEYS = {
+  qrToken: 'silverlink.scan.qrToken',
+  elderId: 'silverlink.scan.elderId',
+  emergencyPhone: 'silverlink.scan.emergencyPhone',
+  emergencyPhoneMasked: 'silverlink.scan.emergencyPhoneMasked',
+} as const;
+
+function getSessionStorage(): Storage | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.sessionStorage;
+  } catch {
+    return null;
+  }
+}
+
+function readResolvedContextForCurrentToken() {
+  const currentToken = readQrToken() || '';
+  if (!currentToken) return null;
+
+  const storage = getSessionStorage();
+  if (storage) {
+    const storedToken = storage.getItem(STORAGE_KEYS.qrToken) || '';
+    if (!storedToken || storedToken !== currentToken) return null;
+    return {
+      qrToken: storedToken,
+      elderId: storage.getItem(STORAGE_KEYS.elderId) || '',
+      emergencyPhone: storage.getItem(STORAGE_KEYS.emergencyPhone) || '',
+      emergencyPhoneMasked: storage.getItem(STORAGE_KEYS.emergencyPhoneMasked) || '',
+    };
+  }
+
+  if (resolvedScanContext.qrToken !== currentToken) return null;
+  return resolvedScanContext;
+}
+
+function persistResolvedContext() {
+  const storage = getSessionStorage();
+  if (!storage || !resolvedScanContext.qrToken) return;
+  storage.setItem(STORAGE_KEYS.qrToken, resolvedScanContext.qrToken);
+  storage.setItem(STORAGE_KEYS.elderId, resolvedScanContext.elderId);
+  if (resolvedScanContext.emergencyPhone) storage.setItem(STORAGE_KEYS.emergencyPhone, resolvedScanContext.emergencyPhone);
+  else storage.removeItem(STORAGE_KEYS.emergencyPhone);
+  if (resolvedScanContext.emergencyPhoneMasked) storage.setItem(STORAGE_KEYS.emergencyPhoneMasked, resolvedScanContext.emergencyPhoneMasked);
+  else storage.removeItem(STORAGE_KEYS.emergencyPhoneMasked);
+}
+
 interface ScanResolveDto {
   elderId: string;
   archiveNo: string;
@@ -50,31 +97,23 @@ interface ScaleDto {
 }
 
 export function getResolvedElderId() {
-  const currentToken = readQrToken() || '';
-  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
-    return '';
-  }
-  return resolvedScanContext.elderId;
+  return readResolvedContextForCurrentToken()?.elderId || '';
 }
 
 export function getResolvedEmergencyPhone() {
-  const currentToken = readQrToken() || '';
-  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
-    return '';
-  }
-  return resolvedScanContext.emergencyPhone;
+  return readResolvedContextForCurrentToken()?.emergencyPhone || '';
 }
 
 export function getResolvedEmergencyPhoneMasked() {
-  const currentToken = readQrToken() || '';
-  if (!currentToken || resolvedScanContext.qrToken !== currentToken) {
-    return '';
-  }
-  return resolvedScanContext.emergencyPhoneMasked;
+  return readResolvedContextForCurrentToken()?.emergencyPhoneMasked || '';
 }
 
 export function getResolvedQrToken() {
-  return resolvedScanContext.qrToken;
+  const resolvedToken = readResolvedContextForCurrentToken()?.qrToken || '';
+  if (resolvedToken) return resolvedToken;
+
+  const storage = getSessionStorage();
+  return storage?.getItem('silverlink.scan.verifiedQrToken') || '';
 }
 
 export function clearResolvedScanContext() {
@@ -82,6 +121,8 @@ export function clearResolvedScanContext() {
   resolvedScanContext.elderId = '';
   resolvedScanContext.emergencyPhone = '';
   resolvedScanContext.emergencyPhoneMasked = '';
+  const storage = getSessionStorage();
+  if (storage) Object.values(STORAGE_KEYS).forEach((key) => storage.removeItem(key));
 }
 
 export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
@@ -94,6 +135,7 @@ export async function fetchBasicInfo(qrToken: string): Promise<ElderBasicInfo> {
   resolvedScanContext.elderId = res.elderId;
   resolvedScanContext.emergencyPhone = res.emergencyPhoneDial || '';
   resolvedScanContext.emergencyPhoneMasked = res.emergencyPhoneMasked || '';
+  persistResolvedContext();
 
   return {
     id: res.elderId,

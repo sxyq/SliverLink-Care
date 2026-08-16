@@ -5,6 +5,7 @@ import { addMedication, deleteMedication, getMedications, updateMedication } fro
 import { previewInvitation, registerWithInvitation, sendInvitationSms } from './invitationApi';
 import { sendSmsCode, verifySmsCode } from './smsApi';
 import { clearToken, del, get, post, put, setToken } from './httpClient';
+import { i18nRuntime } from '../../i18n';
 
 function response(data: unknown, init: ResponseInit = {}) {
   return new Response(JSON.stringify({ code: 200, data }), {
@@ -29,6 +30,7 @@ describe('family entry api', () => {
     vi.restoreAllMocks();
     localStorage.clear();
     clearToken();
+    i18nRuntime.setLocale('zh-CN');
   });
 
   it('covers family token helpers and low-level verbs', async () => {
@@ -55,7 +57,7 @@ describe('family entry api', () => {
     await expect(get('/api/protected', { headers: { 'X-Debug': '1' } })).rejects.toThrow('unauthorized');
 
     expect(fetch).toHaveBeenCalledWith(
-      '/api/protected',
+      '/silverlink-api/api/protected',
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: 'Bearer expired-token',
@@ -131,7 +133,7 @@ describe('family entry api', () => {
     await expect(verifySmsCode('13800000000', '123456')).resolves.toEqual({ success: true, message: '验证成功' });
     await expect(verifySmsCode('13800000000', '000000')).resolves.toEqual({ success: false, message: '验证码错误' });
 
-    expect(fetchMock.mock.calls.map((call) => call[0])).toContain('/api/family/elders/elder%201/medications/med%201');
+    expect(fetchMock.mock.calls.map((call) => call[0])).toContain('/silverlink-api/api/family/elders/elder%201/medications/med%201');
   });
 
   it('covers invitation sms failure and register without token', async () => {
@@ -173,6 +175,30 @@ describe('family entry api', () => {
     await expect(sendSmsCode('13800000000')).resolves.toMatchObject({
       success: false,
       message: '发送失败',
+    });
+  });
+
+  it('uses nested messageKey for family login and invitation register failures', async () => {
+    i18nRuntime.setLocale('ug-Arab-CN');
+    queueFetch(
+      { ok: false, message: '手机号或密码错误', messageKey: 'errors.familyLoginFailed' },
+      { ok: false, message: '该家属账号已绑定此老人', messageKey: 'errors.familyAlreadyBound' },
+    );
+
+    await expect(familyLogin({ phone: '13800000000', password: 'bad' })).resolves.toMatchObject({
+      success: false,
+      message: 'تېلېفون نومۇرى ياكى پارول خاتا',
+    });
+    await expect(registerWithInvitation({
+      code: 'code',
+      name: '家属',
+      phone: '13800000000',
+      relationship: '女儿',
+      password: 'pass',
+      smsCode: '123456',
+    })).resolves.toMatchObject({
+      success: false,
+      message: 'بۇ ئائىلە ھېساباتى بۇ ياشانغانغا باغلانغان',
     });
   });
 });

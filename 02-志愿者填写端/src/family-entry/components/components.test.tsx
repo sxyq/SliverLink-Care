@@ -20,15 +20,15 @@ describe('family entry components', () => {
     };
     render(<ElderCard elder={elder} onClick={onClick} />);
 
-    expect(screen.getByText('王桂兰')).toBeInTheDocument();
-    expect(screen.getByText('女 · 82岁 · A1779****389')).toBeInTheDocument();
+    expect(screen.getByText('王桂兰')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('王桂兰').closest('.card')).toHaveTextContent(/女\s*·\s*82\s*岁\s*·\s*A1779\*{4}389/);
     await user.click(screen.getByText('王桂兰'));
     expect(onClick).toHaveBeenCalledWith(elder);
   });
 
   it('keeps short elder archive numbers visible', () => {
     render(<ElderCard elder={{ id: 'elder-1', name: '赵永福', gender: '男', age: 79, archiveNo: 'A001' }} />);
-    expect(screen.getByText('男 · 79岁 · A001')).toBeInTheDocument();
+    expect(screen.getByText('赵永福').closest('.card')).toHaveTextContent(/男\s*·\s*79\s*岁\s*·\s*A001/);
   });
 
   it('renders medication card actions only when handlers exist', async () => {

@@ -20,7 +20,11 @@ class ApiResponseTest {
         ApiResponse<Object> fail = ApiResponse.fail(403, "forbidden");
         assertEquals(403, fail.getCode());
         assertEquals("forbidden", fail.getMessage());
+        assertNull(fail.getMessageKey());
         assertNull(fail.getData());
+
+        ApiResponse<Object> localizedFail = ApiResponse.fail(400, "bad request", "errors.requestFailed");
+        assertEquals("errors.requestFailed", localizedFail.getMessageKey());
     }
 
     @Test

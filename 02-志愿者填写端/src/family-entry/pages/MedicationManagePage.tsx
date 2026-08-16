@@ -4,10 +4,12 @@ import { MedicationEditorPage } from '@shared/MedicationEditorPage';
 import type { CareMedicationRecord } from '@shared/types';
 import { addMedication, deleteMedication, getMedications, updateMedication } from '../api/medicationApi';
 import type { Medication } from '../types';
+import { useI18n } from '../../i18n';
 
 export default function MedicationManagePage() {
   const { elderId } = useParams<{ elderId: string }>();
   const navigate = useNavigate();
+  const { t } = useI18n();
   const [medications, setMedications] = useState<Medication[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,7 +45,7 @@ export default function MedicationManagePage() {
   return (
     <div className="page-container">
       <MedicationEditorPage
-        title="用药信息维护"
+        title={t('workbench.medicationInfoManage')}
         loading={loading}
         medications={items}
         onBack={() => navigate(-1)}

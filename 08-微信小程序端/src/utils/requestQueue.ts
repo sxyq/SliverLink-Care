@@ -111,7 +111,7 @@ class RequestQueue {
   private runWithTimeout<T>(execute: () => Promise<T>): Promise<T> {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error('请求超时'));
+        reject(new Error(i18nRuntime.t('errors.requestTimeout')));
       }, this.config.timeout);
 
       execute()
@@ -166,7 +166,7 @@ class RequestQueue {
   clear(): void {
     const pending = [...this.queue];
     this.queue = [];
-    pending.forEach((req) => req.reject(new Error('请求被取消')));
+    pending.forEach((req) => req.reject(new Error(i18nRuntime.t('errors.requestCancelled'))));
   }
 }
 
@@ -196,3 +196,4 @@ export async function batchRequests<T, R>(
 
   return Promise.all(promises);
 }
+import { i18nRuntime } from '@/i18n';

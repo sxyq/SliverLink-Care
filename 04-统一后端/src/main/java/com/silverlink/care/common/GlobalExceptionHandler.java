@@ -20,13 +20,13 @@ public class GlobalExceptionHandler {
             status = HttpStatus.NOT_FOUND;
         }
         return ResponseEntity.status(status)
-                .body(ApiResponse.fail(e.getCode(), e.getMessage()));
+                .body(ApiResponse.fail(e.getCode(), e.getMessage(), e.getMessageKey()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(ApiResponse.fail(409, "数据冲突，请检查输入后重试"));
+                .body(ApiResponse.fail(409, "数据冲突，请检查输入后重试", "errors.dataConflict"));
     }
 
     @ExceptionHandler(Exception.class)

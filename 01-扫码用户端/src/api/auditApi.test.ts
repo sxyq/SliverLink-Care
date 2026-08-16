@@ -50,7 +50,7 @@ describe('auditApi', () => {
 
     await reportAudit({ action: 'test' });
 
-    expect(fetchMock).toHaveBeenCalledWith('/api/audit-logs/report', expect.objectContaining({
+    expect(fetchMock).toHaveBeenCalledWith('/silverlink-api/api/audit-logs/report', expect.objectContaining({
       method: 'POST',
       headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
     }));

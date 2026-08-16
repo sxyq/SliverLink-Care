@@ -1,9 +1,17 @@
 import { API_BASE_URL } from '../config/env';
+import { i18nRuntime } from '../i18n';
+import { ApiMessageError, resolveApiMessage } from '@shared-i18n/messages';
 
 interface ApiEnvelope<T> {
   code?: number;
   message?: string;
+  messageKey?: string;
   data?: T;
+}
+
+function buildApiError(payload: unknown): ApiMessageError {
+  const resolved = resolveApiMessage(payload, i18nRuntime.t);
+  return new ApiMessageError(resolved.message, resolved.messageKey);
 }
 
 export async function httpClient<T>(url: string, options?: RequestInit): Promise<T> {
@@ -16,14 +24,15 @@ export async function httpClient<T>(url: string, options?: RequestInit): Promise
   });
 
   if (!res.ok) {
-    throw new Error(`HTTP ${res.status}`);
+    const text = await res.text().catch(() => '');
+    throw buildApiError(text);
   }
 
   const json = (await res.json()) as ApiEnvelope<T> | T;
   if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
     const envelope = json as ApiEnvelope<T>;
     if (envelope.code && envelope.code >= 400) {
-      throw new Error(envelope.message || `API ${envelope.code}`);
+      throw buildApiError(envelope);
     }
     return envelope.data as T;
   }

@@ -7,6 +7,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SelectChips } from '../components/SelectChips';
 import { SubmitBar } from '../components/SubmitBar';
 import { TextInput } from '../components/TextInput';
+import { useI18n } from '../i18n';
 
 interface BasicInfoFormPageProps {
   elder: AssignedElder;
@@ -27,6 +28,7 @@ const defaultBasicInfo: BasicInfo = {
 };
 
 export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
+  const { t } = useI18n();
   const [form, setForm] = useState<BasicInfo>(defaultBasicInfo);
   const [showSms, setShowSms] = useState(false);
   const [smsCode, setSmsCode] = useState('');
@@ -62,7 +64,7 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
       await sendSmsVerify(form.emergencyContactPhone);
       setSmsSent(true);
     } catch (e) {
-      alert('发送失败，请重试');
+      alert(t('errors.sendSmsFailed'));
     }
   }
 
@@ -72,15 +74,15 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
       if (showSms && smsCode) {
         const verify = await verifySmsCode(form.emergencyContactPhone, smsCode);
         if (!verify.ok) {
-          alert('验证码错误');
+          alert(t('errors.smsCodeInvalid'));
           return;
         }
       }
       await updateBasicInfo(elder.id, form);
-      alert('基本信息已保存');
+      alert(t('errors.basicInfoSaved'));
       onBack();
     } catch (e) {
-      alert('保存失败，请重试');
+      alert(t('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -88,42 +90,47 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
 
   return (
     <div className="sl-page sl-basic-info-page">
-      <PageHeader title="基本信息编辑" onBack={onBack} />
+      <PageHeader title={t('workbench.basicInfoEdit')} onBack={onBack} />
 
       <FormSection
-        title="基础信息"
-        hint="按老人档案顺序维护基础资料，关键信息优先放在首页。"
+        title={t('workbench.basicInfo')}
+        hint={t('workbench.basicInfoHint')}
         className="sl-basic-info-section"
       >
         <div className="sl-form-grid">
-          <TextInput label="姓名" value={form.name} onChange={(value) => handleChange('name', value)} />
+          <TextInput label={t('common.name')} value={form.name} onChange={(value) => handleChange('name', value)} />
           <label className="sl-label">
-            <span className="sl-label-text">性别</span>
-            <SelectChips options={['男', '女']} value={form.gender} onChange={(value) => handleChange('gender', value)} />
+            <span className="sl-label-text">{t('common.gender')}</span>
+            <SelectChips
+              options={['男', '女']}
+              value={form.gender}
+              onChange={(value) => handleChange('gender', value)}
+              getLabel={(value) => value === '男' ? t('common.male') : t('common.female')}
+            />
           </label>
-          <TextInput label="年龄" type="number" value={form.age} onChange={(value) => handleChange('age', value)} />
-          <TextInput label="居住地" value={form.residence} onChange={(value) => handleChange('residence', value)} />
-          <TextInput label="ABO 血型" value={form.aboBloodType} onChange={(value) => handleChange('aboBloodType', value)} placeholder="如 A / B / AB / O" />
-          <TextInput label="Rh 血型" value={form.rhBloodType} onChange={(value) => handleChange('rhBloodType', value)} placeholder="如 阳性 / 阴性" />
+          <TextInput label={t('common.age')} type="number" value={form.age} onChange={(value) => handleChange('age', value)} placeholder={t('workbench.agePlaceholder')} />
+          <TextInput label={t('common.address')} value={form.residence} onChange={(value) => handleChange('residence', value)} placeholder={t('workbench.residencePlaceholder')} />
+          <TextInput label={t('scan.aboType')} value={form.aboBloodType} onChange={(value) => handleChange('aboBloodType', value)} placeholder="A / B / AB / O" />
+          <TextInput label={t('scan.rhType')} value={form.rhBloodType} onChange={(value) => handleChange('rhBloodType', value)} placeholder="+ / -" />
           <label className="sl-label sl-label-full">
-            <span className="sl-label-text">过敏史</span>
+            <span className="sl-label-text">{t('common.allergyHistory')}</span>
             <textarea
               className="sl-textarea"
               value={form.allergyHistory}
               onChange={(event) => handleChange('allergyHistory', event.target.value)}
-              placeholder="请输入过敏信息或既往不良反应"
+              placeholder={t('workbench.allergyPlaceholder')}
               rows={2}
             />
           </label>
           <div className="sl-compact-subtitle sl-label-full">
             <ShieldAlert size={16} color="var(--sl-primary)" />
-            <span>紧急联系人</span>
+            <span>{t('scan.emergencyContact')}</span>
           </div>
-          <TextInput label="联系人" value={form.emergencyContactName} onChange={(value) => handleChange('emergencyContactName', value)} />
-          <TextInput label="与老人关系" value={form.emergencyContactRelation} onChange={(value) => handleChange('emergencyContactRelation', value)} />
+          <TextInput label={t('common.contact')} value={form.emergencyContactName} onChange={(value) => handleChange('emergencyContactName', value)} placeholder={t('workbench.contactNamePlaceholder')} />
+          <TextInput label={t('common.relationship')} value={form.emergencyContactRelation} onChange={(value) => handleChange('emergencyContactRelation', value)} placeholder={t('workbench.relationshipPlaceholder')} />
           <div className="sl-label sl-label-full">
             <TextInput
-              label="联系电话"
+              label={t('common.contactPhone')}
               type="tel"
               value={form.emergencyContactPhone}
               onChange={(value) => handleChange('emergencyContactPhone', value)}
@@ -133,17 +140,18 @@ export function BasicInfoFormPage({ elder, onBack }: BasicInfoFormPageProps) {
             <div className="sl-sms-panel sl-label-full">
               <div className="sl-sms-alert">
                 <ShieldAlert size={14} />
-                <span>联系人电话修改后需进行短信验真，确认信息归属准确。</span>
+                <span>{t('workbench.emergencyContactNote')}</span>
               </div>
               <div className="sl-sms-row">
                 <input
-                  className="sl-input"
-                  placeholder="请输入短信验证码"
+                  className="sl-input sl-ltr-data"
+                  dir="ltr"
+                  placeholder={t('workbench.inputSmsCode')}
                   value={smsCode}
                   onChange={(event) => setSmsCode(event.target.value)}
                 />
                 <button type="button" className="sl-btn sl-btn-secondary sl-inline-btn" onClick={handleSendSms}>
-                  {smsSent ? '已发送' : '获取验证码'}
+                  {smsSent ? t('common.sent') : t('common.getCode')}
                 </button>
               </div>
             </div>

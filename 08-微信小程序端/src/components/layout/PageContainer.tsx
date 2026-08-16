@@ -1,5 +1,6 @@
 import { memo, type ReactNode } from 'react';
 import { Button, Text, View } from '@tarojs/components';
+import { useI18n } from '@/i18n';
 
 export interface PageContainerProps {
   title?: string;
@@ -16,10 +17,13 @@ export const PageContainer = memo(function PageContainer({
   subtitle,
   children,
   showBack = false,
-  backText = '返回',
+  backText,
   onBack,
   footer,
 }: PageContainerProps) {
+  const { t } = useI18n();
+  const resolvedBackText = backText ?? t('common.back');
+
   return (
     <View className='sl-page' style={{ display: 'flex', flexDirection: 'column', gap: '24rpx' }}>
       {title || subtitle || showBack ? (
@@ -27,7 +31,7 @@ export const PageContainer = memo(function PageContainer({
           {showBack ? (
             <View style={{ display: 'flex', justifyContent: 'flex-start' }}>
               <Button className='sl-secondary-button' style={{ minWidth: '180rpx' }} onClick={onBack}>
-                {backText}
+                {resolvedBackText}
               </Button>
             </View>
           ) : null}

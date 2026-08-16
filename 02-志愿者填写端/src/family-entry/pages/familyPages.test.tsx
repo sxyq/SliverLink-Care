@@ -115,7 +115,10 @@ describe('family entry pages', () => {
     fireEvent.click(screen.getByRole('button', { name: '登录' }));
     expect(screen.getByText('请输入手机号和密码')).toBeInTheDocument();
 
-    fireEvent.change(screen.getByPlaceholderText('请输入手机号'), { target: { value: '13800000000' } });
+    const phoneInput = screen.getByPlaceholderText('请输入手机号');
+    expect(phoneInput).toHaveAttribute('dir', 'ltr');
+    expect(phoneInput).toHaveClass('sl-ltr-data');
+    fireEvent.change(phoneInput, { target: { value: '13800000000' } });
     fireEvent.change(screen.getByPlaceholderText('请输入密码'), { target: { value: 'pass' } });
     fireEvent.keyDown(screen.getByPlaceholderText('请输入密码'), { key: 'Enter' });
     expect(await screen.findByText('账号错误')).toBeInTheDocument();

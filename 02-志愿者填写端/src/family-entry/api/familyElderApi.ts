@@ -1,5 +1,6 @@
 import type { ElderInfo, QrCodeInfo } from '../types';
 import { get, post, put } from './httpClient';
+import { i18nRuntime } from '../../i18n';
 
 export async function getBoundElders(): Promise<ElderInfo[]> {
   return get<ElderInfo[]>('/api/family/me/elders');
@@ -23,7 +24,7 @@ export async function updateElderContacts(
   params: UpdateContactsParams,
 ): Promise<{ success: boolean; message: string }> {
   await put<ElderInfo>(`/api/family/elders/${encodeURIComponent(elderId)}/contacts`, params);
-  return { success: true, message: '联系人信息已更新' };
+  return { success: true, message: i18nRuntime.t('family.contactsUpdated') };
 }
 
 export async function getElderQrCode(elderId: string): Promise<QrCodeInfo | null> {

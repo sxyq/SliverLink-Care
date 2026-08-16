@@ -44,8 +44,15 @@ describe('scan pages', () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole('heading', { name: '阿司匹林' })).toBeInTheDocument();
-    expect(screen.getByText('100mg | 早饭后')).toBeInTheDocument();
     expect(screen.getByText('请遵医嘱')).toBeInTheDocument();
+
+    const dosageNode = screen.getByText('100mg');
+    expect(dosageNode).toHaveAttribute('dir', 'ltr');
+    expect(dosageNode).toHaveClass('sl-ltr-data');
+    expect(screen.getByRole('heading', { name: '阿司匹林' })).toHaveAttribute('dir', 'auto');
+    const metaLine = dosageNode.closest('p');
+    expect(metaLine?.textContent).toContain('|');
+    expect(metaLine?.textContent).toContain('早饭后');
   });
 
   it('downloads nameplate PDF and reports audit on success', async () => {
@@ -123,9 +130,9 @@ describe('scan pages', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('姓名： 王**')).toBeInTheDocument();
-    expect(screen.getByText('完成验证后可查看老人详细住址信息')).toBeInTheDocument();
-    expect(screen.getByText(/紧急联系人： 王女士/)).toBeInTheDocument();
+    expect(screen.getByText('王**')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('完成验证后可查看老人详细住址信息')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('王女士')).toHaveAttribute('dir', 'auto');
 
     await user.click(screen.getByRole('button', { name: '查看健康档案' }));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -149,9 +156,10 @@ describe('scan pages', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('姓名： 王桂兰')).toBeInTheDocument();
+    expect(screen.getByText('王桂兰')).toHaveAttribute('dir', 'auto');
     expect(screen.getByText('待补充')).toBeInTheDocument();
-    expect(screen.getByText((content) => content.includes('王丽（女儿）') && content.includes('13800006666'))).toBeInTheDocument();
+    expect(screen.getByText('王丽（女儿）')).toHaveAttribute('dir', 'auto');
+    expect(screen.getByText('13800006666')).toHaveAttribute('dir', 'ltr');
 
     await user.click(screen.getByRole('button', { name: '查看健康档案' }));
     expect(screen.getByText('health page')).toBeInTheDocument();

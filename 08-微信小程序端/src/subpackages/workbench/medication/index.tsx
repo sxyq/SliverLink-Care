@@ -20,6 +20,7 @@ import BottomNavGrid from '@/components/workbench/BottomNavGrid';
 import FormSectionCard from '@/components/workbench/FormSectionCard';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
@@ -53,6 +54,7 @@ function toPersistDraft(item: WorkbenchMedicationItem): WorkbenchMedicationDraft
 }
 
 export default function WorkbenchMedicationPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
@@ -84,7 +86,7 @@ export default function WorkbenchMedicationPage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText('缺少老人标识，请返回详情页重新进入');
+      setErrorText(t('errors.noElderIdentifier'));
       return;
     }
 
@@ -96,7 +98,7 @@ export default function WorkbenchMedicationPage() {
         await loadMedications(activeSession.role, elderId);
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载用药信息失败');
+          setErrorText((error as Error)?.message || t('errors.loadMedicationFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -110,7 +112,7 @@ export default function WorkbenchMedicationPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, loadMedications, session?.role]);
+  }, [elderId, loadMedications, session?.role, t]);
 
   const dirty = useMemo(() => {
     return Boolean(pendingDeletedIds.length || items.some((item) => item.id.startsWith('temp-')));
@@ -145,7 +147,7 @@ export default function WorkbenchMedicationPage() {
 
   const handleSaveDraft = useCallback(() => {
     if (!draft.name.trim()) {
-      setErrorText('请先填写药品名称');
+      setErrorText(t('errors.medicationNameRequired'));
       return;
     }
 
@@ -178,7 +180,7 @@ export default function WorkbenchMedicationPage() {
     }
 
     handleCancelEditor();
-  }, [draft, editingId]);
+  }, [draft, editingId, t]);
 
   const handleDelete = useCallback((item: WorkbenchMedicationItem) => {
     setItems((current) => current.filter((row) => row.id !== item.id));
@@ -206,7 +208,7 @@ export default function WorkbenchMedicationPage() {
         setItems(getCachedVolunteerMedications(elderId));
         setPendingDeletedIds([]);
         void Taro.showToast({
-          title: '保存成功',
+          title: t('errors.medicationSaved'),
           icon: 'success',
         });
         return;
@@ -234,15 +236,15 @@ export default function WorkbenchMedicationPage() {
       setItems(nextItems);
       setPendingDeletedIds([]);
       void Taro.showToast({
-        title: '保存成功',
+        title: t('errors.medicationSaved'),
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || '保存失败');
+      setErrorText((error as Error)?.message || t('errors.saveRetry'));
     } finally {
       setSaving(false);
     }
-  }, [session, elderId, saving, items, pendingDeletedIds]);
+  }, [session, elderId, saving, items, pendingDeletedIds, t]);
 
   const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
@@ -254,50 +256,50 @@ export default function WorkbenchMedicationPage() {
 
   return (
     <WorkbenchShell pageClassName='workbench-medication-page'>
-      <WorkbenchHeader title='主要用药' subtitle={elderName ? `${elderName} 的用药记录` : '用药记录'} leadingAction={{ label: '返回', icon: '←', onClick: handleBack }} />
+      <WorkbenchHeader title={t('workbench.medication')} subtitle={elderName ? `${elderName} ${t('workbench.medicationRecords')}` : t('workbench.medicationRecords')} leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }} />
 
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
-      {loading ? <View className='sl-card'><View className='sl-empty-state'>用药信息加载中...</View></View> : null}
+      {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('workbench.medicationRecords')}</View></View> : null}
 
       {!loading ? (
         <>
-          <FormSectionCard title='用药清单' hint='按照药品名称、剂量、用法和用药时间逐条维护，提交后同步到老人护理档案。'>
+          <FormSectionCard title={t('workbench.medicationList')} hint={t('workbench.medicationHint')}>
             <View className='sl-submit-bar sl-submit-bar--split workbench-medication-actions'>
               <Button className='sl-secondary-button' onClick={handleOpenCreate}>
-                ＋ 添加用药
+                  ＋ {t('workbench.addMedication')}
               </Button>
               <Button className='sl-primary-button' loading={saving} onClick={handleSubmitSave}>
-                提交保存
+                {t('workbench.submitSave')}
               </Button>
             </View>
           </FormSectionCard>
 
           {showEditor ? (
-            <FormSectionCard title={editingId ? '编辑用药' : '新增用药'}>
+            <FormSectionCard title={editingId ? t('workbench.medicationEdit') : t('workbench.medicationAdd')}>
               <View className='sl-form-grid'>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>药品名称</Text>
-                  <Input className='sl-form-input' value={draft.name} onInput={(event) => updateDraft('name', event.detail.value)} />
+                  <Text className='sl-form-label'>{t('workbench.medicationName')}</Text>
+                  <Input className='sl-form-input sl-auto-data' {...{ dir: 'auto' }} value={draft.name} onInput={(event) => updateDraft('name', event.detail.value)} />
                 </View>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>剂量</Text>
-                  <Input className='sl-form-input' value={draft.dosage} onInput={(event) => updateDraft('dosage', event.detail.value)} />
+                  <Text className='sl-form-label'>{t('workbench.dosage')}</Text>
+                  <Input className='sl-form-input sl-ltr-data' value={draft.dosage} onInput={(event) => updateDraft('dosage', event.detail.value)} />
                 </View>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>用法</Text>
-                  <Input className='sl-form-input' value={draft.usage} onInput={(event) => updateDraft('usage', event.detail.value)} />
+                  <Text className='sl-form-label'>{t('workbench.usage')}</Text>
+                  <Input className='sl-form-input sl-auto-data' {...{ dir: 'auto' }} value={draft.usage} onInput={(event) => updateDraft('usage', event.detail.value)} />
                 </View>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>用药时间</Text>
-                  <Input className='sl-form-input' value={draft.timing} onInput={(event) => updateDraft('timing', event.detail.value)} />
+                  <Text className='sl-form-label'>{t('workbench.medicationTime')}</Text>
+                  <Input className='sl-form-input sl-auto-data' {...{ dir: 'auto' }} value={draft.timing} onInput={(event) => updateDraft('timing', event.detail.value)} />
                 </View>
               </View>
               <View className='sl-submit-bar sl-submit-bar--split workbench-medication-editor-actions'>
                 <Button className='sl-secondary-button' onClick={handleCancelEditor}>
-                  取消
+                  {t('common.cancel')}
                 </Button>
                 <Button className='sl-primary-button' onClick={handleSaveDraft}>
-                  确认保存
+                  {t('workbench.confirmSave')}
                 </Button>
               </View>
             </FormSectionCard>
@@ -305,35 +307,35 @@ export default function WorkbenchMedicationPage() {
 
           <View className='sl-table-card'>
             <View className='sl-table-header'>
-              <Text>药品名称</Text>
-              <Text>剂量</Text>
-              <Text>用法</Text>
-              <Text>用药时间</Text>
-              <Text>操作</Text>
+              <Text>{t('workbench.medicationName')}</Text>
+              <Text>{t('workbench.dosage')}</Text>
+              <Text>{t('workbench.usage')}</Text>
+              <Text>{t('workbench.medicationTime')}</Text>
+              <Text>{t('workbench.actions')}</Text>
             </View>
             {items.length ? (
               items.map((item) => (
                 <View key={item.id} className='sl-table-row'>
-                  <Text>{item.name || '-'}</Text>
-                  <Text>{item.dosage || '-'}</Text>
-                  <Text>{item.usage || '-'}</Text>
-                  <Text>{item.timing || '-'}</Text>
+                  <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.name || '-'}</Text>
+                  <Text className='sl-ltr-data'>{item.dosage || '-'}</Text>
+                  <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.usage || '-'}</Text>
+                  <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.timing || '-'}</Text>
                   <View className='sl-table-ops'>
                     <Button className='sl-inline-pill' onClick={() => handleOpenEdit(item)}>
-                      编辑
+                      {t('common.edit')}
                     </Button>
                     <Button className='sl-inline-pill sl-inline-pill--danger' onClick={() => handleDelete(item)}>
-                      删除
+                      {t('common.delete')}
                     </Button>
                   </View>
                 </View>
               ))
             ) : (
-              <View className='sl-table-row sl-table-row--empty'>当前暂无用药记录。</View>
+              <View className='sl-table-row sl-table-row--empty'>{t('errors.noMedicationRecords')}</View>
             )}
           </View>
 
-          {dirty ? <Text className='sl-simple-note'>当前修改尚未提交，点击“提交保存”后才会同步到档案记录。</Text> : null}
+          {dirty ? <Text className='sl-simple-note'>{t('errors.unsavedMedication')}</Text> : null}
 
           <BottomNavGrid elderId={elderId} activeKey='medication' />
         </>

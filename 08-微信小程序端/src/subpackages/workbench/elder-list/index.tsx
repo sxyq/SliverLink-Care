@@ -14,55 +14,57 @@ import { ArchiveCarousel, type ArchiveCarouselItem } from '@/components/workbenc
 import SearchPanel from '@/components/workbench/SearchPanel';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
-function buildStatus(item: WorkbenchElderListItem) {
+function buildStatus(item: WorkbenchElderListItem, t: (key: string, params?: Record<string, string | number>) => string) {
   if (item.role === ROLE_TYPES.family) {
-    return '已绑定';
+    return t('status.bound');
   }
-  return item.lastUpdate ? '持续随访中' : '待补充';
+  return item.lastUpdate ? t('status.followup') : t('common.pendingSupplement');
 }
 
-function buildContact(item: WorkbenchElderListItem) {
+function buildContact(item: WorkbenchElderListItem, t: (key: string, params?: Record<string, string | number>) => string) {
   if (!item.emergencyContactName) {
-    return '待补充';
+    return t('common.pendingSupplement');
   }
   return `${item.emergencyContactName}${item.emergencyContactRelation ? `（${item.emergencyContactRelation}）` : ''}`;
 }
 
-function buildBloodOrAllergy(item: WorkbenchElderListItem) {
+function buildBloodOrAllergy(item: WorkbenchElderListItem, t: (key: string, params?: Record<string, string | number>) => string) {
   if (item.bloodType) {
     return {
-      label: '血型',
+      label: t('common.bloodType'),
       value: item.bloodType,
     };
   }
 
   return {
-    label: '过敏史',
-    value: item.allergyHistory || '暂无明确过敏史',
+    label: t('common.allergyHistory'),
+    value: item.allergyHistory || t('workbench.noKnownAllergy'),
   };
 }
 
-function mapCarouselItem(item: WorkbenchElderListItem): ArchiveCarouselItem {
-  const bloodOrAllergy = buildBloodOrAllergy(item);
+function mapCarouselItem(item: WorkbenchElderListItem, t: (key: string, params?: Record<string, string | number>) => string): ArchiveCarouselItem {
+  const bloodOrAllergy = buildBloodOrAllergy(item, t);
   return {
     id: item.id,
-    name: item.name || '未命名老人',
-    archiveNo: item.archiveNo || '待生成',
-    gender: item.gender || '待补充',
-    age: item.age > 0 ? `${item.age}岁` : '年龄待补充',
-    residence: item.residence || '待补充',
-    status: buildStatus(item),
-    contactName: buildContact(item),
-    contactPhone: item.emergencyContactPhone || '待补充',
+    name: item.name || t('common.elderArchive'),
+    archiveNo: item.archiveNo || t('common.generatedPending'),
+    gender: item.gender || t('common.pendingSupplement'),
+    age: item.age > 0 ? t('common.yearsOld', { age: item.age }) : t('common.agePending'),
+    residence: item.residence || t('common.pendingSupplement'),
+    status: buildStatus(item, t),
+    contactName: buildContact(item, t),
+    contactPhone: item.emergencyContactPhone || t('common.pendingSupplement'),
     bloodOrAllergyLabel: bloodOrAllergy.label,
     bloodOrAllergyValue: bloodOrAllergy.value,
   };
 }
 
 export default function WorkbenchElderListPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<WorkbenchElderListItem[]>([]);
   const [keyword, debouncedKeyword, setKeyword] = useDebouncedSearch('');
   const [loading, setLoading] = useState(true);
@@ -108,7 +110,7 @@ export default function WorkbenchElderListPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载老人列表失败');
+          setErrorText((error as Error)?.message || t('errors.loadElderListFailed'));
           setItems([]);
         }
       } finally {
@@ -123,7 +125,7 @@ export default function WorkbenchElderListPage() {
     return () => {
       cancelled = true;
     };
-  }, [sessionRole]);
+  }, [sessionRole, t]);
 
   useEffect(() => {
     if (!showAccountPanel || !session) {
@@ -161,7 +163,7 @@ export default function WorkbenchElderListPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setProfileError((error as Error)?.message || '加载账号信息失败');
+          setProfileError((error as Error)?.message || t('errors.profileLoadFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -175,7 +177,7 @@ export default function WorkbenchElderListPage() {
     return () => {
       cancelled = true;
     };
-  }, [session, showAccountPanel]);
+  }, [session, showAccountPanel, t]);
 
   const filteredItems = useMemo(() => {
     const normalizedKeyword = debouncedKeyword.trim();
@@ -243,13 +245,13 @@ export default function WorkbenchElderListPage() {
         currentPassword: '',
         password: '',
       }));
-      setProfileSuccess('账号信息已更新');
+      setProfileSuccess(t('common.accountUpdated'));
     } catch (error) {
-      setProfileError((error as Error)?.message || '保存失败，请稍后重试');
+      setProfileError((error as Error)?.message || t('errors.profileSaveFailed'));
     } finally {
       setProfileSaving(false);
     }
-  }, [session, profileSaving, profileForm]);
+  }, [session, profileSaving, profileForm, t]);
 
   const handleOpenDetail = useCallback(async (item: WorkbenchElderListItem) => {
     saveCurrentElderSummary(item);
@@ -287,7 +289,7 @@ export default function WorkbenchElderListPage() {
   const handleAddCard = useCallback(() => {
     if (session?.role !== ROLE_TYPES.volunteer) {
       void Taro.showToast({
-        title: '当前账号仅可查看已绑定老人',
+        title: t('common.accountOnlyView'),
         icon: 'none',
       });
       return;
@@ -308,11 +310,11 @@ export default function WorkbenchElderListPage() {
       allergyHistory: '',
     });
     setShowAddModal(true);
-  }, [session?.role]);
+  }, [session?.role, t]);
 
   const handleSaveAdd = useCallback(async () => {
     if (!addForm.name.trim() || addSaving) {
-      setErrorText('请填写老人姓名');
+      setErrorText(t('errors.volunteerNameRequired'));
       return;
     }
     try {
@@ -320,7 +322,7 @@ export default function WorkbenchElderListPage() {
       setErrorText('');
       const result = await createVolunteerElder(addForm);
       setShowAddModal(false);
-      void Taro.showToast({ title: '新增成功', icon: 'success' });
+      void Taro.showToast({ title: t('common.addSuccess'), icon: 'success' });
       // 刷新列表
       const nextItems = await fetchWorkbenchElders(session?.role || ROLE_TYPES.volunteer);
       setItems(nextItems);
@@ -335,41 +337,41 @@ export default function WorkbenchElderListPage() {
         });
       }
     } catch (error) {
-      setErrorText((error as Error)?.message || '新增老人失败');
+      setErrorText((error as Error)?.message || t('errors.createElderFailed'));
     } finally {
       setAddSaving(false);
     }
-  }, [addForm, addSaving, session?.role]);
+  }, [addForm, addSaving, session?.role, t]);
 
   if (!session) {
     return null;
   }
 
-  const carouselItems = filteredItems.map(mapCarouselItem);
+  const carouselItems = filteredItems.map((item) => mapCarouselItem(item, t));
   const showAddCard = session.role === ROLE_TYPES.volunteer;
 
   return (
     <WorkbenchShell pageClassName='workbench-elder-list-page'>
       <WorkbenchHeader
-        title='渝护银龄名牌'
-        leadingAction={{ label: '账号', icon: '👤', onClick: handleShowAccount }}
-        trailingAction={{ label: '退出', icon: '⇢', onClick: handleLogout, disabled: loggingOut }}
+        title={t('common.brandTitle')}
+        leadingAction={{ label: t('common.account'), icon: '👤', onClick: handleShowAccount }}
+        trailingAction={{ label: t('workbench.logout'), icon: '⇢', onClick: handleLogout, disabled: loggingOut }}
       />
 
-      <SearchPanel value={keyword} placeholder='请输入老人姓名或档案编号' onChange={setKeyword} />
+      <SearchPanel value={keyword} placeholder={t('workbench.elderNameOrArchivePlaceholder')} onChange={setKeyword} />
 
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
 
       {loading ? (
         <View className='sl-card'>
-          <View className='sl-empty-state'>老人列表加载中...</View>
+          <View className='sl-empty-state'>{t('common.loading')} {t('workbench.elderArchives')}</View>
         </View>
       ) : null}
 
       {!loading && !carouselItems.length ? (
         <View className='sl-card'>
           <View className='sl-empty-state'>
-            {items.length ? '未找到匹配的老人，请调整搜索条件。' : '当前账号下暂无可展示的老人档案。'}
+            {items.length ? t('common.noMatchingElder') : t('common.noVisibleElder')}
           </View>
         </View>
       ) : null}
@@ -391,15 +393,15 @@ export default function WorkbenchElderListPage() {
       {!loading ? (
         <View className='sl-card sl-add-card' onClick={handleAddCard}>
           <View className='sl-add-card__copy'>
-            <Text className='sl-add-card__title'>{showAddCard ? '新增' : '老人档案'}</Text>
+            <Text className='sl-add-card__title'>{showAddCard ? t('common.add') : t('common.elderArchive')}</Text>
             <Text className='sl-add-card__desc'>
-              {showAddCard ? `直接新增老人档案，当前已负责 ${items.length} 位` : `当前已绑定 ${items.length} 位老人，仅展示账号授权范围内档案`}
+              {showAddCard ? t('common.directAddDescription', { count: items.length }) : t('family.manageBoundHint', { count: items.length })}
             </Text>
           </View>
           <View className='sl-add-card__side'>
-            <Text className='sl-add-card__cap'>{items.length} 位</Text>
+            <Text className='sl-add-card__cap'>{t('common.totalElders', { count: items.length })}</Text>
             <Button className='sl-add-card__btn' disabled={!showAddCard}>
-              {showAddCard ? '新增档案 +' : '已绑定'}
+              {showAddCard ? `${t('common.addElderArchive')} +` : t('family.boundElder')}
             </Button>
           </View>
         </View>
@@ -410,117 +412,122 @@ export default function WorkbenchElderListPage() {
           <View className='sl-modal-backdrop' onClick={() => setShowAddModal(false)} />
           <View className='sl-modal-card sl-account-panel'>
             <View className='sl-account-panel__header'>
-              <Text className='sl-account-panel__title'>新增老人档案</Text>
+              <Text className='sl-account-panel__title'>{t('common.addElderArchive')}</Text>
             </View>
 
             <View className='sl-card sl-card-soft sl-account-panel__body'>
               <View className='sl-form-grid sl-account-panel__grid'>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>姓名 *</Text>
+                  <Text className='sl-form-label'>{t('common.name')} *</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-auto-data'
                     value={addForm.name}
-                    placeholder='请输入老人姓名'
+                    placeholder={t('workbench.namePlaceholder')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateAddForm('name', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>性别</Text>
+                  <Text className='sl-form-label'>{t('common.gender')}</Text>
                   <View className='sl-form-input' style={{ display: 'flex', gap: '16rpx', alignItems: 'center' }}>
                     <Text
                       className={addForm.gender === '男' ? 'sl-chip is-active' : 'sl-chip'}
                       onClick={() => updateAddForm('gender', '男')}
                     >
-                      男
+                      {t('common.male')}
                     </Text>
                     <Text
                       className={addForm.gender === '女' ? 'sl-chip is-active' : 'sl-chip'}
                       onClick={() => updateAddForm('gender', '女')}
                     >
-                      女
+                      {t('common.female')}
                     </Text>
                   </View>
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>年龄</Text>
+                  <Text className='sl-form-label'>{t('common.age')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-ltr-data'
                     type='number'
                     value={addForm.age}
-                    placeholder='请输入年龄'
+                    placeholder={t('workbench.agePlaceholder')}
                     onInput={(event) => updateAddForm('age', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field sl-form-field--full'>
-                  <Text className='sl-form-label'>居住地</Text>
+                  <Text className='sl-form-label'>{t('workbench.residence')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-auto-data'
                     value={addForm.residence}
-                    placeholder='请输入居住地'
+                    placeholder={t('workbench.residencePlaceholder')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateAddForm('residence', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>联系人姓名</Text>
+                  <Text className='sl-form-label'>{t('common.contact')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-auto-data'
                     value={addForm.emergencyContactName}
-                    placeholder='请输入联系人姓名'
+                    placeholder={t('workbench.contactNamePlaceholder')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateAddForm('emergencyContactName', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>联系人电话</Text>
+                  <Text className='sl-form-label'>{t('common.contactPhone')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-ltr-data'
                     type='number'
                     value={addForm.emergencyContactPhone}
-                    placeholder='请输入联系人电话'
+                    placeholder={t('workbench.contactPhonePlaceholder')}
                     onInput={(event) => updateAddForm('emergencyContactPhone', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>联系人关系</Text>
+                  <Text className='sl-form-label'>{t('common.relationship')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-auto-data'
                     value={addForm.emergencyContactRelation}
-                    placeholder='请输入关系'
+                    placeholder={t('workbench.relationshipPlaceholder')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateAddForm('emergencyContactRelation', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>ABO 血型</Text>
+                  <Text className='sl-form-label'>{t('scan.aboType')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-ltr-data'
                     value={addForm.aboType}
-                    placeholder='如 A/B/AB/O'
+                    placeholder={t('workbench.bloodTypePlaceholder')}
                     onInput={(event) => updateAddForm('aboType', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>Rh 血型</Text>
+                  <Text className='sl-form-label'>{t('scan.rhType')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-ltr-data'
                     value={addForm.rhType}
-                    placeholder='如 阳性/阴性'
+                    placeholder={t('workbench.rhTypePlaceholder')}
                     onInput={(event) => updateAddForm('rhType', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field sl-form-field--full'>
-                  <Text className='sl-form-label'>过敏史</Text>
+                  <Text className='sl-form-label'>{t('common.allergyHistory')}</Text>
                   <Input
-                    className='sl-form-input'
+                    className='sl-form-input sl-auto-data'
                     value={addForm.allergyHistory}
-                    placeholder='请输入过敏史，无则留空'
+                    placeholder={t('workbench.allergyPlaceholder')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateAddForm('allergyHistory', event.detail.value)}
                   />
                 </View>
@@ -529,10 +536,10 @@ export default function WorkbenchElderListPage() {
 
             <View className='sl-account-panel__actions'>
               <Button className='sl-secondary-button sl-account-panel__ghost-button' onClick={() => setShowAddModal(false)}>
-                取消
+                {t('common.cancel')}
               </Button>
               <Button className='sl-primary-button sl-account-panel__primary-button' loading={addSaving} onClick={() => void handleSaveAdd()}>
-                {addSaving ? '保存中...' : '保存'}
+                {addSaving ? t('common.saving') : t('common.save')}
               </Button>
             </View>
           </View>
@@ -544,71 +551,72 @@ export default function WorkbenchElderListPage() {
           <View className='sl-modal-backdrop' onClick={() => setShowAccountPanel(false)} />
           <View className='sl-modal-card sl-account-panel'>
             <View className='sl-account-panel__header'>
-              <Text className='sl-account-panel__title'>本账号管理</Text>
+              <Text className='sl-account-panel__title'>{t('common.accountManage')}</Text>
             </View>
 
             <View className='sl-card sl-card-soft sl-account-panel__body'>
-              <Text className='sl-account-panel__name'>{profileForm.name || session.displayName || '当前账号'}</Text>
+              <Text className='sl-account-panel__name sl-auto-data' {...{ dir: 'auto' }}>{profileForm.name || session.displayName || t('common.currentAccount')}</Text>
 
               <View className='sl-form-grid sl-account-panel__grid'>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>姓名</Text>
+                  <Text className='sl-form-label'>{t('common.name')}</Text>
                   <Input
-                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input' : 'sl-form-input is-readonly'}
+                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input sl-auto-data' : 'sl-form-input is-readonly sl-auto-data'}
                     value={profileForm.name}
                     disabled={session.role !== ROLE_TYPES.volunteer}
-                    placeholder='请输入姓名'
+                    {...{ dir: 'auto' }}
+                    placeholder={t('workbench.namePlaceholder')}
                     onInput={(event) => updateProfileField('name', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>登录账号</Text>
+                  <Text className='sl-form-label'>{t('common.loginAccount')}</Text>
                   <Input
-                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input' : 'sl-form-input is-readonly'}
+                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input sl-ltr-data' : 'sl-form-input is-readonly sl-ltr-data'}
                     value={profileForm.account}
                     disabled={session.role !== ROLE_TYPES.volunteer}
-                    placeholder='请输入登录账号'
+                    placeholder={t('auth.inputAccount')}
                     onInput={(event) => updateProfileField('account', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>手机号</Text>
+                  <Text className='sl-form-label'>{t('common.phone')}</Text>
                   <Input
-                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input' : 'sl-form-input is-readonly'}
+                    className={session.role === ROLE_TYPES.volunteer ? 'sl-form-input sl-ltr-data' : 'sl-form-input is-readonly sl-ltr-data'}
                     value={profileForm.phone}
                     disabled={session.role !== ROLE_TYPES.volunteer}
-                    placeholder={session.role === ROLE_TYPES.volunteer ? '请输入手机号' : '当前账号未开放手机号编辑'}
+                    placeholder={session.role === ROLE_TYPES.volunteer ? t('errors.phoneRequired') : t('common.phoneEditUnavailable')}
                     onInput={(event) => updateProfileField('phone', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>负责老人数量</Text>
-                  <View className='sl-account-panel__metric'>{items.length} 位</View>
+                  <Text className='sl-form-label'>{t('common.assignedCount')}</Text>
+                  <View className='sl-account-panel__metric'>{t('common.totalElders', { count: items.length })}</View>
                 </View>
 
                 {session.role === ROLE_TYPES.volunteer ? (
                   <>
                     <View className='sl-form-field sl-form-field--full'>
-                      <Text className='sl-form-label'>当前密码</Text>
+                      <Text className='sl-form-label'>{t('auth.currentPassword')}</Text>
                       <Input
-                        className='sl-form-input'
+                        className='sl-form-input sl-ltr-data'
                         password
                         value={profileForm.currentPassword}
-                        placeholder='修改密码时必须填写'
+                        placeholder={t('common.currentPasswordRequired')}
                         onInput={(event) => updateProfileField('currentPassword', event.detail.value)}
                       />
                     </View>
 
                     <View className='sl-form-field sl-form-field--full'>
-                      <Text className='sl-form-label'>新密码</Text>
+                      <Text className='sl-form-label'>{t('common.newPassword')}</Text>
                       <Input
-                        className='sl-form-input'
+                        className='sl-form-input sl-ltr-data'
                         password
                         value={profileForm.password}
-                        placeholder='不修改可留空'
+                        placeholder={t('common.leaveBlankToKeep')}
                         onInput={(event) => updateProfileField('password', event.detail.value)}
                       />
                     </View>
@@ -617,21 +625,21 @@ export default function WorkbenchElderListPage() {
               </View>
             </View>
 
-            {profileLoading ? <View className='sl-account-panel__tip'>账号信息加载中...</View> : null}
+            {profileLoading ? <View className='sl-account-panel__tip'>{t('common.profileLoading')}</View> : null}
             {profileError ? <View className='sl-error-card sl-account-panel__feedback'>{profileError}</View> : null}
             {profileSuccess ? <View className='sl-account-panel__success'>{profileSuccess}</View> : null}
 
             <View className='sl-account-panel__actions'>
               <Button className='sl-secondary-button sl-account-panel__ghost-button' onClick={() => setShowAccountPanel(false)}>
-                关闭
+                {t('common.close')}
               </Button>
               {session.role === ROLE_TYPES.volunteer ? (
                 <Button className='sl-secondary-button sl-account-panel__ghost-button' loading={profileSaving} onClick={() => void handleSaveProfile()}>
-                  {profileSaving ? '保存中...' : '保存修改'}
+                  {profileSaving ? t('common.saving') : t('common.saveChanges')}
                 </Button>
               ) : null}
               <Button className='sl-primary-button sl-account-panel__primary-button' loading={loggingOut} onClick={() => void handleLogout()}>
-                退出登录
+                {t('workbench.logout')}
               </Button>
             </View>
           </View>

@@ -1,12 +1,14 @@
 import Taro from '@tarojs/taro';
 
-import { ERROR_MESSAGES, STORAGE_KEYS } from '@/app/app.constants';
+import { STORAGE_KEYS } from '@/app/app.constants';
 import { getApiBaseUrl } from '@/utils/env';
 import { clearAuthSession } from '@/store/auth/authStore';
 import { getStorageValue, removeStorageValue, setStorageValue } from '@/utils/storage';
 import { globalDeduplication } from '@/utils/throttleDebounce';
 import { queueRequest } from '@/utils/requestQueue';
 import type { ApiEnvelope, ApiRequestOptions, DownloadResult } from './requestTypes';
+import { i18nRuntime } from '@/i18n';
+import { ApiMessageError, resolveApiMessage } from '@shared-i18n/messages';
 
 const CACHE_PREFIX = 'api_cache__';
 
@@ -22,25 +24,9 @@ function buildCacheKey(path: string, data?: unknown): string {
   }
 }
 
-function normalizeErrorMessage(payload: unknown, fallback: string) {
-  if (!payload) {
-    return fallback;
-  }
-
-  if (typeof payload === 'string') {
-    try {
-      const parsed = JSON.parse(payload) as ApiEnvelope<unknown> & { error?: string };
-      return parsed.message || parsed.error || fallback;
-    } catch {
-      return payload || fallback;
-    }
-  }
-
-  if (typeof payload === 'object' && payload && 'message' in payload) {
-    return String((payload as { message?: string }).message || fallback);
-  }
-
-  return fallback;
+function normalizeErrorMessage(payload: unknown): ApiMessageError {
+  const resolved = resolveApiMessage(payload, i18nRuntime.t);
+  return new ApiMessageError(resolved.message, resolved.messageKey);
 }
 
 function buildHeaders(extraHeaders?: Record<string, string>) {
@@ -67,7 +53,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
   }
 
   if (response.statusCode >= 400) {
-    throw new Error(normalizeErrorMessage(response.data, ERROR_MESSAGES.requestFailed));
+    throw normalizeErrorMessage(response.data);
   }
 
   const payload = response.data;
@@ -75,7 +61,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
   if (payload && typeof payload === 'object' && ('code' in payload || 'data' in payload)) {
     const envelope = payload as ApiEnvelope<T>;
     if ((envelope.code || 0) >= 400) {
-      throw new Error(envelope.message || ERROR_MESSAGES.requestFailed);
+      throw normalizeErrorMessage(envelope);
     }
     return envelope.data as T;
   }
@@ -145,7 +131,7 @@ async function download(path: string): Promise<DownloadResult> {
   } as Taro.downloadFile.Option & { enableCookie: boolean });
 
   if (result.statusCode >= 400) {
-    throw new Error(ERROR_MESSAGES.requestFailed);
+    throw new ApiMessageError(i18nRuntime.t('errors.requestFailed'));
   }
 
   return {

@@ -15,8 +15,11 @@ import { ScaleDetailPage } from './pages/ScaleDetailPage';
 import { NameplatePreviewPage } from './pages/NameplatePreviewPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { createAppRouter } from './routes/router';
+import { I18nProvider, i18nRuntime } from './i18n';
+import { useI18n } from './i18n';
 
 function AppRoutes() {
+  const { t } = useI18n();
   const { token, isValid } = useQrToken();
   const qrState = !token ? 'missing-token' : isValid ? 'valid-token' : 'invalid-qr';
   const { data, loading, error } = useScanBasicInfo(qrState === 'valid-token' ? token : null);
@@ -41,19 +44,19 @@ function AppRoutes() {
     const base = safeVerifiedBasicInfo || data;
     const archiveNo = base?.archiveNo || '';
     const sessionTail = verifiedSessionId ? verifiedSessionId.slice(-6) : 'public';
-    return `智联名牌 仅供查看 ${archiveNo} ${sessionTail}`;
-  }, [data, verifiedBasicInfo, verifiedSessionId]);
+    return `${t('common.appName')} ${t('common.viewOnlyWatermark')} ${archiveNo} ${sessionTail}`;
+  }, [data, t, verifiedBasicInfo, verifiedSessionId]);
 
   const router = useMemo(() => {
     if (loading) {
       return createAppRouter(
-        <div className="sl-page loading">正在读取智联名牌...</div>,
-        <div className="sl-page loading">正在读取...</div>,
-        <div className="sl-page loading">正在读取...</div>,
-        <div className="sl-page loading">正在读取...</div>,
-        <div className="sl-page loading">正在读取...</div>,
-        <div className="sl-page loading">正在读取...</div>,
-        <div className="sl-page loading">正在读取...</div>
+        <div className="sl-page loading">{t('common.readingNameplate')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>,
+        <div className="sl-page loading">{t('common.reading')}</div>
       );
     }
 
@@ -92,7 +95,7 @@ function AppRoutes() {
         archiveNo={data.archiveNo}
       />
     );
-  }, [loading, error, data, verified, verifiedBasicInfo, healthRecord, medications, scaleSummaries, archiveLoading, qrState]);
+  }, [archiveLoading, data, error, healthRecord, loading, medications, qrState, scaleSummaries, t, verified, verifiedBasicInfo, verifiedSessionId, verifiedElderId]);
 
   return (
     <>
@@ -104,8 +107,10 @@ function AppRoutes() {
 
 export function App() {
   return (
-    <SecurityProvider>
-      <AppRoutes />
-    </SecurityProvider>
+    <I18nProvider runtime={i18nRuntime}>
+      <SecurityProvider>
+        <AppRoutes />
+      </SecurityProvider>
+    </I18nProvider>
   );
 }

@@ -18,6 +18,7 @@ import BottomNavGrid from '@/components/workbench/BottomNavGrid';
 import FormSectionCard from '@/components/workbench/FormSectionCard';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
@@ -44,6 +45,7 @@ function updateSummaryFromForm(detail: WorkbenchElderDetail, formValue: Workbenc
 }
 
 export default function WorkbenchBasicPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
@@ -61,7 +63,7 @@ export default function WorkbenchBasicPage() {
     }
 
     if (!elderId) {
-      setErrorText('缺少老人标识，请返回详情页重新进入');
+      setErrorText(t('errors.noElderIdentifier'));
       setLoading(false);
       return;
     }
@@ -80,7 +82,7 @@ export default function WorkbenchBasicPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载基本信息失败');
+          setErrorText((error as Error)?.message || t('errors.loadBasicFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -94,7 +96,7 @@ export default function WorkbenchBasicPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, session?.role]);
+  }, [elderId, session?.role, t]);
 
   const canEditAll = useMemo(() => Boolean(session && canEditBasicInfo(session.role)), [session]);
   const canEditContactOnly = useMemo(() => Boolean(session && canManageContacts(session.role)), [session]);
@@ -131,11 +133,11 @@ export default function WorkbenchBasicPage() {
 
       updateSummaryFromForm(detail, formValue);
       void Taro.showToast({
-        title: '保存成功',
+        title: t('errors.basicInfoSaved'),
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || '保存失败，请稍后重试');
+      setErrorText((error as Error)?.message || t('errors.saveRetry'));
     } finally {
       setSaving(false);
     }
@@ -153,27 +155,28 @@ export default function WorkbenchBasicPage() {
 
   return (
     <WorkbenchShell pageClassName='workbench-basic-page'>
-      <WorkbenchHeader title='基本信息编辑' leadingAction={{ label: '返回', icon: '←', onClick: handleBack }} />
+      <WorkbenchHeader title={t('workbench.basicInfoEdit')} leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }} />
 
-      {loading ? <View className='sl-card'><View className='sl-empty-state'>基本信息加载中...</View></View> : null}
+      {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('workbench.basicInfo')}</View></View> : null}
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
 
       {!loading && detail && formValue ? (
         <>
-          <FormSectionCard title='基础信息' hint='按老人档案顺序维护基础资料，关键信息优先放在首屏。'>
+          <FormSectionCard title={t('workbench.basicInfo')} hint={t('workbench.basicInfoHint')}>
             <View className='sl-form-grid workbench-basic-grid'>
               <View className='sl-form-field workbench-basic-grid__name'>
-                <Text className='sl-form-label'>姓名</Text>
+                <Text className='sl-form-label'>{t('common.name')}</Text>
                 <Input
-                  className={isReadOnly('name') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('name') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                   value={formValue.name}
                   disabled={isReadOnly('name')}
+                  {...{ dir: 'auto' }}
                   onInput={(event) => updateField('name', event.detail.value)}
                 />
               </View>
 
               <View className='sl-form-field workbench-basic-grid__gender'>
-                <Text className='sl-form-label'>性别</Text>
+                <Text className='sl-form-label'>{t('common.gender')}</Text>
                 <View className='sl-pill-switch workbench-basic-gender-switch'>
                   {(['男', '女'] as const).map((gender) => (
                     <Button
@@ -182,16 +185,16 @@ export default function WorkbenchBasicPage() {
                       disabled={isReadOnly('gender')}
                       onClick={() => updateField('gender', gender)}
                     >
-                      {gender}
+                      {gender === '男' ? t('common.male') : t('common.female')}
                     </Button>
                   ))}
                 </View>
               </View>
 
               <View className='sl-form-field workbench-basic-grid__age'>
-                <Text className='sl-form-label'>年龄</Text>
+                <Text className='sl-form-label'>{t('common.age')}</Text>
                 <Input
-                  className={isReadOnly('age') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('age') ? 'sl-form-input is-readonly sl-ltr-data' : 'sl-form-input sl-ltr-data'}
                   type='number'
                   value={formValue.age}
                   disabled={isReadOnly('age')}
@@ -200,19 +203,20 @@ export default function WorkbenchBasicPage() {
               </View>
 
               <View className='sl-form-field workbench-basic-grid__residence'>
-                <Text className='sl-form-label'>居住地</Text>
+                <Text className='sl-form-label'>{t('workbench.residence')}</Text>
                 <Input
-                  className={isReadOnly('residence') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('residence') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                   value={formValue.residence}
                   disabled={isReadOnly('residence')}
+                  {...{ dir: 'auto' }}
                   onInput={(event) => updateField('residence', event.detail.value)}
                 />
               </View>
 
               <View className='sl-form-field'>
-                <Text className='sl-form-label'>ABO 血型</Text>
+                <Text className='sl-form-label'>{t('scan.aboType')}</Text>
                 <Input
-                  className={isReadOnly('aboType') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('aboType') ? 'sl-form-input is-readonly sl-ltr-data' : 'sl-form-input sl-ltr-data'}
                   value={formValue.aboType}
                   disabled={isReadOnly('aboType')}
                   onInput={(event) => updateField('aboType', event.detail.value)}
@@ -220,9 +224,9 @@ export default function WorkbenchBasicPage() {
               </View>
 
               <View className='sl-form-field'>
-                <Text className='sl-form-label'>Rh 血型</Text>
+                <Text className='sl-form-label'>{t('scan.rhType')}</Text>
                 <Input
-                  className={isReadOnly('rhType') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('rhType') ? 'sl-form-input is-readonly sl-ltr-data' : 'sl-form-input sl-ltr-data'}
                   value={formValue.rhType}
                   disabled={isReadOnly('rhType')}
                   onInput={(event) => updateField('rhType', event.detail.value)}
@@ -230,43 +234,46 @@ export default function WorkbenchBasicPage() {
               </View>
 
               <View className='sl-form-field sl-form-field--full'>
-                <Text className='sl-form-label'>过敏史</Text>
+                <Text className='sl-form-label'>{t('common.allergyHistory')}</Text>
                 <Textarea
-                  className={isReadOnly('allergyHistory') ? 'sl-form-textarea is-readonly' : 'sl-form-textarea'}
+                  className={isReadOnly('allergyHistory') ? 'sl-form-textarea is-readonly sl-auto-data' : 'sl-form-textarea sl-auto-data'}
                   value={formValue.allergyHistory}
                   disabled={isReadOnly('allergyHistory')}
+                  {...{ dir: 'auto' }}
                   onInput={(event) => updateField('allergyHistory', event.detail.value)}
                 />
               </View>
             </View>
           </FormSectionCard>
 
-          <FormSectionCard title='紧急联系人'>
+          <FormSectionCard title={t('workbench.emergencyContact')}>
             <View className='sl-form-grid workbench-basic-grid'>
               <View className='sl-form-field'>
-                <Text className='sl-form-label'>联系人</Text>
+                <Text className='sl-form-label'>{t('common.contact')}</Text>
                 <Input
-                  className={isReadOnly('emergencyContactName') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('emergencyContactName') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                   value={formValue.emergencyContactName}
                   disabled={isReadOnly('emergencyContactName')}
+                  {...{ dir: 'auto' }}
                   onInput={(event) => updateField('emergencyContactName', event.detail.value)}
                 />
               </View>
 
               <View className='sl-form-field'>
-                <Text className='sl-form-label'>与老人关系</Text>
+                <Text className='sl-form-label'>{t('common.relationship')}</Text>
                 <Input
-                  className={isReadOnly('emergencyContactRelation') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('emergencyContactRelation') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                   value={formValue.emergencyContactRelation}
                   disabled={isReadOnly('emergencyContactRelation')}
+                  {...{ dir: 'auto' }}
                   onInput={(event) => updateField('emergencyContactRelation', event.detail.value)}
                 />
               </View>
 
               <View className='sl-form-field sl-form-field--full'>
-                <Text className='sl-form-label'>联系电话</Text>
+                <Text className='sl-form-label'>{t('common.contactPhone')}</Text>
                 <Input
-                  className={isReadOnly('emergencyContactPhone') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                  className={isReadOnly('emergencyContactPhone') ? 'sl-form-input is-readonly sl-ltr-data' : 'sl-form-input sl-ltr-data'}
                   type='number'
                   value={formValue.emergencyContactPhone}
                   disabled={isReadOnly('emergencyContactPhone')}
@@ -277,32 +284,34 @@ export default function WorkbenchBasicPage() {
           </FormSectionCard>
 
           {canEditContactOnly ? (
-            <FormSectionCard title='备用联系人'>
+            <FormSectionCard title={t('workbench.backupContact')}>
               <View className='sl-form-grid workbench-basic-grid'>
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>联系人</Text>
+                  <Text className='sl-form-label'>{t('common.contact')}</Text>
                   <Input
-                    className={isReadOnly('backupContactName') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                    className={isReadOnly('backupContactName') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                     value={formValue.backupContactName}
                     disabled={isReadOnly('backupContactName')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateField('backupContactName', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field'>
-                  <Text className='sl-form-label'>与老人关系</Text>
+                  <Text className='sl-form-label'>{t('common.relationship')}</Text>
                   <Input
-                    className={isReadOnly('backupContactRelation') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                    className={isReadOnly('backupContactRelation') ? 'sl-form-input is-readonly sl-auto-data' : 'sl-form-input sl-auto-data'}
                     value={formValue.backupContactRelation}
                     disabled={isReadOnly('backupContactRelation')}
+                    {...{ dir: 'auto' }}
                     onInput={(event) => updateField('backupContactRelation', event.detail.value)}
                   />
                 </View>
 
                 <View className='sl-form-field sl-form-field--full'>
-                  <Text className='sl-form-label'>联系电话</Text>
+                  <Text className='sl-form-label'>{t('common.contactPhone')}</Text>
                   <Input
-                    className={isReadOnly('backupContactPhone') ? 'sl-form-input is-readonly' : 'sl-form-input'}
+                    className={isReadOnly('backupContactPhone') ? 'sl-form-input is-readonly sl-ltr-data' : 'sl-form-input sl-ltr-data'}
                     type='number'
                     value={formValue.backupContactPhone}
                     disabled={isReadOnly('backupContactPhone')}
@@ -315,7 +324,7 @@ export default function WorkbenchBasicPage() {
 
           {showContactSave ? (
             <Button className='sl-primary-button sl-primary-button--wide workbench-basic-save-button' loading={saving} onClick={handleSave}>
-              提交保存
+              {t('workbench.submitSave')}
             </Button>
           ) : null}
 

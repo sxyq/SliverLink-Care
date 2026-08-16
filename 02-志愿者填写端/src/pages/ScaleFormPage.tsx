@@ -6,6 +6,7 @@ import type { AssignedElder, ScaleAnswer, ScaleType } from '../types';
 import { PageHeader } from '../components/PageHeader';
 import { ScaleQuestion } from '../components/ScaleQuestion';
 import { SubmitBar } from '../components/SubmitBar';
+import { useI18n } from '../i18n';
 
 interface ScaleFormPageProps {
   elder: AssignedElder;
@@ -18,10 +19,16 @@ const scaleLabels: Record<ScaleType, string> = {
   'UCLA': 'UCLA',
 };
 
-const optionLabels: Record<ScaleType, string[]> = {
-  'PHQ-9': ['从不', '几天', '一半以上', '几乎每天'],
-  'GAD-7': ['完全不会', '好几天', '超过一周', '几乎每天'],
-  'UCLA': ['从不', '很少', '有时', '一直'],
+const optionLabelKeys: Record<ScaleType, string[]> = {
+  'PHQ-9': ['scan.answerNever', 'scan.answerFewDays', 'scan.answerMoreThanHalf', 'scan.answerNearlyEveryDay'],
+  'GAD-7': ['scan.answerNotAtAll', 'scan.answerSeveralDays', 'scan.answerOverAWeek', 'scan.answerNearlyEveryDay'],
+  UCLA: ['scan.answerNever', 'scan.answerRarely', 'scan.answerSometimes', 'scan.answerAlways'],
+};
+
+const questionKeys: Record<ScaleType, string[]> = {
+  'PHQ-9': Array.from({ length: 9 }, (_, index) => `scan.scalePhqQuestion${index + 1}`),
+  'GAD-7': Array.from({ length: 7 }, (_, index) => `scan.scaleGadQuestion${index + 1}`),
+  UCLA: Array.from({ length: 20 }, (_, index) => `workbench.scaleUclaQuestion${index + 1}`),
 };
 
 const EMPTY_RECORD_META: Record<ScaleType, { date: string; volunteer: string; score: number; hasSaved: boolean }> = {
@@ -42,6 +49,7 @@ function mergeScaleAnswers(type: ScaleType, incoming: ScaleAnswer[] = []): Scale
 }
 
 export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
+  const { t } = useI18n();
   const [activeScale, setActiveScale] = useState<ScaleType>('PHQ-9');
   const [phq9, setPhq9] = useState<ScaleAnswer[]>(() => createScaleAnswers('PHQ-9'));
   const [gad7, setGad7] = useState<ScaleAnswer[]>(() => createScaleAnswers('GAD-7'));
@@ -100,7 +108,7 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
       setGad7(createScaleAnswers('GAD-7'));
       setUcla(createScaleAnswers('UCLA'));
       setRecordMeta(EMPTY_RECORD_META);
-      setLoadError(error instanceof Error ? error.message : '加载量表失败');
+      setLoadError(error instanceof Error ? error.message : t('errors.loadScaleFailed'));
     } finally {
       setLoading(false);
     }
@@ -127,9 +135,9 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
       await submitScaleRecord(elder.id, scale);
       await loadScaleData();
       setEditing(false);
-      alert(`${scaleLabels[activeScale]} 量表已保存，总分 ${totalScore}`);
+      alert(`${scaleLabels[activeScale]} ${t('errors.scaleSaved')}，${t('scan.currentScore')} ${totalScore}`);
     } catch (e) {
-      alert('提交失败，请重试');
+      alert(t('errors.submitFailed'));
     } finally {
       setSaving(false);
     }
@@ -137,7 +145,7 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
 
   return (
     <div className="sl-page">
-      <PageHeader title="量表填写" subtitle={elder.name} onBack={onBack} />
+      <PageHeader title={t('workbench.completeScale')} subtitle={elder.name} onBack={onBack} />
 
       <section className="sl-card sl-card-soft">
         <div className="sl-scale-tabs">
@@ -156,18 +164,18 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
 
       <section className="sl-scale-progress-card">
         <div className="sl-scale-progress-row">
-          <span>进度 {answeredCount}/{currentAnswers.length}</span>
+          <span>{t('common.progress')} {answeredCount}/{currentAnswers.length}</span>
           <span>{progressPercent}%</span>
         </div>
         <div className="sl-progress-track">
           <div className="sl-progress-bar" style={{ width: `${progressPercent}%` }} />
         </div>
         <div className="sl-scale-progress-row">
-          <span>当前量表：{scaleLabels[activeScale]}</span>
-          <strong style={{ color: 'var(--sl-primary-deep)' }}>总分 {displayScore}</strong>
+          <span>{t('common.currentScale')}：{scaleLabels[activeScale]}</span>
+          <strong style={{ color: 'var(--sl-primary-deep)' }}>{t('scan.score')} <span className="sl-ltr-data" dir="ltr">{displayScore}</span></strong>
         </div>
         <div className="sl-scale-progress-row">
-          <span>{currentMeta.hasSaved ? `最近保存：${currentMeta.date || '未记录日期'}` : '当前暂无已保存记录'}</span>
+          <span>{currentMeta.hasSaved ? (<>{t('common.recentSaved')}：<span className="sl-ltr-data" dir="ltr">{currentMeta.date || t('errors.unrecorded')}</span></>) : t('common.noSavedRecord')}</span>
           <button
             type="button"
             className={editing ? 'sl-btn sl-btn-secondary sl-scale-inline-btn' : 'sl-btn sl-btn-primary sl-scale-inline-btn'}
@@ -175,28 +183,28 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
             disabled={loading || saving}
           >
             <PencilLine size={16} />
-            {editing ? '取消编辑' : currentMeta.hasSaved ? '编辑量表' : '开始填写'}
+            {editing ? t('common.cancelEdit') : currentMeta.hasSaved ? t('common.editScale') : t('common.startFilling')}
           </button>
         </div>
       </section>
 
       <section className="sl-card sl-scale-window">
         <div className="sl-scale-window-head">
-          <strong>{scaleLabels[activeScale]} 题目</strong>
-          <span>{editing ? '编辑模式：可修改并保存' : '查看模式：点击编辑后才可修改'}</span>
+          <strong>{scaleLabels[activeScale]} {t('workbench.scaleQuestions')}</strong>
+          <span>{editing ? t('common.editMode') : t('common.viewMode')}</span>
         </div>
         <div className="sl-scale-window-body">
           {loadError ? <p className="sl-login-error">{loadError}</p> : null}
           {!loadError && currentMeta.hasSaved && !hasDetailedAnswers ? (
-            <p className="sl-field-note">当前已保存历史总分，但旧记录未保留逐题答案；点击编辑后可重新完善本量表。</p>
+            <p className="sl-field-note">{t('common.scoreOnlyNotice')}</p>
           ) : null}
           {currentAnswers.map((item, index) => (
             <ScaleQuestion
               key={`${activeScale}-${index}`}
               index={index}
-              item={item}
-              options={optionLabels[activeScale].map((label, optionIndex) =>
-                activeScale === 'UCLA' ? `${label}(${optionIndex + 1}分)` : `${label}(${optionIndex}分)`,
+              item={{ ...item, question: t(questionKeys[activeScale][index]) === questionKeys[activeScale][index] ? item.question : t(questionKeys[activeScale][index]) }}
+              options={optionLabelKeys[activeScale].map((_key, optionIndex) =>
+                `${t(optionLabelKeys[activeScale][optionIndex])}(${activeScale === 'UCLA' ? optionIndex + 1 : optionIndex}${t('common.points')})`,
               )}
               onChange={(value) => handleSelect(index, value)}
               readOnly={!editing}
@@ -207,7 +215,7 @@ export function ScaleFormPage({ elder, onBack }: ScaleFormPageProps) {
 
       <div className="sl-disclaimer">
         <AlertCircle size={16} />
-        <span>量表结果仅作为随访记录，不作为临床诊断结论。请结合老人近况和实际评估综合判断。</span>
+        <span>{t('common.scaleDisclaimer')}</span>
       </div>
 
       {editing ? <SubmitBar onSubmit={() => void handleSubmit()} loading={saving} /> : null}

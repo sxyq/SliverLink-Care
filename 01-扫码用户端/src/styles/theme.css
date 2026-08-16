@@ -33,8 +33,32 @@ body {
   background:
     radial-gradient(circle at top, rgba(53, 180, 150, 0.12), transparent 32%),
     linear-gradient(180deg, #f8fcfb 0%, #eef6f8 100%);
-  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Naskh Arabic", "Noto Sans Arabic", sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+html[dir='rtl'] body {
+  direction: rtl;
+}
+
+html[dir='rtl'] body,
+html[dir='rtl'] #root {
+  font-family: "Noto Naskh Arabic", "Noto Sans Arabic", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}
+
+.sl-device-frame {
+  position: relative;
+}
+
+.sl-ltr-data {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+.sl-auto-data {
+  unicode-bidi: plaintext;
+  text-align: start;
 }
 
 * {

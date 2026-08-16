@@ -118,8 +118,15 @@ describe('scan navigation and protection components', () => {
     );
 
     expect(screen.getByText('阿司匹林')).toBeInTheDocument();
-    expect(screen.getByText('100mg · 口服 · 早饭后')).toBeInTheDocument();
     expect(screen.getByText('需短信验证后查看')).toBeInTheDocument();
+
+    const dosageNode = screen.getByText('100mg');
+    expect(dosageNode).toHaveAttribute('dir', 'ltr');
+    expect(dosageNode).toHaveClass('sl-ltr-data');
+    expect(screen.getByText('阿司匹林')).toHaveAttribute('dir', 'auto');
+    const metaLine = dosageNode.closest('div');
+    expect(metaLine?.textContent).toContain('口服');
+    expect(metaLine?.textContent).toContain('早饭后');
 
     rerender(<VerificationBadge state="verified" />);
     expect(screen.getByText('已通过短信验证')).toBeInTheDocument();
@@ -242,14 +249,16 @@ describe('scan navigation and protection components', () => {
   it('blocks context menu and drag events when protection enabled', () => {
     render(<ContentProtection enabled watermarkText="test" />);
 
-    const contextEvent = new Event('contextmenu', { cancelable: true });
-    document.dispatchEvent(contextEvent);
+    act(() => {
+      const contextEvent = new Event('contextmenu', { cancelable: true });
+      document.dispatchEvent(contextEvent);
 
-    const dragEvent = new Event('dragstart', { cancelable: true });
-    document.dispatchEvent(dragEvent);
+      const dragEvent = new Event('dragstart', { cancelable: true });
+      document.dispatchEvent(dragEvent);
 
-    const selectEvent = new Event('selectstart', { cancelable: true });
-    document.dispatchEvent(selectEvent);
+      const selectEvent = new Event('selectstart', { cancelable: true });
+      document.dispatchEvent(selectEvent);
+    });
   });
 
   it('highlights active tab based on current path', () => {

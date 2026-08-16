@@ -53,6 +53,10 @@ async function readProjectJson(relativePath) {
   return JSON.parse(await fsp.readFile(path.join(projectRoot, relativePath), 'utf8'));
 }
 
+async function readSource(relativePath) {
+  return fsp.readFile(path.join(projectRoot, relativePath), 'utf8');
+}
+
 async function collectFiles(directory) {
   const entries = await fsp.readdir(directory, { withFileTypes: true });
   const nested = await Promise.all(entries.map(async (entry) => {
@@ -142,22 +146,51 @@ const verifyConfig = await readJson('subpackages/scan/verify/index.json');
 assert.equal(verifyConfig.navigationBarTitleText, '访问验证');
 
 const verifyBundle = await fsp.readFile(path.join(distRoot, 'subpackages/scan/verify/index.js'), 'utf8');
-assert.ok(verifyBundle.includes('\\u4e00\\u952e\\u8df3\\u8f6c\\u77ed\\u4fe1'), 'scan verify bundle is missing one-tap SMS button text');
-assert.ok(verifyBundle.includes('\\u77ed\\u4fe1\\u5185\\u5bb9\\u5df2\\u590d\\u5236'), 'scan verify bundle is missing SMS copied fallback text');
+const verifySource = await readSource('src/subpackages/scan/verify/index.tsx');
+assert.ok(
+  verifyBundle.includes('\\u4e00\\u952e\\u8df3\\u8f6c\\u77ed\\u4fe1') || verifySource.includes("t('verification.openSmsComposer')"),
+  'scan verify bundle/source is missing one-tap SMS button text',
+);
+assert.ok(
+  verifyBundle.includes('\\u77ed\\u4fe1\\u5185\\u5bb9\\u5df2\\u590d\\u5236') || verifySource.includes("t('verification.messageCopied')"),
+  'scan verify bundle/source is missing SMS copied fallback text',
+);
 assert.ok(verifyBundle.includes('sessionId') && verifyBundle.includes('elderId'), 'scan verify bundle is missing protected session/elder routing fields');
-assert.ok(verifyBundle.includes('\\u9a8c\\u8bc1\\u4f1a\\u8bdd\\u4e0e\\u5f53\\u524d\\u8001\\u4eba\\u4e0d\\u4e00\\u81f4'), 'scan verify bundle is missing cross-elder guard message');
+assert.ok(
+  verifyBundle.includes('\\u9a8c\\u8bc1\\u4f1a\\u8bdd\\u4e0e\\u5f53\\u524d\\u8001\\u4eba\\u4e0d\\u4e00\\u81f4') || verifySource.includes("t('errors.verificationMismatch')"),
+  'scan verify bundle/source is missing cross-elder guard message',
+);
 
 const scanArchiveBundle = await fsp.readFile(path.join(distRoot, 'subpackages/scan/archive/index.js'), 'utf8');
 assert.ok(scanArchiveBundle.includes('sessionId') && scanArchiveBundle.includes('elderId'), 'scan archive bundle is missing protected query fields');
 
 const qrcodeBundle = await fsp.readFile(path.join(distRoot, 'subpackages/workbench/qrcode/index.js'), 'utf8');
-assert.ok(qrcodeBundle.includes('\\u4e8c\\u7ef4\\u7801\\u8bbf\\u95ee\\u94fe\\u63a5\\u5df2\\u590d\\u5236'), 'workbench qrcode bundle is missing copy-link success text');
-assert.ok(qrcodeBundle.includes('\\u5bfc\\u51fa\\u540d\\u724c'), 'workbench qrcode bundle is missing nameplate export entry');
-assert.ok(qrcodeBundle.includes('\\u505c\\u7528\\u4e8c\\u7ef4\\u7801'), 'workbench qrcode bundle is missing QR disable action text');
+const qrcodeSource = await readSource('src/subpackages/workbench/qrcode/index.tsx');
+assert.ok(
+  qrcodeBundle.includes('\\u4e8c\\u7ef4\\u7801\\u8bbf\\u95ee\\u94fe\\u63a5\\u5df2\\u590d\\u5236') || qrcodeSource.includes("t('workbench.copiedAccessLink')"),
+  'workbench qrcode bundle/source is missing copy-link success text',
+);
+assert.ok(
+  qrcodeBundle.includes('\\u5bfc\\u51fa\\u540d\\u724c') || qrcodeSource.includes("t('workbench.exportNameplate')"),
+  'workbench qrcode bundle/source is missing nameplate export entry',
+);
+assert.ok(
+  qrcodeBundle.includes('\\u505c\\u7528\\u4e8c\\u7ef4\\u7801') || qrcodeSource.includes("t('workbench.disableQr')"),
+  'workbench qrcode bundle/source is missing QR disable action text',
+);
 
 const nameplateBundle = await fsp.readFile(path.join(distRoot, 'subpackages/scan/nameplate/index.js'), 'utf8');
-assert.ok(nameplateBundle.includes('\\u80cc\\u9762') && nameplateBundle.includes('\\u626b\\u7801\\u67e5\\u770b'), 'scan nameplate bundle is missing back-side scan preview text');
-assert.ok(nameplateBundle.includes('PDF'), 'scan nameplate bundle is missing PDF export text');
+const nameplateSource = await readSource('src/subpackages/scan/nameplate/index.tsx');
+assert.ok(
+  (nameplateBundle.includes('\\u80cc\\u9762') && nameplateBundle.includes('\\u626b\\u7801\\u67e5\\u770b'))
+    || (nameplateSource.includes("t('scan.backNameplate')") && nameplateSource.includes("t('scan.wechatScanHealthArchive')")),
+  'scan nameplate bundle/source is missing back-side scan preview text',
+);
+assert.ok(
+  nameplateBundle.includes('PDF')
+    || (nameplateSource.includes("t('scan.generatePdf')") && nameplateSource.includes("t('scan.downloadPdf')")),
+  'scan nameplate bundle/source is missing PDF export text',
+);
 
 const qrcodeServiceSource = await fsp.readFile(path.join(projectRoot, 'src/services/workbench/qrcodeService.ts'), 'utf8');
 for (const field of ['publicUrl', 'qrImageBase64', 'qrImageUrl', 'disableReviewStatus', 'backQrUrl', 'backQrPayload', 'backQrImageBase64']) {

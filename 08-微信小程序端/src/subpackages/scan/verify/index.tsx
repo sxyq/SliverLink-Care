@@ -2,9 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button, Input, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { getScanVerificationStatus, startScanSmsVerification, verifyScanIdentity } from '@/services/scan/scanAuthService';
 import { parseQueryParams } from '@/utils/routeParams';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
@@ -25,8 +26,8 @@ function normalizeIdCard(idCard: string) {
   return idCard.trim().toUpperCase();
 }
 
-function formatSmsReceiverLabel(maskedPhone: string) {
-  return maskedPhone || '后台指定号码';
+function formatSmsReceiverLabel(maskedPhone: string, fallback: string) {
+  return maskedPhone || fallback;
 }
 
 function isValidIdCard(idCard: string) {
@@ -56,19 +57,20 @@ function ScanVerifyHeader(props: {
   mode: VerifyMode;
   onToggleMode: () => void;
 }) {
+  const { t } = useI18n();
   return (
     <View className='sl-page-header-bar'>
       <View className='sl-page-header-action'>
         <View className='sl-page-header-icon' onClick={() => Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.home }))}>
-          首页
+          {t('common.home')}
         </View>
       </View>
       <View className='sl-page-header-copy'>
-        <View className='sl-page-header-copy__title'>渝护银龄名牌</View>
+        <View className='sl-page-header-copy__title'>{t('common.brandTitle')}</View>
       </View>
       <View className='sl-page-header-action'>
         <View className='sl-page-header-icon scan-verify-header-toggle' onClick={props.onToggleMode}>
-          {props.mode === 'sms' ? '证件登记' : '短信验证'}
+          {props.mode === 'sms' ? t('verification.idRegistration') : t('verification.sms')}
         </View>
       </View>
     </View>
@@ -76,6 +78,7 @@ function ScanVerifyHeader(props: {
 }
 
 export default function ScanVerifyPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const elderId = params.elderId || '';
@@ -114,16 +117,16 @@ export default function ScanVerifyPage() {
 
   const identityError = useMemo(() => {
     if (!identityName.trim()) {
-      return '请输入登记人姓名';
+      return t('errors.nameRequired');
     }
     if (!/^1\d{10}$/.test(normalizePhone(identityPhone))) {
-      return '请输入 11 位手机号';
+      return t('errors.phone11');
     }
     if (!isValidIdCard(normalizeIdCard(identityIdCard))) {
-      return '请输入有效的身份证号';
+      return t('errors.idCardInvalid');
     }
     return '';
-  }, [identityIdCard, identityName, identityPhone]);
+  }, [identityIdCard, identityName, identityPhone, t]);
 
   async function navigateToArchive(nextElderId: string, sessionId: string) {
     await Taro.redirectTo({
@@ -133,7 +136,7 @@ export default function ScanVerifyPage() {
 
   async function handleIdentitySubmit() {
     if (missingParams) {
-      setErrorText('缺少老人标识，请返回重新扫码');
+      setErrorText(t('errors.missingElder'));
       return;
     }
 
@@ -156,19 +159,19 @@ export default function ScanVerifyPage() {
       });
 
       if (!result.verified || !result.sessionId) {
-        setErrorText('身份登记未通过，请核对后重试');
+        setErrorText(t('errors.identityFailed'));
         return;
       }
 
       if (result.elderId && result.elderId !== elderId) {
-        setErrorText('验证会话与当前老人不一致，请返回重新扫码');
+        setErrorText(t('errors.verificationMismatch'));
         return;
       }
 
-      setSuccessText('验证成功，正在进入健康档案...');
+      setSuccessText(t('verification.identitySuccess'));
       await navigateToArchive(result.elderId || elderId, result.sessionId);
     } catch (error) {
-      setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+      setErrorText((error as Error)?.message || t('errors.requestFailed'));
     } finally {
       setSubmittingIdentity(false);
     }
@@ -176,7 +179,7 @@ export default function ScanVerifyPage() {
 
   async function handleStartSmsVerification() {
     if (missingParams) {
-      setErrorText('缺少老人标识，请返回重新扫码');
+      setErrorText(t('errors.missingElder'));
       return;
     }
 
@@ -189,9 +192,9 @@ export default function ScanVerifyPage() {
       setSmsReceiverPhone(session.receiverPhone);
       setSmsReceiverPhoneMasked(session.receiverPhoneMasked);
       setSmsMessageBody(session.messageBody);
-      setSuccessText('短信验证会话已创建，请由绑定手机发送验证短信后再检查状态');
+      setSuccessText(t('verification.smsSessionCreated'));
     } catch (error) {
-      setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+      setErrorText((error as Error)?.message || t('errors.requestFailed'));
     } finally {
       setSmsLoading(false);
     }
@@ -199,7 +202,7 @@ export default function ScanVerifyPage() {
 
   async function handleCheckSmsStatus() {
     if (!smsSessionId) {
-      setErrorText('请先创建短信验证会话');
+      setErrorText(t('errors.verificationCreateFailed'));
       return;
     }
 
@@ -211,22 +214,22 @@ export default function ScanVerifyPage() {
 
       if (status.verified) {
         if (status.elderId && status.elderId !== elderId) {
-          setErrorText('验证会话与当前老人不一致，请返回重新扫码');
+          setErrorText(t('errors.verificationMismatch'));
           return;
         }
-        setSuccessText('短信验证成功，正在进入健康档案...');
+        setSuccessText(t('verification.smsVerificationSuccess'));
         await navigateToArchive(status.elderId || elderId, status.sessionId);
         return;
       }
 
       if (status.status === 'EXPIRED') {
-        setErrorText('当前短信验证已过期，请重新创建会话');
+        setErrorText(t('errors.verificationExpired'));
         return;
       }
 
-      setErrorText('暂未收到验证完成状态，请发送短信后稍后再试');
+      setErrorText(t('errors.verificationNotReceived'));
     } catch (error) {
-      setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+      setErrorText((error as Error)?.message || t('errors.verificationCheckFailed'));
     } finally {
       setSmsChecking(false);
     }
@@ -234,7 +237,7 @@ export default function ScanVerifyPage() {
 
   async function handleOpenSmsComposer() {
     if (!smsReceiverPhone || !smsMessageBody) {
-      setErrorText('请先生成短信内容');
+      setErrorText(t('verification.generatingSms'));
       return;
     }
 
@@ -245,22 +248,22 @@ export default function ScanVerifyPage() {
 
       if (process.env.TARO_ENV === 'h5' && typeof window !== 'undefined') {
         window.location.href = buildSmsLink(smsReceiverPhone, smsMessageBody);
-        setSuccessText('已打开系统短信；如果没有自动填充，请直接粘贴已复制的短信内容。');
+        setSuccessText(t('verification.smsCopiedInstruction'));
         return;
       }
 
       const result = await Taro.showModal({
-        title: '短信内容已复制',
-        content: `当前环境暂不支持直接拉起系统短信，请手动打开短信并发送到 ${formatSmsReceiverLabel(smsReceiverPhoneMasked)}。`,
-        confirmText: '我知道了',
+        title: t('verification.messageCopied'),
+        content: t('verification.smsCopyUnavailable', { phone: formatSmsReceiverLabel(smsReceiverPhoneMasked, t('errors.noPhone')) }),
+        confirmText: t('common.confirm'),
         showCancel: false,
       });
 
       if (result.confirm) {
-        setSuccessText('短信内容已复制，请打开系统短信后粘贴发送。');
+        setSuccessText(t('verification.smsCopiedInstruction'));
       }
     } catch (error) {
-      setErrorText((error as Error)?.message || '打开短信失败，请稍后重试');
+      setErrorText((error as Error)?.message || t('errors.openSmsFailed'));
     }
   }
 
@@ -273,29 +276,29 @@ export default function ScanVerifyPage() {
               <ScanVerifyHeader mode={mode} onToggleMode={() => setMode((current) => (current === 'sms' ? 'identity' : 'sms'))} />
 
               <View className='sl-section-heading'>
-                <Text className='scan-verify-heading__title'>{mode === 'identity' ? '身份登记' : '短信验证'}</Text>
-                <Text className='scan-verify-heading__badge'>盾</Text>
+                <Text className='scan-verify-heading__title'>{mode === 'identity' ? t('verification.identity') : t('verification.sms')}</Text>
+                <Text className='scan-verify-heading__badge'>✓</Text>
               </View>
 
               <View className='sl-card scan-verify-hero-card'>
-                <View className='scan-verify-hero-card__icon'>锁</View>
+                <View className='scan-verify-hero-card__icon'>⌑</View>
                 <View className='scan-verify-hero-card__copy'>
                   {mode === 'identity' ? (
                     <>
-                      <Text>登记姓名、手机号与身份证号后，</Text>
-                      <Text>即可查看完整健康信息</Text>
+                      <Text>{t('verification.identityLine1')}</Text>
+                      <Text>{t('verification.identityLine2')}</Text>
                     </>
                   ) : (
                     <>
-                      <Text>为保护老人隐私，</Text>
-                      <Text>请使用当前手机完成验证</Text>
+                      <Text>{t('verification.protectPrivacyLine1')}</Text>
+                      <Text>{t('verification.protectPrivacyLine2')}</Text>
                     </>
                   )}
                 </View>
               </View>
 
               <View className='sl-card scan-verify-panel'>
-                {missingParams ? <View className='sl-error-card'>缺少老人标识，请返回扫码落地页重新进入。</View> : null}
+                {missingParams ? <View className='sl-error-card'>{t('errors.missingElder')}</View> : null}
                 {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
                 {successText ? <View className='sl-permission-banner'>{successText}</View> : null}
 
@@ -303,66 +306,66 @@ export default function ScanVerifyPage() {
                   <View className='scan-verify-form'>
                     <View className='sl-form-grid'>
                       <View className='sl-form-field sl-form-field--full'>
-                        <Text className='sl-form-label'>访问人姓名</Text>
-                        <Input className='sl-form-input' value={identityName} placeholder='请输入姓名' onInput={(e) => setIdentityName(e.detail.value)} />
+                        <Text className='sl-form-label'>{t('verification.visitorName')}</Text>
+                        <Input className='sl-form-input' value={identityName} placeholder={t('verification.realNamePlaceholder')} onInput={(e) => setIdentityName(e.detail.value)} />
                       </View>
                       <View className='sl-form-field sl-form-field--full'>
-                        <Text className='sl-form-label'>访问人手机号</Text>
+                          <Text className='sl-form-label'>{t('verification.visitorPhone')}</Text>
                         <Input
-                          className='sl-form-input'
+                          className='sl-form-input sl-ltr-data'
                           type='number'
                           maxlength={11}
                           value={identityPhone}
-                          placeholder='请输入 11 位手机号'
+                          placeholder={t('verification.phone11Placeholder')}
                           onInput={(e) => setIdentityPhone(e.detail.value)}
                         />
                       </View>
                       <View className='sl-form-field sl-form-field--full'>
-                        <Text className='sl-form-label'>访问人身份证号</Text>
+                          <Text className='sl-form-label'>{t('verification.visitorIdCard')}</Text>
                         <Input
-                          className='sl-form-input'
+                          className='sl-form-input sl-ltr-data'
                           value={identityIdCard}
                           maxlength={18}
-                          placeholder='请输入身份证号'
+                          placeholder={t('verification.idCardPlaceholder')}
                           onInput={(e) => setIdentityIdCard(e.detail.value)}
                         />
                       </View>
                     </View>
-                    <Text className='scan-verify-form__hint'>登记后将记录验证方式、来源 IP 与身份信息，用于访问审计与后台统计。</Text>
+                    <Text className='scan-verify-form__hint'>{t('verification.identityAuditHint')}</Text>
                     <View className='scan-verify-actions'>
                       <Button className='sl-primary-button' loading={submittingIdentity} onClick={handleIdentitySubmit}>
-                        {submittingIdentity ? '登记中...' : '登记信息并查看'}
+                        {submittingIdentity ? t('verification.registering') : t('verification.registerAndView')}
                       </Button>
                     </View>
                   </View>
                 ) : (
                   <View className='scan-verify-form'>
                     <View className='scan-verify-step-list'>
-                      <View className='scan-verify-step-item'>1. 打开系统短信</View>
-                      <View className='scan-verify-step-item'>2. 向后台指定号码发送下方短信内容</View>
-                      <View className='scan-verify-step-item'>3. 返回本页检查验证结果</View>
+                      <View className='scan-verify-step-item'>1. {t('verification.stepOpenSms')}</View>
+                      <View className='scan-verify-step-item'>2. {t('verification.stepSendSms')}</View>
+                      <View className='scan-verify-step-item'>3. {t('verification.stepCheckResult')}</View>
                     </View>
                     {smsReceiverPhoneMasked ? (
                       <View className='sl-form-grid'>
                         <View className='sl-form-field sl-form-field--full'>
-                          <Text className='sl-form-label'>后台指定接收手机号</Text>
-                          <View className='scan-verify-data-card'>{smsReceiverPhoneMasked}</View>
+                          <Text className='sl-form-label'>{t('verification.receiverPhone')}</Text>
+                          <View className='scan-verify-data-card sl-ltr-data'>{smsReceiverPhoneMasked}</View>
                         </View>
                         <View className='sl-form-field sl-form-field--full'>
-                          <Text className='sl-form-label'>短信内容</Text>
-                          <View className='scan-verify-data-card scan-verify-data-card--message'>{smsMessageBody || '已生成'}</View>
+                          <Text className='sl-form-label'>{t('verification.messageBody')}</Text>
+                          <View className='scan-verify-data-card scan-verify-data-card--message sl-ltr-data'>{smsMessageBody || t('common.generatedPending')}</View>
                         </View>
                       </View>
                     ) : null}
                     <View className='scan-verify-actions'>
                       <Button className='sl-primary-button' onClick={handleOpenSmsComposer} disabled={smsLoading || !smsSessionId || !smsMessageBody}>
-                        一键跳转短信
+                        {t('verification.openSmsComposer')}
                       </Button>
                       <Button className='sl-primary-button' loading={smsLoading} onClick={handleStartSmsVerification}>
-                        {smsSessionId ? '重新生成短信内容' : '打开短信前先生成短信内容'}
+                        {smsSessionId ? t('verification.regenerateMessage') : t('verification.generateMessageFirst')}
                       </Button>
                       <Button className='sl-secondary-button' loading={smsChecking} onClick={handleCheckSmsStatus}>
-                        {smsChecking ? '检查中...' : '我已发送，检查结果'}
+                        {smsChecking ? t('verification.checking') : t('verification.sentCheckResult')}
                       </Button>
                     </View>
                   </View>

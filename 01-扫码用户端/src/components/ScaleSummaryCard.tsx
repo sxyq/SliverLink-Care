@@ -1,76 +1,64 @@
 import { useState } from 'react';
 import { ChevronDown, ClipboardList } from 'lucide-react';
 import type { ScaleName, ScaleSummary } from '../types';
+import { useI18n } from '../i18n';
 
 interface ScaleSummaryCardProps {
   items: ScaleSummary[];
 }
 
-const SCALE_META: Record<ScaleName, { title: string; maxScore: number; questions: string[] }> = {
+const SCALE_META: Record<ScaleName, { titleKey: string; maxScore: number; questionKeys: string[] }> = {
   'PHQ-9': {
-    title: '抑郁症筛查量表',
+    titleKey: 'scan.scalePhqTitle',
     maxScore: 27,
-    questions: [
-      '做事提不起劲或没有兴趣',
-      '感到心情低落、沮丧或绝望',
-      '睡眠困难或睡眠过多',
-      '感觉疲倦或没有活力',
-      '食欲不振或吃太多',
-      '觉得自己很糟或让家人失望',
-      '注意力难以集中',
-      '动作或说话变慢，或烦躁不安',
-      '出现伤害自己的念头',
+    questionKeys: [
+      'scan.scalePhqQuestion1', 'scan.scalePhqQuestion2', 'scan.scalePhqQuestion3',
+      'scan.scalePhqQuestion4', 'scan.scalePhqQuestion5', 'scan.scalePhqQuestion6',
+      'scan.scalePhqQuestion7', 'scan.scalePhqQuestion8', 'scan.scalePhqQuestion9',
     ],
   },
   'GAD-7': {
-    title: '广泛性焦虑障碍量表',
+    titleKey: 'scan.scaleGadTitle',
     maxScore: 21,
-    questions: [
-      '感觉紧张、焦虑或急切',
-      '不能停止或控制担忧',
-      '对各种事情担忧过多',
-      '很难放松下来',
-      '由于不安而无法静坐',
-      '容易烦恼或急躁',
-      '害怕将有可怕事情发生',
+    questionKeys: [
+      'scan.scaleGadQuestion1', 'scan.scaleGadQuestion2', 'scan.scaleGadQuestion3',
+      'scan.scaleGadQuestion4', 'scan.scaleGadQuestion5', 'scan.scaleGadQuestion6',
+      'scan.scaleGadQuestion7',
     ],
   },
   UCLA: {
-    title: 'UCLA 孤独感量表',
+    titleKey: 'scan.scaleUclaTitle',
     maxScore: 80,
-    questions: [
-      '与周围人的关系是否和谐',
-      '是否感到缺少伙伴',
-      '是否感到没人可以信赖',
-      '是否感到寂寞',
-      '是否感到有人真正了解自己',
-      '是否感到有人值得信赖',
+    questionKeys: [
+      'scan.scaleUclaQuestion1', 'scan.scaleUclaQuestion2', 'scan.scaleUclaQuestion3',
+      'scan.scaleUclaQuestion4', 'scan.scaleUclaQuestion5', 'scan.scaleUclaQuestion6',
     ],
   },
 };
 
-function getLevel(item: ScaleSummary) {
-  if (item.level) return item.level;
+function getLevelKey(item: ScaleSummary) {
+  if (item.level) return '';
   if (item.name === 'PHQ-9') {
-    if (item.score >= 20) return '重度';
-    if (item.score >= 15) return '中重度';
-    if (item.score >= 10) return '中度';
-    if (item.score >= 5) return '轻度';
-    return '正常范围';
+    if (item.score >= 20) return 'scan.levelSevere';
+    if (item.score >= 15) return 'scan.levelModerateSevere';
+    if (item.score >= 10) return 'scan.levelModerate';
+    if (item.score >= 5) return 'scan.levelMild';
+    return 'scan.levelNormal';
   }
   if (item.name === 'GAD-7') {
-    if (item.score >= 15) return '重度';
-    if (item.score >= 10) return '中度';
-    if (item.score >= 5) return '轻度';
-    return '正常范围';
+    if (item.score >= 15) return 'scan.levelSevere';
+    if (item.score >= 10) return 'scan.levelModerate';
+    if (item.score >= 5) return 'scan.levelMild';
+    return 'scan.levelNormal';
   }
-  if (item.score >= 44) return '偏高';
-  if (item.score >= 28) return '需关注';
-  return '正常范围';
+  if (item.score >= 44) return 'scan.levelHigh';
+  if (item.score >= 28) return 'scan.levelAttention';
+  return 'scan.levelNormal';
 }
 
 export function ScaleSummaryCard({ items }: ScaleSummaryCardProps) {
   const [activeName, setActiveName] = useState<ScaleName | null>(null);
+  const { t } = useI18n();
 
   return (
     <div className="sl-scale-list">
@@ -91,42 +79,42 @@ export function ScaleSummaryCard({ items }: ScaleSummaryCardProps) {
                 </span>
                 <span>
                   <span className="sl-scale-name">{item.name}</span>
-                  <span className="sl-scale-title">{meta.title}</span>
+                  <span className="sl-scale-title">{t(meta.titleKey)}</span>
                 </span>
               </div>
               <div className="sl-scale-score">
-                <strong>{item.score}</strong>
-                <span>分</span>
+                <strong className="sl-ltr-data" dir="ltr">{item.score}</strong>
+                <span>{t('common.points')}</span>
                 <ChevronDown size={16} className={open ? 'rotate' : ''} />
               </div>
             </div>
 
             <div className="sl-scale-meta">
-              最近记录：{item.updatedAt || '未填写'} | 结果：{getLevel(item)}
+              {t('scan.recentRecord')}：<span className="sl-ltr-data">{item.updatedAt || t('scan.unanswered')}</span> | {t('scan.result')}：{item.level || t(getLevelKey(item))}
             </div>
 
             {open && (
               <div className="sl-scale-detail">
                 <div className="sl-scale-detail-grid">
                   <div>
-                    <span>量表总分</span>
-                    <strong>{item.score} / {meta.maxScore}</strong>
+                    <span>{t('scan.scaleTotal')}</span>
+                    <strong className="sl-ltr-data" dir="ltr">{item.score} / {meta.maxScore}</strong>
                   </div>
                   <div>
-                    <span>负责人员</span>
-                    <strong>{item.volunteer || '未记录'}</strong>
+                    <span>{t('scan.responsible')}</span>
+                    <strong className="sl-auto-data" dir="auto">{item.volunteer || t('scan.unrecorded')}</strong>
                   </div>
                 </div>
                 <div className="sl-scale-question-list">
-                  {meta.questions.map((question, index) => (
-                    <div className="sl-scale-question" key={question}>
+                  {meta.questionKeys.map((questionKey, index) => (
+                    <div className="sl-scale-question" key={questionKey}>
                       <span>{index + 1}</span>
-                      <p>{question}</p>
+                      <p>{t(questionKey)}</p>
                     </div>
                   ))}
                 </div>
                 <p className="sl-scale-detail-note">
-                  当前接口返回摘要分数；逐题答案接入后将在此处展示每题选择结果。
+                  {t('scan.summaryOnly')}
                 </p>
               </div>
             )}

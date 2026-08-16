@@ -61,23 +61,31 @@ public class VolunteerService {
         String phone = req.getPhone() == null ? "" : req.getPhone().trim();
 
         if (invitationCode.isBlank()) {
-            throw new BizException(400, "请输入邀请码");
+            throw new BizException(400, "请输入邀请码", "errors.invitationRequired");
         }
         if (account.isBlank()) {
-            throw new BizException(400, "请输入账号");
+            throw new BizException(400, "请输入账号", "errors.accountRequired");
         }
         if (password.isBlank()) {
-            throw new BizException(400, "请输入密码");
+            throw new BizException(400, "请输入密码", "errors.passwordRequired");
         }
         if (name.isBlank()) {
-            throw new BizException(400, "请输入姓名");
+            throw new BizException(400, "请输入姓名", "errors.nameRequired");
         }
 
-        Map<String, Object> invitation = data.one("select * from invitation where code=?", invitationCode);
+        Map<String, Object> invitation;
+        try {
+            invitation = data.one("select * from invitation where code=?", invitationCode);
+        } catch (BizException exception) {
+            if (exception.getCode() == 404) {
+                throw new BizException(400, "邀请码不可用", "errors.invitationUnavailable");
+            }
+            throw exception;
+        }
         validateInvitation(invitation);
 
         if (data.findUser(account, "VOLUNTEER").isPresent()) {
-            throw new BizException(400, "该账号已存在，请更换后重试");
+            throw new BizException(400, "该账号已存在，请更换后重试", "errors.accountExists");
         }
 
         String elderId = data.str(invitation.get("elder_id"));
@@ -123,7 +131,7 @@ public class VolunteerService {
         Map<String, Object> elder = findMyElder(account, elderId);
         QrCodeEntity current = qrCodeService.findCurrentByElder(elderId);
         if (current == null) {
-            throw new BizException(404, "当前老人暂无二维码");
+            throw new BizException(404, "当前老人暂无二维码", "errors.qrMissing");
         }
         Map<String, Object> review = reviewRequestService.createQrDisableRequest(account, "VOLUNTEER", elderId, current);
         Map<String, Object> result = toQrManageMap(current, elder);
@@ -137,21 +145,21 @@ public class VolunteerService {
         return getMyElders(account).stream()
                 .filter(row -> elderId.equals(String.valueOf(row.get("id"))))
                 .findFirst()
-                .orElseThrow(() -> new BizException(403, "无权访问该老人档案"));
+                .orElseThrow(() -> new BizException(403, "无权访问该老人档案", "errors.permissionDenied"));
     }
 
     private void validateInvitation(Map<String, Object> invitation) {
         if (!"ACTIVE".equalsIgnoreCase(data.str(invitation.get("status")))) {
-            throw new BizException(400, "邀请码不可用");
+            throw new BizException(400, "邀请码不可用", "errors.invitationUnavailable");
         }
         if (data.intValue(invitation.get("used_count")) >= data.intValue(invitation.get("max_uses"))) {
-            throw new BizException(400, "邀请码已用完");
+            throw new BizException(400, "邀请码已用完", "errors.invitationUsed");
         }
         String expiresAt = data.str(invitation.get("expires_at"));
         if (!expiresAt.isBlank()) {
             LocalDateTime expireTime = LocalDateTime.parse(expiresAt, FMT);
             if (expireTime.isBefore(LocalDateTime.now())) {
-                throw new BizException(400, "邀请码已过期");
+                throw new BizException(400, "邀请码已过期", "errors.invitationExpired");
             }
         }
     }

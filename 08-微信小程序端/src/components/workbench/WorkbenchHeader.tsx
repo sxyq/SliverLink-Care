@@ -64,7 +64,7 @@ function HeaderAction({ label, icon, onClick, compact = true, disabled = false }
       className={disabled ? `${compact ? 'sl-page-header-icon' : 'sl-page-header-icon sl-page-header-icon-label'} is-disabled` : compact ? 'sl-page-header-icon' : 'sl-page-header-icon sl-page-header-icon-label'}
       onClick={disabled ? undefined : onClick}
     >
-      {icon ? <Text className='sl-header-icon-glyph'>{icon}</Text> : null}
+      {icon ? <Text className={icon === '←' || icon === '→' ? 'sl-header-icon-glyph is-directional' : 'sl-header-icon-glyph'}>{icon}</Text> : null}
       {compact ? null : <Text className='sl-header-icon-label'>{label}</Text>}
       {!icon ? label : null}
     </View>
@@ -95,7 +95,7 @@ export const WorkbenchHeader = memo(function WorkbenchHeader({
 
       <View className='sl-page-header-copy'>
         <View className='sl-page-header-copy__title'>{title}</View>
-        {subtitle ? <Text className='sl-page-header-copy__subtitle'>{subtitle}</Text> : null}
+        {subtitle ? <Text className='sl-page-header-copy__subtitle sl-auto-data' {...{ dir: 'auto' }}>{subtitle}</Text> : null}
       </View>
 
       {trailingNode ? (

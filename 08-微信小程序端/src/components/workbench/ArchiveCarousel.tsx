@@ -1,5 +1,6 @@
 import { memo } from 'react';
 import { Button, Swiper, SwiperItem, Text, View } from '@tarojs/components';
+import { useI18n } from '@/i18n';
 
 export interface ArchiveCarouselItem {
   id: string;
@@ -23,6 +24,7 @@ interface ArchiveCarouselProps {
 }
 
 export const ArchiveCarousel = memo(function ArchiveCarousel({ items, activeIndex, onChange, onOpen }: ArchiveCarouselProps) {
+  const { t } = useI18n();
   const safeIndex = Math.min(Math.max(activeIndex, 0), Math.max(items.length - 1, 0));
   const activeItem = items[safeIndex];
   const hasMultipleItems = items.length > 1;
@@ -31,24 +33,24 @@ export const ArchiveCarousel = memo(function ArchiveCarousel({ items, activeInde
     <View className='sl-archive-layout'>
       <View className='sl-archive-overview'>
         <View className='sl-archive-overview-copy'>
-          <Text className='sl-overview-kicker'>老人档案</Text>
-          <View className='sl-archive-overview-copy__title'>{items.length > 1 ? '左右滑动切换档案' : '当前负责老人档案'}</View>
+          <Text className='sl-overview-kicker'>{t('workbench.elderArchives')}</Text>
+          <View className='sl-archive-overview-copy__title'>{items.length > 1 ? t('workbench.swipeToSwitch') : t('workbench.currentElderArchive')}</View>
           <Text className='sl-archive-overview-copy__desc'>
-            当前共 {items.length} 位老人{items.length > 1 ? `，正在查看第 ${safeIndex + 1} 位` : ''}
+            {t('common.currentCount', { count: items.length })}{items.length > 1 ? t('common.currentPosition', { position: safeIndex + 1 }) : ''}
           </Text>
         </View>
 
         {hasMultipleItems ? (
           <View className='sl-carousel-nav'>
             <Button className={safeIndex === 0 ? 'sl-carousel-btn is-disabled' : 'sl-carousel-btn'} disabled={safeIndex === 0} onClick={() => onChange(safeIndex - 1)}>
-              ←
+              <Text className='sl-directional-icon'>←</Text>
             </Button>
             <Button
               className={safeIndex >= items.length - 1 ? 'sl-carousel-btn is-disabled' : 'sl-carousel-btn'}
               disabled={safeIndex >= items.length - 1}
               onClick={() => onChange(safeIndex + 1)}
             >
-              →
+              <Text className='sl-directional-icon'>→</Text>
             </Button>
           </View>
         ) : null}
@@ -76,38 +78,38 @@ export const ArchiveCarousel = memo(function ArchiveCarousel({ items, activeInde
                   </View>
                 </View>
                 <View className='sl-archive-card-copy'>
-                  <View className='sl-archive-card-name'>{item.name}</View>
+                  <View className='sl-archive-card-name sl-auto-data' {...{ dir: 'auto' }}>{item.name}</View>
                   <Text className='sl-archive-card-subtitle'>
-                    档案编号 {item.archiveNo || '待生成'} {item.gender || '待补充'} {item.age || '年龄待补充'}
+                    {t('common.archiveNumber')} <Text className='sl-ltr-data'>{item.archiveNo || t('common.generatedPending')}</Text> {item.gender === '男' ? t('common.male') : item.gender === '女' ? t('common.female') : item.gender || t('common.pendingSupplement')} <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.age || t('common.agePending')}</Text>
                   </Text>
                   <View className='sl-archive-card-subtitle sl-archive-card-residence'>
-                    <Text>住址 {item.residence || '待补充'}</Text>
+                    <Text>{t('workbench.residence')} <Text className='sl-auto-data' {...{ dir: 'auto' }}>{item.residence || t('common.pendingSupplement')}</Text></Text>
                   </View>
                 </View>
               </View>
 
               <View className='sl-archive-card-grid'>
                 <View className='sl-archive-data-pill'>
-                  <Text className='sl-archive-data-pill__label'>状态</Text>
+                  <Text className='sl-archive-data-pill__label'>{t('common.status')}</Text>
                   <Text className='sl-archive-data-pill__value'>{item.status}</Text>
                 </View>
                 <View className='sl-archive-data-pill'>
-                  <Text className='sl-archive-data-pill__label'>联系人</Text>
-                  <Text className='sl-archive-data-pill__value'>{item.contactName}</Text>
+                  <Text className='sl-archive-data-pill__label'>{t('common.contact')}</Text>
+                  <Text className='sl-archive-data-pill__value sl-auto-data' {...{ dir: 'auto' }}>{item.contactName}</Text>
                 </View>
                 <View className='sl-archive-data-pill'>
-                  <Text className='sl-archive-data-pill__label'>联系电话</Text>
-                  <Text className='sl-archive-data-pill__value'>{item.contactPhone}</Text>
+                  <Text className='sl-archive-data-pill__label'>{t('common.contactPhone')}</Text>
+                  <Text className='sl-archive-data-pill__value sl-ltr-data'>{item.contactPhone}</Text>
                 </View>
                 <View className='sl-archive-data-pill'>
                   <Text className='sl-archive-data-pill__label'>{item.bloodOrAllergyLabel}</Text>
-                  <Text className='sl-archive-data-pill__value'>{item.bloodOrAllergyValue}</Text>
+                  <Text className='sl-archive-data-pill__value sl-auto-data' {...{ dir: 'auto' }}>{item.bloodOrAllergyValue}</Text>
                 </View>
               </View>
 
               <View className='sl-archive-card-footer'>
                 <Button className='sl-archive-inline-action' onClick={() => onOpen(item)}>
-                  进入档案 →
+                  {t('workbench.enterArchive')} <Text className='sl-directional-icon'>→</Text>
                 </Button>
               </View>
             </View>
@@ -121,7 +123,7 @@ export const ArchiveCarousel = memo(function ArchiveCarousel({ items, activeInde
         ))}
       </View>
 
-      {activeItem ? <View className='sl-carousel-active-sr'>{activeItem.name}</View> : null}
+      {activeItem ? <View className='sl-carousel-active-sr sl-auto-data' {...{ dir: 'auto' }}>{activeItem.name}</View> : null}
     </View>
   );
 });

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { ALLOW_LOCAL_VERIFICATION_FALLBACK } from '../config/env';
 import { fetchHealthRecord, fetchMedications, fetchScaleSummaries, fetchVerifiedBasicInfo } from '../api/scanApi';
+import { getDesignPreviewArchive, getDesignPreviewBasicInfo } from '../dev/designPreview';
 import type { ElderBasicInfo, HealthRecord, Medication, ScaleSummary } from '../types';
 
 export function useProtectedArchive(verified: boolean, sessionId: string, elderId?: string) {
@@ -23,6 +25,16 @@ export function useProtectedArchive(verified: boolean, sessionId: string, elderI
     setHealthRecord(null);
     setMedications(null);
     setScaleSummaries(null);
+
+    if (ALLOW_LOCAL_VERIFICATION_FALLBACK && (sessionId.startsWith('local-relay-') || sessionId.startsWith('local-identity-'))) {
+      setVerifiedBasicInfo(getDesignPreviewBasicInfo());
+      const previewArchive = getDesignPreviewArchive();
+      setHealthRecord(previewArchive.healthRecord);
+      setMedications(previewArchive.medications);
+      setScaleSummaries(previewArchive.scaleSummaries);
+      setLoading(false);
+      return;
+    }
 
     setLoading(true);
     let cancelled = false;

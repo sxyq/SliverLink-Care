@@ -50,7 +50,7 @@ describe('scanApi', () => {
     expect(getResolvedElderId()).toBe('elder-001');
     expect(getResolvedEmergencyPhone()).toBe('13800000000');
     expect(getResolvedEmergencyPhoneMasked()).toBe('138****0000');
-    expect(fetchMock).toHaveBeenCalledWith('/api/scan/resolve', expect.objectContaining({
+    expect(fetchMock).toHaveBeenCalledWith('/silverlink-api/api/scan/resolve', expect.objectContaining({
       method: 'POST',
       body: JSON.stringify({ token: 'qr-token-123456' }),
     }));

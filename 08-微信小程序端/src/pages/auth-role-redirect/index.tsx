@@ -1,13 +1,15 @@
 import { Text, View } from '@tarojs/components';
 
 import { useRoleRedirect } from '@/hooks/useRoleRedirect';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
 function RedirectHeader() {
+  const { t } = useI18n();
   return (
     <View className='sl-card sl-card-soft auth-role-redirect-inline-header'>
-      <View className='auth-role-redirect-title'>角色分流</View>
+      <View className='auth-role-redirect-title'>{t('common.roleRouting')}</View>
     </View>
   );
 }

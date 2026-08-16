@@ -18,6 +18,7 @@ import { canRegenerateQrCode, canRequestQrDisable } from '@/utils/permissions';
 import BottomNavGrid from '@/components/workbench/BottomNavGrid';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
@@ -57,7 +58,21 @@ function getQrImageClassName(status: string) {
   return 'sl-qr-image is-enabled';
 }
 
+function getStatusLabel(status: string, t: (key: string) => string) {
+  if (status === '已停用') {
+    return t('workbench.disabled');
+  }
+  if (status === '已重新生成') {
+    return t('workbench.regenerate');
+  }
+  if (status === '启用') {
+    return t('family.qrEnabled');
+  }
+  return status || t('workbench.unknownQrStatus');
+}
+
 export default function WorkbenchQrCodePage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
@@ -79,7 +94,7 @@ export default function WorkbenchQrCodePage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText('缺少老人标识，请返回详情页重新进入');
+      setErrorText(t('errors.noElderIdentifier'));
       return;
     }
 
@@ -96,7 +111,7 @@ export default function WorkbenchQrCodePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载二维码信息失败');
+          setErrorText((error as Error)?.message || t('errors.loadQrInfoFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -110,7 +125,7 @@ export default function WorkbenchQrCodePage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, session?.role]);
+  }, [elderId, session?.role, t]);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,13 +166,13 @@ export default function WorkbenchQrCodePage() {
       await Taro.setClipboardData({
         data: accessLink,
       });
-      setMessageText('二维码访问链接已复制。');
+      setMessageText(t('workbench.copiedAccessLink'));
     } catch (error) {
-      setErrorText((error as Error)?.message || '复制访问链接失败');
+      setErrorText((error as Error)?.message || t('errors.linkCopyFailed'));
     } finally {
       setBusyAction('');
     }
-  }, [info, busyAction]);
+  }, [info, busyAction, t]);
 
   const handleDisable = useCallback(async () => {
     if (!session || !elderId || busyAction || info?.status === '已停用' || info?.disableReviewStatus === 'PENDING') {
@@ -169,13 +184,13 @@ export default function WorkbenchQrCodePage() {
       setErrorText('');
       const result = await requestDisableWorkbenchQrCode(session.role, elderId);
       setInfo(result);
-      setMessageText(result.reviewMessage || '停用申请已提交');
+      setMessageText(result.reviewMessage || t('family.disablePending'));
     } catch (error) {
-      setErrorText((error as Error)?.message || '停用申请失败');
+      setErrorText((error as Error)?.message || t('errors.disableRequestFailed'));
     } finally {
       setBusyAction('');
     }
-  }, [session, elderId, busyAction, info?.status, info?.disableReviewStatus]);
+  }, [session, elderId, busyAction, info?.status, info?.disableReviewStatus, t]);
 
   const handleRegenerate = useCallback(async () => {
     if (!elderId || busyAction) {
@@ -187,13 +202,13 @@ export default function WorkbenchQrCodePage() {
       setErrorText('');
       const result = await regenerateWorkbenchQrCode(elderId);
       setInfo(result);
-      setMessageText('二维码已重新生成');
+      setMessageText(t('errors.qrRegenerated'));
     } catch (error) {
-      setErrorText((error as Error)?.message || '重新生成失败');
+      setErrorText((error as Error)?.message || t('errors.regenerateFailed'));
     } finally {
       setBusyAction('');
     }
-  }, [elderId, busyAction]);
+  }, [elderId, busyAction, t]);
 
   const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: `${APP_ROUTES.workbenchElderDetail}?elderId=${encodeURIComponent(elderId)}` }));
@@ -209,21 +224,23 @@ export default function WorkbenchQrCodePage() {
         url: `${APP_ROUTES.scanNameplate}?elderId=${encodeURIComponent(elderId)}`,
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || '打开名牌预览失败');
+      setErrorText((error as Error)?.message || t('errors.nameplateOpenFailed'));
     }
-  }, [busyAction, elderId]);
+  }, [busyAction, elderId, t]);
 
   if (!session) {
     return null;
   }
 
   const actionCount = [canRegenerateQrCode(session.role), canRequestQrDisable(session.role)].filter(Boolean).length;
+  const [qrCreatedAtPrefix = '', qrCreatedAtSuffix = ''] = t('workbench.qrCreatedAt').split('{time}');
+  const qrCreatedAt = formatDateTimeLabel(info?.createdAt || '');
 
   return (
     <WorkbenchShell pageClassName='workbench-qrcode-page'>
-      <WorkbenchHeader title='二维码查看与管理' subtitle={elderName || undefined} leadingAction={{ label: '返回', icon: '←', onClick: handleBack }} />
+      <WorkbenchHeader title={t('workbench.qrViewManage')} subtitle={elderName || undefined} leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }} />
 
-      {loading ? <View className='sl-card'><View className='sl-empty-state'>二维码信息加载中...</View></View> : null}
+      {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('common.qrCode')}</View></View> : null}
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
       {messageText ? <View className='workbench-qrcode-message'>{messageText}</View> : null}
 
@@ -231,17 +248,21 @@ export default function WorkbenchQrCodePage() {
         <>
           <View className='sl-card sl-card-soft workbench-qrcode-hero'>
             <View className='workbench-qrcode-hero-copy'>
-              <Text className='sl-overview-kicker'>扫码名牌</Text>
+              <Text className='sl-overview-kicker'>{t('workbench.scanNameplateKicker')}</Text>
             </View>
 
             <View className={getPreviewCardClassName(info.status)}>
-              <Text className={getStatusClassName(info.status)}>{info.status || '未知'}</Text>
-              <View className='sl-qr-preview-title'>{info.elderName || elderName || '当前老人'}的二维码</View>
-              <View className='sl-qr-preview-meta'>生成时间 {formatDateTimeLabel(info.createdAt)}</View>
+              <Text className={getStatusClassName(info.status)}>{getStatusLabel(info.status, t)}</Text>
+              <View className='sl-qr-preview-title'>{t('workbench.currentElderQr', { name: info.elderName || elderName || t('workbench.currentElder') })}</View>
+              <View className='sl-qr-preview-meta'>
+                <Text>{qrCreatedAtPrefix}</Text>
+                <Text className='sl-ltr-data' {...{ dir: 'ltr' }}>{qrCreatedAt}</Text>
+                <Text>{qrCreatedAtSuffix}</Text>
+              </View>
 
               <View className='sl-qr-preview-frame'>
                 <Button className='workbench-qrcode-export-button' onClick={() => void handleOpenNameplatePreview()}>
-                  导出名牌
+                  {t('workbench.exportNameplate')}
                 </Button>
                 <View className='sl-qr-preview-placeholder'>
                   {previewImage ? (
@@ -249,15 +270,15 @@ export default function WorkbenchQrCodePage() {
                   ) : (
                     <>
                       <Text className='sl-qr-preview-empty-icon'>⌁</Text>
-                      <Text className='sl-qr-preview-empty-title'>二维码预览暂不可用</Text>
-                      <Text className='sl-qr-preview-caption'>可复制访问链接，或重新生成二维码后再试</Text>
+                      <Text className='sl-qr-preview-empty-title'>{t('workbench.qrPreviewUnavailable')}</Text>
+                      <Text className='sl-qr-preview-caption'>{t('workbench.qrPreviewCopyHint')}</Text>
                     </>
                   )}
                 </View>
               </View>
 
               <Button className='sl-secondary-button workbench-qrcode-copy-button' loading={busyAction === 'copy'} onClick={handleCopyLink}>
-                复制访问链接
+                {t('workbench.copyAccessLink')}
               </Button>
             </View>
           </View>
@@ -266,8 +287,8 @@ export default function WorkbenchQrCodePage() {
             {canRegenerateQrCode(session.role) ? (
               <View className='sl-action-card sl-detail-action-card' onClick={() => void handleRegenerate()}>
                 <View className='sl-action-card__copy'>
-                  <Text className='sl-action-card__title'>{busyAction === 'regenerate' ? '重新生成中' : '重新生成'}</Text>
-                  <Text className='sl-action-card__desc'>刷新二维码与访问入口，旧二维码将被替换。</Text>
+                    <Text className='sl-action-card__title'>{busyAction === 'regenerate' ? t('workbench.regenerating') : t('workbench.regenerate')}</Text>
+                    <Text className='sl-action-card__desc'>{t('workbench.regenerateDescription')}</Text>
                 </View>
                 <View className='sl-action-card__arrow'>↻</View>
               </View>
@@ -277,12 +298,12 @@ export default function WorkbenchQrCodePage() {
               <View className='sl-action-card sl-detail-action-card sl-action-card--warning' onClick={() => void handleDisable()}>
                 <View className='sl-action-card__copy'>
                   <Text className='sl-action-card__title'>
-                    {busyAction === 'disable' ? '提交中' : info.status === '已停用' ? '已停用' : info.disableReviewStatus === 'PENDING' ? '审核中' : '停用二维码'}
+                    {busyAction === 'disable' ? t('workbench.submitPending') : info.status === '已停用' ? t('workbench.disabled') : info.disableReviewStatus === 'PENDING' ? t('workbench.reviewing') : t('workbench.disableQr')}
                   </Text>
                   <Text className='sl-action-card__desc'>
                     {info.disableReviewStatus === 'PENDING'
-                      ? info.reviewMessage || '停用申请已提交，等待管理员审核。'
-                      : info.reviewMessage || '停用后当前二维码将不再允许扫码访问。'}
+                      ? info.reviewMessage || t('family.disablePending')
+                      : info.reviewMessage || t('workbench.disableDescription')}
                   </Text>
                 </View>
                 <View className='sl-action-card__arrow'>⊘</View>

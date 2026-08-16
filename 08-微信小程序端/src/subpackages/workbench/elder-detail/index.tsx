@@ -1,25 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import Taro, { useRouter } from '@tarojs/taro';
-import { View } from '@tarojs/components';
+import { Text, View } from '@tarojs/components';
 
 import { APP_ROUTES } from '@/app/app.constants';
 import { fetchWorkbenchElderDetail, type WorkbenchElderDetail } from '@/services/workbench/elderService';
 import { getAuthSession } from '@/store/auth/authStore';
 import ActionTileGrid, { type ActionTileItem } from '@/components/workbench/ActionTileGrid';
-import SummaryHero from '@/components/workbench/SummaryHero';
+import SummaryHero, { type SummaryHeroField } from '@/components/workbench/SummaryHero';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
 import WorkbenchShell from '@/components/workbench/WorkbenchShell';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
-function toDisplayValue(value?: string | number) {
+function toDisplayValue(value: string | number | undefined, fallback: string) {
   if (value == null || value === '') {
-    return '未填写';
+    return fallback;
   }
   return String(value);
 }
 
 export default function WorkbenchElderDetailPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
 
@@ -37,7 +39,7 @@ export default function WorkbenchElderDetailPage() {
     }
 
     if (!elderId) {
-      setErrorText('缺少老人标识，请返回列表重新进入');
+      setErrorText(t('errors.noElderIdentifier'));
       setLoading(false);
       return;
     }
@@ -55,7 +57,7 @@ export default function WorkbenchElderDetailPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || '加载老人详情失败');
+          setErrorText((error as Error)?.message || t('errors.loadElderDetailFailed'));
           setDetail(null);
         }
       } finally {
@@ -70,25 +72,30 @@ export default function WorkbenchElderDetailPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, sessionRole]);
+  }, [elderId, sessionRole, t]);
 
-  const summaryFields = useMemo(() => {
+  const summaryFields = useMemo<SummaryHeroField[]>(() => {
     if (!detail) {
       return [];
     }
 
     return [
-      { label: '住址信息', value: toDisplayValue(detail.residence) },
+      { label: t('scan.addressInfo'), value: toDisplayValue(detail.residence, t('common.notProvided')), direction: 'auto' },
       {
-        label: '紧急联系人（关系）',
+        label: `${t('workbench.emergencyContact')}（${t('common.relationship')}）`,
         value: detail.emergencyContactName
           ? `${detail.emergencyContactName}${detail.emergencyContactRelation ? `（${detail.emergencyContactRelation}）` : ''}`
-          : '未填写',
+          : t('common.notProvided'),
+        direction: 'auto',
       },
-      { label: '联系电话', value: toDisplayValue(detail.emergencyContactPhone) },
-      { label: '血型 / 过敏史', value: detail.bloodType || detail.allergyHistory || '未填写' },
+      { label: t('common.contactPhone'), value: toDisplayValue(detail.emergencyContactPhone, t('common.notProvided')), direction: 'ltr' },
+      {
+        label: `${t('common.bloodType')} / ${t('common.allergyHistory')}`,
+        value: detail.bloodType || detail.allergyHistory || t('common.notProvided'),
+        direction: detail.bloodType ? 'ltr' : 'auto',
+      },
     ];
-  }, [detail]);
+  }, [detail, t]);
 
   const handleBack = useCallback(() => {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.workbenchElderList }));
@@ -105,11 +112,11 @@ export default function WorkbenchElderDetailPage() {
   }, [elderId]);
 
   const actionItems = useMemo<ActionTileItem[]>(() => [
-    { key: 'basic', title: '基本信息', description: '档案资料', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic) },
-    { key: 'medication', title: '主要用药', description: '用药记录', onClick: () => void handleOpenPage(APP_ROUTES.workbenchMedication) },
-    { key: 'scale', title: '量表信息', description: 'PHQ / GAD / UCLA', onClick: () => void handleOpenPage(APP_ROUTES.workbenchScale) },
-    { key: 'qrcode', title: '二维码管理', description: '扫码名牌', onClick: () => void handleOpenPage(APP_ROUTES.workbenchQrCode) },
-  ], [handleOpenPage]);
+    { key: 'basic', title: t('workbench.basicInfo'), description: t('workbench.archiveData'), onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic) },
+    { key: 'medication', title: t('workbench.medication'), description: t('workbench.medicationRecords'), onClick: () => void handleOpenPage(APP_ROUTES.workbenchMedication) },
+    { key: 'scale', title: t('workbench.scale'), description: 'PHQ / GAD / UCLA', onClick: () => void handleOpenPage(APP_ROUTES.workbenchScale) },
+    { key: 'qrcode', title: t('workbench.qrManagement'), description: t('workbench.scanNameplate'), onClick: () => void handleOpenPage(APP_ROUTES.workbenchQrCode) },
+  ], [handleOpenPage, t]);
 
   if (!session) {
     return null;
@@ -118,19 +125,25 @@ export default function WorkbenchElderDetailPage() {
   return (
     <WorkbenchShell pageClassName='workbench-elder-detail-page'>
       <WorkbenchHeader
-        title='老人详情'
-        leadingAction={{ label: '返回', icon: '←', onClick: handleBack }}
-        trailingAction={{ label: '编辑', icon: '', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
+        title={t('workbench.elderDetail')}
+        leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }}
+        trailingAction={{ label: t('common.edit'), icon: '', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
       />
 
-      {loading ? <View className='sl-card'><View className='sl-empty-state'>老人详情加载中...</View></View> : null}
+      {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('workbench.elderDetail')}</View></View> : null}
       {errorText ? <View className='sl-error-card'>{errorText}</View> : null}
 
       {!loading && detail ? (
         <>
           <SummaryHero
-            title={detail.name || '老人详情'}
-            meta={`档案编号 ${detail.archiveNo || '未分配'}${detail.gender ? ` ${detail.gender}` : ''}${detail.age ? ` ${detail.age}岁` : ''}`}
+            title={detail.name || t('workbench.elderDetail')}
+            meta={
+              <>
+                {t('common.archiveNumber')} <Text className='sl-ltr-data'>{detail.archiveNo || t('common.generatedPending')}</Text>
+                {detail.gender ? ` ${detail.gender === '男' ? t('common.male') : detail.gender === '女' ? t('common.female') : detail.gender}` : ''}
+                {detail.age ? <Text className='sl-auto-data' {...{ dir: 'auto' }}> {t('common.yearsOld', { age: detail.age })}</Text> : null}
+              </>
+            }
             fields={summaryFields}
           />
           <ActionTileGrid items={actionItems} detail />

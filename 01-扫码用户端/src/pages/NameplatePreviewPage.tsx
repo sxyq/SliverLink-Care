@@ -4,6 +4,7 @@ import { ActionButton } from '../components/ActionButton';
 import { reportAudit } from '../api/auditApi';
 import { ENDPOINTS } from '../config/endpoints';
 import { API_BASE_URL } from '../config/env';
+import { useI18n } from '../i18n';
 
 interface NameplatePreviewPageProps {
   elderId: string;
@@ -21,6 +22,7 @@ export function NameplatePreviewPage({
   archiveNo = '',
 }: NameplatePreviewPageProps) {
   const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
 
   async function handleDownloadPdf() {
     setLoading(true);
@@ -29,13 +31,13 @@ export function NameplatePreviewPage({
         method: 'GET',
       });
 
-      if (!res.ok) throw new Error('PDF 生成失败');
+      if (!res.ok) throw new Error(t('errors.exportRetry'));
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `智联名牌_${archiveNo || elderId}.pdf`;
+      a.download = `${t('common.appName')}_${archiveNo || elderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -43,7 +45,7 @@ export function NameplatePreviewPage({
 
       reportAudit({ action: 'nameplate_pdf_download', target: archiveNo || elderId }).catch(() => {});
     } catch {
-      alert('PDF 下载失败，请稍后重试');
+      alert(t('scan.pdfDownloadFailed'));
     } finally {
       setLoading(false);
     }
@@ -53,8 +55,8 @@ export function NameplatePreviewPage({
     <div className="sl-page">
       <header className="sl-hero slim">
         <div>
-          <h1>实体名牌预览</h1>
-          <p>正面与背面打印效果预览</p>
+          <h1>{t('scan.nameplatePreview')}</h1>
+          <p>{t('scan.previewPreparing')}</p>
         </div>
         <QrCode size={32} />
       </header>
@@ -62,20 +64,20 @@ export function NameplatePreviewPage({
       <section className="sl-card">
         <div className="sl-section-title">
           <ArrowLeft size={18} />
-          <h2>正面（佩戴面）</h2>
+          <h2>{t('scan.frontNameplate')}</h2>
         </div>
         <div className="sl-nameplate-front">
           <div className="sl-nameplate-field">
-            <span className="sl-nameplate-label">姓名</span>
-            <span className="sl-nameplate-placeholder">{name || '未填写'}</span>
+            <span className="sl-nameplate-label">{t('common.name')}</span>
+            <span className="sl-nameplate-placeholder sl-auto-data" dir="auto">{name || t('scan.unanswered')}</span>
           </div>
           <div className="sl-nameplate-field">
-            <span className="sl-nameplate-label">年龄</span>
-            <span className="sl-nameplate-placeholder">{age ? `${age} 岁` : '未填写'}</span>
+            <span className="sl-nameplate-label">{t('common.age')}</span>
+            <span className="sl-nameplate-placeholder">{age ? t('common.yearsOld', { age }) : t('scan.unanswered')}</span>
           </div>
           <div className="sl-nameplate-field">
-            <span className="sl-nameplate-label">联系电话</span>
-            <span className="sl-nameplate-placeholder">{phone || '未填写'}</span>
+            <span className="sl-nameplate-label">{t('common.contactPhone')}</span>
+            <span className="sl-nameplate-placeholder sl-ltr-data">{phone || t('scan.unanswered')}</span>
           </div>
         </div>
       </section>
@@ -83,17 +85,17 @@ export function NameplatePreviewPage({
       <section className="sl-card">
         <div className="sl-section-title">
           <ArrowLeft size={18} />
-          <h2>背面（信息面）</h2>
+          <h2>{t('scan.backNameplate')}</h2>
         </div>
         <div className="sl-nameplate-back">
           <div className="sl-nameplate-qr-area">
             <QrCode size={64} />
-            <span className="sl-nameplate-qr-hint">微信扫码查看健康档案</span>
+            <span className="sl-nameplate-qr-hint">{t('scan.wechatScanHealthArchive')}</span>
           </div>
           <div className="sl-nameplate-divider" />
           <div className="sl-nameplate-field">
-            <span className="sl-nameplate-label">档案编号</span>
-            <span className="sl-nameplate-placeholder">{archiveNo || '未生成'}</span>
+            <span className="sl-nameplate-label">{t('common.healthRecordNo')}</span>
+            <span className="sl-nameplate-placeholder sl-ltr-data">{archiveNo || t('scan.notGenerated')}</span>
           </div>
         </div>
       </section>
@@ -105,7 +107,7 @@ export function NameplatePreviewPage({
           onClick={handleDownloadPdf}
           disabled={loading}
         >
-          {loading ? '生成中...' : '生成 PDF'}
+          {loading ? t('scan.generatingPdf') : t('scan.generatePdf')}
         </ActionButton>
         <ActionButton
           icon={Download}
@@ -113,12 +115,12 @@ export function NameplatePreviewPage({
           onClick={handleDownloadPdf}
           disabled={loading}
         >
-          {loading ? '下载中...' : '下载 PDF'}
+          {loading ? t('scan.downloadingPdf') : t('scan.downloadPdf')}
         </ActionButton>
       </div>
 
       <p className="sl-nameplate-note">
-        二维码由后端加密生成，前端不自行生成明文二维码。
+        {t('scan.qrBackendNotice')}
       </p>
     </div>
   );

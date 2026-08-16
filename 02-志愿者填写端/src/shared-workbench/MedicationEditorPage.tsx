@@ -3,6 +3,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import type { CareMedicationRecord } from './types';
 import { PageHeader } from '../components/PageHeader';
+import { useI18n } from '../i18n';
 
 type DraftMedication = Omit<CareMedicationRecord, 'updatedAt'>;
 
@@ -30,13 +31,14 @@ export function MedicationEditorPage({
   title,
   loading = false,
   medications,
-  saveLabel = '保存',
+  saveLabel,
   onSaveBatch,
   onCreate,
   onUpdate,
   onDelete,
   onBack,
 }: MedicationEditorPageProps) {
+  const { t } = useI18n();
   const batchMode = useMemo(() => Boolean(onSaveBatch) && !onCreate && !onUpdate && !onDelete, [onCreate, onDelete, onSaveBatch, onUpdate]);
   const [drafts, setDrafts] = useState<CareMedicationRecord[]>(medications);
   const [editing, setEditing] = useState<DraftMedication>(emptyDraft());
@@ -80,7 +82,7 @@ export function MedicationEditorPage({
 
   async function handleModalSave() {
     if (!editing.name.trim()) {
-      alert('请输入药品名称');
+      alert(t('errors.medicationNameRequired'));
       return;
     }
 
@@ -103,7 +105,7 @@ export function MedicationEditorPage({
       }
       closeModal();
     } catch (error) {
-      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
+      alert(error instanceof Error ? error.message : t('errors.saveRetry'));
     } finally {
       setSaving(false);
     }
@@ -118,7 +120,7 @@ export function MedicationEditorPage({
     try {
       await onDelete(id);
     } catch (error) {
-      alert(error instanceof Error ? error.message : '删除失败，请稍后重试');
+      alert(error instanceof Error ? error.message : t('errors.deleteRetry'));
     }
   }
 
@@ -136,7 +138,7 @@ export function MedicationEditorPage({
         })),
       );
     } catch (error) {
-      alert(error instanceof Error ? error.message : '保存失败，请稍后重试');
+      alert(error instanceof Error ? error.message : t('errors.saveRetry'));
     } finally {
       setSaving(false);
     }
@@ -144,21 +146,21 @@ export function MedicationEditorPage({
 
   return (
     <div className="sl-page">
-      <PageHeader title="主要用药" subtitle={title} onBack={onBack} />
+      <PageHeader title={t('workbench.medication')} subtitle={title} onBack={onBack} />
 
       <section className="sl-card sl-card-soft">
         <div className="sl-section-title">
-          <h2>用药清单</h2>
+          <h2>{t('workbench.medicationList')}</h2>
         </div>
-        <p className="sl-section-hint">按照药品名称、剂量、用法和用药时间逐条维护，提交后同步到老人护理档案。</p>
+        <p className="sl-section-hint">{t('workbench.medicationHint')}</p>
         <div className="sl-submit-bar">
           <button type="button" className="sl-btn sl-btn-secondary" onClick={openCreate}>
             <Plus size={16} />
-            添加用药
+            {t('workbench.addMedication')}
           </button>
           {batchMode ? (
             <button type="button" className="sl-btn sl-btn-primary" onClick={() => void handleSaveBatch()} disabled={saving}>
-              {saving ? '保存中...' : saveLabel}
+              {saving ? t('common.saving') : saveLabel || t('common.save')}
             </button>
           ) : null}
         </div>
@@ -166,32 +168,32 @@ export function MedicationEditorPage({
 
       {loading ? (
         <section className="sl-card">
-          <div className="sl-empty-state">加载中...</div>
+          <div className="sl-empty-state">{t('common.loading')}</div>
         </section>
       ) : currentItems.length === 0 ? (
         <section className="sl-card">
-          <div className="sl-empty-state">暂无用药记录</div>
+          <div className="sl-empty-state">{t('workbench.noMedication')}</div>
         </section>
       ) : (
         <section className="sl-table-card">
           <div className="sl-table-header">
-            <span>药品名称</span>
-            <span>剂量</span>
-            <span>用法</span>
-            <span>用药时间</span>
-            <span>操作</span>
+            <span>{t('workbench.medicationName')}</span>
+            <span>{t('workbench.dosage')}</span>
+            <span>{t('workbench.usage')}</span>
+            <span>{t('workbench.medicationTime')}</span>
+            <span>{t('workbench.actions')}</span>
           </div>
           {currentItems.map((item) => (
             <div key={item.id} className="sl-table-row">
-              <span>{item.name}</span>
-              <span>{item.dosage || '-'}</span>
-              <span>{item.usage || '-'}</span>
-              <span>{item.timing || '-'}</span>
+              <span className="sl-auto-data" dir="auto">{item.name}</span>
+              <span className="sl-ltr-data" dir="ltr">{item.dosage || '-'}</span>
+              <span className="sl-auto-data" dir="auto">{item.usage || '-'}</span>
+              <span className="sl-ltr-data" dir="ltr">{item.timing || '-'}</span>
               <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
                 <button type="button" className="sl-ghost-btn" onClick={() => openEdit(item)}>
-                  编辑
+                  {t('common.edit')}
                 </button>
-                <button type="button" className="sl-icon-btn" onClick={() => void handleDelete(item.id)} aria-label="删除药品">
+                <button type="button" className="sl-icon-btn" onClick={() => void handleDelete(item.id)} aria-label={t('workbench.deleteMedication')}>
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -203,27 +205,27 @@ export function MedicationEditorPage({
       {showModal ? (
         <div className="sl-modal-overlay" onClick={closeModal}>
           <div className="sl-modal-card" onClick={(event) => event.stopPropagation()}>
-            <h3>{editingId ? '编辑药品' : '新增药品'}</h3>
+            <h3>{editingId ? t('workbench.editMedication') : t('workbench.addMedication')}</h3>
             <div className="sl-form-grid">
-              <Field label="药品名称">
-                <input className="sl-input" value={editing.name} onChange={(event) => updateDraftField('name', event.target.value)} />
+              <Field label={t('workbench.medicationName')}>
+                <input className="sl-input sl-auto-data" dir="auto" value={editing.name} onChange={(event) => updateDraftField('name', event.target.value)} />
               </Field>
-              <Field label="剂量">
-                <input className="sl-input" value={editing.dosage} onChange={(event) => updateDraftField('dosage', event.target.value)} />
+              <Field label={t('workbench.dosage')}>
+                <input className="sl-input sl-ltr-data" dir="ltr" value={editing.dosage} onChange={(event) => updateDraftField('dosage', event.target.value)} />
               </Field>
-              <Field label="用法">
-                <input className="sl-input" value={editing.usage} onChange={(event) => updateDraftField('usage', event.target.value)} />
+              <Field label={t('workbench.usage')}>
+                <input className="sl-input sl-auto-data" dir="auto" value={editing.usage} onChange={(event) => updateDraftField('usage', event.target.value)} />
               </Field>
-              <Field label="用药时间">
-                <input className="sl-input" value={editing.timing} onChange={(event) => updateDraftField('timing', event.target.value)} />
+              <Field label={t('workbench.medicationTime')}>
+                <input className="sl-input sl-ltr-data" dir="ltr" value={editing.timing} onChange={(event) => updateDraftField('timing', event.target.value)} />
               </Field>
             </div>
             <div className="sl-modal-actions">
               <button type="button" className="sl-btn sl-btn-secondary" onClick={closeModal}>
-                取消
+                {t('common.cancel')}
               </button>
               <button type="button" className="sl-btn sl-btn-primary" onClick={() => void handleModalSave()} disabled={saving}>
-                {saving ? '保存中...' : '确认保存'}
+                {saving ? t('common.saving') : t('workbench.confirmSave')}
               </button>
             </div>
           </div>

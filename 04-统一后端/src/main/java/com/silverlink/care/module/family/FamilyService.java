@@ -35,7 +35,7 @@ public class FamilyService {
     public FamilyLoginResultDto login(FamilyLoginRequest req) {
         var user = data.login(req.getPhone(), req.getPassword(), "FAMILY");
         if (user.isEmpty()) {
-            return new FamilyLoginResultDto(false, null, "手机号或密码错误");
+            return new FamilyLoginResultDto(false, null, "手机号或密码错误", "errors.familyLoginFailed");
         }
         return new FamilyLoginResultDto(true, jwtTokenProvider.generateToken(req.getPhone(), "FAMILY", 86400000L), "登录成功");
     }
@@ -141,10 +141,10 @@ public class FamilyService {
         checkBinding(resolveFamilyUserId(familyAccount), elderId);
         Map<String, Object> elder = data.elderDetail(elderId, false);
         if (!"ACTIVE".equalsIgnoreCase(data.str(elder.get("status")))) {
-            throw new BizException(404, "老人档案已停用，二维码不可用");
+            throw new BizException(404, "老人档案已停用，二维码不可用", "errors.elderInactive");
         }
         List<Map<String, Object>> rows = jdbc.queryForList("select * from qr_code where elder_id=? and status='ENABLED' order by created_at desc limit 1", elderId);
-        if (rows.isEmpty()) throw new BizException(404, "二维码不存在，请联系管理员生成");
+        if (rows.isEmpty()) throw new BizException(404, "二维码不存在，请联系管理员生成", "errors.qrNotFound");
         Map<String, Object> row = rows.get(0);
         FamilyQrCodeDto dto = new FamilyQrCodeDto();
         dto.setToken(data.str(row.get("qr_token")));
@@ -171,7 +171,7 @@ public class FamilyService {
         checkBinding(familyUserId, elderId);
         QrCodeEntity current = qrCodeService.findCurrentByElder(elderId);
         if (current == null) {
-            throw new BizException(404, "当前老人暂无二维码");
+            throw new BizException(404, "当前老人暂无二维码", "errors.qrMissing");
         }
         Map<String, Object> review = reviewRequestService.createQrDisableRequest(familyAccount, "FAMILY", elderId, current);
         FamilyQrCodeDto dto = qrcode(elderId, familyAccount);
@@ -209,7 +209,7 @@ public class FamilyService {
 
     private String resolveFamilyUserId(String familyAccount) {
         if (familyAccount == null || familyAccount.isBlank()) {
-            throw new BizException(401, "未登录或 Token 无效");
+            throw new BizException(401, "未登录或 Token 无效", "errors.loginRequired");
         }
         Map<String, Object> user = data.one("select * from app_user where account=? and role='FAMILY' and status='ACTIVE'", familyAccount);
         return data.str(user.get("id"));
@@ -217,7 +217,7 @@ public class FamilyService {
 
     private void checkBinding(String familyUserId, String elderId) {
         if (!data.isFamilyBound(familyUserId, elderId)) {
-            throw new BizException(403, "无权访问该老人信息");
+            throw new BizException(403, "无权访问该老人信息", "errors.permissionDenied");
         }
     }
 }

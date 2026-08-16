@@ -165,8 +165,8 @@ const landingSource = await readText('src/subpackages/scan/landing/index.tsx');
 assertContainsAll(landingSource, [
   'function maskName(name: string)',
   'maskName(basicInfo.name)',
-  'info.emergencyPhoneMasked',
-  '完成验证后可查看老人详细住址信息',
+  'basicInfo.emergencyPhoneMasked',
+  "t('scan.completeVerifyToViewAddress')",
   'handleEmergencyCall(basicInfo.emergencyPhoneDial)',
   'basicInfo.allergySummary',
 ], 'scan landing public-before-verify privacy contract');
@@ -174,14 +174,14 @@ assertNotContains(landingSource, ['basicInfo.residence'], 'scan landing must not
 
 const verifySource = await readText('src/subpackages/scan/verify/index.tsx');
 assertContainsAll(verifySource, [
-  'function formatSmsReceiverLabel(maskedPhone: string)',
+  'function formatSmsReceiverLabel(maskedPhone: string, fallback: string)',
   'value={identityPhone}',
   'value={identityIdCard}',
   'phone: normalizePhone(identityPhone)',
   'idCard: normalizeIdCard(identityIdCard)',
   'await Taro.setClipboardData({ data: smsMessageBody })',
   'window.location.href = buildSmsLink(smsReceiverPhone, smsMessageBody)',
-  'formatSmsReceiverLabel(smsReceiverPhoneMasked)',
+  "formatSmsReceiverLabel(smsReceiverPhoneMasked, t('errors.noPhone'))",
   'smsReceiverPhoneMasked ?',
   'scan-verify-data-card scan-verify-data-card--message',
 ], 'scan verify sensitive field channel contract');

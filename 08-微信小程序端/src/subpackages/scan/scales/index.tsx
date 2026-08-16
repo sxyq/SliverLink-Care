@@ -2,21 +2,23 @@ import { useEffect, useState } from 'react';
 import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
-import { APP_ROUTES, ERROR_MESSAGES } from '@/app/app.constants';
+import { APP_ROUTES } from '@/app/app.constants';
 import { fetchScales } from '@/services/scan/scanArchiveService';
 import type { ScanScaleSummaryItem } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
+import { useI18n } from '@/i18n';
 
 import './index.scss';
 
-function formatDate(value: string) {
+function formatDate(value: string, fallback: string) {
   if (!value) {
-    return '暂无记录';
+    return fallback;
   }
   return value.slice(0, 10);
 }
 
 export default function ScanScalesPage() {
+  const { t } = useI18n();
   const router = useRouter();
   const params = parseQueryParams(router.params || {});
   const elderId = params.elderId || '';
@@ -38,7 +40,7 @@ export default function ScanScalesPage() {
   useEffect(() => {
     if (!elderId || !sessionId) {
       setLoading(false);
-      setErrorText('缺少访问会话，请返回验证页重新进入。');
+      setErrorText(t('errors.sessionRequired'));
       return;
     }
 
@@ -54,7 +56,7 @@ export default function ScanScalesPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || ERROR_MESSAGES.requestFailed);
+          setErrorText((error as Error)?.message || t('errors.requestFailed'));
         }
       } finally {
         if (!cancelled) {
@@ -68,7 +70,7 @@ export default function ScanScalesPage() {
     return () => {
       cancelled = true;
     };
-  }, [elderId, sessionId]);
+  }, [elderId, sessionId, t]);
 
   function handleBack() {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: buildArchiveUrl() }));
@@ -83,11 +85,11 @@ export default function ScanScalesPage() {
               <View className='sl-page-header-bar'>
                 <View className='sl-page-header-action'>
                   <View className='sl-page-header-icon' onClick={handleBack}>
-                    返回
+                    {t('common.back')}
                   </View>
                 </View>
                 <View className='sl-page-header-copy'>
-                  <View className='sl-page-header-copy__title'>量表记录</View>
+                  <View className='sl-page-header-copy__title'>{t('scan.scaleRecords')}</View>
                 </View>
                 <View className='sl-page-header-placeholder' />
               </View>
@@ -95,7 +97,7 @@ export default function ScanScalesPage() {
               {hasProtectedContext ? (
                 <View className='sl-action-grid scan-scales-actions'>
                   <Button className='sl-secondary-button' onClick={() => Taro.redirectTo({ url: buildArchiveUrl() })}>
-                    返回档案
+                    {t('scan.backToArchive')}
                   </Button>
                   <Button
                     className='sl-secondary-button'
@@ -103,35 +105,35 @@ export default function ScanScalesPage() {
                       Taro.redirectTo({ url: `${APP_ROUTES.scanMedications}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}` })
                     }
                   >
-                    查看用药
+                    {t('scan.viewMedication')}
                   </Button>
                 </View>
               ) : null}
 
               {loading ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>正在加载量表记录...</View>
+                  <View className='sl-empty-state'>{t('common.loading')} {t('scan.scaleRecords')}</View>
                 </View>
               ) : errorText ? (
                 <View className='sl-card sl-form-panel'>
                   <View className='sl-error-card'>{errorText}</View>
                   <Button className='sl-secondary-button scan-scales-panel__button' onClick={() => Taro.redirectTo({ url: buildVerifyUrl() })}>
-                    返回验证页
+                    {t('scan.backToVerify')}
                   </Button>
                 </View>
               ) : items.length === 0 ? (
                 <View className='sl-card'>
-                  <View className='sl-empty-state'>暂无量表记录。</View>
+                  <View className='sl-empty-state'>{t('scan.noScaleRecords')}</View>
                 </View>
               ) : (
                 <View className='scan-scales-list'>
                   {items.map((item) => (
                     <View key={`${item.name}-${item.updatedAt}`} className='sl-card scan-scales-item'>
-                      <View className='scan-scales-item__icon'>表</View>
+                      <View className='scan-scales-item__icon'>≋</View>
                       <View className='scan-scales-item__body'>
-                        <View className='scan-scales-item__name'>{item.name || '未命名量表'}</View>
+                        <View className='scan-scales-item__name'>{item.name || t('common.unknownScale')}</View>
                         <View className='scan-scales-item__summary'>
-                          最近记录：{formatDate(item.updatedAt)} | 分数 <Text className='scan-scales-item__score'>{item.score}</Text>
+                          {t('scan.recentRecord')}：<Text className='sl-ltr-data'>{formatDate(item.updatedAt, t('common.noRecords'))}</Text> | {t('scan.score')} <Text className='scan-scales-item__score sl-ltr-data'>{item.score}</Text>
                         </View>
                       </View>
                     </View>
@@ -139,7 +141,7 @@ export default function ScanScalesPage() {
                 </View>
               )}
 
-              {!loading && !errorText && items.length ? <View className='scan-scales-privacy-pill'>隐私保护</View> : null}
+              {!loading && !errorText && items.length ? <View className='scan-scales-privacy-pill'>{t('scan.privacyProtection')}</View> : null}
             </View>
           </View>
         </View>

@@ -63,7 +63,165 @@ page {
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.95), transparent 35%),
     linear-gradient(180deg, #f8fdff 0%, $sl-bg 46%, #eaf6f9 100%);
-  font-family: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Naskh Arabic', 'Noto Sans Arabic', sans-serif;
+  direction: ltr;
+}
+
+.sl-app-root {
+  min-height: 100vh;
+}
+
+.sl-app-root.sl-dir-rtl,
+.sl-app-root.sl-dir-rtl .sl-page,
+.sl-app-root.sl-dir-rtl .sl-card,
+.sl-app-root.sl-dir-rtl input,
+.sl-app-root.sl-dir-rtl button {
+  direction: rtl;
+  text-align: start;
+  font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+}
+
+.sl-app-root .sl-auto-data,
+.sl-app-root input.sl-auto-data,
+.sl-app-root textarea.sl-auto-data {
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+.sl-app-root .sl-ltr-data,
+.sl-app-root input.sl-ltr-data,
+.sl-app-root .sl-phone-number,
+.sl-app-root .sl-verify-data-card--message {
+  direction: ltr;
+  unicode-bidi: plaintext;
+  text-align: start;
+}
+
+.sl-dir-rtl .sl-header-icon-glyph.is-directional,
+.sl-dir-rtl .sl-single-action__arrow,
+.sl-dir-rtl .sl-action-card__arrow.is-directional,
+.sl-dir-rtl .sl-directional-icon {
+  transform: scaleX(-1);
+}
+
+.sl-language-switcher {
+  position: fixed;
+  top: calc(constant(safe-area-inset-top) + 18rpx);
+  top: calc(env(safe-area-inset-top, 0px) + 18rpx);
+  right: 18rpx;
+  left: auto;
+  z-index: 20;
+  direction: ltr;
+}
+
+.sl-language-switcher__trigger {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12rpx;
+  min-width: 190rpx;
+  min-height: 56rpx;
+  padding: 0 18rpx;
+  color: var(--sl-primary-ink);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1rpx solid rgba(20, 121, 184, 0.18);
+  border-radius: 999rpx;
+  box-shadow: 0 8rpx 18rpx rgba(12, 79, 117, 0.1);
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 56rpx;
+  white-space: nowrap;
+}
+
+.sl-dir-rtl .sl-language-switcher {
+  right: 18rpx;
+  left: auto;
+}
+
+.sl-language-switcher__chevron {
+  color: var(--sl-text-secondary);
+  font-size: 24rpx;
+  line-height: 1;
+}
+
+.sl-language-switcher__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: transparent;
+}
+
+.sl-language-menu {
+  position: absolute;
+  top: calc(100% + 12rpx);
+  right: 0;
+  left: auto;
+  z-index: 2;
+  width: 260rpx;
+  max-width: calc(100vw - 36rpx);
+  padding: 8rpx;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.99);
+  border: 1rpx solid rgba(20, 121, 184, 0.18);
+  border-radius: 20rpx;
+  box-shadow: 0 20rpx 42rpx rgba(12, 79, 117, 0.18);
+}
+
+.sl-language-menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24rpx;
+  width: 100%;
+  min-height: 72rpx;
+  padding: 0 18rpx;
+  color: var(--sl-text);
+  background: transparent;
+  border: 0;
+  border-radius: 14rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  line-height: 72rpx;
+  white-space: nowrap;
+}
+
+.sl-language-menu__item[aria-checked='true'] {
+  color: var(--sl-primary-deep);
+  background: var(--sl-surface-muted);
+}
+
+.sl-app-root .sl-language-switcher__trigger[dir='ltr'],
+.sl-app-root .sl-language-switcher__trigger.is-ltr,
+.sl-app-root .sl-language-menu__item[dir='ltr'],
+.sl-app-root .sl-language-menu__item.is-ltr {
+  direction: ltr;
+  text-align: start;
+}
+
+.sl-app-root .sl-language-switcher__trigger[dir='rtl'],
+.sl-app-root .sl-language-switcher__trigger.is-rtl,
+.sl-app-root .sl-language-menu__item[dir='rtl'],
+.sl-app-root .sl-language-menu__item.is-rtl {
+  direction: rtl;
+  text-align: start;
+}
+
+@media (max-width: 360px) {
+  .sl-language-switcher {
+    right: 12rpx;
+  }
+
+  .sl-language-switcher__trigger {
+    min-width: 168rpx;
+    padding-inline: 14rpx;
+  }
+
+  .sl-language-menu {
+    width: 236rpx;
+    max-width: calc(100vw - 24rpx);
+  }
 }
 
 view,
@@ -790,7 +948,7 @@ button::after {
   gap: 12rpx;
   min-height: 112rpx;
   padding: 18rpx 20rpx;
-  text-align: left;
+  text-align: start;
   color: $sl-primary-ink;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
   border: 1rpx solid $sl-border;
@@ -1014,7 +1172,7 @@ button::after {
   min-height: 176rpx;
   padding: 32rpx 28rpx;
   color: $sl-primary-ink;
-  text-align: left;
+  text-align: start;
   background: linear-gradient(180deg, #ffffff 0%, #f8fbfc 100%);
   border: 1rpx solid $sl-border;
   border-radius: 36rpx;
@@ -1457,7 +1615,7 @@ button::after {
   color: $sl-text-secondary;
   font-size: 22rpx;
   line-height: 1.6;
-  text-align: right;
+  text-align: end;
 }
 
 .sl-scale-window-note {
@@ -1491,7 +1649,7 @@ button::after {
 }
 
 .sl-question-num {
-  margin-right: 10rpx;
+  margin-inline-end: 10rpx;
   color: $sl-primary-deep;
   font-weight: 800;
 }
@@ -1515,7 +1673,7 @@ button::after {
   color: $sl-text;
   font-size: 26rpx;
   font-weight: 500;
-  text-align: left;
+  text-align: start;
   line-height: 1.5;
 }
 

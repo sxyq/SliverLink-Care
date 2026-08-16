@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useI18n } from '../i18n';
 
 interface PageHeaderProps {
   title: string;
@@ -10,12 +11,13 @@ interface PageHeaderProps {
 }
 
 export function PageHeader({ title, subtitle, onBack, leadingAction, action }: PageHeaderProps) {
+  const { t } = useI18n();
   return (
     <header className="sl-page-header-bar">
       {leadingAction ? (
         <div className="sl-page-header-action">{leadingAction}</div>
       ) : onBack ? (
-        <button type="button" className="sl-page-header-icon" onClick={onBack} aria-label="返回">
+        <button type="button" className="sl-page-header-icon is-leading-back" onClick={onBack} aria-label={t('common.back')}>
           <ArrowLeft size={20} />
         </button>
       ) : (

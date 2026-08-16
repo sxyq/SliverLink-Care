@@ -7,7 +7,10 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@shared-i18n/*": ["../shared/i18n/*"],
+      "react": ["node_modules/@types/react"],
+      "react/*": ["node_modules/@types/react/*"]
     },
     "types": ["@tarojs/taro", "node"],
     "allowSyntheticDefaultImports": true,

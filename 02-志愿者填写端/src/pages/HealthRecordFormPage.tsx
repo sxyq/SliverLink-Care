@@ -7,6 +7,7 @@ import { PageHeader } from '../components/PageHeader';
 import { SelectChips } from '../components/SelectChips';
 import { SubmitBar } from '../components/SubmitBar';
 import { TextInput } from '../components/TextInput';
+import { useI18n } from '../i18n';
 
 interface HealthRecordFormPageProps {
   elder: AssignedElder;
@@ -29,6 +30,7 @@ const cognitiveOptions = ['正常', '可疑', '异常'];
 const emotionOptions = ['无明显异常', '轻度', '中度', '重度'];
 
 export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProps) {
+  const { t } = useI18n();
   const [form, setForm] = useState<HealthFormState>(defaultForm);
   const [saving, setSaving] = useState(false);
 
@@ -42,10 +44,10 @@ export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProp
     setSaving(true);
     try {
       await saveHealthRecord(elder.id, form);
-      alert('健康档案已保存');
+      alert(t('errors.healthRecordSaved'));
       onBack();
     } catch (e) {
-      alert('保存失败，请重试');
+      alert(t('errors.saveFailed'));
     } finally {
       setSaving(false);
     }
@@ -53,43 +55,63 @@ export function HealthRecordFormPage({ elder, onBack }: HealthRecordFormPageProp
 
   return (
     <div className="sl-page">
-      <PageHeader title="健康档案填写" subtitle={elder.name} onBack={onBack} />
+      <PageHeader title={t('workbench.healthRecordForm')} subtitle={elder.name} onBack={onBack} />
 
-      <FormSection title="健康指标">
+      <FormSection title={t('workbench.healthIndicators')}>
         <div className="sl-metric-grid">
           <div className="sl-metric-row">
-            <span className="sl-label-text">身高</span>
+            <span className="sl-label-text">{t('scan.height')}</span>
             <TextInput label="" type="number" value={form.heightCm} onChange={(value) => handleChange('heightCm', value)} suffix="cm" />
           </div>
           <div className="sl-metric-row">
-            <span className="sl-label-text">体重</span>
+            <span className="sl-label-text">{t('scan.weight')}</span>
             <TextInput label="" type="number" value={form.weightKg} onChange={(value) => handleChange('weightKg', value)} suffix="kg" />
           </div>
           <div className="sl-metric-row">
-            <span className="sl-label-text">腰围</span>
+            <span className="sl-label-text">{t('workbench.waist')}</span>
             <TextInput label="" type="number" value={form.waistCm} onChange={(value) => handleChange('waistCm', value)} suffix="cm" />
           </div>
           <div className="sl-metric-row">
             <span className="sl-label-text">BMI</span>
-            <TextInput label="" value={bmi} onChange={() => undefined} readOnly />
+            <TextInput label="" type="number" value={bmi} onChange={() => undefined} readOnly />
           </div>
         </div>
       </FormSection>
 
-      <FormSection title="自评健康状况">
-        <SelectChips options={healthOptions} value={form.healthSelfAssessment} onChange={(value) => handleChange('healthSelfAssessment', value)} />
+      <FormSection title={t('workbench.selfRatedHealth')}>
+        <SelectChips
+          options={healthOptions}
+          value={form.healthSelfAssessment}
+          onChange={(value) => handleChange('healthSelfAssessment', value)}
+          getLabel={(value) => ({ 很好: t('workbench.veryGood'), 较好: t('workbench.good'), 一般: t('workbench.average'), 较差: t('workbench.poor'), 很差: t('workbench.veryPoor') } as Record<string, string>)[value] || value}
+        />
       </FormSection>
 
-      <FormSection title="生活自理能力">
-        <SelectChips options={selfCareOptions} value={form.selfCareAssessment} onChange={(value) => handleChange('selfCareAssessment', value)} />
+      <FormSection title={t('workbench.selfCareAbility')}>
+        <SelectChips
+          options={selfCareOptions}
+          value={form.selfCareAssessment}
+          onChange={(value) => handleChange('selfCareAssessment', value)}
+          getLabel={(value) => ({ 完全自理: t('workbench.fullyIndependent'), 部分自理: t('workbench.partlyIndependent'), 不能自理: t('workbench.dependent') } as Record<string, string>)[value] || value}
+        />
       </FormSection>
 
-      <FormSection title="认知功能筛查（近 1 个月）">
-        <SelectChips options={cognitiveOptions} value={form.cognitiveScreening} onChange={(value) => handleChange('cognitiveScreening', value)} />
+      <FormSection title={t('workbench.cognitiveScreening')}>
+        <SelectChips
+          options={cognitiveOptions}
+          value={form.cognitiveScreening}
+          onChange={(value) => handleChange('cognitiveScreening', value)}
+          getLabel={(value) => ({ 正常: t('scan.levelNormal'), 可疑: t('workbench.suspicious'), 异常: t('workbench.abnormal') } as Record<string, string>)[value] || value}
+        />
       </FormSection>
 
-      <FormSection title="情绪状态筛查（近 2 周）">
-        <SelectChips options={emotionOptions} value={form.emotionScreening} onChange={(value) => handleChange('emotionScreening', value)} />
+      <FormSection title={t('workbench.emotionScreening')}>
+        <SelectChips
+          options={emotionOptions}
+          value={form.emotionScreening}
+          onChange={(value) => handleChange('emotionScreening', value)}
+          getLabel={(value) => ({ 无明显异常: t('workbench.noObviousAbnormality'), 轻度: t('scan.levelMild'), 中度: t('scan.levelModerate'), 重度: t('scan.levelSevere') } as Record<string, string>)[value] || value}
+        />
       </FormSection>
 
       <SubmitBar onSubmit={() => void handleSubmit()} loading={saving} />

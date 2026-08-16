@@ -1,5 +1,6 @@
 package com.silverlink.care.module.scan;
 
+import com.silverlink.care.common.BizException;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeService;
@@ -54,16 +55,34 @@ class ScanServiceTest {
 
     @Test
     void resolveRejectsMissingOrDisabledQrCode() throws Exception {
-        RuntimeException blank = assertThrows(RuntimeException.class, () -> service.resolve(""));
+        BizException blank = assertThrows(BizException.class, () -> service.resolve(""));
         assertTrue(blank.getMessage().contains("二维码无效"));
+        assertEquals("errors.invalidQr", blank.getMessageKey());
 
         when(qrCodeService.resolve("missing")).thenReturn(null);
-        assertThrows(RuntimeException.class, () -> service.resolve("missing"));
+        BizException missing = assertThrows(BizException.class, () -> service.resolve("missing"));
+        assertEquals("errors.invalidQr", missing.getMessageKey());
 
         QrCodeEntity disabled = new QrCodeEntity();
         disabled.setStatus("DISABLED");
         when(qrCodeService.resolve("disabled")).thenReturn(disabled);
-        assertThrows(RuntimeException.class, () -> service.resolve("disabled"));
+        BizException disabledException = assertThrows(BizException.class, () -> service.resolve("disabled"));
+        assertEquals("errors.invalidQr", disabledException.getMessageKey());
+    }
+
+    @Test
+    void resolvePreservesUnexpectedFailuresAsInternalErrors() throws Exception {
+        QrCodeEntity entity = new QrCodeEntity();
+        entity.setElderId("elder-1");
+        entity.setStatus("ENABLED");
+        RuntimeException persistenceFailure = new RuntimeException("database unavailable");
+        when(qrCodeService.resolve("token-1")).thenReturn(entity);
+        when(data.scanBasic("elder-1")).thenThrow(persistenceFailure);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> service.resolve("token-1"));
+
+        assertEquals("二维码解析失败", exception.getMessage());
+        assertEquals(persistenceFailure, exception.getCause());
     }
 
     @Test

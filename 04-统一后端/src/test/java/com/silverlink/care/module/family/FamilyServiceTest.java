@@ -84,6 +84,7 @@ class FamilyServiceTest {
         assertFalse(result.getOk());
         assertNull(result.getToken());
         assertEquals("手机号或密码错误", result.getMessage());
+        assertEquals("errors.familyLoginFailed", result.getMessageKey());
     }
 
     @Test
@@ -352,6 +353,7 @@ class FamilyServiceTest {
     void requestDisableQrCodeCreatesRequestAndReturnsUpdatedDto() {
         String auth = "13800000000";
         stubFamilyAccount(auth, "user-1");
+        when(data.elderDetail("elder-1", false)).thenReturn(Map.of("status", "ACTIVE"));
 
         QrCodeEntity currentQr = new QrCodeEntity();
         currentQr.setId("qr-1");

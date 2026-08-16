@@ -1,4 +1,5 @@
 import { http } from './httpClient';
+import { i18nRuntime } from '../i18n';
 export { loginVolunteer, fetchAssignedElders } from './volunteerApi';
 export { saveBasicInfo, saveHealthRecord, saveMedications, saveScaleRecords, fetchScaleRecords } from './elderApi';
 export { saveBasicInfo as updateBasicInfo } from './elderApi';
@@ -15,7 +16,7 @@ export async function verifySmsCode(phone: string, code: string) {
     method: 'POST',
     body: JSON.stringify({ phone, code }),
   });
-  return { ok: Boolean(res.verified ?? res.ok), message: '验证成功' };
+  return { ok: Boolean(res.verified ?? res.ok), message: i18nRuntime.t('verification.smsVerified') };
 }
 
 export async function submitScaleRecord(elderId: string, scale: import('../types').ScaleForm) {

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Copy, IdCard, LockKeyhole, MessageSquareShare, Phone, RefreshCw, ShieldCheck, User } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ActionButton } from '../components/ActionButton';
@@ -6,9 +6,11 @@ import { BottomTabBar } from '../components/BottomTabBar';
 import { PageTopBar } from '../components/PageTopBar';
 import { confirmRelayVerificationSent, getRelayVerificationStatus, startRelayVerification, verifyIdentityAccess } from '../api/smsApi';
 import { useSecurity } from '../app/SecurityProvider';
+import { ALLOW_LOCAL_VERIFICATION_FALLBACK } from '../config/env';
 import { useVerificationStore } from '../features/verification/verificationStore';
 import { getResolvedElderId } from '../api/scanApi';
 import type { IdentityVerificationPayload, SmsVerificationSession } from '../types/verification';
+import { useI18n } from '../i18n';
 
 type VerifyMode = 'sms' | 'identity';
 
@@ -46,19 +48,19 @@ function isValidIdCard(idCard: string) {
   return checksums[total % 11] === idCard[17];
 }
 
-function buildIdentityError(form: IdentityVerificationPayload) {
+function buildIdentityError(form: IdentityVerificationPayload, translate: (key: string) => string) {
   const name = form.name.trim();
   const phone = normalizeIdentityPhone(form.phone);
   const idCard = normalizeIdCard(form.idCard);
 
   if (!name) {
-    return '请输入姓名';
+    return translate('errors.nameRequired');
   }
   if (!/^1\d{10}$/.test(phone)) {
-    return '请输入 11 位数字手机号';
+    return translate('errors.phone11');
   }
   if (!isValidIdCard(idCard)) {
-    return '请输入符合规范的身份证号';
+    return translate('errors.idCardInvalid');
   }
   return '';
 }
@@ -69,6 +71,7 @@ export function SmsVerifyPage() {
   const target = params.get('target') || 'health';
   const { verify: setGlobalVerified, clearVerification } = useSecurity();
   const { startAuthTimer } = useVerificationStore();
+  const { t } = useI18n();
 
   const [mode, setMode] = useState<VerifyMode>('sms');
   const [session, setSession] = useState<SmsVerificationSession | null>(null);
@@ -77,6 +80,7 @@ export function SmsVerifyPage() {
   const [submittingIdentity, setSubmittingIdentity] = useState(false);
   const [error, setError] = useState('');
   const [sentHint, setSentHint] = useState(false);
+  const demoTapCountRef = useRef(0);
   const [identityForm, setIdentityForm] = useState<IdentityVerificationPayload>({
     name: '',
     phone: '',
@@ -107,7 +111,7 @@ export function SmsVerifyPage() {
         }
       } catch {
         if (mounted) {
-          setError('无法创建验证会话，请稍后重试');
+          setError(t('errors.verificationCreateFailed'));
           setSession(null);
         }
       } finally {
@@ -131,7 +135,7 @@ export function SmsVerifyPage() {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      setError('复制失败，请手动选择短信内容');
+      setError(t('errors.copyFailed'));
     }
   }
 
@@ -141,19 +145,35 @@ export function SmsVerifyPage() {
     window.location.href = smsLink;
   }
 
+  function handleDemoBypassTap() {
+    if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
+
+    const nextCount = demoTapCountRef.current + 1;
+    demoTapCountRef.current = nextCount < 5 ? nextCount : 0;
+    if (nextCount < 5) return;
+
+    const demoSessionId = `local-relay-demo-${Date.now()}`;
+    setError('');
+    setGlobalVerified(demoSessionId, getResolvedElderId());
+    startAuthTimer();
+    navigate('/health');
+  }
+
   async function handleCheckStatus() {
     if (!session) return;
     setChecking(true);
     setError('');
 
     try {
-      await confirmRelayVerificationSent(session.sessionId);
+      if (ALLOW_LOCAL_VERIFICATION_FALLBACK) {
+        await confirmRelayVerificationSent(session.sessionId);
+      }
       const status = await getRelayVerificationStatus(session.sessionId);
       if (status.verified) {
         const currentElderId = getResolvedElderId();
         const verifiedElderId = status.elderId || session.elderId || currentElderId;
         if (verifiedElderId && currentElderId && verifiedElderId !== currentElderId) {
-          setError('验证会话与当前二维码不一致，请重新扫码后再试');
+          setError(t('errors.verificationMismatch'));
           return;
         }
         setGlobalVerified(session.sessionId, verifiedElderId);
@@ -163,13 +183,13 @@ export function SmsVerifyPage() {
       }
 
       if (status.status === 'EXPIRED') {
-        setError('本次验证已过期，请重新发起验证');
+        setError(t('errors.verificationExpired'));
         return;
       }
 
-      setError('暂未收到验证结果，请发送短信后再检查');
+      setError(t('errors.verificationNotReceived'));
     } catch {
-      setError('检查验证结果失败，请稍后重试');
+      setError(t('errors.verificationCheckFailed'));
     } finally {
       setChecking(false);
     }
@@ -183,7 +203,7 @@ export function SmsVerifyPage() {
     };
     setIdentityForm(nextPayload);
 
-    const nextError = buildIdentityError(nextPayload);
+    const nextError = buildIdentityError(nextPayload, t);
     if (nextError) {
       setError(nextError);
       return;
@@ -195,19 +215,19 @@ export function SmsVerifyPage() {
     try {
       const status = await verifyIdentityAccess(target, nextPayload);
       if (!status.verified) {
-        setError('身份信息校验未通过，请稍后重试');
+        setError(t('errors.identityFailed'));
         return;
       }
       const currentElderId = getResolvedElderId();
       if (status.elderId && currentElderId && status.elderId !== currentElderId) {
-        setError('验证会话与当前二维码不一致，请重新扫码后再试');
+        setError(t('errors.verificationMismatch'));
         return;
       }
       setGlobalVerified(status.sessionId, status.elderId || currentElderId);
       startAuthTimer();
       navigate('/health');
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : '提交身份信息失败，请稍后重试');
+      setError(reason instanceof Error ? reason.message : t('errors.identitySubmitFailed'));
     } finally {
       setSubmittingIdentity(false);
     }
@@ -216,15 +236,15 @@ export function SmsVerifyPage() {
   return (
     <div className="sl-page sl-verify-page sl-has-bottom-nav">
       <PageTopBar
-        title="智联名牌"
+        title={t('common.appName')}
         leading="home"
-        trailingLabel={mode === 'sms' ? '证件登记' : '短信验证'}
-        trailingAriaLabel={mode === 'sms' ? '切换到证件登记验证' : '切换到短信验证'}
+        trailingLabel={mode === 'sms' ? t('verification.idRegistration') : t('verification.sms')}
+        trailingAriaLabel={mode === 'sms' ? t('verification.switchToIdentity') : t('verification.switchToSms')}
         onTrailingClick={() => setMode((current) => (current === 'sms' ? 'identity' : 'sms'))}
       />
 
       <section className="sl-section-heading">
-        <h2>{mode === 'sms' ? '短信验证' : '身份登记'}</h2>
+        <h2>{mode === 'sms' ? t('verification.sms') : t('verification.identity')}</h2>
         <span className="sl-section-heading-badge">
           <ShieldCheck size={18} />
         </span>
@@ -233,19 +253,29 @@ export function SmsVerifyPage() {
       <section className="sl-panel sl-verify-hero-card">
         <div
           className="sl-verify-hero-icon"
+          onClick={handleDemoBypassTap}
+          role={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 'button' : undefined}
+          tabIndex={ALLOW_LOCAL_VERIFICATION_FALLBACK ? 0 : undefined}
+          onKeyDown={(event) => {
+            if (!ALLOW_LOCAL_VERIFICATION_FALLBACK) return;
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleDemoBypassTap();
+            }
+          }}
         >
           <LockKeyhole size={34} />
         </div>
         <div className="sl-verify-hero-copy">
           {mode === 'sms' ? (
             <>
-              <p>为保护老人隐私，</p>
-              <p>请使用当前手机完成验证</p>
+              <p>{t('verification.protectPrivacyLine1')}</p>
+              <p>{t('verification.protectPrivacyLine2')}</p>
             </>
           ) : (
             <>
-              <p>登记姓名、手机号与身份证号后，</p>
-              <p>即可查看完整健康信息</p>
+              <p>{t('verification.identityLine1')}</p>
+              <p>{t('verification.identityLine2')}</p>
             </>
           )}
         </div>
@@ -254,29 +284,29 @@ export function SmsVerifyPage() {
       <section className="sl-verify-form-block">
         {mode === 'sms' ? (
           <>
-            {loading ? <p className="sl-form-hint">正在生成验证短信内容...</p> : null}
+            {loading ? <p className="sl-form-hint">{t('verification.generatingSms')}</p> : null}
 
             {!loading && session ? (
               <>
                 <div className="sl-verify-step-list">
-                  <div className="sl-verify-step-item">1. 打开系统短信</div>
-                  <div className="sl-verify-step-item">2. 向后台指定号码发送下方短信内容</div>
-                  <div className="sl-verify-step-item">3. 返回本页检查验证结果</div>
+                  <div className="sl-verify-step-item">1. {t('verification.stepOpenSms')}</div>
+                  <div className="sl-verify-step-item">2. {t('verification.stepSendSms')}</div>
+                  <div className="sl-verify-step-item">3. {t('verification.stepCheckResult')}</div>
                 </div>
 
                 <div className="sl-verify-data-card">
-                  <label className="sl-form-label">后台指定接收手机号</label>
-                  <div className="sl-phone-number">{session.receiverPhone}</div>
+                  <label className="sl-form-label">{t('verification.receiverPhone')}</label>
+                  <div className="sl-phone-number sl-ltr-data">{session.receiverPhone}</div>
                 </div>
 
                 <div className="sl-verify-data-card">
-                  <label className="sl-form-label">短信内容</label>
-                  <div className="sl-message-body">{session.messageBody || '未生成短信内容'}</div>
+                  <label className="sl-form-label">{t('verification.messageBody')}</label>
+                  <div className="sl-message-body sl-ltr-data">{session.messageBody || t('verification.noMessageBody')}</div>
                 </div>
 
                 <div className="sl-verify-actions">
                   <ActionButton icon={MessageSquareShare} variant="outline" onClick={handleOpenSms}>
-                    打开短信
+                    {t('verification.openSms')}
                   </ActionButton>
                   <ActionButton
                     icon={Copy}
@@ -284,12 +314,12 @@ export function SmsVerifyPage() {
                     onClick={() => handleCopy(session.messageBody || '')}
                     disabled={!session.messageBody}
                   >
-                    复制内容
+                    {t('verification.copyContent')}
                   </ActionButton>
                 </div>
 
                 {sentHint ? (
-                  <p className="sl-form-hint">如果没有自动打开短信，请复制短信内容后手动发送到上方号码。</p>
+                  <p className="sl-form-hint">{t('verification.sentHint')}</p>
                 ) : null}
               </>
             ) : null}
@@ -302,18 +332,19 @@ export function SmsVerifyPage() {
               onClick={handleCheckStatus}
               disabled={loading || checking || !session}
             >
-              {checking ? '检查中...' : '我已发送，检查结果'}
+              {checking ? t('verification.checking') : t('verification.sentCheckResult')}
             </ActionButton>
           </>
         ) : (
           <>
             <div className="sl-verify-data-card sl-identity-card">
-              <label className="sl-form-label">访问人姓名</label>
+              <label className="sl-form-label">{t('verification.visitorName')}</label>
               <div className="sl-input-wrap">
                 <User size={16} />
                 <input
-                  className="sl-code-input sl-identity-input"
-                  placeholder="请输入真实姓名"
+                  className="sl-code-input sl-identity-input sl-auto-data"
+                  dir="auto"
+                  placeholder={t('verification.realNamePlaceholder')}
                   value={identityForm.name}
                   onChange={(event) => setIdentityForm((current) => ({ ...current, name: event.target.value }))}
                 />
@@ -321,12 +352,13 @@ export function SmsVerifyPage() {
             </div>
 
             <div className="sl-verify-data-card sl-identity-card">
-              <label className="sl-form-label">访问人手机号</label>
+              <label className="sl-form-label">{t('verification.visitorPhone')}</label>
               <div className="sl-input-wrap">
                 <Phone size={16} />
                 <input
-                  className="sl-code-input sl-identity-input"
-                  placeholder="请输入 11 位数字手机号"
+                  className="sl-code-input sl-identity-input sl-ltr-data"
+                  dir="ltr"
+                  placeholder={t('verification.phone11Placeholder')}
                   inputMode="numeric"
                   maxLength={11}
                   value={identityForm.phone}
@@ -336,23 +368,24 @@ export function SmsVerifyPage() {
             </div>
 
             <div className="sl-verify-data-card sl-identity-card">
-              <label className="sl-form-label">访问人身份证号</label>
+              <label className="sl-form-label">{t('verification.visitorIdCard')}</label>
               <div className="sl-input-wrap">
                 <IdCard size={16} />
                 <input
-                  className="sl-code-input sl-identity-input"
-                  placeholder="请输入符合规范的身份证号"
+                  className="sl-code-input sl-identity-input sl-ltr-data"
+                  dir="ltr"
+                  placeholder={t('verification.idCardPlaceholder')}
                   value={identityForm.idCard}
                   onChange={(event) => setIdentityForm((current) => ({ ...current, idCard: event.target.value }))}
                 />
               </div>
             </div>
 
-            <p className="sl-form-hint">登记后将记录验证方式、来源 IP 与身份信息，用于访问审计与后台统计。</p>
+            <p className="sl-form-hint">{t('verification.identityAuditHint')}</p>
             {error ? <p className="sl-error">{error}</p> : null}
 
             <ActionButton icon={ShieldCheck} variant="primary" onClick={handleIdentitySubmit} disabled={submittingIdentity}>
-              {submittingIdentity ? '登记中...' : '登记信息并查看'}
+              {submittingIdentity ? t('verification.registering') : t('verification.registerAndView')}
             </ActionButton>
           </>
         )}
