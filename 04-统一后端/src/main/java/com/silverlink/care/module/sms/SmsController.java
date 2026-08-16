@@ -35,7 +35,7 @@ public class SmsController {
             auditLogService.record("扫码用户", "SCAN", request, maskPhone(phone), "SMS_SEND", "FAIL", e.getMessage(), null);
             return e instanceof BizException bizException
                     ? ApiResponse.fail(bizException.getCode(), e.getMessage(), bizException.getMessageKey())
-                    : ApiResponse.fail(429, e.getMessage());
+                    : ApiResponse.fail(429, "请求失败，请稍后重试", "errors.requestFailed");
         }
     }
 

@@ -24,8 +24,17 @@ function buildCacheKey(path: string, data?: unknown): string {
   }
 }
 
-function normalizeErrorMessage(payload: unknown): ApiMessageError {
+function normalizeErrorMessage(payload: unknown, statusCode?: number): ApiMessageError {
   const resolved = resolveApiMessage(payload, i18nRuntime.t);
+  const hasRegisteredMessageKey = Boolean(
+    resolved.messageKey && i18nRuntime.t(resolved.messageKey) !== resolved.messageKey,
+  );
+  const shouldHideServerFailure = (statusCode || 0) >= 500 && !hasRegisteredMessageKey;
+
+  if (shouldHideServerFailure) {
+    return new ApiMessageError(i18nRuntime.t('errors.requestFailed'), 'errors.requestFailed');
+  }
+
   return new ApiMessageError(resolved.message, resolved.messageKey);
 }
 
@@ -53,7 +62,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
   }
 
   if (response.statusCode >= 400) {
-    throw normalizeErrorMessage(response.data);
+    throw normalizeErrorMessage(response.data, response.statusCode);
   }
 
   const payload = response.data;
@@ -61,7 +70,7 @@ async function doRequest<T>(path: string, options: ApiRequestOptions = {}): Prom
   if (payload && typeof payload === 'object' && ('code' in payload || 'data' in payload)) {
     const envelope = payload as ApiEnvelope<T>;
     if ((envelope.code || 0) >= 400) {
-      throw normalizeErrorMessage(envelope);
+      throw normalizeErrorMessage(envelope, envelope.code);
     }
     return envelope.data as T;
   }
@@ -101,7 +110,10 @@ async function request<T>(path: string, options: ApiRequestOptions = {}): Promis
         const cacheKey = buildCacheKey(path, options.data);
         removeStorageValue(cacheKey);
       }
-      throw error;
+      if (error instanceof ApiMessageError) {
+        throw error;
+      }
+      throw new ApiMessageError(i18nRuntime.t('errors.requestFailed'), 'errors.requestFailed');
     }
   };
 
@@ -131,7 +143,7 @@ async function download(path: string): Promise<DownloadResult> {
   } as Taro.downloadFile.Option & { enableCookie: boolean });
 
   if (result.statusCode >= 400) {
-    throw new ApiMessageError(i18nRuntime.t('errors.requestFailed'));
+    throw new ApiMessageError(i18nRuntime.t('errors.requestFailed'), 'errors.requestFailed');
   }
 
   return {

@@ -4,6 +4,7 @@ import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { fetchArchive, fetchVerifiedBasicInfo } from '@/services/scan/scanArchiveService';
 import type { ScanArchiveRecord, ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
@@ -62,13 +63,13 @@ function ScanArchivePage() {
   const [basicInfo, setBasicInfo] = useState<ScanBasicInfo | null>(null);
   const [archive, setArchive] = useState<ScanArchiveRecord | null>(null);
   const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const hasProtectedContext = Boolean(elderId && sessionId);
 
   useEffect(() => {
     if (!elderId || !sessionId) {
       setLoading(false);
-      setErrorText(t('errors.sessionRequired'));
+      setErrorKey('errors.sessionRequired');
       return;
     }
 
@@ -77,7 +78,7 @@ function ScanArchivePage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const [nextBasicInfo, nextArchive] = await Promise.all([
           fetchVerifiedBasicInfo(elderId, sessionId),
           fetchArchive(elderId, sessionId),
@@ -89,7 +90,7 @@ function ScanArchivePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.requestFailed'));
+          setError(error, 'errors.requestFailed');
         }
       } finally {
         if (!cancelled) {

@@ -157,7 +157,11 @@ assert.ok(
 );
 assert.ok(verifyBundle.includes('sessionId') && verifyBundle.includes('elderId'), 'scan verify bundle is missing protected session/elder routing fields');
 assert.ok(
-  verifyBundle.includes('\\u9a8c\\u8bc1\\u4f1a\\u8bdd\\u4e0e\\u5f53\\u524d\\u8001\\u4eba\\u4e0d\\u4e00\\u81f4') || verifySource.includes("t('errors.verificationMismatch')"),
+  verifyBundle.includes('\\u9a8c\\u8bc1\\u4f1a\\u8bdd\\u4e0e\\u5f53\\u524d\\u8001\\u4eba\\u4e0d\\u4e00\\u81f4') || (
+    verifySource.includes('result.elderId && result.elderId !== elderId')
+    && verifySource.includes('status.elderId && status.elderId !== elderId')
+    && verifySource.includes("setErrorKey('errors.verificationMismatch')")
+  ),
   'scan verify bundle/source is missing cross-elder guard message',
 );
 

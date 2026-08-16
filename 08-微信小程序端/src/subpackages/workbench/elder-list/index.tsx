@@ -5,6 +5,7 @@ import Taro from '@tarojs/taro';
 import { useDebouncedSearch } from '@/utils/throttleDebounce';
 
 import { APP_ROUTES, ROLE_TYPES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { createVolunteerElder, fetchWorkbenchElders, type WorkbenchElderListItem, type WorkbenchBasicFormValue } from '@/services/workbench/elderService';
 import { fetchWorkbenchProfile, logoutWorkbenchAccount, updateWorkbenchProfile } from '@/services/workbench/authService';
 import { updateAppSession } from '@/store/app/appSessionStore';
@@ -70,7 +71,7 @@ function WorkbenchElderListPage() {
   const [keyword, debouncedKeyword, setKeyword] = useDebouncedSearch('');
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const [activeIndex, setActiveIndex] = useState(0);
   const [showAccountPanel, setShowAccountPanel] = useState(false);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -100,7 +101,7 @@ function WorkbenchElderListPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchWorkbenchElders(activeSession.role);
         if (!cancelled) {
           setItems(result);
@@ -111,7 +112,7 @@ function WorkbenchElderListPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadElderListFailed'));
+          setError(error, 'errors.loadElderListFailed');
           setItems([]);
         }
       } finally {
@@ -315,12 +316,12 @@ function WorkbenchElderListPage() {
 
   const handleSaveAdd = useCallback(async () => {
     if (!addForm.name.trim() || addSaving) {
-      setErrorText(t('errors.volunteerNameRequired'));
+      setErrorKey('errors.volunteerNameRequired');
       return;
     }
     try {
       setAddSaving(true);
-      setErrorText('');
+      clearError();
       const result = await createVolunteerElder(addForm);
       setShowAddModal(false);
       void Taro.showToast({ title: t('common.addSuccess'), icon: 'success' });
@@ -338,7 +339,7 @@ function WorkbenchElderListPage() {
         });
       }
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.createElderFailed'));
+      setError(error, 'errors.createElderFailed');
     } finally {
       setAddSaving(false);
     }

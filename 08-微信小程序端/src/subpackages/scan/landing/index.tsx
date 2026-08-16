@@ -3,6 +3,7 @@ import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { resolveScanToken } from '@/services/scan/scanAuthService';
 import type { ScanBasicInfo } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
@@ -45,14 +46,14 @@ function ScanLandingPage() {
   const params = parseQueryParams(router.params || {});
   const [basicInfo, setBasicInfo] = useState<ScanBasicInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   useEffect(() => {
     const qrToken = params.qrToken;
 
     if (!qrToken) {
       setLoading(false);
-      setErrorText(t('scan.notFoundInvalidQr'));
+      setErrorKey('scan.notFoundInvalidQr');
       return;
     }
 
@@ -61,14 +62,14 @@ function ScanLandingPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await resolveScanToken({ token: qrToken || '' });
         if (!cancelled) {
           setBasicInfo(result);
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.requestFailed'));
+          setError(error, 'errors.requestFailed');
         }
       } finally {
         if (!cancelled) {

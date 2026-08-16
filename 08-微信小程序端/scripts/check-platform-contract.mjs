@@ -58,7 +58,7 @@ const methodContractSnippets = [
       'window.location.href = buildSmsLink(smsReceiverPhone, smsMessageBody)',
       "title: t('verification.messageCopied')",
       'showCancel: false',
-      "setErrorText(t('verification.generatingSms'))",
+      "setErrorKey('verification.generatingSms')",
     ],
   },
   {

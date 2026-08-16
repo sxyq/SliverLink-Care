@@ -3,6 +3,7 @@ import { Button, Image, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import {
   fetchNameplatePreview,
   fetchWorkbenchQrCode,
@@ -28,7 +29,7 @@ function NameplatePreviewPage() {
   const [preview, setPreview] = useState<NameplatePreviewInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [openingPdf, setOpeningPdf] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const [qrImage, setQrImage] = useState('');
   const [pdfPreviewImage, setPdfPreviewImage] = useState('');
 
@@ -40,7 +41,7 @@ function NameplatePreviewPage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       return;
     }
 
@@ -49,14 +50,14 @@ function NameplatePreviewPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchNameplatePreview(elderId);
         if (!cancelled) {
           setPreview(result);
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.nameplateOpenFailed'));
+          setError(error, 'errors.nameplateOpenFailed');
         }
       } finally {
         if (!cancelled) {
@@ -156,10 +157,10 @@ function NameplatePreviewPage() {
 
     try {
       setOpeningPdf(true);
-      setErrorText('');
+      clearError();
       await openNameplatePdf(elderId);
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.pdfDownloadFailed'));
+      setError(error, 'errors.pdfDownloadFailed');
     } finally {
       setOpeningPdf(false);
     }

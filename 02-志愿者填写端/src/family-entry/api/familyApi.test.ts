@@ -144,7 +144,7 @@ describe('family entry api', () => {
 
     await expect(sendInvitationSms('code 1', '13800000000')).resolves.toMatchObject({
       success: false,
-      message: '发送失败',
+      message: i18nRuntime.t('errors.requestFailed'),
     });
 
     await expect(registerWithInvitation({
@@ -174,7 +174,7 @@ describe('family entry api', () => {
 
     await expect(sendSmsCode('13800000000')).resolves.toMatchObject({
       success: false,
-      message: '发送失败',
+      message: i18nRuntime.t('errors.requestFailed'),
     });
   });
 
@@ -200,5 +200,19 @@ describe('family entry api', () => {
       success: false,
       message: 'بۇ ئائىلە ھېساباتى بۇ ياشانغانغا باغلانغان',
     });
+  });
+
+  it('hides technical and transport errors while preserving registered server keys', async () => {
+    i18nRuntime.setLocale('ug-Arab-CN');
+    queueFetch(
+      new Response(JSON.stringify({ message: 'native backend failure' }), { status: 500 }),
+      new Response(JSON.stringify({ message: '服务器异常', messageKey: 'errors.familyLoginFailed' }), { status: 500 }),
+    );
+
+    await expect(get('/api/technical-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
+    await expect(get('/api/known-failure')).rejects.toThrow(i18nRuntime.t('errors.familyLoginFailed'));
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network implementation detail')));
+    await expect(get('/api/network-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
   });
 });

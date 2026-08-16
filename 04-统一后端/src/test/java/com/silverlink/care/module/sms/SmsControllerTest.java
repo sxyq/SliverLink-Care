@@ -52,6 +52,18 @@ class SmsControllerTest {
     }
 
     @Test
+    void sendHidesUnexpectedFailuresWithStableMessageKey() {
+        when(smsService.sendCode("13800001111", "SCAN"))
+                .thenThrow(new RuntimeException("provider implementation detail"));
+
+        var result = controller.send(Map.of("phone", "13800001111"), request);
+
+        assertEquals(429, result.getCode());
+        assertEquals("请求失败，请稍后重试", result.getMessage());
+        assertEquals("errors.requestFailed", result.getMessageKey());
+    }
+
+    @Test
     void sendUsesCustomScene() {
         when(smsService.sendCode("13800002222", "FAMILY")).thenReturn("654321");
 

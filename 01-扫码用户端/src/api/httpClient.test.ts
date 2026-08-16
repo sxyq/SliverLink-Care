@@ -36,10 +36,22 @@ describe('httpClient', () => {
     await expect(httpClient('/api/plain')).resolves.toEqual({ ok: true });
   });
 
-  it('uses a server error message for non-success HTTP responses', async () => {
+  it('hides unregistered technical messages from server failures', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'no' }, { status: 500 })));
 
-    await expect(httpClient('/api/fail')).rejects.toThrow('no');
+    await expect(httpClient('/api/fail')).rejects.toThrow('请求失败，请稍后重试');
+  });
+
+  it('keeps a registered key on server failures and hides transport errors', async () => {
+    i18nRuntime.setLocale('ug-Arab-CN');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({
+      message: '服务器异常',
+      messageKey: 'errors.loginFailed',
+    }, { status: 500 })));
+    await expect(httpClient('/api/known-server-fail')).rejects.toThrow(i18nRuntime.t('errors.loginFailed'));
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network implementation detail')));
+    await expect(httpClient('/api/network-fail')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
   });
 
   it('throws envelope business errors', async () => {

@@ -27,6 +27,7 @@ class GlobalExceptionHandlerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(500, response.getBody().getCode());
-        assertEquals("boom", response.getBody().getMessage());
+        assertEquals("请求失败，请稍后重试", response.getBody().getMessage());
+        assertEquals("errors.requestFailed", response.getBody().getMessageKey());
     }
 }

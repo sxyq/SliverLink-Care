@@ -3,6 +3,7 @@ import { Button, ScrollView, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import {
   fetchVolunteerScaleRecords,
   saveVolunteerScaleRecord,
@@ -126,7 +127,7 @@ function WorkbenchScalePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   useEffect(() => {
     if (!session) {
@@ -136,13 +137,13 @@ function WorkbenchScalePage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       return;
     }
 
     if (!canViewScales(session.role)) {
       setLoading(false);
-      setErrorText(t('errors.roleScaleUnavailable'));
+      setErrorKey('errors.roleScaleUnavailable');
       return;
     }
 
@@ -151,7 +152,7 @@ function WorkbenchScalePage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchVolunteerScaleRecords(elderId);
         if (!cancelled) {
           setRecords(result);
@@ -163,7 +164,7 @@ function WorkbenchScalePage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadScaleFailed'));
+          setError(error, 'errors.loadScaleFailed');
         }
       } finally {
         if (!cancelled) {
@@ -208,7 +209,7 @@ function WorkbenchScalePage() {
 
     try {
       setSaving(true);
-      setErrorText('');
+      clearError();
       await saveVolunteerScaleRecord(elderId, activeDraft);
       const nextRecords = await fetchVolunteerScaleRecords(elderId);
       setRecords(nextRecords);
@@ -218,7 +219,7 @@ function WorkbenchScalePage() {
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.saveFailed'));
+      setError(error, 'errors.saveFailed');
     } finally {
       setSaving(false);
     }

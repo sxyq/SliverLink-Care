@@ -42,6 +42,8 @@ import {
 } from '@/utils/storage';
 import { httpClient } from '@/services/api/httpClient';
 import { i18nRuntime } from '@/i18n';
+import { normalizeLocalizedError } from '@/hooks/useLocalizedError';
+import { ApiMessageError, getErrorMessage } from '@shared-i18n/messages';
 import {
   getScanVerificationStatus,
   resolveScanToken,
@@ -571,7 +573,10 @@ test('http client attaches auth, unwraps envelopes, caches GETs, and clears toke
 
   setStorageValue('api_cache__/api/cache-clear', { data: { value: 'stale' }, cachedAt: 0 });
   await withFrozenTime(7000, async () => {
-    await assert.rejects(() => httpClient.get('/api/cache-clear', { cacheTtl: 1000, useQueue: false }), /服务异常/);
+    await assert.rejects(
+      () => httpClient.get('/api/cache-clear', { cacheTtl: 1000, useQueue: false }),
+      /请求失败，请稍后重试/,
+    );
   });
   assert.equal(taroTestApi.__getStorageSnapshot().has('api_cache__/api/cache-clear'), false);
 
@@ -602,7 +607,7 @@ test('http client surfaces API errors and downloadFile contract', async () => {
   await assert.rejects(() => httpClient.post('/api/error', { foo: 'bar' }, { useQueue: false }), /业务错误/);
   assert.deepEqual(taroTestApi.__getRequests()[0].data, { foo: 'bar' });
   assert.equal(taroTestApi.__getRequests()[0].method, 'POST');
-  await assert.rejects(() => httpClient.get('/api/server-error', { useQueue: false }), /服务不可用/);
+  await assert.rejects(() => httpClient.get('/api/server-error', { useQueue: false }), /请求失败，请稍后重试/);
 
   taroTestApi.__setDownloadHandler((option) => ({
     statusCode: String(option.url).includes('bad') ? 500 : 200,
@@ -635,6 +640,12 @@ test('http client localizes Kazakh keys and keeps unknown-key server messages', 
         data: { message: '服务端自定义提示', messageKey: 'errors.unknownKey' },
       };
     }
+    if (url.includes('/technical-server-error')) {
+      return {
+        statusCode: 500,
+        data: { code: 500, message: 'Last unit does not have enough valid bits' },
+      };
+    }
     return {
       statusCode: 500,
       data: { message: '   ', messageKey: 'errors.unknownKey' },
@@ -650,6 +661,18 @@ test('http client localizes Kazakh keys and keeps unknown-key server messages', 
       () => httpClient.get('/api/unknown-key', { useQueue: false }),
       /服务端自定义提示/,
     );
+    let technicalError: unknown;
+    try {
+      await httpClient.get('/api/technical-server-error', { useQueue: false });
+    } catch (error) {
+      technicalError = error;
+    }
+    assert.ok(technicalError instanceof ApiMessageError);
+    assert.equal(technicalError.messageKey, 'errors.requestFailed');
+    assert.match(technicalError.message, new RegExp(i18nRuntime.t('errors.requestFailed')));
+    i18nRuntime.setLocale('zh-CN');
+    assert.equal(getErrorMessage(technicalError, i18nRuntime.t, 'errors.requestFailed'), '请求失败，请稍后重试');
+    i18nRuntime.setLocale('kk-Arab-CN');
     await assert.rejects(
       () => httpClient.get('/api/empty-message', { useQueue: false }),
       /سۇراۋ ءساتسىز اياقتالدى, كەيىنىرەك قايتالاپ كورىڭىز/,
@@ -657,6 +680,46 @@ test('http client localizes Kazakh keys and keeps unknown-key server messages', 
   } finally {
     i18nRuntime.setLocale('zh-CN');
   }
+});
+
+test('localized error state hides raw platform errors and keeps stable API message keys', () => {
+  i18nRuntime.setLocale('zh-CN');
+  const platformError = normalizeLocalizedError(
+    new Error('native platform internal failure'),
+    i18nRuntime.t,
+    'errors.linkCopyFailed',
+  );
+  assert.equal(platformError.messageKey, 'errors.linkCopyFailed');
+  assert.equal(
+    getErrorMessage(platformError, i18nRuntime.t, 'errors.requestFailed'),
+    i18nRuntime.t('errors.linkCopyFailed'),
+  );
+  assert.doesNotMatch(
+    getErrorMessage(platformError, i18nRuntime.t, 'errors.requestFailed'),
+    /native platform internal failure/,
+  );
+
+  i18nRuntime.setLocale('ug-Arab-CN');
+  assert.equal(
+    getErrorMessage(platformError, i18nRuntime.t, 'errors.requestFailed'),
+    i18nRuntime.t('errors.linkCopyFailed'),
+  );
+  i18nRuntime.setLocale('kk-Arab-CN');
+  assert.equal(
+    getErrorMessage(platformError, i18nRuntime.t, 'errors.requestFailed'),
+    i18nRuntime.t('errors.linkCopyFailed'),
+  );
+
+  const serverBusinessError = new ApiMessageError('服务端自定义提示', 'errors.unknownKey');
+  assert.equal(
+    normalizeLocalizedError(serverBusinessError, i18nRuntime.t, 'errors.requestFailed'),
+    serverBusinessError,
+  );
+  assert.equal(
+    getErrorMessage(serverBusinessError, i18nRuntime.t, 'errors.requestFailed'),
+    '服务端自定义提示',
+  );
+  i18nRuntime.setLocale('zh-CN');
 });
 
 test('scan services call backend paths and normalize verification payloads', async () => {
@@ -860,7 +923,10 @@ test('workbench medication service uses volunteer GET, 405 cache fallback, no-ca
 
   assert.equal((await fetchWorkbenchMedications(ROLE_TYPES.volunteer, 'elder 1'))[0].name, '缓存药');
   assert.deepEqual(await fetchWorkbenchMedications(ROLE_TYPES.volunteer, 'elder-empty'), []);
-  await assert.rejects(() => fetchWorkbenchMedications(ROLE_TYPES.volunteer, 'elder-fail'), /药品读取失败/);
+  await assert.rejects(
+    () => fetchWorkbenchMedications(ROLE_TYPES.volunteer, 'elder-fail'),
+    /请求失败，请稍后重试/,
+  );
   assert.equal((await fetchWorkbenchMedications(ROLE_TYPES.family, 'elder-1'))[0].name, '家属药');
   assert.deepEqual(taroTestApi.__getRequests().map((item) => [item.method, requestPath(item)]), [
     ['GET', '/api/volunteer/me/elders/elder%201/medications'],

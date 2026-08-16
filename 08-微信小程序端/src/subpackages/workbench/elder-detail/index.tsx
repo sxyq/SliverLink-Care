@@ -3,6 +3,7 @@ import Taro, { useRouter } from '@tarojs/taro';
 import { Text, View } from '@tarojs/components';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { fetchWorkbenchElderDetail, type WorkbenchElderDetail } from '@/services/workbench/elderService';
 import { getAuthSession } from '@/store/auth/authStore';
 import ActionTileGrid, { type ActionTileItem } from '@/components/workbench/ActionTileGrid';
@@ -28,7 +29,7 @@ function WorkbenchElderDetailPage() {
 
   const [detail, setDetail] = useState<WorkbenchElderDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   const session = getAuthSession();
   const sessionRole = session?.role;
@@ -40,7 +41,7 @@ function WorkbenchElderDetailPage() {
     }
 
     if (!elderId) {
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       setLoading(false);
       return;
     }
@@ -51,14 +52,14 @@ function WorkbenchElderDetailPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchWorkbenchElderDetail(activeSession.role, elderId);
         if (!cancelled) {
           setDetail(result);
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadElderDetailFailed'));
+          setError(error, 'errors.loadElderDetailFailed');
           setDetail(null);
         }
       } finally {

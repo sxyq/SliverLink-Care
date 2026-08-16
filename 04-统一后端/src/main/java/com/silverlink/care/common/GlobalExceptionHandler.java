@@ -32,6 +32,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneric(Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.fail(500, e.getMessage()));
+                .body(ApiResponse.fail(500, "请求失败，请稍后重试", "errors.requestFailed"));
     }
 }

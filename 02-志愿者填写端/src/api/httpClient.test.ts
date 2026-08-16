@@ -44,12 +44,12 @@ describe('volunteer httpClient', () => {
     }));
   });
 
-  it('normalizes plain, json and business errors', async () => {
+  it('hides plain and json server failures while preserving business errors', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('plain error', { status: 500 })));
-    await expect(http('/api/plain-error')).rejects.toThrow('plain error');
+    await expect(http('/api/plain-error')).rejects.toThrow('请求失败，请稍后重试');
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ message: 'json error' }), { status: 500 })));
-    await expect(http('/api/json-error')).rejects.toThrow('json error');
+    await expect(http('/api/json-error')).rejects.toThrow('请求失败，请稍后重试');
 
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ code: 400, message: 'biz error', data: null })));
     await expect(http('/api/biz-error')).rejects.toThrow('biz error');
@@ -121,7 +121,7 @@ describe('volunteer httpClient', () => {
 
   it('normalizes error with error field in JSON response', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ error: 'custom error' }), { status: 500 })));
-    await expect(http('/api/error-field')).rejects.toThrow('custom error');
+    await expect(http('/api/error-field')).rejects.toThrow('请求失败，请稍后重试');
   });
 
   it('normalizes JSON error without message or error field', async () => {
@@ -140,6 +140,20 @@ describe('volunteer httpClient', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(badRes));
 
     await expect(http('/api/text-fail')).rejects.toThrow('请求失败，请稍后重试');
+  });
+
+  it('keeps registered server keys and hides transport errors', async () => {
+    i18nRuntime.setLocale('kk-Arab-CN');
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({
+      code: 500,
+      message: '服务器异常',
+      messageKey: 'errors.loginFailed',
+      data: null,
+    })));
+    await expect(http('/api/known-server-fail')).rejects.toThrow(i18nRuntime.t('errors.loginFailed'));
+
+    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network implementation detail')));
+    await expect(http('/api/network-fail')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
   });
 
   it('preserves custom headers alongside defaults', async () => {

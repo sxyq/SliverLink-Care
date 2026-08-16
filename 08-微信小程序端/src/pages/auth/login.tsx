@@ -3,6 +3,7 @@ import { Button, Input, Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { useScanEntry } from '@/hooks/useScanEntry';
 import {
   loginWorkbenchAccount,
@@ -36,7 +37,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
   const [invitation, setInvitation] = useState<VolunteerInvitationPreview | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [checkingInvitation, setCheckingInvitation] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const openScan = useScanEntry();
 
   function handleScanEntry() {
@@ -49,13 +50,13 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
     }
 
     if (!account.trim() || !password.trim()) {
-      setErrorText(t('errors.completeLoginFields'));
+      setErrorKey('errors.completeLoginFields');
       return;
     }
 
     try {
       setSubmitting(true);
-      setErrorText('');
+      clearError();
       const result = await loginWorkbenchAccount({
         role: undefined,
         account,
@@ -77,7 +78,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
       await Taro.redirectTo({ url: APP_ROUTES.authRoleRedirect });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.loginRetry'));
+      setError(error, 'errors.loginRetry');
     } finally {
       setSubmitting(false);
     }
@@ -92,19 +93,19 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
     if (!code) {
       setInvitation(null);
-      setErrorText(t('errors.invitationRequired'));
+      setErrorKey('errors.invitationRequired');
       return;
     }
 
     try {
       setCheckingInvitation(true);
-      setErrorText('');
+      clearError();
       const result = await previewVolunteerInvitation(code);
       setInvitation(result);
       setRegisterForm((current) => ({ ...current, invitationCode: code }));
     } catch (error) {
       setInvitation(null);
-      setErrorText((error as Error)?.message || t('errors.invitationCheckFailed'));
+      setError(error, 'errors.invitationCheckFailed');
     } finally {
       setCheckingInvitation(false);
     }
@@ -117,7 +118,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
     try {
       setSubmitting(true);
-      setErrorText('');
+      clearError();
       const result = await registerVolunteerAccount(registerForm);
 
       saveAuthSession({
@@ -135,7 +136,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
       await Taro.redirectTo({ url: APP_ROUTES.authRoleRedirect });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.registerRetry'));
+      setError(error, 'errors.registerRetry');
     } finally {
       setSubmitting(false);
     }
@@ -180,7 +181,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                   className={`auth-login-mode-tabs__item ${mode === 'login' ? 'is-active' : ''}`}
                   onClick={() => {
                     setMode('login');
-                    setErrorText('');
+                    clearError();
                   }}
                 >
                   {t('auth.volunteerLogin')}
@@ -189,7 +190,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                   className={`auth-login-mode-tabs__item ${mode === 'register' ? 'is-active' : ''}`}
                   onClick={() => {
                     setMode('register');
-                    setErrorText('');
+                    clearError();
                   }}
                 >
                   {t('auth.invitationRegister')}

@@ -3,6 +3,7 @@ import { Button, Input, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { getScanVerificationStatus, startScanSmsVerification, verifyScanIdentity } from '@/services/scan/scanAuthService';
 import { parseQueryParams } from '@/utils/routeParams';
 import { useI18n } from '@/i18n';
@@ -98,13 +99,13 @@ function ScanVerifyPage() {
   const [smsReceiverPhoneMasked, setSmsReceiverPhoneMasked] = useState('');
   const [smsMessageBody, setSmsMessageBody] = useState('');
 
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const [successText, setSuccessText] = useState('');
 
   const missingParams = !elderId;
 
   useEffect(() => {
-    setErrorText('');
+    clearError();
     setSuccessText('');
   }, [mode]);
 
@@ -116,18 +117,18 @@ function ScanVerifyPage() {
     void handleStartSmsVerification();
   }, [mode, missingParams, smsLoading, smsSessionId]);
 
-  const identityError = useMemo(() => {
+  const identityErrorKey = useMemo(() => {
     if (!identityName.trim()) {
-      return t('errors.nameRequired');
+      return 'errors.nameRequired';
     }
     if (!/^1\d{10}$/.test(normalizePhone(identityPhone))) {
-      return t('errors.phone11');
+      return 'errors.phone11';
     }
     if (!isValidIdCard(normalizeIdCard(identityIdCard))) {
-      return t('errors.idCardInvalid');
+      return 'errors.idCardInvalid';
     }
     return '';
-  }, [identityIdCard, identityName, identityPhone, t]);
+  }, [identityIdCard, identityName, identityPhone]);
 
   async function navigateToArchive(nextElderId: string, sessionId: string) {
     await Taro.redirectTo({
@@ -137,18 +138,18 @@ function ScanVerifyPage() {
 
   async function handleIdentitySubmit() {
     if (missingParams) {
-      setErrorText(t('errors.missingElder'));
+      setErrorKey('errors.missingElder');
       return;
     }
 
-    if (identityError) {
-      setErrorText(identityError);
+    if (identityErrorKey) {
+      setErrorKey(identityErrorKey);
       return;
     }
 
     try {
       setSubmittingIdentity(true);
-      setErrorText('');
+      clearError();
       setSuccessText('');
 
       const result = await verifyScanIdentity({
@@ -160,19 +161,19 @@ function ScanVerifyPage() {
       });
 
       if (!result.verified || !result.sessionId) {
-        setErrorText(t('errors.identityFailed'));
+        setErrorKey('errors.identityFailed');
         return;
       }
 
       if (result.elderId && result.elderId !== elderId) {
-        setErrorText(t('errors.verificationMismatch'));
+        setErrorKey('errors.verificationMismatch');
         return;
       }
 
       setSuccessText(t('verification.identitySuccess'));
       await navigateToArchive(result.elderId || elderId, result.sessionId);
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.requestFailed'));
+      setError(error, 'errors.requestFailed');
     } finally {
       setSubmittingIdentity(false);
     }
@@ -180,13 +181,13 @@ function ScanVerifyPage() {
 
   async function handleStartSmsVerification() {
     if (missingParams) {
-      setErrorText(t('errors.missingElder'));
+      setErrorKey('errors.missingElder');
       return;
     }
 
     try {
       setSmsLoading(true);
-      setErrorText('');
+      clearError();
       setSuccessText('');
       const session = await startScanSmsVerification(elderId, target);
       setSmsSessionId(session.sessionId);
@@ -195,7 +196,7 @@ function ScanVerifyPage() {
       setSmsMessageBody(session.messageBody);
       setSuccessText(t('verification.smsSessionCreated'));
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.requestFailed'));
+      setError(error, 'errors.requestFailed');
     } finally {
       setSmsLoading(false);
     }
@@ -203,19 +204,19 @@ function ScanVerifyPage() {
 
   async function handleCheckSmsStatus() {
     if (!smsSessionId) {
-      setErrorText(t('errors.verificationCreateFailed'));
+      setErrorKey('errors.verificationCreateFailed');
       return;
     }
 
     try {
       setSmsChecking(true);
-      setErrorText('');
+      clearError();
       setSuccessText('');
       const status = await getScanVerificationStatus(smsSessionId);
 
       if (status.verified) {
         if (status.elderId && status.elderId !== elderId) {
-          setErrorText(t('errors.verificationMismatch'));
+          setErrorKey('errors.verificationMismatch');
           return;
         }
         setSuccessText(t('verification.smsVerificationSuccess'));
@@ -224,13 +225,13 @@ function ScanVerifyPage() {
       }
 
       if (status.status === 'EXPIRED') {
-        setErrorText(t('errors.verificationExpired'));
+        setErrorKey('errors.verificationExpired');
         return;
       }
 
-      setErrorText(t('errors.verificationNotReceived'));
+      setErrorKey('errors.verificationNotReceived');
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.verificationCheckFailed'));
+      setError(error, 'errors.verificationCheckFailed');
     } finally {
       setSmsChecking(false);
     }
@@ -238,12 +239,12 @@ function ScanVerifyPage() {
 
   async function handleOpenSmsComposer() {
     if (!smsReceiverPhone || !smsMessageBody) {
-      setErrorText(t('verification.generatingSms'));
+      setErrorKey('verification.generatingSms');
       return;
     }
 
     try {
-      setErrorText('');
+      clearError();
       setSuccessText('');
       await Taro.setClipboardData({ data: smsMessageBody });
 
@@ -264,7 +265,7 @@ function ScanVerifyPage() {
         setSuccessText(t('verification.smsCopiedInstruction'));
       }
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.openSmsFailed'));
+      setError(error, 'errors.openSmsFailed');
     }
   }
 

@@ -14,6 +14,7 @@ import {
 import { getAuthSession } from '@/store/auth/authStore';
 import { getCurrentElderSummary, saveCurrentElderSummary } from '@/store/elder/currentElderStore';
 import { canEditBasicInfo, canManageContacts } from '@/utils/permissions';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import BottomNavGrid from '@/components/workbench/BottomNavGrid';
 import FormSectionCard from '@/components/workbench/FormSectionCard';
 import WorkbenchHeader from '@/components/workbench/WorkbenchHeader';
@@ -55,7 +56,7 @@ function WorkbenchBasicPage() {
   const [formValue, setFormValue] = useState<WorkbenchBasicFormValue | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   useEffect(() => {
     if (!session) {
@@ -64,7 +65,7 @@ function WorkbenchBasicPage() {
     }
 
     if (!elderId) {
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       setLoading(false);
       return;
     }
@@ -75,7 +76,7 @@ function WorkbenchBasicPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchWorkbenchElderDetail(activeSession.role, elderId);
         if (!cancelled) {
           setDetail(result);
@@ -83,7 +84,7 @@ function WorkbenchBasicPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadBasicFailed'));
+          setError(error, 'errors.loadBasicFailed');
         }
       } finally {
         if (!cancelled) {
@@ -125,7 +126,7 @@ function WorkbenchBasicPage() {
 
     try {
       setSaving(true);
-      setErrorText('');
+      clearError();
       if (canEditAll) {
         await saveVolunteerBasicInfo(detail.id, formValue);
       } else if (canEditContactOnly) {
@@ -138,7 +139,7 @@ function WorkbenchBasicPage() {
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.saveRetry'));
+      setError(error, 'errors.saveRetry');
     } finally {
       setSaving(false);
     }

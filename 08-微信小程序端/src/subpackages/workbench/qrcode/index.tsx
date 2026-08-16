@@ -3,6 +3,7 @@ import Taro, { useRouter } from '@tarojs/taro';
 import { useCallback, useEffect, useState } from 'react';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import {
   fetchWorkbenchQrCode,
   regenerateWorkbenchQrCode,
@@ -83,7 +84,7 @@ function WorkbenchQrCodePage() {
   const [info, setInfo] = useState<WorkbenchQrCodeInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyAction, setBusyAction] = useState<'disable' | 'regenerate' | 'copy' | ''>('');
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const [messageText, setMessageText] = useState('');
   const [previewImage, setPreviewImage] = useState('');
 
@@ -95,7 +96,7 @@ function WorkbenchQrCodePage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       return;
     }
 
@@ -105,14 +106,14 @@ function WorkbenchQrCodePage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const result = await fetchWorkbenchQrCode(activeSession.role, elderId);
         if (!cancelled) {
           setInfo(result);
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadQrInfoFailed'));
+          setError(error, 'errors.loadQrInfoFailed');
         }
       } finally {
         if (!cancelled) {
@@ -163,13 +164,13 @@ function WorkbenchQrCodePage() {
 
     try {
       setBusyAction('copy');
-      setErrorText('');
+      clearError();
       await Taro.setClipboardData({
         data: accessLink,
       });
       setMessageText(t('workbench.copiedAccessLink'));
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.linkCopyFailed'));
+      setError(error, 'errors.linkCopyFailed');
     } finally {
       setBusyAction('');
     }
@@ -182,12 +183,12 @@ function WorkbenchQrCodePage() {
 
     try {
       setBusyAction('disable');
-      setErrorText('');
+      clearError();
       const result = await requestDisableWorkbenchQrCode(session.role, elderId);
       setInfo(result);
       setMessageText(result.reviewMessage || t('family.disablePending'));
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.disableRequestFailed'));
+      setError(error, 'errors.disableRequestFailed');
     } finally {
       setBusyAction('');
     }
@@ -200,12 +201,12 @@ function WorkbenchQrCodePage() {
 
     try {
       setBusyAction('regenerate');
-      setErrorText('');
+      clearError();
       const result = await regenerateWorkbenchQrCode(elderId);
       setInfo(result);
       setMessageText(t('errors.qrRegenerated'));
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.regenerateFailed'));
+      setError(error, 'errors.regenerateFailed');
     } finally {
       setBusyAction('');
     }
@@ -225,7 +226,7 @@ function WorkbenchQrCodePage() {
         url: `${APP_ROUTES.scanNameplate}?elderId=${encodeURIComponent(elderId)}`,
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.nameplateOpenFailed'));
+      setError(error, 'errors.nameplateOpenFailed');
     }
   }, [busyAction, elderId, t]);
 

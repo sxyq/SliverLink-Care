@@ -3,6 +3,7 @@ import { Button, Input, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES, ROLE_TYPES, type RoleType } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import {
   cacheVolunteerMedications,
   createFamilyMedication,
@@ -69,11 +70,11 @@ function WorkbenchMedicationPage() {
   const [showEditor, setShowEditor] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   const loadMedications = useCallback(async (role: RoleType, nextElderId: string) => {
     setLoading(true);
-    setErrorText('');
+    clearError();
     const result = await fetchWorkbenchMedications(role, nextElderId);
     setItems(result);
     setPendingDeletedIds([]);
@@ -87,7 +88,7 @@ function WorkbenchMedicationPage() {
 
     if (!elderId) {
       setLoading(false);
-      setErrorText(t('errors.noElderIdentifier'));
+      setErrorKey('errors.noElderIdentifier');
       return;
     }
 
@@ -99,7 +100,7 @@ function WorkbenchMedicationPage() {
         await loadMedications(activeSession.role, elderId);
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.loadMedicationFailed'));
+          setError(error, 'errors.loadMedicationFailed');
         }
       } finally {
         if (!cancelled) {
@@ -130,14 +131,14 @@ function WorkbenchMedicationPage() {
     setDraft(emptyDraft);
     setEditingId('');
     setShowEditor(true);
-    setErrorText('');
+    clearError();
   }, []);
 
   const handleOpenEdit = useCallback((item: WorkbenchMedicationItem) => {
     setDraft(toDraft(item));
     setEditingId(item.id);
     setShowEditor(true);
-    setErrorText('');
+    clearError();
   }, []);
 
   const handleCancelEditor = useCallback(() => {
@@ -148,7 +149,7 @@ function WorkbenchMedicationPage() {
 
   const handleSaveDraft = useCallback(() => {
     if (!draft.name.trim()) {
-      setErrorText(t('errors.medicationNameRequired'));
+      setErrorKey('errors.medicationNameRequired');
       return;
     }
 
@@ -197,7 +198,7 @@ function WorkbenchMedicationPage() {
 
     try {
       setSaving(true);
-      setErrorText('');
+      clearError();
 
       if (session.role === ROLE_TYPES.volunteer) {
         await saveVolunteerMedications(elderId, items.map(toPersistDraft));
@@ -241,7 +242,7 @@ function WorkbenchMedicationPage() {
         icon: 'success',
       });
     } catch (error) {
-      setErrorText((error as Error)?.message || t('errors.saveRetry'));
+      setError(error, 'errors.saveRetry');
     } finally {
       setSaving(false);
     }

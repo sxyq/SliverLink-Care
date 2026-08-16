@@ -3,6 +3,7 @@ import { Button, Text, View } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { fetchMedications } from '@/services/scan/scanArchiveService';
 import type { ScanMedicationItem } from '@/types/scan';
 import { parseQueryParams } from '@/utils/routeParams';
@@ -21,7 +22,7 @@ function ScanMedicationsPage() {
 
   const [items, setItems] = useState<ScanMedicationItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [errorText, setErrorText] = useState('');
+  const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
 
   function buildArchiveUrl() {
     return `${APP_ROUTES.scanArchive}?elderId=${encodeURIComponent(elderId)}&sessionId=${encodeURIComponent(sessionId)}`;
@@ -34,7 +35,7 @@ function ScanMedicationsPage() {
   useEffect(() => {
     if (!elderId || !sessionId) {
       setLoading(false);
-      setErrorText(t('errors.sessionRequired'));
+      setErrorKey('errors.sessionRequired');
       return;
     }
 
@@ -43,14 +44,14 @@ function ScanMedicationsPage() {
     async function load() {
       try {
         setLoading(true);
-        setErrorText('');
+        clearError();
         const data = await fetchMedications(elderId, sessionId);
         if (!cancelled) {
           setItems(data);
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorText((error as Error)?.message || t('errors.requestFailed'));
+          setError(error, 'errors.requestFailed');
         }
       } finally {
         if (!cancelled) {

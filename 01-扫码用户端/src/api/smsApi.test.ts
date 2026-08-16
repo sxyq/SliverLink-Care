@@ -255,7 +255,7 @@ describe('smsApi', () => {
     expect(result.verified).toBe(true);
   });
 
-  it('verifyIdentityAccess throws error when local fallback is disabled', async () => {
+  it('verifyIdentityAccess uses a localized transport error when local fallback is disabled', async () => {
     vi.doMock('../config/env', () => ({
       ...envMockBase,
       ALLOW_LOCAL_VERIFICATION_FALLBACK: false,
@@ -269,7 +269,7 @@ describe('smsApi', () => {
       name: '测试',
       phone: '13800001111',
       idCard: '500102200212180836',
-    })).rejects.toThrow('network');
+    })).rejects.toThrow('请求失败，请稍后重试');
 
     vi.doUnmock('../config/env');
   });

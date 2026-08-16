@@ -24,8 +24,14 @@ interface ApiEnvelope<T> {
   data?: T;
 }
 
-function buildApiError(payload: unknown): ApiMessageError {
+function buildApiError(payload: unknown, statusCode?: number): ApiMessageError {
   const resolved = resolveApiMessage(payload, i18nRuntime.t);
+  const hasRegisteredMessageKey = Boolean(
+    resolved.messageKey && i18nRuntime.t(resolved.messageKey) !== resolved.messageKey,
+  );
+  if ((statusCode || 0) >= 500 && !hasRegisteredMessageKey) {
+    return new ApiMessageError(i18nRuntime.t('errors.requestFailed'), 'errors.requestFailed');
+  }
   return new ApiMessageError(resolved.message, resolved.messageKey);
 }
 
@@ -51,29 +57,34 @@ export function clearToken(): void {
 }
 
 async function request<T>(method: string, url: string, body?: unknown, config?: RequestConfig): Promise<T> {
-  const token = getToken();
-  const res = await fetch(`${API_BASE_URL}${url}`, {
-    method,
-    credentials: 'same-origin',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(config?.headers || {}),
-    },
-    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
-  });
-  if (res.status === 401 || res.status === 403) clearToken();
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw buildApiError(text);
+  try {
+    const token = getToken();
+    const res = await fetch(`${API_BASE_URL}${url}`, {
+      method,
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...(config?.headers || {}),
+      },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+    if (res.status === 401 || res.status === 403) clearToken();
+    if (!res.ok) {
+      const text = await res.text().catch(() => '');
+      throw buildApiError(text, res.status);
+    }
+    const json = (await res.json()) as ApiEnvelope<T> | T;
+    if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
+      const envelope = json as ApiEnvelope<T>;
+      if (envelope.code && envelope.code >= 400) throw buildApiError(envelope, envelope.code);
+      return envelope.data as T;
+    }
+    return json as T;
+  } catch (error) {
+    if (error instanceof ApiMessageError) throw error;
+    throw new ApiMessageError(i18nRuntime.t('errors.requestFailed'), 'errors.requestFailed');
   }
-  const json = (await res.json()) as ApiEnvelope<T> | T;
-  if (json && typeof json === 'object' && 'code' in json && 'data' in json) {
-    const envelope = json as ApiEnvelope<T>;
-    if (envelope.code && envelope.code >= 400) throw buildApiError(envelope);
-    return envelope.data as T;
-  }
-  return json as T;
 }
 
 export function get<T>(url: string, config?: RequestConfig): Promise<T> {
