@@ -308,7 +308,7 @@ function ScanVerifyPage() {
                     <View className='sl-form-grid'>
                       <View className='sl-form-field sl-form-field--full'>
                         <Text className='sl-form-label'>{t('verification.visitorName')}</Text>
-                        <Input className='sl-form-input' value={identityName} placeholder={t('verification.realNamePlaceholder')} onInput={(e) => setIdentityName(e.detail.value)} />
+                        <Input className='sl-form-input sl-auto-data' value={identityName} placeholder={t('verification.realNamePlaceholder')} onInput={(e) => setIdentityName(e.detail.value)} />
                       </View>
                       <View className='sl-form-field sl-form-field--full'>
                           <Text className='sl-form-label'>{t('verification.visitorPhone')}</Text>

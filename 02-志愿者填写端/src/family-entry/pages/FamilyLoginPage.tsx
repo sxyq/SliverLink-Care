@@ -67,9 +67,10 @@ export default function FamilyLoginPage() {
         <div className="form-group">
           <label className="form-label">{t('common.password')}</label>
           <input
-            className="form-input"
+            className="form-input sl-ltr-data"
             placeholder={t('auth.inputPassword')}
             type="password"
+            dir="ltr"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleLogin()}

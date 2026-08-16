@@ -46,7 +46,12 @@ describe('family entry components', () => {
     const { rerender } = render(<MedCard medication={medication} onEdit={onEdit} onDelete={onDelete} />);
 
     expect(screen.getByText('阿司匹林')).toBeInTheDocument();
-    expect(screen.getByText('剂量：100mg · 用法：口服')).toBeInTheDocument();
+    const dosage = screen.getByText('100mg');
+    expect(dosage.parentElement).toHaveTextContent('剂量：100mg · 用法：口服');
+    expect(dosage).toHaveAttribute('dir', 'ltr');
+    expect(dosage).toHaveClass('sl-ltr-data');
+    expect(screen.getByText('2026-05-25')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByText('2026-05-25')).toHaveClass('sl-ltr-data');
     await user.click(screen.getAllByRole('button')[0]);
     await user.click(screen.getAllByRole('button')[1]);
     expect(onEdit).toHaveBeenCalledWith(medication);

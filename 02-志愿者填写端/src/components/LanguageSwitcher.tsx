@@ -28,6 +28,7 @@ export function LanguageSwitcher() {
       if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
         setOpen(false);
         setFocusIndex(null);
+        triggerRef.current?.focus();
       }
     };
 

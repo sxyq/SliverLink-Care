@@ -78,9 +78,11 @@ export default function FamilyRegisterPage() {
           <div className="form-group">
             <label className="form-label">{t('common.phone')}</label>
             <input
-              className={`form-input${errors['phone'] ? ' error' : ''}`}
+              className={`form-input sl-ltr-data${errors['phone'] ? ' error' : ''}`}
               placeholder={t('errors.phoneRequired')}
               type="tel"
+              inputMode="numeric"
+              dir="ltr"
               maxLength={11}
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
@@ -107,9 +109,10 @@ export default function FamilyRegisterPage() {
           <div className="form-group">
             <label className="form-label">{t('common.password')}</label>
             <input
-              className={`form-input${errors['password'] ? ' error' : ''}`}
+              className={`form-input sl-ltr-data${errors['password'] ? ' error' : ''}`}
               placeholder={t('family.passwordRegisterHint')}
               type="password"
+              dir="ltr"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -119,9 +122,10 @@ export default function FamilyRegisterPage() {
           <div className="form-group">
             <label className="form-label">{t('auth.confirmPassword')}</label>
             <input
-              className={`form-input${errors['confirmPassword'] ? ' error' : ''}`}
+              className={`form-input sl-ltr-data${errors['confirmPassword'] ? ' error' : ''}`}
               placeholder={t('family.confirmPasswordPlaceholder')}
               type="password"
+              dir="ltr"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />

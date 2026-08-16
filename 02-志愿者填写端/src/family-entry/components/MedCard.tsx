@@ -53,14 +53,19 @@ export default function MedCard({ medication, onEdit, onDelete }: MedCardProps) 
               )}
             </div>
           </div>
-          <div className="sl-auto-data" dir="auto" style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
-            {t('workbench.dosage')}：{medication.dosage} · {t('workbench.usage')}：{medication.usage}
+          <div style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
+            <span>{t('workbench.dosage')}：</span>
+            <span className="sl-ltr-data" dir="ltr">{medication.dosage}</span>
+            <span aria-hidden="true"> · </span>
+            <span>{t('workbench.usage')}：</span>
+            <span className="sl-auto-data" dir="auto">{medication.usage}</span>
           </div>
           <div className="sl-auto-data" dir="auto" style={{ fontSize: 13, color: 'var(--sl-text-secondary)', marginTop: 2 }}>
             {t('workbench.medicationTime')}：{medication.timing}
           </div>
           <div style={{ fontSize: 12, color: 'var(--sl-text-secondary)', marginTop: 4 }}>
-            {t('common.updatedAt')} {medication.updatedAt}
+            <span>{t('common.updatedAt')} </span>
+            <span className="sl-ltr-data" dir="ltr">{medication.updatedAt}</span>
           </div>
         </div>
       </div>

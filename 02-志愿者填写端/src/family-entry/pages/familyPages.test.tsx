@@ -118,9 +118,12 @@ describe('family entry pages', () => {
     const phoneInput = screen.getByPlaceholderText('请输入手机号');
     expect(phoneInput).toHaveAttribute('dir', 'ltr');
     expect(phoneInput).toHaveClass('sl-ltr-data');
+    const passwordInput = screen.getByPlaceholderText('请输入密码');
+    expect(passwordInput).toHaveAttribute('dir', 'ltr');
+    expect(passwordInput).toHaveClass('sl-ltr-data');
     fireEvent.change(phoneInput, { target: { value: '13800000000' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入密码'), { target: { value: 'pass' } });
-    fireEvent.keyDown(screen.getByPlaceholderText('请输入密码'), { key: 'Enter' });
+    fireEvent.change(passwordInput, { target: { value: 'pass' } });
+    fireEvent.keyDown(passwordInput, { key: 'Enter' });
     expect(await screen.findByText('账号错误')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: '注册家属账号' }));
@@ -152,6 +155,16 @@ describe('family entry pages', () => {
     );
 
     expect(screen.getByDisplayValue('INV-1')).toBeInTheDocument();
+    const registerPhoneInput = screen.getByPlaceholderText('请输入手机号');
+    expect(registerPhoneInput).toHaveAttribute('dir', 'ltr');
+    expect(registerPhoneInput).toHaveClass('sl-ltr-data');
+    expect(registerPhoneInput).toHaveAttribute('inputmode', 'numeric');
+    const registerPasswordInput = screen.getByPlaceholderText('首次注册请设置密码；已有账号请输入原密码');
+    const confirmPasswordInput = screen.getByPlaceholderText('请再次输入密码');
+    for (const input of [registerPasswordInput, confirmPasswordInput]) {
+      expect(input).toHaveAttribute('dir', 'ltr');
+      expect(input).toHaveClass('sl-ltr-data');
+    }
     fireEvent.click(screen.getByRole('button', { name: '下一步：短信验证' }));
     expect(screen.getByText('请输入姓名')).toBeInTheDocument();
 

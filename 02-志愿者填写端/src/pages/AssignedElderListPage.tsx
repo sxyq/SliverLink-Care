@@ -286,8 +286,9 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
                   <label className="sl-label sl-label-full">
                     <span className="sl-label-text">{t('auth.currentPassword')}</span>
                     <input
-                      className="sl-input"
+                      className="sl-input sl-ltr-data"
                       type="password"
+                      dir="ltr"
                       value={accountForm.currentPassword}
                       onChange={(event) => updateAccountForm('currentPassword', event.target.value)}
                       placeholder={t('common.currentPasswordRequired')}
@@ -296,8 +297,9 @@ export const AssignedElderListPage: React.FC<Props> = ({ onSelect, onEditBasic }
                   <label className="sl-label sl-label-full">
                     <span className="sl-label-text">{t('common.password')}</span>
                     <input
-                      className="sl-input"
+                      className="sl-input sl-ltr-data"
                       type="password"
+                      dir="ltr"
                       value={accountForm.password}
                       onChange={(event) => updateAccountForm('password', event.target.value)}
                       placeholder={t('common.leaveBlankToKeep')}

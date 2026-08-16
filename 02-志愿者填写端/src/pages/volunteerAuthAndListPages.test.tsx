@@ -88,8 +88,11 @@ describe('LoginPage', () => {
     const accountInput = screen.getByPlaceholderText('请输入账号');
     expect(accountInput).toHaveAttribute('dir', 'ltr');
     expect(accountInput).toHaveClass('sl-ltr-data');
+    const passwordInput = screen.getByPlaceholderText('请输入密码');
+    expect(passwordInput).toHaveAttribute('dir', 'ltr');
+    expect(passwordInput).toHaveClass('sl-ltr-data');
     fireEvent.change(accountInput, { target: { value: 'vol1' } });
-    fireEvent.change(screen.getByPlaceholderText('请输入密码'), { target: { value: 'pwd' } });
+    fireEvent.change(passwordInput, { target: { value: 'pwd' } });
     fireEvent.click(screen.getByRole('button', { name: '登录' }));
 
     await waitFor(() => {
@@ -126,7 +129,10 @@ describe('LoginPage', () => {
     expect(phoneInput).toHaveAttribute('dir', 'ltr');
     expect(phoneInput).toHaveClass('sl-ltr-data');
     fireEvent.change(phoneInput, { target: { value: '13800000000' } });
-    fireEvent.change(screen.getByPlaceholderText('请设置登录密码'), { target: { value: 'secret' } });
+    const passwordInput = screen.getByPlaceholderText('请设置登录密码');
+    expect(passwordInput).toHaveAttribute('dir', 'ltr');
+    expect(passwordInput).toHaveClass('sl-ltr-data');
+    fireEvent.change(passwordInput, { target: { value: 'secret' } });
     fireEvent.click(screen.getByRole('button', { name: '注册并进入' }));
 
     await waitFor(() => {

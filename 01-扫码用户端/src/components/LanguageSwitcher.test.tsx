@@ -87,6 +87,7 @@ describe('LanguageSwitcher', () => {
     await user.click(trigger);
     fireEvent.pointerDown(document.body);
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
 
     await user.click(trigger);
     const items = screen.getAllByRole('menuitemradio');

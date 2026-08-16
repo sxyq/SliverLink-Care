@@ -165,8 +165,9 @@ export const LoginPage: React.FC = () => {
                     <div className="sl-input-wrap">
                       <LockKeyhole size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
+                        className="sl-input sl-login-input sl-ltr-data"
                         type="password"
+                        dir="ltr"
                         placeholder={t('auth.inputPassword')}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -255,8 +256,9 @@ export const LoginPage: React.FC = () => {
                     <div className="sl-input-wrap">
                       <LockKeyhole size={18} className="sl-login-input-icon" />
                       <input
-                        className="sl-input sl-login-input"
+                        className="sl-input sl-login-input sl-ltr-data"
                         type="password"
+                        dir="ltr"
                         placeholder={t('auth.setLoginPassword')}
                         value={registerForm.password}
                         onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
