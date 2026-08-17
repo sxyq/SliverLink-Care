@@ -13,7 +13,7 @@
     "postcss": false,
     "compileWorklet": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
+    "uploadWithSourceMap": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
     "minifyWXML": true,
