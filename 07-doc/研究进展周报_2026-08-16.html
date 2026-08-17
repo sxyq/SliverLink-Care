@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SilverLink Care 周报 2026-08-16</title>
+  <style>
+    :root {
+      --ink: #18232d;
+      --muted: #66737d;
+      --line: #d9e0e4;
+      --paper: #f7f8f6;
+      --white: #ffffff;
+      --blue: #1f5f87;
+      --green: #2d6b58;
+      --amber: #9b6a1d;
+      --shadow: 0 14px 34px rgba(24, 35, 45, .08);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font: 15px/1.7 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+      overflow: hidden;
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .topbar {
+      position: fixed;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-height: 58px;
+      padding: 0 32px;
+      background: rgba(255, 255, 255, .95);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(12px);
+    }
+    .brand { font-weight: 700; letter-spacing: .02em; }
+    .topbar nav { display: flex; gap: 16px; flex-wrap: wrap; }
+    .topbar nav a { color: var(--muted); font-size: 13px; }
+    .wrap { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+    .deck {
+      height: 100vh;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      scrollbar-width: none;
+    }
+    .deck::-webkit-scrollbar { display: none; }
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      display: flex;
+      align-items: center;
+      padding: 88px 0 34px;
+    }
+    .overview-slide { background: var(--paper); }
+    .work-slide { background: #f5f7f8; }
+    .next-slide { background: #eef5f1; }
+    .intro {
+      display: grid;
+      grid-template-columns: 1.45fr .9fr;
+      gap: 24px;
+      padding: 0;
+    }
+    .eyebrow {
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { margin-bottom: 12px; font-size: 42px; line-height: 1.15; }
+    h2 { margin-bottom: 8px; font-size: 25px; line-height: 1.3; }
+    h3 { margin-bottom: 6px; font-size: 17px; }
+    .lead { max-width: 760px; margin-bottom: 20px; color: #40505c; font-size: 17px; }
+    .boundary {
+      padding: 18px 20px;
+      background: var(--white);
+      border-left: 4px solid var(--green);
+      box-shadow: var(--shadow);
+    }
+    .boundary strong { display: block; margin-bottom: 5px; color: var(--green); }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin: 30px 0 0;
+    }
+    .stat {
+      padding: 14px 16px;
+      background: var(--white);
+      border: 1px solid var(--line);
+    }
+    .stat b { display: block; font-size: 22px; line-height: 1.2; }
+    .stat span { color: var(--muted); font-size: 12px; }
+    .overview-content { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+    .overview-content h1 { max-width: 860px; }
+    .section-head { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 0 0 14px; }
+    .section-head p { margin-bottom: 0; color: var(--muted); }
+    .card {
+      overflow: hidden;
+      background: var(--white);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .card.blue-top { border-top: 4px solid var(--blue); }
+    .card.green-top { border-top: 4px solid var(--green); }
+    .work-block { padding: 20px 26px; }
+    .work-block + .work-block { border-top: 1px solid var(--line); }
+    .work-block h3 span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+      margin-left: 8px;
+    }
+    .work-block p { margin-bottom: 0; color: #40505c; font-size: 14px; max-width: 980px; }
+    .table-wrap { overflow-x: auto; padding: 16px 26px 4px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { min-width: 92px; padding: 9px 10px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: #40505c; background: #f0f4f5; font-weight: 700; }
+    td:first-child, th:first-child { min-width: 170px; }
+    .note { margin: 0; padding: 14px 26px 20px; color: #40505c; font-size: 13.5px; }
+    .note::before { content: "—"; margin-right: 8px; color: var(--muted); }
+    .pager {
+      position: fixed;
+      z-index: 6;
+      top: 50%;
+      right: 22px;
+      display: grid;
+      gap: 8px;
+      transform: translateY(-50%);
+    }
+    .pager button {
+      width: 9px;
+      height: 9px;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      background: #b8c3c8;
+      cursor: pointer;
+    }
+    .pager button.active { background: var(--blue); transform: scale(1.35); }
+    .presentation-controls {
+      position: fixed;
+      z-index: 6;
+      right: 32px;
+      bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .presentation-controls button {
+      display: grid;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      padding: 0;
+      color: var(--ink);
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 19px;
+      line-height: 1;
+    }
+    .presentation-controls button:hover { border-color: var(--blue); color: var(--blue); }
+    @media (max-width: 820px) {
+      body { overflow: auto; }
+      .topbar { padding: 0 18px; }
+      .topbar nav { display: none; }
+      .wrap { width: min(100% - 28px, 700px); }
+      .deck { height: auto; overflow: visible; scroll-snap-type: none; }
+      .slide { min-height: auto; padding: 94px 0 34px; }
+      .intro { grid-template-columns: 1fr; }
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      h1 { font-size: 32px; }
+      .pager, .presentation-controls { display: none; }
+    }
+    @page { size: A4 landscape; margin: 8mm; }
+    @media print {
+      html, body { width: auto; height: auto; background: #fff; overflow: visible; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      .topbar, .pager, .presentation-controls { display: none !important; }
+      .deck { height: auto; overflow: visible; scroll-snap-type: none; }
+      .slide { min-height: 0; height: 185mm; padding: 7mm 0 5mm; break-after: page; page-break-after: always; overflow: hidden; }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      .overview-content, .wrap { width: calc(100% - 12mm); }
+      .overview-slide { align-items: flex-start; }
+      .stats { grid-template-columns: repeat(4, 1fr); }
+      .card { box-shadow: none; }
+      .work-block { padding: 12px 16px; }
+      .work-block p { font-size: 11px; }
+      .table-wrap { padding: 8px 16px 2px; }
+      table { font-size: 9.5px; }
+      th, td { min-width: 70px; padding: 4px 5px; }
+      .note { padding: 0 16px 8px; font-size: 10px; }
+      h1 { font-size: 34px; }
+      h2 { font-size: 21px; }
+      h3 { font-size: 14px; }
+      .lead { margin-bottom: 12px; font-size: 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">SilverLink Care 周报 · 2026-08-16 · 补充 2026-08-17</div>
+    <nav>
+      <a href="#overview">概览</a>
+      <a href="#work">主要工作</a>
+      <a href="#next">进行中与遗留</a>
+    </nav>
+  </header>
+
+  <main class="deck" id="deck">
+    <section class="slide overview-slide" id="overview">
+      <div class="overview-content">
+        <div class="intro">
+          <div>
+            <div class="eyebrow">项目周报</div>
+            <h1>三语国际化与 RTL 适配收尾</h1>
+            <p class="lead">SilverLink Care 面向老人与志愿者，服务地区需同时使用中文、维吾尔语与哈萨克语。本周为扫码 H5、志愿者填写端与微信小程序补齐三语支持，三端共用一份词条源，维、哈语言下布局与交互整体镜像。8 月 17 日完成小程序尺寸矩阵、志愿者端线上子路径修复和公网语言菜单复核；家属协管统一账号模型已确认，现有绑定迁移尚待指定账号。</p>
+          </div>
+          <div class="boundary">
+            <strong>本周范围</strong>
+            管理后台与安卓短信中转端保持中文，不在本轮。语言切换入口固定于物理右上角：中文 / ئۇيغۇرچە / قازاقشا。
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>3</b><span>种语言：中文走 LTR，维、哈走 RTL</span></div>
+          <div class="stat"><b>684</b><span>个词条键，三端共用 shared/i18n 一份词条源</span></div>
+          <div class="stat"><b>15 × 3</b><span>小程序 15 页、3 个设备尺寸的三语言矩阵已完成</span></div>
+          <div class="stat"><b>24ae76d</b><span>志愿者端线上资源子路径修复提交</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide work-slide" id="work">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="eyebrow">主要工作</div><h2>本周工作与发布补充</h2></div>
+          <p>提交：de50003、522f685、65bd855、296fc07、22cd8ef、9bbdea2、24ae76d</p>
+        </div>
+        <article class="card blue-top">
+          <div class="work-block">
+            <h3>共享词条与语言切换</h3>
+            <p>词条集中至 shared/i18n，按 common、auth、scan 等分组，三端读取同一份，684 个键三语一一对应。语言选择存于 silverlink.locale，默认中文，异常值自动回退中文。菜单支持键盘操作，外部点击关闭后焦点回到触发按钮。</p>
+          </div>
+          <div class="work-block">
+            <h3>RTL 与小程序适配</h3>
+            <p>维、哈语言下布局与按钮顺序镜像，图标仅镜像一次。手机号、剂量等数据强制 LTR，姓名与药品名按内容自动判定方向。小程序适配中，Taro 的 App 组件不进入页面树，语言菜单一度无法显示；改为每页包裹 I18nPageShell 后，15 个页面逐页接入解决。</p>
+          </div>
+          <div class="work-block">
+            <h3>错误文案本地化与四轮审查</h3>
+            <p>扫码接口返回 500 时曾将英文技术异常直接展示给用户。三端 HTTP 客户端统一改为按当前语言显示通用失败提示，后端同步返回稳定错误键，13 个页面的错误状态随语言切换重译。审查由无上下文的独立代理执行四轮，误判当轮撤回，确认的问题当轮修复并提交。</p>
+          </div>
+          <div class="work-block">
+            <h3>发布验证与线上资源修复 <span>2026-08-17</span></h3>
+            <p>微信小程序开发版本 0.1.3 已上传，三种设备尺寸下的三语言页面矩阵完成。小程序上传 source map 已关闭，构建产物未发现 map 文件。志愿者端线上页面曾将 JS 和 CSS 指向根路径 /assets，Nginx 实际资源映射位于 /silverlink/volunteer/assets；在 Vite 增加子路径 base 后，构建、158 项测试和公网加载均通过。公网首屏已确认右上角“中文⌄”按钮、三项语言菜单和 RTL 切换可用。</p>
+          </div>
+          <div class="work-block">
+            <h3>家属协管账号模型确认 <span>待实施</span></h3>
+            <p>现有家属协管页面、接口和老人绑定功能仍可用，但当前实现使用独立家属认证。产品要求已明确为志愿者与家属协管共用账号和登录入口，通过入口标签区分功能范围。家属绑定记录需要先明确迁移到哪个统一账号；在该映射确认前，本轮不调整认证、权限或线上数据。</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide next-slide" id="next">
+      <div class="wrap">
+        <div class="section-head">
+          <div><div class="eyebrow">进行中与遗留</div><h2>待确认事项</h2></div>
+          <p>上线前需要确认</p>
+        </div>
+        <article class="card green-top">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>事项</th><th>现状</th><th>下一步</th></tr></thead>
+              <tbody>
+                <tr><td>维哈文案母语审校</td><td>医疗、隐私类文案仅经机器核对，尚未逐条人工确认。</td><td>由母语使用者审校后定稿。</td></tr>
+                <tr><td>小程序视觉矩阵</td><td>320×568、390×844、768×1024 三种尺寸下的三语言矩阵已完成，未发现布局问题。</td><td>正式提审前随最终包复核一次。</td></tr>
+                <tr><td>Web 线上发布</td><td>志愿者端资源子路径已修复，公网语言切换按钮、菜单与 RTL 切换已重新验证。</td><td>保留旧版本备份，发布后继续观察访问日志。</td></tr>
+                <tr><td>source map 策略</td><td>小程序 uploadWithSourceMap 已关闭，构建产物中无 map。</td><td>正式提审时保持该配置。</td></tr>
+                <tr><td>家属协管统一账号</td><td>当前仍为独立家属认证；目标为与志愿者共用账号和登录入口。</td><td>确认家属绑定迁移到哪个统一账号后再实施。</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note">代码、自动化和本轮线上静态发布已完成，改动边界已核对。维哈文案仍需母语者确认；微信小程序正式发布仍需在公众平台提审、审核通过后执行。家属协管统一账号改造等待明确的数据迁移账号。</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <div class="pager" id="pager"></div>
+  <div class="presentation-controls">
+    <button id="previous-page" type="button" aria-label="上一页">‹</button>
+    <span id="page-status"></span>
+    <button id="next-page" type="button" aria-label="下一页">›</button>
+  </div>
+
+  <script>
+    const 分区 = Array.from(document.querySelectorAll(".slide"));
+    const 页码容器 = document.getElementById("pager");
+    const 页码文字 = document.getElementById("page-status");
+    let 当前页 = 0;
+
+    function 前往分区(索引) {
+      const 目标页 = Math.max(0, Math.min(索引, 分区.length - 1));
+      分区[目标页].scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    function 更新页码(索引) {
+      当前页 = 索引;
+      页码文字.textContent = (索引 + 1) + " / " + 分区.length;
+      Array.from(页码容器.children).forEach(function(按钮, 按钮索引) {
+        按钮.classList.toggle("active", 按钮索引 === 索引);
+      });
+    }
+    分区.forEach(function(分区元素, 索引) {
+      const 按钮 = document.createElement("button");
+      按钮.type = "button";
+      按钮.title = "转到第 " + (索引 + 1) + " 页";
+      按钮.setAttribute("aria-label", 按钮.title);
+      按钮.addEventListener("click", function() { 前往分区(索引); });
+      页码容器.appendChild(按钮);
+    });
+    const 观察器 = new IntersectionObserver(function(记录) {
+      const 当前记录 = 记录.filter(function(记录项) { return 记录项.isIntersecting; })
+        .sort(function(甲, 乙) { return 乙.intersectionRatio - 甲.intersectionRatio; })[0];
+      if (当前记录) 更新页码(分区.indexOf(当前记录.target));
+    }, { root: document.getElementById("deck"), threshold: 0.6 });
+    分区.forEach(function(分区元素) { 观察器.observe(分区元素); });
+    document.getElementById("previous-page").addEventListener("click", function() { 前往分区(当前页 - 1); });
+    document.getElementById("next-page").addEventListener("click", function() { 前往分区(当前页 + 1); });
+    window.addEventListener("keydown", function(事件) {
+      if (["ArrowDown", "ArrowRight", "PageDown"].includes(事件.key)) {
+        事件.preventDefault();
+        前往分区(当前页 + 1);
+      }
+      if (["ArrowUp", "ArrowLeft", "PageUp"].includes(事件.key)) {
+        事件.preventDefault();
+        前往分区(当前页 - 1);
+      }
+    });
+    更新页码(0);
+  </script>
+</body>
+</html>
