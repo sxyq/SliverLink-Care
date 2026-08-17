@@ -51,6 +51,12 @@ describe('volunteer httpClient', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(JSON.stringify({ message: 'json error' }), { status: 500 })));
     await expect(http('/api/json-error')).rejects.toThrow('请求失败，请稍后重试');
 
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<!doctype html><title>proxy denied</title>', { status: 400 })));
+    await expect(http('/api/proxy-error')).rejects.toThrow('请求失败，请稍后重试');
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('upstream connection reset', { status: 403 })));
+    await expect(http('/api/plain-technical-error')).rejects.toThrow('请求失败，请稍后重试');
+
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ code: 400, message: 'biz error', data: null })));
     await expect(http('/api/biz-error')).rejects.toThrow('biz error');
   });

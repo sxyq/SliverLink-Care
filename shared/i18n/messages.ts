@@ -2180,6 +2180,15 @@ function nonEmptyString(value: unknown): string | undefined {
   return typeof value === 'string' && value.trim() ? value : undefined;
 }
 
+function isSafeLegacyPlainMessage(value: string): boolean {
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > 160 || /[\r\n]/.test(trimmed)) return false;
+  if (/^<!doctype\b|<\/?[a-z][^>]*>/i.test(trimmed)) return false;
+  if (/^[{\[]/.test(trimmed)) return false;
+
+  return !/\b(?:upstream|proxy|gateway|nginx|cloudflare|stack(?:\s*trace)?|exception|traceback|request\s*id|java\.|org\.|com\.|errno|econn\w*|socket|connection\s+(?:reset|refused|timed?\s*out)|internal\s+server\s+error|bad\s+gateway|service\s+unavailable)\b|\bat\s+\S+\([^)]*:\d+\)/i.test(trimmed);
+}
+
 function normalizeApiMessagePayload(payload: unknown): ApiMessagePayload {
   if (typeof payload === 'string') {
     const trimmed = payload.trim();
@@ -2190,7 +2199,7 @@ function normalizeApiMessagePayload(payload: unknown): ApiMessagePayload {
       if (typeof parsed === 'string') return { message: parsed };
       return parsed && typeof parsed === 'object' ? parsed as ApiMessagePayload : {};
     } catch {
-      return trimmed.startsWith('{') || trimmed.startsWith('[') ? {} : { message: payload };
+      return isSafeLegacyPlainMessage(payload) ? { message: payload } : {};
     }
   }
 

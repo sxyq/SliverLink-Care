@@ -40,6 +40,12 @@ describe('httpClient', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(jsonResponse({ message: 'no' }, { status: 500 })));
 
     await expect(httpClient('/api/fail')).rejects.toThrow('请求失败，请稍后重试');
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('<html>proxy request id=abc</html>', { status: 400 })));
+    await expect(httpClient('/api/proxy-error')).rejects.toThrow('请求失败，请稍后重试');
+
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('upstream connection reset', { status: 403 })));
+    await expect(httpClient('/api/plain-technical-error')).rejects.toThrow('请求失败，请稍后重试');
   });
 
   it('keeps a registered key on server failures and hides transport errors', async () => {

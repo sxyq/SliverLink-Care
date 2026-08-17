@@ -212,6 +212,13 @@ describe('family entry api', () => {
     await expect(get('/api/technical-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
     await expect(get('/api/known-failure')).rejects.toThrow(i18nRuntime.t('errors.familyLoginFailed'));
 
+    queueFetch(
+      new Response('<html>family proxy error</html>', { status: 400 }),
+      new Response('upstream connection reset', { status: 403 }),
+    );
+    await expect(get('/api/proxy-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
+    await expect(get('/api/plain-technical-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
+
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('network implementation detail')));
     await expect(get('/api/network-failure')).rejects.toThrow(i18nRuntime.t('errors.requestFailed'));
   });

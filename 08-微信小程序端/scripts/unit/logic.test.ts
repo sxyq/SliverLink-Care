@@ -646,6 +646,18 @@ test('http client localizes Kazakh keys and keeps unknown-key server messages', 
         data: { code: 500, message: 'Last unit does not have enough valid bits' },
       };
     }
+    if (url.includes('/proxy-client-error')) {
+      return {
+        statusCode: 400,
+        data: '<html>proxy request id=abc</html>',
+      };
+    }
+    if (url.includes('/plain-technical-client-error')) {
+      return {
+        statusCode: 403,
+        data: 'upstream connection reset',
+      };
+    }
     return {
       statusCode: 500,
       data: { message: '   ', messageKey: 'errors.unknownKey' },
@@ -670,6 +682,14 @@ test('http client localizes Kazakh keys and keeps unknown-key server messages', 
     assert.ok(technicalError instanceof ApiMessageError);
     assert.equal(technicalError.messageKey, 'errors.requestFailed');
     assert.match(technicalError.message, new RegExp(i18nRuntime.t('errors.requestFailed')));
+    await assert.rejects(
+      () => httpClient.get('/api/proxy-client-error', { useQueue: false }),
+      new RegExp(i18nRuntime.t('errors.requestFailed')),
+    );
+    await assert.rejects(
+      () => httpClient.get('/api/plain-technical-client-error', { useQueue: false }),
+      new RegExp(i18nRuntime.t('errors.requestFailed')),
+    );
     i18nRuntime.setLocale('zh-CN');
     assert.equal(getErrorMessage(technicalError, i18nRuntime.t, 'errors.requestFailed'), '请求失败，请稍后重试');
     i18nRuntime.setLocale('kk-Arab-CN');
