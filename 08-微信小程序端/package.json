@@ -5,8 +5,8 @@
   "type": "module",
   "sideEffects": false,
   "scripts": {
-    "dev:weapp": "npm exec --yes --package=node@20 --package=@tarojs/cli@4.2.0 -- taro build --type weapp --watch",
-    "build:weapp": "npm exec --yes --package=node@20 --package=@tarojs/cli@4.2.0 -- taro build --type weapp",
+    "dev:weapp": "taro build --type weapp --watch",
+    "build:weapp": "taro build --type weapp",
     "test:unit": "node ./scripts/run-unit-tests.mjs",
     "test:static": "node ./scripts/run-static-audit.mjs",
     "test:route-contract": "node ./scripts/check-route-contract.mjs",
@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-decorators": "^7.25.9",
+    "@tarojs/cli": "4.2.0",
     "@tarojs/plugin-framework-react": "^4.0.7",
     "@tarojs/plugin-platform-weapp": "^4.0.7",
     "@tarojs/vite-runner": "^4.0.7",
