@@ -40,7 +40,7 @@ import javax.imageio.ImageIO;
 @Service
 public class NameplateService {
 
-    private static final String FOOTER_ATTRIBUTION = "重庆医科大学护理学院 银龄守护团队";
+    private static final String FOOTER_ATTRIBUTION = "重庆医科大学护理学院 空巢养老团";
     private static final Color INK = new Color(5, 74, 95);
     private static final Color MUTED_INK = new Color(82, 114, 124);
     private static final Color MINT = new Color(222, 241, 238);

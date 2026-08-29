@@ -5,15 +5,20 @@ import com.silverlink.care.module.nameplate.dto.NameplatePreviewResponse;
 import com.silverlink.care.module.qrcode.QrCodeEntity;
 import com.silverlink.care.module.qrcode.QrCodeIssueResult;
 import com.silverlink.care.module.qrcode.QrCodeService;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -138,7 +143,7 @@ class NameplateServiceTest {
     }
 
     @Test
-    void generateDemoPdfCachesBytesAndReturnsDefensiveCopies() {
+    void generateDemoPdfCachesBytesAndReturnsDefensiveCopies() throws IOException {
         ReflectionTestUtils.setField(service, "previewCacheTtlMs", 10_000L);
         ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 10_000L);
         ReflectionTestUtils.setField(service, "qrImageCacheTtlMs", 10_000L);
@@ -157,6 +162,12 @@ class NameplateServiceTest {
         byte[] second = service.generateDemoPdf("elder-pdf");
 
         assertTrue(first.length > 0);
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(first))) {
+            String pdfText = new PDFTextStripper().getText(document);
+            String attribution = "重庆医科大学护理学院 空巢养老团";
+            assertEquals(2, countOccurrences(pdfText, attribution));
+            assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
+        }
         assertArrayEquals(first, second);
         assertNotSame(first, second);
         verify(data, times(1)).elderDetail("elder-pdf", false);
@@ -182,5 +193,15 @@ class NameplateServiceTest {
         byte[] pdf = service.generateDemoPdf("elder-age");
 
         assertTrue(pdf.length > 0);
+    }
+
+    private static int countOccurrences(String text, String value) {
+        int count = 0;
+        int index = 0;
+        while ((index = text.indexOf(value, index)) >= 0) {
+            count++;
+            index += value.length();
+        }
+        return count;
     }
 }

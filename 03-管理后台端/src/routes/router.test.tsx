@@ -109,7 +109,7 @@ describe('createAdminRouter', () => {
 
     expect(await screen.findByText('DashboardPage')).toBeInTheDocument();
     expect(screen.getByText('AdminNoticeCenter')).toBeInTheDocument();
-    expect(screen.getByText('重庆医科大学护理学院 银龄守护团队')).toBeInTheDocument();
+    expect(screen.getByText('重庆医科大学护理学院 空巢养老团')).toBeInTheDocument();
     expect(screen.getByTestId('sidebar-state')).toHaveTextContent('expanded');
   });
 

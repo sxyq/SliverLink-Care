@@ -52,6 +52,40 @@ function createMapStorage(initial?: string | null) {
 }
 
 describe('shared i18n message catalog', () => {
+  it('uses the renamed attribution in all locales and removes the previous values', () => {
+    const expectedAttribution = {
+      'zh-CN': '重庆医科大学护理学院 空巢养老团',
+      'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
+      'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى كۇمىس جاسى بويىنشا بوس ۇيالى قارټتارعا قامقورلىق توبى',
+    } as const;
+    const previousAttribution = [
+      ['重庆医科大学护理学院', ' ', '\u94f6\u9f84\u5b88\u62a4\u56e2\u961f'].join(''),
+      [
+        'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ ',
+        '«ياشانغانلارنى ',
+        'قوغداش» گۇرۇپپىسى',
+      ].join(''),
+      [
+        'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ ',
+        'مەدبيكەلىك مەدبيكەلىك مەكتەبى ',
+        'كۇمىس جاسى بويىنشا ',
+        'قامقورشىلار توبى',
+      ].join(''),
+    ];
+    const { storage } = createMapStorage();
+    const runtime = createI18nRuntime(storage);
+
+    for (const locale of SUPPORTED_LOCALES) {
+      runtime.setLocale(locale);
+      expect(runtime.t('common.attribution')).toBe(expectedAttribution[locale]);
+    }
+
+    const catalogValues = SUPPORTED_LOCALES.flatMap((locale) => collectStringValues(messages[locale]));
+    for (const previousValue of previousAttribution) {
+      expect(catalogValues).not.toContain(previousValue);
+    }
+  });
+
   it('keeps all three eight-group trees complete, unique, non-empty, and placeholder-compatible', () => {
     expect(SUPPORTED_LOCALES).toEqual(['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN']);
 

@@ -59,7 +59,7 @@ describe('scan app shell, security provider and router', () => {
       </MemoryRouter>,
     );
     expect(screen.getByText('inside app')).toBeInTheDocument();
-    expect(screen.getByText('重庆医科大学护理学院 银龄守护团队')).toBeInTheDocument();
+    expect(screen.getByText('重庆医科大学护理学院 空巢养老团')).toBeInTheDocument();
     expect(isDesignPreviewEnabled()).toBe(false);
     expect(getDesignPreviewBasicInfo()).toMatchObject({ name: '王桂兰' });
     expect(getDesignPreviewArchive().scaleSummaries).toHaveLength(3);

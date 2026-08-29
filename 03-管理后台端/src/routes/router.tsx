@@ -56,7 +56,7 @@ function AdminLayout({ role, onLogout }: { role: string; onLogout: () => void })
       <Sidebar role={role} onLogout={onLogout} collapsed={collapsed} onToggleCollapse={() => setCollapsed((prev) => !prev)} />
       <section className="workspace">
         <Outlet />
-        <footer className="admin-footer">重庆医科大学护理学院 银龄守护团队</footer>
+        <footer className="admin-footer">重庆医科大学护理学院 空巢养老团</footer>
       </section>
     </div>
   );

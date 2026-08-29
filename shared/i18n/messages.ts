@@ -25,7 +25,7 @@ export const messages: Record<Locale, MessageTree> = {
     common: {
       appName: '智联名牌',
       brandSubtitle: '用心守护 温暖相伴',
-      attribution: '重庆医科大学护理学院 银龄守护团队',
+      attribution: '重庆医科大学护理学院 空巢养老团',
       footer: '笙箫一曲',
       loading: '加载中...',
       reading: '正在读取...',
@@ -727,7 +727,7 @@ export const messages: Record<Locale, MessageTree> = {
     common: {
       appName: 'ئەقلىي ئىسىم تاختىسى',
       brandSubtitle: 'كۆڭۈل قويۇپ قوغدايمىز، ئىللىق ھەمراھ بولىمىز',
-      attribution: 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «ياشانغانلارنى قوغداش» گۇرۇپپىسى',
+      attribution: 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
       footer: 'نەغمە ساداسى',
       loading: 'يۈكلىنىۋاتىدۇ...',
       reading: 'ئوقۇلىۋاتىدۇ...',
@@ -1429,7 +1429,7 @@ export const messages: Record<Locale, MessageTree> = {
     common: {
       appName: 'اقىلدى بايلانىس تاقتاشاسى',
       brandSubtitle: 'جىلى جۇرەكپەن ساقتاۋ',
-      attribution: 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى كۇمىس جاسى بويىنشا قامقورشىلار توبى',
+      attribution: 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى كۇمىس جاسى بويىنشا بوس ۇيالى قارټتارعا قامقورلىق توبى',
       footer: 'شەن ديناستياسىنىڭ ءانى',
       loading: 'جۇكتەلۋدە...',
       reading: 'وقۋ...',

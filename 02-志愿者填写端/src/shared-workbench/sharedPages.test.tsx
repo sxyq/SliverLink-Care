@@ -32,7 +32,7 @@ describe('shared volunteer and family components', () => {
     );
 
     expect(screen.getByText('content body')).toBeInTheDocument();
-    expect(screen.getByText('重庆医科大学护理学院 银龄守护团队')).toBeInTheDocument();
+    expect(screen.getByText('重庆医科大学护理学院 空巢养老团')).toBeInTheDocument();
     expect(screen.getByText('副标题')).toBeInTheDocument();
     screen.getAllByRole('button', { name: '返回' }).forEach((button) => fireEvent.click(button));
     fireEvent.click(screen.getByRole('button', { name: 'action' }));
