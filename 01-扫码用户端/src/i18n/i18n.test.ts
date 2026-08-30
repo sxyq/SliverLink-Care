@@ -16,7 +16,7 @@ import {
 } from '@shared-i18n/messages';
 
 const EXPECTED_GROUPS = ['common', 'auth', 'scan', 'verification', 'workbench', 'family', 'status', 'errors'];
-const EXPECTED_LEAF_KEY_COUNT = 684;
+const EXPECTED_LEAF_KEY_COUNT = 685;
 
 function readLeaf(tree: unknown, key: string): string {
   const value = key.split('.').reduce<unknown>((current, part) => {

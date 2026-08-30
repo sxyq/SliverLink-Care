@@ -185,6 +185,11 @@ html[dir='rtl'] .sl-language-switcher {
   font-weight: 700;
 }
 
+.sl-consent-verification-methods {
+  color: #13233a !important;
+  font-weight: 800;
+}
+
 .sl-consent-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

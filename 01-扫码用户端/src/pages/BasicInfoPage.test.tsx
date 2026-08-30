@@ -111,6 +111,8 @@ describe('BasicInfoPage', () => {
 
     await user.click(screen.getByRole('button', { name: /查看健康档案/ }));
     expect(screen.getByText(/查看详细信息前请先完成登记/)).toBeInTheDocument();
+    const recommendation = screen.getByText('两种验证方式：短信验证、身份证件登记。推荐使用身份证件登记。');
+    expect(recommendation.tagName).toBe('STRONG');
   });
 
   it('navigates to verify page from consent dialog', async () => {

@@ -127,6 +127,9 @@ export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
           <div className="sl-consent-dialog">
             <h3 id="sl-consent-title">{t('scan.consentTitle')}</h3>
             <p>{t('scan.consentDescription')}</p>
+            <p className="sl-consent-verification-methods">
+              <strong>{t('scan.consentVerificationRecommendation')}</strong>
+            </p>
             <p>{t('scan.consentAudit')}</p>
             <p className="sl-consent-emphasis">{t('scan.consentAgreement')}</p>
             <div className="sl-consent-actions">
