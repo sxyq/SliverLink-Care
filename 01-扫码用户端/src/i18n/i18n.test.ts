@@ -56,7 +56,7 @@ describe('shared i18n message catalog', () => {
     const expectedAttribution = {
       'zh-CN': '重庆医科大学护理学院 空巢养老团',
       'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
-      'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى كۇمىس جاسى بويىنشا بوس ۇيالى قارټتارعا قامقورلىق توبى',
+      'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى بوس ۇيالى قارټتارعا قامقورلىق توبى',
     } as const;
     const previousAttribution = [
       ['重庆医科大学护理学院', ' ', '\u94f6\u9f84\u5b88\u62a4\u56e2\u961f'].join(''),
@@ -68,7 +68,7 @@ describe('shared i18n message catalog', () => {
       [
         'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ ',
         'مەدبيكەلىك مەدبيكەلىك مەكتەبى ',
-        'كۇمىس جاسى بويىنشا ',
+        '\u0643\u06c7\u0645\u0649\u0633 \u062c\u0627\u0633\u0649 \u0628\u0648\u064a\u0649\u0646\u0634\u0627 ',
         'قامقورشىلار توبى',
       ].join(''),
     ];
@@ -84,6 +84,7 @@ describe('shared i18n message catalog', () => {
     for (const previousValue of previousAttribution) {
       expect(catalogValues).not.toContain(previousValue);
     }
+    expect(catalogValues.every((value) => !value.includes('\u0643\u06c7\u0645\u0649\u0633 \u062c\u0627\u0633\u0649 \u0628\u0648\u064a\u0649\u0646\u0634\u0627'))).toBe(true);
   });
 
   it('keeps all three eight-group trees complete, unique, non-empty, and placeholder-compatible', () => {

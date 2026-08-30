@@ -7,10 +7,12 @@ import com.silverlink.care.module.qrcode.QrCodeIssueResult;
 import com.silverlink.care.module.qrcode.QrCodeService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.apache.pdfbox.text.PDFTextStripperByArea;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Map;
@@ -167,6 +169,13 @@ class NameplateServiceTest {
             String attribution = "重庆医科大学护理学院 空巢养老团";
             assertEquals(2, countOccurrences(pdfText, attribution));
             assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
+
+            PDFTextStripperByArea areaStripper = new PDFTextStripperByArea();
+            areaStripper.addRegion("front", new Rectangle2D.Float(0, 0, 512, 576));
+            areaStripper.addRegion("back", new Rectangle2D.Float(512, 0, 512, 576));
+            areaStripper.extractRegions(document.getPage(0));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), attribution));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), attribution));
         }
         assertArrayEquals(first, second);
         assertNotSame(first, second);
