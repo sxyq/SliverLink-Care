@@ -44,7 +44,6 @@ export interface ElderScopeOption {
 
 export interface QrCodeRow {
   id: string;
-  elderId: string;
   token: string;
   archiveNo: string | null;
   elderName: string | null;

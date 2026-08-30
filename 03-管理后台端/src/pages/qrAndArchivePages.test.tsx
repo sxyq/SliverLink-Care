@@ -8,7 +8,6 @@ const fetchSmsRelayDevices = vi.fn();
 const disableQrCode = vi.fn();
 const regenerateQrCode = vi.fn();
 const updateQrCodeRelayDevice = vi.fn();
-const downloadNameplatePdf = vi.fn();
 const fetchElders = vi.fn();
 const createElder = vi.fn();
 const setElderStatus = vi.fn();
@@ -26,7 +25,6 @@ vi.mock('../api/adminApi', () => ({
   disableQrCode: (...args: unknown[]) => disableQrCode(...args),
   regenerateQrCode: (...args: unknown[]) => regenerateQrCode(...args),
   updateQrCodeRelayDevice: (...args: unknown[]) => updateQrCodeRelayDevice(...args),
-  downloadNameplatePdf: (...args: unknown[]) => downloadNameplatePdf(...args),
   fetchElders: (...args: unknown[]) => fetchElders(...args),
   createElder: (...args: unknown[]) => createElder(...args),
   setElderStatus: (...args: unknown[]) => setElderStatus(...args),
@@ -61,7 +59,6 @@ describe('QrCodeManagePage', () => {
       .mockResolvedValueOnce([
         {
           id: 'qr-1',
-          elderId: 'elder-1',
           token: 'token-1',
           archiveNo: 'A-001',
           elderName: '李奶奶',
@@ -77,7 +74,6 @@ describe('QrCodeManagePage', () => {
       .mockResolvedValueOnce([
         {
           id: 'qr-1',
-          elderId: 'elder-1',
           token: 'token-1',
           archiveNo: 'A-001',
           elderName: '李奶奶',
@@ -93,7 +89,6 @@ describe('QrCodeManagePage', () => {
       .mockResolvedValueOnce([
         {
           id: 'qr-1',
-          elderId: 'elder-1',
           token: 'token-1b',
           archiveNo: 'A-001',
           elderName: '李奶奶',
@@ -132,7 +127,6 @@ describe('QrCodeManagePage', () => {
     });
     disableQrCode.mockResolvedValue(undefined);
     regenerateQrCode.mockResolvedValue({ url: 'https://example.com/scan/2' });
-    downloadNameplatePdf.mockResolvedValue(undefined);
     toDataURL.mockResolvedValue('data:image/png;base64,qr');
     writeText.mockResolvedValue(undefined);
     openMock.mockReturnValue({});
@@ -159,12 +153,6 @@ describe('QrCodeManagePage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: '打开扫码页' }));
     expect(openMock).toHaveBeenCalledWith('https://example.com/scan/1', '_blank', 'noopener,noreferrer');
-
-    fireEvent.click(screen.getByRole('button', { name: '导出名牌 PDF' }));
-    await waitFor(() => {
-      expect(downloadNameplatePdf).toHaveBeenCalledWith('elder-1');
-      expect(screen.getByText('名牌 PDF 已开始下载。')).toBeInTheDocument();
-    });
 
     fireEvent.change(screen.getByDisplayValue('device-1 · 13800000000'), { target: { value: 'device-2' } });
     fireEvent.click(screen.getByRole('button', { name: '保存短信接收设备' }));

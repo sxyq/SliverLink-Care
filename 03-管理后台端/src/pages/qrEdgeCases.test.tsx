@@ -7,7 +7,6 @@ const fetchSmsRelayDevices = vi.fn();
 const disableQrCode = vi.fn();
 const regenerateQrCode = vi.fn();
 const updateQrCodeRelayDevice = vi.fn();
-const downloadNameplatePdf = vi.fn();
 const toDataURL = vi.fn();
 const assignMock = vi.fn();
 const openMock = vi.fn();
@@ -18,7 +17,6 @@ vi.mock('../api/adminApi', () => ({
   disableQrCode: (...args: unknown[]) => disableQrCode(...args),
   regenerateQrCode: (...args: unknown[]) => regenerateQrCode(...args),
   updateQrCodeRelayDevice: (...args: unknown[]) => updateQrCodeRelayDevice(...args),
-  downloadNameplatePdf: (...args: unknown[]) => downloadNameplatePdf(...args),
 }));
 
 vi.mock('../components/StatusTag', () => ({

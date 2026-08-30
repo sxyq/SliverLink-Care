@@ -345,7 +345,6 @@ export async function fetchQrCodes() {
   const rows = await request<Array<Record<string, unknown>>>('/api/admin/qrcodes');
   return rows.map((row) => ({
     id: String(row.id || ''),
-    elderId: String(row.elderId || row.elder_id || ''),
     token: String(row.qrId || row.qrTokenHash || ''),
     archiveNo: row.archiveNo ? String(row.archiveNo) : null,
     elderName: row.elderName ? String(row.elderName) : null,
@@ -357,27 +356,6 @@ export async function fetchQrCodes() {
     status: formatQrStatus(row.status),
     createdAt: String(row.createdAt || ''),
   }));
-}
-
-export async function downloadNameplatePdf(elderId: string) {
-  const response = await fetch(`${API_BASE_URL}/api/nameplates/${encodeURIComponent(elderId)}/pdf`, {
-    method: 'GET',
-    credentials: 'same-origin',
-  });
-
-  if (!response.ok) {
-    const text = await response.text().catch(() => '');
-    throw new Error(normalizeErrorMessage(text));
-  }
-
-  const objectUrl = window.URL.createObjectURL(await response.blob());
-  const link = document.createElement('a');
-  link.href = objectUrl;
-  link.download = `nameplate-${elderId}.pdf`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.setTimeout(() => window.URL.revokeObjectURL(objectUrl), 1000);
 }
 
 export async function createQrCode(elderId: string, archiveNo: string) {
