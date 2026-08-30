@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
-import { QrCode, Settings2 } from 'lucide-react';
+import { Download, QrCode, Settings2 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { StatusTag } from '../components/StatusTag';
 import { TableColumnMenu, useTableColumnVisibility, type TableColumnOption } from '../components/TableColumnMenu';
-import { disableQrCode, fetchQrCodes, fetchSmsRelayDevices, regenerateQrCode, updateQrCodeRelayDevice } from '../api/adminApi';
+import { disableQrCode, downloadNameplatePdf, fetchQrCodes, fetchSmsRelayDevices, regenerateQrCode, updateQrCodeRelayDevice } from '../api/adminApi';
 import type { QrCodeRow, SmsRelayDeviceRow } from '../types';
 import { exportToCsv } from '../utils/exportCsv';
 
@@ -75,6 +75,7 @@ export function QrCodeManagePage() {
   const [previewError, setPreviewError] = useState('');
   const [bindingRelayDeviceId, setBindingRelayDeviceId] = useState('');
   const [bindingSaving, setBindingSaving] = useState(false);
+  const [pdfExporting, setPdfExporting] = useState(false);
   const columns = useTableColumnVisibility('sl_columns_qrcodes', qrColumnOptions);
 
   async function load() {
@@ -222,6 +223,24 @@ export function QrCodeManagePage() {
     }
 
     window.location.assign(previewUrl);
+  }
+
+  async function handleDownloadNameplatePdf() {
+    if (!selectedRow?.elderId) {
+      setActionMessage('当前二维码未关联老人档案，暂不能导出名牌 PDF。');
+      return;
+    }
+
+    setPdfExporting(true);
+    setActionMessage('');
+    try {
+      await downloadNameplatePdf(selectedRow.elderId);
+      setActionMessage('名牌 PDF 已开始下载。');
+    } catch (error) {
+      setActionMessage(error instanceof Error ? error.message : '名牌 PDF 导出失败');
+    } finally {
+      setPdfExporting(false);
+    }
   }
 
   async function handleSaveRelayDevice() {
@@ -398,6 +417,10 @@ export function QrCodeManagePage() {
                       </button>
                       <button className="secondary" onClick={handleOpenPreviewUrl}>
                         打开扫码页
+                      </button>
+                      <button onClick={handleDownloadNameplatePdf} disabled={pdfExporting || !selectedRow.elderId}>
+                        <Download size={16} aria-hidden="true" />
+                        {pdfExporting ? '导出中...' : '导出名牌 PDF'}
                       </button>
                     </div>
                   </>
