@@ -36,6 +36,7 @@ function renderPage(data: ElderBasicInfo = baseData, verified = false) {
         <Route path="/basic" element={<BasicInfoPage data={data} verified={verified} />} />
         <Route path="/health" element={<p>health page</p>} />
         <Route path="/verify" element={<p>verify page</p>} />
+        <Route path="/nameplate" element={<p>nameplate page</p>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -94,6 +95,14 @@ describe('BasicInfoPage', () => {
 
     await user.click(screen.getByRole('button', { name: /查看健康档案/ }));
     expect(screen.getByText('health page')).toBeInTheDocument();
+  });
+
+  it('exposes the nameplate PDF export entry from the scan view', async () => {
+    const user = userEvent.setup();
+    renderPage(baseData, false);
+
+    await user.click(screen.getByRole('button', { name: '下载 PDF' }));
+    expect(screen.getByText('nameplate page')).toBeInTheDocument();
   });
 
   it('shows consent dialog when not verified and clicking view archive', async () => {

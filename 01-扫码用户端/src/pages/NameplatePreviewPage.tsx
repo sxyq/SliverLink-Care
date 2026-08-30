@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { QrCode, Download, FileText, ArrowLeft } from 'lucide-react';
 import { ActionButton } from '../components/ActionButton';
+import { PageTopBar } from '../components/PageTopBar';
 import { reportAudit } from '../api/auditApi';
 import { ENDPOINTS } from '../config/endpoints';
 import { API_BASE_URL } from '../config/env';
@@ -53,6 +54,8 @@ export function NameplatePreviewPage({
 
   return (
     <div className="sl-page">
+      <PageTopBar title={t('scan.nameplatePreview')} leading="back" trailing="menu" />
+
       <header className="sl-hero slim">
         <div>
           <h1>{t('scan.nameplatePreview')}</h1>

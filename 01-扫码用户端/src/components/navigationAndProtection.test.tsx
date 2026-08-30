@@ -102,6 +102,7 @@ describe('scan navigation and protection components', () => {
     );
 
     expect(screen.getByRole('heading', { name: '健康档案' })).toBeInTheDocument();
+    expect(screen.getByRole('banner')).toHaveClass('has-language-safe-area');
     expect(screen.getByLabelText('返回首页')).toBeInTheDocument();
     await user.click(screen.getByLabelText('切换短信验证'));
     expect(onTrailingClick).toHaveBeenCalledTimes(1);

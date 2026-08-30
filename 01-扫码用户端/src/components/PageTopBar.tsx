@@ -32,7 +32,7 @@ export function PageTopBar({
   }
 
   return (
-    <header className={`sl-topbar${hasTrailingAction ? ' has-trailing-action' : ''}`}>
+    <header className={`sl-topbar has-language-safe-area${hasTrailingAction ? ' has-trailing-action' : ''}`}>
       <button
         type="button"
         className={`sl-topbar-icon ${leading === 'back' ? 'is-leading-back' : ''}`}

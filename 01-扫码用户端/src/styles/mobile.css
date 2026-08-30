@@ -253,6 +253,13 @@ html[dir='rtl'] .sl-language-switcher {
   grid-template-columns: 40px minmax(0, 1fr) auto;
 }
 
+/* The language switcher is fixed to the frame's top-right corner. Keep every
+ * top-bar action clear of its hit area, including the identity-mode toggle. */
+.sl-topbar > .sl-topbar-switch,
+.sl-topbar > .sl-topbar-icon:not(:first-child) {
+  margin-right: 122px;
+}
+
 .sl-topbar h1 {
   margin: 0;
   text-align: center;
@@ -297,6 +304,117 @@ html[dir='rtl'] .sl-topbar-icon.is-leading-back svg {
   font-weight: 700;
   letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.sl-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px;
+  color: #19315b;
+  background: linear-gradient(135deg, #eaf7f4 0%, #f5f8ff 100%);
+  border: 1px solid #dcefeb;
+  border-radius: var(--sl-radius-lg);
+}
+
+.sl-hero.slim {
+  margin-bottom: 16px;
+}
+
+.sl-hero h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.sl-hero p {
+  margin: 6px 0 0;
+  color: var(--sl-text-soft);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.sl-card {
+  margin-top: 14px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid var(--sl-border);
+  border-radius: var(--sl-radius-lg);
+  box-shadow: 0 10px 24px rgba(28, 45, 67, 0.05);
+}
+
+.sl-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #168f79;
+}
+
+.sl-section-title h2 {
+  margin: 0;
+  color: var(--sl-text);
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.sl-nameplate-front,
+.sl-nameplate-back {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid #d9ebe6;
+  border-radius: 14px;
+}
+
+.sl-nameplate-front {
+  display: grid;
+  gap: 14px;
+  background: linear-gradient(145deg, #f1fbf7 0%, #ffffff 72%);
+}
+
+.sl-nameplate-back {
+  background: linear-gradient(145deg, #f4f8ff 0%, #ffffff 72%);
+}
+
+.sl-nameplate-field {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sl-nameplate-label {
+  color: var(--sl-text-soft);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.sl-nameplate-placeholder {
+  min-width: 0;
+  color: var(--sl-text);
+  font-size: 16px;
+  font-weight: 800;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+.sl-nameplate-qr-area {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  color: #2673dc;
+}
+
+.sl-nameplate-qr-hint {
+  color: var(--sl-text-soft);
+  font-size: 12px;
+  text-align: center;
+}
+
+.sl-nameplate-divider {
+  height: 1px;
+  margin: 16px 0;
+  background: #e4ebf3;
 }
 
 .sl-section-heading {

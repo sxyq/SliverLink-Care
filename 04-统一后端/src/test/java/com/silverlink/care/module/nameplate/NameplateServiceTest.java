@@ -171,8 +171,8 @@ class NameplateServiceTest {
             assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
 
             PDFTextStripperByArea areaStripper = new PDFTextStripperByArea();
-            areaStripper.addRegion("front", new Rectangle2D.Float(0, 0, 512, 576));
-            areaStripper.addRegion("back", new Rectangle2D.Float(512, 0, 512, 576));
+            areaStripper.addRegion("front", new Rectangle2D.Double(83, 158, 414, 262));
+            areaStripper.addRegion("back", new Rectangle2D.Double(527, 158, 414, 262));
             areaStripper.extractRegions(document.getPage(0));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), attribution));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), attribution));

@@ -71,7 +71,11 @@ describe('scan pages', () => {
       return element;
     });
 
-    render(<NameplatePreviewPage elderId="elder-1" name="赵永福" age={79} phone="13877778888" archiveNo="A001" />);
+    render(
+      <MemoryRouter>
+        <NameplatePreviewPage elderId="elder-1" name="赵永福" age={79} phone="13877778888" archiveNo="A001" />
+      </MemoryRouter>,
+    );
     await user.click(screen.getByRole('button', { name: /下载 PDF/ }));
 
     await waitFor(() => expect(click).toHaveBeenCalledTimes(1));
@@ -86,7 +90,11 @@ describe('scan pages', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
     vi.stubGlobal('alert', alert);
 
-    render(<NameplatePreviewPage elderId="elder-1" />);
+    render(
+      <MemoryRouter>
+        <NameplatePreviewPage elderId="elder-1" />
+      </MemoryRouter>,
+    );
     await user.click(screen.getByRole('button', { name: /生成 PDF/ }));
 
     await waitFor(() => expect(alert).toHaveBeenCalledWith('PDF 下载失败，请稍后重试'));
@@ -108,7 +116,11 @@ describe('scan pages', () => {
       return element;
     });
 
-    render(<NameplatePreviewPage elderId="elder-2" archiveNo="" />);
+    render(
+      <MemoryRouter>
+        <NameplatePreviewPage elderId="elder-2" archiveNo="" />
+      </MemoryRouter>,
+    );
     await user.click(screen.getByRole('button', { name: /下载 PDF/ }));
 
     await waitFor(() => {

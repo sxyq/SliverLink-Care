@@ -1,4 +1,4 @@
-import { Phone, PlusSquare, ShieldCheck, UserRound } from 'lucide-react';
+import { FileDown, Phone, PlusSquare, ShieldCheck, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ActionButton } from '../components/ActionButton';
@@ -113,6 +113,10 @@ export function BasicInfoPage({ data, verified = false }: BasicInfoPageProps) {
 
       <ActionButton variant="primary" onClick={handleViewArchive}>
         {t('scan.viewHealthArchive')}
+      </ActionButton>
+
+      <ActionButton icon={FileDown} variant="outline" onClick={() => navigate('/nameplate')}>
+        {t('scan.downloadPdf')}
       </ActionButton>
 
       <AppAttribution />
