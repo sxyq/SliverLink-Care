@@ -1380,6 +1380,28 @@ button::after {
   letter-spacing: 0.02em;
 }
 
+.sl-shell-footer-group {
+  margin-top: auto;
+  padding: 8rpx 8rpx 4rpx;
+  text-align: center;
+}
+
+.sl-shell-footer-group .sl-shell-footer {
+  margin-top: 0;
+}
+
+.sl-app-attribution {
+  display: block;
+  margin-top: 4rpx;
+  padding: 0 8rpx;
+  color: #8ea0b2;
+  font-size: 20rpx;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
 .sl-bottom-nav-shell {
   padding: 8rpx;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(249, 253, 254, 0.98) 100%);

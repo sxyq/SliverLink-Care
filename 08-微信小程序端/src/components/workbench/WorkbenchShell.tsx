@@ -17,7 +17,10 @@ export const WorkbenchShell = memo(function WorkbenchShell({ children, pageClass
         <View className='sl-phone-shell'>
           <View className='sl-phone-content'>
             <View className={`sl-page ${pageClassName}`.trim()}>{children}</View>
-            <Text className='sl-shell-footer'>{resolvedFooter}</Text>
+            <View className='sl-shell-footer-group'>
+              <Text className='sl-shell-footer'>{resolvedFooter}</Text>
+              <Text className='sl-app-attribution'>{t('common.attribution')}</Text>
+            </View>
           </View>
         </View>
       </View>
