@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Ban, Copy, QrCode, RefreshCcw } from 'lucide-react';
+import { Ban, Copy, Download, LoaderCircle, QrCode, RefreshCcw } from 'lucide-react';
 import QRCode from 'qrcode';
 import { PageHeader } from '../components/PageHeader';
 import { disableVolunteerElderQrCode, fetchVolunteerElderQrCode, regenerateVolunteerElderQrCode } from '../api/volunteerApi';
 import type { AssignedElder, VolunteerQrCodeInfo } from '../types';
 import { useI18n } from '../i18n';
+import { downloadNameplatePdf } from '../shared-workbench/nameplateExport';
 
 interface QrCodeManagePageProps {
   elder: AssignedElder;
@@ -84,6 +85,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
   const [previewImage, setPreviewImage] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<'disable' | 'regenerate' | null>(null);
+  const [pdfExporting, setPdfExporting] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const disableReviewPending = info?.disableReviewStatus === 'PENDING';
@@ -189,6 +191,24 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
     }
   }
 
+  async function handleDownloadNameplatePdf() {
+    if (pdfExporting) return;
+    setPdfExporting(true);
+    setError('');
+    setMessage('');
+    try {
+      await downloadNameplatePdf({
+        elderId: elder.id,
+        archiveNo: elder.archiveNo,
+        tokenStorageKey: 'sl_volunteer_token',
+      });
+    } catch (nextError) {
+      setError(nextError instanceof Error ? nextError.message : t('errors.pdfDownloadFailed'));
+    } finally {
+      setPdfExporting(false);
+    }
+  }
+
   return (
     <div className="sl-page">
       <PageHeader title={t('workbench.qrViewManage')} onBack={onBack} />
@@ -205,9 +225,21 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
         ) : info ? (
           <div className="sl-qr-layout">
             <div className={qrPreviewStateClassName(info.status)}>
-              <span className={statusClassName(info.status)}>
-                {info.status === '已停用' ? t('workbench.disabled') : info.status === '启用' ? t('family.qrEnabled') : info.status}
-              </span>
+              <div className="sl-qr-preview-top-actions">
+                <button
+                  type="button"
+                  className="sl-qr-pdf-export-button"
+                  onClick={() => void handleDownloadNameplatePdf()}
+                  disabled={pdfExporting}
+                  aria-label={t('workbench.exportNameplatePdf')}
+                  title={pdfExporting ? t('common.exporting') : t('workbench.exportNameplatePdf')}
+                >
+                  {pdfExporting ? <LoaderCircle className="sl-icon-spin" size={18} /> : <Download size={18} />}
+                </button>
+                <span className={statusClassName(info.status)}>
+                  {info.status === '已停用' ? t('workbench.disabled') : info.status === '启用' ? t('family.qrEnabled') : info.status}
+                </span>
+              </div>
               <div className="sl-qr-preview-title">{t('workbench.qrOfElder', { name: elder.name })}</div>
               <div className="sl-qr-preview-meta">
                 {t('workbench.generatedAt')} <span className="sl-ltr-data">{formatTime(info.createdAt, t('errors.unrecorded'))}</span>

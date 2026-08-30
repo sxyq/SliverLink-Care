@@ -1017,13 +1017,52 @@
 }
 
 .sl-qr-status-chip {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.sl-qr-preview-top-actions {
   position: absolute;
   top: 14px;
   inset-inline-end: 14px;
   z-index: 1;
-  font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sl-qr-pdf-export-button {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--sl-border);
+  border-radius: 8px;
+  color: var(--sl-primary);
+  background: #fff;
+  cursor: pointer;
+}
+
+.sl-qr-pdf-export-button:hover:not(:disabled) {
+  border-color: var(--sl-primary);
+  background: #f2fbfc;
+}
+
+.sl-qr-pdf-export-button:disabled {
+  cursor: wait;
+  opacity: 0.64;
+}
+
+.sl-icon-spin {
+  animation: sl-icon-spin 0.8s linear infinite;
+}
+
+@keyframes sl-icon-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .sl-qr-status-chip.is-enabled {

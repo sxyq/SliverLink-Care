@@ -18,6 +18,7 @@ const fetchVolunteerElderQrCode = vi.fn();
 const regenerateVolunteerElderQrCode = vi.fn();
 const disableVolunteerElderQrCode = vi.fn();
 const qrToDataUrl = vi.fn();
+const downloadNameplatePdf = vi.fn();
 
 vi.mock('../api', () => ({
   updateBasicInfo: (...args: unknown[]) => updateBasicInfo(...args),
@@ -33,6 +34,10 @@ vi.mock('../api/volunteerApi', () => ({
   fetchVolunteerElderQrCode: (...args: unknown[]) => fetchVolunteerElderQrCode(...args),
   regenerateVolunteerElderQrCode: (...args: unknown[]) => regenerateVolunteerElderQrCode(...args),
   disableVolunteerElderQrCode: (...args: unknown[]) => disableVolunteerElderQrCode(...args),
+}));
+
+vi.mock('../shared-workbench/nameplateExport', () => ({
+  downloadNameplatePdf: (...args: unknown[]) => downloadNameplatePdf(...args),
 }));
 
 vi.mock('@shared/SubjectDetailPage', () => ({
@@ -99,6 +104,7 @@ const elder = {
 describe('volunteer care pages', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    downloadNameplatePdf.mockResolvedValue(undefined);
     vi.stubGlobal('alert', vi.fn());
   });
 
@@ -359,6 +365,12 @@ describe('volunteer care pages', () => {
     render(<QrCodeManagePage elder={elder} onBack={vi.fn()} />);
 
     expect(await screen.findByText('李奶奶 的二维码')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '导出名牌 PDF' }));
+    await waitFor(() => expect(downloadNameplatePdf).toHaveBeenCalledWith({
+      elderId: 'elder-1',
+      archiveNo: 'A-001',
+      tokenStorageKey: 'sl_volunteer_token',
+    }));
     fireEvent.click(screen.getByRole('button', { name: '复制访问链接' }));
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/qr'));
 
