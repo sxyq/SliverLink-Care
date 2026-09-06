@@ -94,11 +94,25 @@
   letter-spacing: 2rpx;
 }
 
+.scan-nameplate-front-hero__subtitle {
+  margin-top: -4rpx;
+  font-size: 30rpx;
+  line-height: 1.2;
+  color: var(--sl-text-secondary);
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
 .scan-nameplate-front-hero__divider {
   width: 88rpx;
   height: 8rpx;
   border-radius: 999rpx;
   background: linear-gradient(90deg, #18a9c8, rgba(24, 169, 200, 0.16));
+}
+
+.scan-nameplate-back-brand {
+  justify-items: center;
+  text-align: center;
 }
 
 .scan-nameplate-front-grid {

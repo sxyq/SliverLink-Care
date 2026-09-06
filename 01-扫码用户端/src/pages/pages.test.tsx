@@ -76,6 +76,7 @@ describe('scan pages', () => {
         <NameplatePreviewPage elderId="elder-1" name="赵永福" age={79} phone="13877778888" archiveNo="A001" />
       </MemoryRouter>,
     );
+    expect(screen.getAllByText('智护空巢')).toHaveLength(2);
     await user.click(screen.getByRole('button', { name: /下载 PDF/ }));
 
     await waitFor(() => expect(click).toHaveBeenCalledTimes(1));

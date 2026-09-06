@@ -16,7 +16,7 @@ import {
 } from '@shared-i18n/messages';
 
 const EXPECTED_GROUPS = ['common', 'auth', 'scan', 'verification', 'workbench', 'family', 'status', 'errors'];
-const EXPECTED_LEAF_KEY_COUNT = 685;
+const EXPECTED_LEAF_KEY_COUNT = 686;
 
 function readLeaf(tree: unknown, key: string): string {
   const value = key.split('.').reduce<unknown>((current, part) => {
@@ -54,12 +54,19 @@ function createMapStorage(initial?: string | null) {
 describe('shared i18n message catalog', () => {
   it('uses the renamed attribution in all locales and removes the previous values', () => {
     const expectedAttribution = {
-      'zh-CN': '重庆医科大学护理学院 空巢养老团',
-      'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
-      'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
+      'zh-CN': '重庆医科大学空巢养老团',
+      'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
+      'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
+    } as const;
+    const expectedNameplateSubtitle = {
+      'zh-CN': '智护空巢',
+      'ug-Arab-CN': 'بوش ئۇۋىلىق ياشانغانلارغا ئەقلىي غەمخورلۇق',
+      'kk-Arab-CN': 'بوس ۇياداعى قارتتارعا اقىلدى قامقورلىق',
     } as const;
     const previousAttribution = [
       ['重庆医科大学护理学院', ' ', '\u94f6\u9f84\u5b88\u62a4\u56e2\u961f'].join(''),
+      'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
+      'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ مەدبيكەلىك مەدبيكەلىك مەكتەبى بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
       [
         'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتى كۈتۈنۈش ئىنىستىتۇتىنىڭ ',
         '\u00ab\u064a\u0627\u0634\u0627\u0646\u063a\u0627\u0646\u0644\u0627\u0631\u0646\u0649 ',
@@ -82,6 +89,7 @@ describe('shared i18n message catalog', () => {
     for (const locale of SUPPORTED_LOCALES) {
       runtime.setLocale(locale);
       expect(runtime.t('common.attribution')).toBe(expectedAttribution[locale]);
+      expect(runtime.t('common.nameplateSubtitle')).toBe(expectedNameplateSubtitle[locale]);
     }
 
     const catalogValues = SUPPORTED_LOCALES.flatMap((locale) => collectStringValues(messages[locale]));

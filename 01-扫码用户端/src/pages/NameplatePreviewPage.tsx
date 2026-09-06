@@ -70,6 +70,10 @@ export function NameplatePreviewPage({
           <h2>{t('scan.frontNameplate')}</h2>
         </div>
         <div className="sl-nameplate-front">
+          <div className="sl-nameplate-brand">
+            <strong>{t('common.appName')}</strong>
+            <span>{t('common.nameplateSubtitle')}</span>
+          </div>
           <div className="sl-nameplate-field">
             <span className="sl-nameplate-label">{t('common.name')}</span>
             <span className="sl-nameplate-placeholder sl-auto-data" dir="auto">{name || t('scan.unanswered')}</span>
@@ -91,6 +95,10 @@ export function NameplatePreviewPage({
           <h2>{t('scan.backNameplate')}</h2>
         </div>
         <div className="sl-nameplate-back">
+          <div className="sl-nameplate-brand">
+            <strong>{t('common.appName')}</strong>
+            <span>{t('common.nameplateSubtitle')}</span>
+          </div>
           <div className="sl-nameplate-qr-area">
             <QrCode size={64} />
             <span className="sl-nameplate-qr-hint">{t('scan.wechatScanHealthArchive')}</span>

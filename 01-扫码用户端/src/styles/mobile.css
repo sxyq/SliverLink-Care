@@ -371,6 +371,28 @@ html[dir='rtl'] .sl-topbar-icon.is-leading-back svg {
   border-radius: 14px;
 }
 
+.sl-nameplate-brand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.sl-nameplate-brand strong {
+  color: var(--sl-primary-deep);
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.sl-nameplate-brand span {
+  color: var(--sl-text-soft);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
 .sl-nameplate-front {
   display: grid;
   gap: 14px;

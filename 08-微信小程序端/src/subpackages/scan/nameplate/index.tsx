@@ -219,7 +219,8 @@ function NameplatePreviewPage() {
                           <View className='scan-nameplate-card__tag'>{t('scan.carryWithYou')}</View>
                         </View>
                         <View className='scan-nameplate-front-hero'>
-                          <View className='scan-nameplate-front-hero__title'>{t('common.brandTitle')}</View>
+                          <View className='scan-nameplate-front-hero__title'>{t('common.appName')}</View>
+                          <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
                           <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-front-grid'>
@@ -242,6 +243,11 @@ function NameplatePreviewPage() {
                         <View className='scan-nameplate-card__header'>
                           <View className='scan-nameplate-card__kicker'>{t('scan.backNameplate')}</View>
                           <View className='scan-nameplate-card__tag'>{t('auth.scanView')}</View>
+                        </View>
+                        <View className='scan-nameplate-front-hero scan-nameplate-back-brand'>
+                          <View className='scan-nameplate-front-hero__title'>{t('common.appName')}</View>
+                          <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
+                          <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-qr-area'>
                           <View className='scan-nameplate-qr-box'>

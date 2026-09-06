@@ -166,9 +166,11 @@ class NameplateServiceTest {
         assertTrue(first.length > 0);
         try (PDDocument document = PDDocument.load(new ByteArrayInputStream(first))) {
             String pdfText = new PDFTextStripper().getText(document);
-            String attribution = "重庆医科大学护理学院 空巢养老团";
+            String attribution = "重庆医科大学空巢养老团";
             assertEquals(2, countOccurrences(pdfText, attribution));
+            assertFalse(pdfText.contains("重庆医科大学护理学院 空巢养老团"));
             assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
+            assertEquals(2, countOccurrences(pdfText, "智护空巢"));
 
             PDFTextStripperByArea areaStripper = new PDFTextStripperByArea();
             areaStripper.addRegion("front", new Rectangle2D.Double(83, 158, 414, 262));
@@ -176,6 +178,8 @@ class NameplateServiceTest {
             areaStripper.extractRegions(document.getPage(0));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), attribution));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), attribution));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), "智护空巢"));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), "智护空巢"));
         }
         assertArrayEquals(first, second);
         assertNotSame(first, second);

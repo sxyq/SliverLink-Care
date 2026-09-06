@@ -40,7 +40,8 @@ import javax.imageio.ImageIO;
 @Service
 public class NameplateService {
 
-    private static final String FOOTER_ATTRIBUTION = "重庆医科大学护理学院 空巢养老团";
+    private static final String NAMEPLATE_SUBTITLE = "智护空巢";
+    private static final String FOOTER_ATTRIBUTION = "重庆医科大学空巢养老团";
     private static final Color INK = new Color(5, 74, 95);
     private static final Color MUTED_INK = new Color(82, 114, 124);
     private static final Color MINT = new Color(222, 241, 238);
@@ -219,7 +220,8 @@ public class NameplateService {
             NameplatePreviewResponse preview
     ) throws IOException {
         drawCenteredText(content, font, 38f, "智联名牌", x + width / 2f, y + height * 0.69f, INK);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.59f, 56f, MINT_DEEP);
+        drawCenteredText(content, font, 16f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.615f, MUTED_INK);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, MINT_DEEP);
 
         float labelX = x + width * 0.14f;
         float valueX = x + width * 0.33f;
@@ -243,7 +245,8 @@ public class NameplateService {
             BufferedImage qrImage
     ) throws IOException {
         drawCenteredText(content, font, 25f, "智联名牌", x + width / 2f, y + height * 0.82f, INK);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.75f, 42f, MINT_DEEP);
+        drawCenteredText(content, font, 14f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.765f, MUTED_INK);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, MINT_DEEP);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
