@@ -1,6 +1,9 @@
 .local/
 dist-preview/
 miniprogram-ci-qrcode.png
-node_modules
-node_modules
-node_modules
+node_modules/
+dist/
+.swc/
+.codex-write-check
+.DS_Store
+.vscode/
