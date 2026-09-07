@@ -369,7 +369,7 @@ describe('volunteer care pages', () => {
     await waitFor(() => expect(downloadNameplatePdf).toHaveBeenCalledWith({
       elderId: 'elder-1',
       archiveNo: 'A-001',
-      tokenStorageKey: 'sl_volunteer_token',
+      tokenStorageKey: 'sl_volunteer_web_token',
     }));
     fireEvent.click(screen.getByRole('button', { name: '复制访问链接' }));
     await waitFor(() => expect(navigator.clipboard.writeText).toHaveBeenCalledWith('https://example.com/qr'));

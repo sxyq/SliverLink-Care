@@ -822,7 +822,7 @@ describe('family entry pages', () => {
       expect(downloadNameplatePdf).toHaveBeenCalledWith({
         elderId: 'elder-1',
         archiveNo: 'A001',
-        tokenStorageKey: 'family_token',
+        tokenStorageKey: 'sl_family_web_token',
       });
     });
     fireEvent.click(screen.getByRole('button', { name: 'detail back' }));

@@ -20,6 +20,7 @@ describe('downloadNameplatePdf', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    localStorage.clear();
   });
 
   it('downloads the generated pdf and releases its object URL', async () => {
@@ -29,16 +30,21 @@ describe('downloadNameplatePdf', () => {
     const appendSpy = vi.spyOn(document.body, 'appendChild');
     const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
 
+    localStorage.setItem('sl_volunteer_web_token', 'token-1');
     await downloadNameplatePdf({
       elderId: 'elder 1',
       archiveNo: 'A001',
-      tokenStorageKey: 'token-key',
+      tokenStorageKey: 'sl_volunteer_web_token',
     });
 
     const anchor = appendSpy.mock.calls[0][0] as HTMLAnchorElement;
-    expect(fetchMock).toHaveBeenCalledWith('/api/nameplates/elder%201/pdf', {
+    expect(fetchMock).toHaveBeenCalledWith('/silverlink-api/api/nameplates/elder%201/pdf', {
       method: 'GET',
       credentials: 'same-origin',
+      headers: {
+        Accept: 'application/pdf',
+        Authorization: 'Bearer token-1',
+      },
     });
     expect(anchor.href).toBe('blob:nameplate-pdf');
     expect(anchor.download).toBe('nameplate-elder 1.pdf');

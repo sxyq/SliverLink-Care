@@ -63,7 +63,7 @@ export default function ElderBasicManagePage() {
       await downloadNameplatePdf({
         elderId: currentElder.id,
         archiveNo: currentElder.archiveNo,
-        tokenStorageKey: 'family_token',
+        tokenStorageKey: 'sl_family_web_token',
       });
     } catch (error) {
       alert(error instanceof Error ? error.message : t('errors.exportRetry'));

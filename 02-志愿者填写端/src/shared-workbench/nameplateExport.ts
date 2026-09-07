@@ -1,6 +1,11 @@
 import { i18nRuntime } from '../i18n';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+function resolveBaseUrl() {
+  const configured = (import.meta as any).env?.VITE_API_BASE_URL?.trim();
+  return (configured || '/silverlink-api').replace(/\/$/, '');
+}
+
+const API_BASE_URL = resolveBaseUrl();
 
 type DownloadNameplatePdfOptions = {
   elderId: string;
@@ -10,12 +15,15 @@ type DownloadNameplatePdfOptions = {
 
 export async function downloadNameplatePdf({ elderId, archiveNo, tokenStorageKey }: DownloadNameplatePdfOptions) {
   void archiveNo;
-  void tokenStorageKey;
-
+  const authToken = typeof window !== 'undefined' ? window.localStorage.getItem(tokenStorageKey) || '' : '';
   const url = `${API_BASE_URL}/api/nameplates/${encodeURIComponent(elderId)}/pdf`;
   const response = await fetch(url, {
     method: 'GET',
     credentials: 'same-origin',
+    headers: {
+      Accept: 'application/pdf',
+      ...(authToken ? { Authorization: `Bearer ${authToken}` } : {}),
+    },
   });
   if (!response.ok) {
     throw new Error(i18nRuntime.t('errors.exportRetry'));

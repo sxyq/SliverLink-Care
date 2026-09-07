@@ -200,7 +200,7 @@ export function QrCodeManagePage({ elder, onBack }: QrCodeManagePageProps) {
       await downloadNameplatePdf({
         elderId: elder.id,
         archiveNo: elder.archiveNo,
-        tokenStorageKey: 'sl_volunteer_token',
+        tokenStorageKey: 'sl_volunteer_web_token',
       });
     } catch (nextError) {
       setError(nextError instanceof Error ? nextError.message : t('errors.pdfDownloadFailed'));
