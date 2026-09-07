@@ -1369,25 +1369,10 @@ button::after {
   background: transparent;
 }
 
-.sl-shell-footer {
-  margin-top: auto;
-  padding: 8rpx 8rpx 4rpx;
-  color: #8ea0b2;
-  font-size: 22rpx;
-  font-weight: 500;
-  line-height: 1.5;
-  text-align: center;
-  letter-spacing: 0.02em;
-}
-
 .sl-shell-footer-group {
   margin-top: auto;
   padding: 8rpx 8rpx 4rpx;
   text-align: center;
-}
-
-.sl-shell-footer-group .sl-shell-footer {
-  margin-top: 0;
 }
 
 .sl-app-attribution {

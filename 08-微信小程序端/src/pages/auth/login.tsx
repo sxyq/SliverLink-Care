@@ -338,9 +338,6 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
               </View>
             </View>
 
-            <View className='auth-login-footer'>
-              <Text className='auth-login-footer__line'>{t('common.footer')}</Text>
-            </View>
           </View>
         </View>
       </View>

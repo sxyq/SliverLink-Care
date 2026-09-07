@@ -5,12 +5,10 @@ import { useI18n } from '@/i18n';
 interface WorkbenchShellProps {
   children: ReactNode;
   pageClassName?: string;
-  footerText?: string;
 }
 
-export const WorkbenchShell = memo(function WorkbenchShell({ children, pageClassName = '', footerText = '' }: WorkbenchShellProps) {
+export const WorkbenchShell = memo(function WorkbenchShell({ children, pageClassName = '' }: WorkbenchShellProps) {
   const { t } = useI18n();
-  const resolvedFooter = footerText || t('common.footer');
   return (
     <View className='sl-stage sl-stage--workbench'>
       <View className='sl-app-shell'>
@@ -18,7 +16,6 @@ export const WorkbenchShell = memo(function WorkbenchShell({ children, pageClass
           <View className='sl-phone-content'>
             <View className={`sl-page ${pageClassName}`.trim()}>{children}</View>
             <View className='sl-shell-footer-group'>
-              <Text className='sl-shell-footer'>{resolvedFooter}</Text>
               <Text className='sl-app-attribution'>{t('common.attribution')}</Text>
             </View>
           </View>
