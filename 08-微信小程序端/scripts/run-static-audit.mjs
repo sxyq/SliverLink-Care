@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 
-const expectedTopPages = ['pages/home/index', 'pages/auth/login', 'pages/auth-role-redirect/index'];
+const expectedTopPages = ['pages/home/index', 'pages/auth/login', 'pages/agreement/index', 'pages/auth-role-redirect/index'];
 const expectedScanPages = ['landing/index', 'verify/index', 'archive/index', 'medications/index', 'scales/index', 'nameplate/index'];
 const expectedWorkbenchPages = ['elder-list/index', 'elder-detail/index', 'basic/index', 'medication/index', 'scale/index', 'qrcode/index'];
 const expectedConditionNames = [
@@ -22,6 +22,7 @@ const expectedConditionNames = [
   'workbench-medication',
   'workbench-scale',
   'workbench-qrcode',
+  'agreement',
 ];
 
 async function readText(relativePath) {
@@ -99,7 +100,7 @@ assert.equal(projectConfig.setting?.minifyWXSS, true, 'minifyWXSS should stay en
 assert.equal(projectConfig.setting?.minifyWXML, true, 'minifyWXML should stay enabled');
 
 const conditionList = projectConfig.condition?.miniprogram?.list || [];
-assert.equal(conditionList.length, 12, 'DevTools condition matrix must cover 12 entries');
+assert.equal(conditionList.length, 13, 'DevTools condition matrix must cover 13 entries');
 assert.deepEqual(conditionList.map((item) => item.name), expectedConditionNames, 'DevTools condition order/name drifted');
 for (const condition of conditionList) {
   assert.ok(condition.path, `condition ${condition.name} is missing path`);

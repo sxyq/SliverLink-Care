@@ -81,7 +81,7 @@ async function assertLanguageMenuContracts() {
   const verifySource = await fsp.readFile(path.join(projectRoot, 'src/subpackages/scan/verify/index.tsx'), 'utf8');
   assert.match(verifySource, /<Input\s+className='sl-form-input sl-auto-data'\s+value=\{identityName\}/, 'visitor name must preserve its own bidirectional text direction');
 
-  assert.equal(pageSources.length, 15, 'all registered page roots must be covered by the page-level i18n shell');
+  assert.equal(pageSources.length, 16, 'all registered page roots must be covered by the page-level i18n shell');
   for (const pageSource of pageSources) {
     assert.match(pageSource, /I18nPageShell/);
     assert.match(pageSource, /export default function \w+Entry\(\)[\s\S]*<I18nPageShell navigationTitleKey=['"][a-z]+\.[A-Za-z]+['"]>/);

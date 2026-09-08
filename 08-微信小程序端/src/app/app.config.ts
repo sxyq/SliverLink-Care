@@ -1,5 +1,5 @@
 export default {
-  pages: ['pages/home/index', 'pages/auth/login', 'pages/auth-role-redirect/index'],
+  pages: ['pages/home/index', 'pages/auth/login', 'pages/auth-role-redirect/index', 'pages/agreement/index'],
   subpackages: [
     {
       root: 'subpackages/scan',

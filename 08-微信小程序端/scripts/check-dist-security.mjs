@@ -74,7 +74,7 @@ function assertNoForbiddenContent(relativePath, content) {
 
 function assertDevtoolsConditionSafety(projectConfig) {
   const conditions = projectConfig.condition?.miniprogram?.list || [];
-  assert.equal(conditions.length, 12, 'dist project config should keep the 12-entry DevTools condition matrix');
+  assert.equal(conditions.length, 13, 'dist project config should keep the 13-entry DevTools condition matrix');
 
   const forbiddenQueryKey = /(?:^|[?&])(?:token|authToken|phone|mobile|idCard|password)=/i;
   for (const condition of conditions) {

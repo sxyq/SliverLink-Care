@@ -104,6 +104,12 @@
           "path": "subpackages/workbench/qrcode/index",
           "query": "elderId=ELDER_DEMO_001",
           "scene": null
+        },
+        {
+          "name": "agreement",
+          "path": "pages/agreement/index",
+          "query": "",
+          "scene": null
         }
       ]
     }

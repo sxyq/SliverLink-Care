@@ -13,6 +13,7 @@ const requiredFiles = [
   'pages/home/index.js',
   'pages/auth/login.js',
   'pages/auth-role-redirect/index.js',
+  'pages/agreement/index.js',
   'subpackages/scan/landing/index.js',
   'subpackages/scan/verify/index.js',
   'subpackages/scan/archive/index.js',
@@ -96,6 +97,7 @@ assert.deepEqual(appJson.pages, [
   'pages/home/index',
   'pages/auth/login',
   'pages/auth-role-redirect/index',
+  'pages/agreement/index',
 ]);
 
 const scanSubpackage = appJson.subpackages.find((item) => item.root === 'subpackages/scan');
@@ -120,7 +122,7 @@ for (const relativePath of requiredFiles) {
 
 const registeredPages = allRegisteredPages(appJson);
 const devtoolsConditions = sourceProjectConfig.condition?.miniprogram?.list || [];
-assert.equal(devtoolsConditions.length, 12, 'DevTools condition matrix should cover 12 miniapp pages');
+assert.equal(devtoolsConditions.length, 13, 'DevTools condition matrix should cover 13 miniapp pages');
 
 for (const condition of devtoolsConditions) {
   assert.ok(condition.name, 'DevTools condition is missing name');

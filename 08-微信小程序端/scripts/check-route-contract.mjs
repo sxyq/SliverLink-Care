@@ -22,6 +22,7 @@ const expectedRouteKeys = [
   'scanMedications',
   'scanScales',
   'scanNameplate',
+  'agreement',
 ];
 
 const routeQueryRequirements = [

@@ -6,12 +6,16 @@ export type HomeEntrySource = (typeof ENTRY_KEYS)[keyof typeof ENTRY_KEYS] | 'un
 export interface AppSessionState {
   homeEntrySource: HomeEntrySource;
   privacyAccepted: boolean;
+  privacyAcceptedAt: number;
+  privacyPolicyVersion: string;
   lastWorkbenchOpenedAt: number;
 }
 
 const DEFAULT_APP_SESSION: AppSessionState = {
   homeEntrySource: 'unknown',
   privacyAccepted: false,
+  privacyAcceptedAt: 0,
+  privacyPolicyVersion: '',
   lastWorkbenchOpenedAt: 0,
 };
 

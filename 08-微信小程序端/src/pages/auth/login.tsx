@@ -3,6 +3,8 @@ import { Button, Input, Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
+import { AGREEMENT_VERSION } from '@/content/agreements';
+import { AgreementConsentRow } from '@/components/feedback/AgreementConsentRow';
 import { useLocalizedError } from '@/hooks/useLocalizedError';
 import { useScanEntry } from '@/hooks/useScanEntry';
 import {
@@ -13,6 +15,7 @@ import {
 } from '@/services/workbench/authService';
 import { updateAppSession } from '@/store/app/appSessionStore';
 import { getAuthSession, saveAuthSession } from '@/store/auth/authStore';
+import { getAppSession } from '@/store/app/appSessionStore';
 import { useI18n } from '@/i18n';
 import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
@@ -37,11 +40,37 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
   const [invitation, setInvitation] = useState<VolunteerInvitationPreview | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [checkingInvitation, setCheckingInvitation] = useState(false);
+  const [agreementAccepted, setAgreementAccepted] = useState(true);
+  const [agreementViewed, setAgreementViewed] = useState(() => Boolean(getAppSession().privacyAccepted));
   const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const openScan = useScanEntry();
 
   function handleScanEntry() {
     void openScan();
+  }
+
+  function ensureAgreementAccepted() {
+    if (!agreementAccepted) {
+      setErrorKey('agreement.required');
+      return false;
+    }
+
+    if (!agreementViewed && !getAppSession().privacyAccepted) {
+      setErrorKey('agreement.viewRequired');
+      return false;
+    }
+
+    void updateAppSession({
+      privacyAccepted: true,
+      privacyAcceptedAt: Date.now(),
+      privacyPolicyVersion: AGREEMENT_VERSION,
+    });
+    return true;
+  }
+
+  function handleOpenAgreement() {
+    setAgreementViewed(true);
+    void Taro.navigateTo({ url: APP_ROUTES.agreement });
   }
 
   async function handleLoginSubmit() {
@@ -51,6 +80,10 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
     if (!account.trim() || !password.trim()) {
       setErrorKey('errors.completeLoginFields');
+      return;
+    }
+
+    if (!ensureAgreementAccepted()) {
       return;
     }
 
@@ -113,6 +146,10 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
   async function handleRegisterSubmit() {
     if (submitting) {
+      return;
+    }
+
+    if (!ensureAgreementAccepted()) {
       return;
     }
 
@@ -234,6 +271,12 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
                     {errorText ? <View className='auth-login-error'>{errorText}</View> : null}
 
+                    <AgreementConsentRow
+                      checked={agreementAccepted}
+                      onToggle={setAgreementAccepted}
+                      onOpenAgreement={handleOpenAgreement}
+                    />
+
                     <Button className='sl-primary-button auth-login-submit' loading={submitting} onClick={handleLoginSubmit}>
                       {t('auth.login')}
                     </Button>
@@ -329,6 +372,12 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
                     </View>
 
                     {errorText ? <View className='auth-login-error'>{errorText}</View> : null}
+
+                    <AgreementConsentRow
+                      checked={agreementAccepted}
+                      onToggle={setAgreementAccepted}
+                      onOpenAgreement={handleOpenAgreement}
+                    />
 
                     <Button className='sl-primary-button auth-login-submit' loading={submitting} onClick={handleRegisterSubmit}>
                       {t('auth.registerAndEnter')}

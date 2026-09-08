@@ -1,0 +1,72 @@
+.sl-agreement-consent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6rpx;
+  margin-top: 4rpx;
+  padding: 14rpx 16rpx;
+  border-radius: 18rpx;
+  background: rgba(28, 167, 180, 0.05);
+  border: 1rpx solid rgba(28, 167, 180, 0.12);
+}
+
+.sl-agreement-consent__box {
+  flex: none;
+  transform: scale(0.82);
+  transform-origin: center;
+}
+
+.sl-agreement-consent__text {
+  color: #5f7888;
+  font-size: 22rpx;
+  line-height: 1.5;
+}
+
+.sl-agreement-consent__link {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  height: auto;
+  line-height: 1.5;
+  border: none;
+  background: transparent;
+  color: var(--sl-color-primary-strong);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.sl-agreement-consent__link::after {
+  display: none;
+}
+
+.sl-agreement-consent__view {
+  flex: none;
+  margin-left: auto;
+  padding: 0 18rpx;
+  height: 52rpx;
+  min-height: 0;
+  line-height: 50rpx;
+  border-radius: 26rpx;
+  background: #eff7fc;
+  border: 1rpx solid #d3e7f6;
+  color: var(--sl-color-primary-strong);
+  font-size: 22rpx;
+  font-weight: 700;
+}
+
+.sl-agreement-consent__view::after {
+  display: none;
+}
+
+// RTL: keep the checkbox on the physical start side and let the view action
+// keep its trailing slot without overlapping the wrapped agreement copy.
+.sl-dir-rtl .sl-agreement-consent__view {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.sl-dir-rtl .sl-agreement-consent__text {
+  unicode-bidi: plaintext;
+}

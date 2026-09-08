@@ -16,6 +16,7 @@ export const APP_ROUTES = {
   scanMedications: '/subpackages/scan/medications/index',
   scanScales: '/subpackages/scan/scales/index',
   scanNameplate: '/subpackages/scan/nameplate/index',
+  agreement: '/pages/agreement/index',
 } as const;
 
 export const STORAGE_KEYS = {
