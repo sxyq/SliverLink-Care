@@ -6,6 +6,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.silverlink.care.infrastructure.cache.SimpleTtlCache;
 import com.silverlink.care.infrastructure.persistence.SilverLinkDataService;
 import com.silverlink.care.module.nameplate.dto.NameplatePreviewResponse;
@@ -22,6 +23,8 @@ import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.springframework.beans.factory.annotation.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
@@ -31,28 +34,28 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Base64;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import javax.imageio.ImageIO;
 
 @Service
 public class NameplateService {
 
+    private static final Logger log = LoggerFactory.getLogger(NameplateService.class);
     private static final String NAMEPLATE_SUBTITLE = "智护空巢";
     private static final String FOOTER_ATTRIBUTION = "重庆医科大学空巢养老团";
-    private static final Color INK = new Color(5, 74, 95);
-    private static final Color MUTED_INK = new Color(82, 114, 124);
-    private static final Color MINT = new Color(222, 241, 238);
-    private static final Color MINT_DEEP = new Color(172, 213, 207);
-    private static final Color LINE = new Color(129, 185, 178);
-    private static final Color GOLD = new Color(236, 174, 68);
-    private static final Color BORDER = new Color(211, 225, 226);
     private static volatile byte[] cachedFontBytes;
+    private static volatile String cachedFontKey;
 
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
+    private final ObjectMapper templateObjectMapper = new ObjectMapper();
     private final SimpleTtlCache<String, NameplatePreviewResponse> previewCache = new SimpleTtlCache<>();
     private final SimpleTtlCache<String, byte[]> pdfCache = new SimpleTtlCache<>();
     private final SimpleTtlCache<String, BufferedImage> qrImageCache = new SimpleTtlCache<>();
@@ -69,12 +72,21 @@ public class NameplateService {
     @Value("${silverlink.nameplate.font-resource-cache-enabled:true}")
     private boolean fontResourceCacheEnabled;
 
+    @Value("${silverlink.nameplate.template-config-file:}")
+    private String templateConfigFile;
+
+    private volatile TemplateSnapshot templateSnapshot = TemplateSnapshot.builtIn();
+
     public NameplateService(SilverLinkDataService data, QrCodeService qrCodeService) {
         this.data = data;
         this.qrCodeService = qrCodeService;
     }
 
     public NameplatePreviewResponse preview(String elderId, boolean blankTemplate) {
+        return preview(elderId, blankTemplate, templateSnapshot());
+    }
+
+    private NameplatePreviewResponse preview(String elderId, boolean blankTemplate, TemplateSnapshot template) {
         if (blankTemplate) {
             NameplatePreviewResponse resp = new NameplatePreviewResponse();
             resp.setElderId(elderId);
@@ -88,23 +100,24 @@ public class NameplateService {
             resp.setBackQrImageBase64("");
             resp.setBackArchiveNo("________");
             resp.setBackHint("扫码查看基础信息");
-            resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp));
+            resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp, template.config()));
             return resp;
         }
         if (previewCacheTtlMs > 0) {
-            NameplatePreviewResponse cached = previewCache.getOrLoad(elderId, previewCacheTtlMs, () -> loadPreview(elderId));
+            String cacheKey = elderId + "|" + template.version();
+            NameplatePreviewResponse cached = previewCache.getOrLoad(cacheKey, previewCacheTtlMs, () -> loadPreview(elderId, template.config()));
             return copyPreview(cached);
         }
-        return copyPreview(loadPreview(elderId));
+        return copyPreview(loadPreview(elderId, template.config()));
     }
 
-    private NameplatePreviewResponse loadPreview(String elderId) {
+    private NameplatePreviewResponse loadPreview(String elderId, NameplateTemplateConfig template) {
         NameplatePreviewResponse resp = new NameplatePreviewResponse();
         resp.setElderId(elderId);
         resp.setBlankTemplate(false);
         Map<String, Object> elder = data.elderDetail(elderId, false);
         resp.setFrontName(stringValue(elder.get("name"), "未填写"));
-        resp.setFrontAge(stringValue(elder.get("age"), "未填写"));
+        resp.setFrontAge(formatAgeValue(stringValue(elder.get("age"), "未填写")));
         resp.setFrontPhone(stringValue(elder.get("emergencyContactPhone"), "未填写"));
         String qrUrl = resolvePublicQrUrl(elderId, stringValue(elder.get("archiveNo"), "未生成"));
         resp.setBackQrToken(qrUrl);
@@ -113,26 +126,24 @@ public class NameplateService {
         resp.setBackQrImageBase64(qrCodeService.renderQrImageBase64(qrUrl, 300));
         resp.setBackArchiveNo(stringValue(elder.get("archiveNo"), "未生成"));
         resp.setBackHint("扫码查看基础信息");
-        resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp));
-        if (previewCacheTtlMs > 0) {
-            previewCache.put(elderId, copyPreview(resp), previewCacheTtlMs);
-        }
+        resp.setPdfPreviewImageBase64(renderPdfPreviewImageBase64(resp, template));
         return resp;
     }
 
     public byte[] generateDemoPdf(String elderId) {
-        NameplatePreviewResponse preview = preview(elderId, false);
-        String pdfCacheKey = buildPdfCacheKey(elderId, preview);
+        TemplateSnapshot template = templateSnapshot();
+        NameplatePreviewResponse preview = preview(elderId, false, template);
+        String pdfCacheKey = buildPdfCacheKey(elderId, preview, template.version());
         if (pdfCacheTtlMs > 0) {
-            byte[] cachedPdf = pdfCache.getOrLoad(pdfCacheKey, pdfCacheTtlMs, () -> renderPdfBytes(preview));
+            byte[] cachedPdf = pdfCache.getOrLoad(pdfCacheKey, pdfCacheTtlMs, () -> renderPdfBytes(preview, template.config()));
             return Arrays.copyOf(cachedPdf, cachedPdf.length);
         }
-        return renderPdfBytes(preview);
+        return renderPdfBytes(preview, template.config());
     }
 
-    private byte[] renderPdfBytes(NameplatePreviewResponse preview) {
+    private byte[] renderPdfBytes(NameplatePreviewResponse preview, NameplateTemplateConfig template) {
         try (PDDocument document = new PDDocument();
-             InputStream fontStream = new ByteArrayInputStream(loadFontBytes())) {
+             InputStream fontStream = new ByteArrayInputStream(loadFontBytes(template.fontResource))) {
             PDFont font = PDType0Font.load(document, fontStream, true);
             BufferedImage qrImage = renderQrImageCached(preview.getBackQrToken(), 300);
 
@@ -140,7 +151,7 @@ public class NameplateService {
             document.addPage(page);
 
             try (PDPageContentStream content = new PDPageContentStream(document, page)) {
-                drawPage(document, content, page, font, preview, qrImage);
+                drawPage(document, content, page, font, preview, qrImage, template);
             }
 
             ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -157,7 +168,8 @@ public class NameplateService {
             PDPage page,
             PDFont font,
             NameplatePreviewResponse preview,
-            BufferedImage qrImage
+            BufferedImage qrImage,
+            NameplateTemplateConfig template
     ) throws IOException {
         float pageWidth = page.getMediaBox().getWidth();
         float cardWidth = 410f;
@@ -167,13 +179,21 @@ public class NameplateService {
         float rightX = leftX + cardWidth + gap;
         float cardY = 160f;
 
-        drawCardBase(content, leftX, cardY, cardWidth, cardHeight, false);
-        drawCardBase(content, rightX, cardY, cardWidth, cardHeight, true);
-        drawFrontCard(content, font, leftX, cardY, cardWidth, cardHeight, preview);
-        drawBackCard(document, content, font, rightX, cardY, cardWidth, cardHeight, preview, qrImage);
+        drawCardBase(content, leftX, cardY, cardWidth, cardHeight, false, template);
+        drawCardBase(content, rightX, cardY, cardWidth, cardHeight, true, template);
+        drawFrontCard(content, font, leftX, cardY, cardWidth, cardHeight, preview, template);
+        drawBackCard(document, content, font, rightX, cardY, cardWidth, cardHeight, preview, qrImage, template);
     }
 
-    private void drawCardBase(PDPageContentStream content, float x, float y, float width, float height, boolean mirrored)
+    private void drawCardBase(
+            PDPageContentStream content,
+            float x,
+            float y,
+            float width,
+            float height,
+            boolean mirrored,
+            NameplateTemplateConfig template
+    )
             throws IOException {
         content.setNonStrokingColor(new Color(228, 235, 235));
         addRoundRect(content, x + 3f, y - 4f, width, height, 18f);
@@ -187,7 +207,7 @@ public class NameplateService {
         addRoundRect(content, x, y, width, height, 18f);
         content.clip();
 
-        content.setNonStrokingColor(MINT);
+        content.setNonStrokingColor(color(template.mint));
         if (mirrored) {
             drawTopRightWave(content, x, y, width, height);
         } else {
@@ -196,7 +216,7 @@ public class NameplateService {
         drawBottomWave(content, x, y, width, height);
         content.restoreGraphicsState();
 
-        content.setStrokingColor(BORDER);
+        content.setStrokingColor(color(template.border));
         content.setLineWidth(1.1f);
         addRoundRect(content, x, y, width, height, 18f);
         content.stroke();
@@ -217,20 +237,28 @@ public class NameplateService {
             float y,
             float width,
             float height,
-            NameplatePreviewResponse preview
+            NameplatePreviewResponse preview,
+            NameplateTemplateConfig template
     ) throws IOException {
-        drawCenteredText(content, font, 38f, "智联名牌", x + width / 2f, y + height * 0.69f, INK);
-        drawCenteredText(content, font, 16f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.615f, MUTED_INK);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, MINT_DEEP);
+        Color ink = color(template.ink);
+        Color mutedInk = color(template.mutedInk);
+        Color line = color(template.line);
+        Color mintDeep = color(template.mintDeep);
+        drawCenteredText(content, font, 38f, "智联名牌", x + width / 2f, y + height * 0.69f, ink);
+        drawCenteredText(content, font, 16f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.615f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
-        float valueX = x + width * 0.33f;
-        drawLabeledValue(content, font, "姓名：", safe(preview.getFrontName()), labelX, valueX, y + height * 0.43f, 17f, 86f);
-        drawLabeledValue(content, font, "年龄：", formatAge(preview.getFrontAge()), labelX, valueX, y + height * 0.30f, 17f, 86f);
-        drawLabeledValue(content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f);
+        float lineX = x + width * template.frontNameLineXRatio;
+        float lineWidth = template.frontLineWidth;
+        drawCenteredLabeledValue(content, font, "姓名：", safe(preview.getFrontName()), labelX, lineX, y + height * template.frontNameBaselineRatio, 17f, lineWidth, ink);
+        float ageBaseline = y + height * template.frontAgeBaselineRatio;
+        drawCenteredLabeledValue(content, font, "年龄：", formatAgeValue(preview.getFrontAge()), labelX, lineX, ageBaseline, 17f, lineWidth, ink);
+        drawText(content, font, 17f, "岁", lineX + lineWidth + template.frontAgeUnitGap, ageBaseline, ink);
+        drawLabeledValue(content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f, ink);
 
-        drawCareMark(content, x + width * 0.76f, y + height * 0.075f);
-        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, MUTED_INK);
+        drawCareMark(content, x + width * 0.76f, y + height * 0.075f, color(template.careMark));
+        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, mutedInk);
     }
 
     private void drawBackCard(
@@ -242,11 +270,16 @@ public class NameplateService {
             float width,
             float height,
             NameplatePreviewResponse preview,
-            BufferedImage qrImage
+            BufferedImage qrImage,
+            NameplateTemplateConfig template
     ) throws IOException {
-        drawCenteredText(content, font, 25f, "智联名牌", x + width / 2f, y + height * 0.82f, INK);
-        drawCenteredText(content, font, 14f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.765f, MUTED_INK);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, MINT_DEEP);
+        Color ink = color(template.ink);
+        Color mutedInk = color(template.mutedInk);
+        Color line = color(template.line);
+        Color mintDeep = color(template.mintDeep);
+        drawCenteredText(content, font, 25f, "智联名牌", x + width / 2f, y + height * 0.82f, ink);
+        drawCenteredText(content, font, 14f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.765f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
@@ -260,13 +293,13 @@ public class NameplateService {
         content.stroke();
         drawBackgroundImage(document, content, qrImage, qrX, qrY, qrSize, qrSize);
 
-        drawText(content, font, 22f, "扫码查看基础信息", x + width * 0.50f, y + height * 0.46f, INK);
-        drawDividerWithHealthIcon(content, x + width * 0.68f, y + height * 0.35f, 44f, GOLD);
+        drawText(content, font, 22f, "扫码查看基础信息", x + width * 0.50f, y + height * 0.46f, ink);
+        drawDividerWithHealthIcon(content, x + width * 0.68f, y + height * 0.35f, 44f, color(template.gold), line);
 
-        drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, INK);
-        drawText(content, font, 15f, safe(preview.getBackArchiveNo()), x + width * 0.43f, y + height * 0.13f, INK);
-        drawLine(content, x + width * 0.43f, y + height * 0.105f, x + width * 0.70f, y + height * 0.105f, INK, 0.9f);
-        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.5f, y + height * 0.032f, MUTED_INK);
+        drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
+        drawText(content, font, 15f, safe(preview.getBackArchiveNo()), x + width * 0.43f, y + height * 0.13f, ink);
+        drawLine(content, x + width * 0.43f, y + height * 0.105f, x + width * 0.70f, y + height * 0.105f, ink, 0.9f);
+        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.5f, y + height * 0.032f, mutedInk);
     }
 
     private void drawBackgroundImage(
@@ -291,17 +324,42 @@ public class NameplateService {
             float valueX,
             float baseline,
             float size,
-            float lineWidth
+            float lineWidth,
+            Color ink
     ) throws IOException {
-        drawText(content, font, size, label, labelX, baseline, INK);
-        drawText(content, font, size - 1f, value, valueX, baseline, INK);
-        drawLine(content, valueX - 2f, baseline - 6f, valueX + lineWidth, baseline - 6f, INK, 0.9f);
+        drawText(content, font, size, label, labelX, baseline, ink);
+        drawText(content, font, size - 1f, value, valueX, baseline, ink);
+        drawLine(content, valueX - 2f, baseline - 6f, valueX + lineWidth, baseline - 6f, ink, 0.9f);
     }
 
-    private void drawDividerWithHealthIcon(PDPageContentStream content, float centerX, float y, float lineLength, Color iconColor)
+    private void drawCenteredLabeledValue(
+            PDPageContentStream content,
+            PDFont font,
+            String label,
+            String value,
+            float labelX,
+            float lineX,
+            float baseline,
+            float size,
+            float lineWidth,
+            Color ink
+    ) throws IOException {
+        drawText(content, font, size, label, labelX, baseline, ink);
+        drawCenteredText(content, font, size - 1f, value, lineX + lineWidth / 2f, baseline, ink);
+        drawLine(content, lineX - 2f, baseline - 6f, lineX + lineWidth, baseline - 6f, ink, 0.9f);
+    }
+
+    private void drawDividerWithHealthIcon(
+            PDPageContentStream content,
+            float centerX,
+            float y,
+            float lineLength,
+            Color iconColor,
+            Color lineColor
+    )
             throws IOException {
-        drawLine(content, centerX - lineLength - 22f, y, centerX - 20f, y, LINE, 1f);
-        drawLine(content, centerX + 20f, y, centerX + lineLength + 22f, y, LINE, 1f);
+        drawLine(content, centerX - lineLength - 22f, y, centerX - 20f, y, lineColor, 1f);
+        drawLine(content, centerX + 20f, y, centerX + lineLength + 22f, y, lineColor, 1f);
         content.setNonStrokingColor(iconColor);
         addCircle(content, centerX, y + 1f, 10f);
         content.fill();
@@ -311,22 +369,22 @@ public class NameplateService {
         drawLine(content, centerX, y - 4f, centerX, y + 6f, Color.WHITE, 2.6f);
     }
 
-    private void drawCareMark(PDPageContentStream content, float x, float y) throws IOException {
-        content.setStrokingColor(new Color(55, 139, 130));
+    private void drawCareMark(PDPageContentStream content, float x, float y, Color markColor) throws IOException {
+        content.setStrokingColor(markColor);
         content.setLineWidth(2.2f);
         content.moveTo(x - 18f, y + 5f);
         content.curveTo(x - 15f, y + 22f, x - 3f, y + 18f, x, y + 8f);
         content.curveTo(x + 3f, y + 18f, x + 15f, y + 22f, x + 18f, y + 5f);
         content.stroke();
-        content.setNonStrokingColor(new Color(55, 139, 130));
+        content.setNonStrokingColor(markColor);
         addCircle(content, x, y + 21f, 6f);
         content.fill();
-        content.setStrokingColor(new Color(55, 139, 130));
+        content.setStrokingColor(markColor);
         content.setLineWidth(2f);
-        drawLine(content, x - 14f, y, x - 7f, y + 8f, new Color(55, 139, 130), 2f);
-        drawLine(content, x + 14f, y, x + 7f, y + 8f, new Color(55, 139, 130), 2f);
-        drawLine(content, x - 7f, y + 8f, x, y + 2f, new Color(55, 139, 130), 2f);
-        drawLine(content, x + 7f, y + 8f, x, y + 2f, new Color(55, 139, 130), 2f);
+        drawLine(content, x - 14f, y, x - 7f, y + 8f, markColor, 2f);
+        drawLine(content, x + 14f, y, x + 7f, y + 8f, markColor, 2f);
+        drawLine(content, x - 7f, y + 8f, x, y + 2f, markColor, 2f);
+        drawLine(content, x + 7f, y + 8f, x, y + 2f, markColor, 2f);
     }
 
     private void drawTopLeftWave(PDPageContentStream content, float x, float y, float width, float height) throws IOException {
@@ -418,40 +476,67 @@ public class NameplateService {
         return renderQrImage(value, size);
     }
 
-    private byte[] loadFontBytes() throws IOException {
+    private byte[] loadFontBytes(String fontResource) throws IOException {
+        String resource = fontResource == null || fontResource.isBlank() ? "/fonts/ArialUnicode.ttf" : fontResource.trim();
+        String fontKey = fontResourceVersion(resource);
         if (!fontResourceCacheEnabled) {
-            try (InputStream fontStream = NameplateService.class.getResourceAsStream("/fonts/ArialUnicode.ttf")) {
-                if (fontStream == null) {
-                    throw new IllegalStateException("缺少中文字体资源 ArialUnicode.ttf");
-                }
-                return fontStream.readAllBytes();
-            }
+            return readFontBytes(resource);
         }
         byte[] bytes = cachedFontBytes;
-        if (bytes != null) {
+        if (bytes != null && Objects.equals(cachedFontKey, fontKey)) {
             return bytes;
         }
         synchronized (NameplateService.class) {
-            if (cachedFontBytes == null) {
-                try (InputStream fontStream = NameplateService.class.getResourceAsStream("/fonts/ArialUnicode.ttf")) {
-                    if (fontStream == null) {
-                        throw new IllegalStateException("缺少中文字体资源 ArialUnicode.ttf");
-                    }
-                    cachedFontBytes = fontStream.readAllBytes();
-                }
+            if (cachedFontBytes == null || !Objects.equals(cachedFontKey, fontKey)) {
+                cachedFontBytes = readFontBytes(resource);
+                cachedFontKey = fontKey;
             }
             return cachedFontBytes;
         }
     }
 
-    private String buildPdfCacheKey(String elderId, NameplatePreviewResponse preview) {
-        return elderId + "|" + safe(preview.getFrontName()) + "|" + safe(preview.getFrontAge()) + "|"
-                + safe(preview.getFrontPhone()) + "|" + safe(preview.getBackArchiveNo()) + "|"
-                + safe(preview.getBackQrToken()) + "|" + safe(preview.getBackHint());
+    private byte[] readFontBytes(String fontResource) throws IOException {
+        Path externalPath = resolveExternalFontPath(fontResource);
+        if (externalPath != null) {
+            return Files.readAllBytes(externalPath);
+        }
+        String classpathResource = fontResource.startsWith("/") ? fontResource : "/" + fontResource;
+        try (InputStream fontStream = NameplateService.class.getResourceAsStream(classpathResource)) {
+            if (fontStream == null) {
+                throw new IllegalStateException("缺少中文字体资源 " + fontResource);
+            }
+            return fontStream.readAllBytes();
+        }
     }
 
-    private String renderPdfPreviewImageBase64(NameplatePreviewResponse preview) {
-        byte[] pdfBytes = renderPdfBytes(preview);
+    private String fontResourceVersion(String fontResource) {
+        try {
+            Path externalPath = resolveExternalFontPath(fontResource);
+            if (externalPath != null) {
+                return fontResource + ":" + Files.getLastModifiedTime(externalPath).toMillis() + ":" + Files.size(externalPath);
+            }
+        } catch (IOException ignored) {
+            // The render path will report the readable font error with the configured resource name.
+        }
+        return fontResource;
+    }
+
+    private Path resolveExternalFontPath(String fontResource) {
+        if (fontResource.startsWith("file:")) {
+            return Path.of(URI.create(fontResource));
+        }
+        Path candidate = Path.of(fontResource);
+        return candidate.isAbsolute() && Files.isRegularFile(candidate) ? candidate : null;
+    }
+
+    private String buildPdfCacheKey(String elderId, NameplatePreviewResponse preview, String templateVersion) {
+        return elderId + "|" + safe(preview.getFrontName()) + "|" + safe(preview.getFrontAge()) + "|"
+                + safe(preview.getFrontPhone()) + "|" + safe(preview.getBackArchiveNo()) + "|"
+                + safe(preview.getBackQrToken()) + "|" + safe(preview.getBackHint()) + "|" + templateVersion;
+    }
+
+    private String renderPdfPreviewImageBase64(NameplatePreviewResponse preview, NameplateTemplateConfig template) {
+        byte[] pdfBytes = renderPdfBytes(preview, template);
         try (PDDocument document = PDDocument.load(pdfBytes);
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             BufferedImage pageImage = new PDFRenderer(document).renderImageWithDPI(0, 144);
@@ -459,6 +544,70 @@ public class NameplateService {
             return Base64.getEncoder().encodeToString(output.toByteArray());
         } catch (IOException e) {
             throw new IllegalStateException("生成名牌预览图失败", e);
+        }
+    }
+
+    private TemplateSnapshot templateSnapshot() {
+        String configuredPath = templateConfigFile == null ? "" : templateConfigFile.trim();
+        if (configuredPath.isEmpty()) {
+            return TemplateSnapshot.builtIn();
+        }
+
+        Path path = Path.of(configuredPath).toAbsolutePath().normalize();
+        if (!Files.isRegularFile(path)) {
+            return TemplateSnapshot.builtIn();
+        }
+
+        try {
+            long modifiedAt = Files.getLastModifiedTime(path).toMillis();
+            long size = Files.size(path);
+            TemplateSnapshot current = templateSnapshot;
+            if (current.matches(path.toString(), modifiedAt, size, fontResourceVersion(current.config().fontResource))) {
+                return current;
+            }
+            synchronized (this) {
+                current = templateSnapshot;
+                if (current.matches(path.toString(), modifiedAt, size, fontResourceVersion(current.config().fontResource))) {
+                    return current;
+                }
+                NameplateTemplateConfig loaded = templateObjectMapper.readValue(Files.readString(path), NameplateTemplateConfig.class);
+                loaded.validate();
+                TemplateSnapshot next = new TemplateSnapshot(path.toString(), modifiedAt, size, loaded, fontResourceVersion(loaded.fontResource));
+                templateSnapshot = next;
+                return next;
+            }
+        } catch (Exception e) {
+            log.warn("无法加载名牌模板文件 {}，继续使用内置模板", path, e);
+            return templateSnapshot.sourceKey().equals(path.toString()) ? templateSnapshot : TemplateSnapshot.builtIn();
+        }
+    }
+
+    private Color color(String hex) {
+        return new Color(Integer.parseInt(hex.substring(1), 16));
+    }
+
+    private record TemplateSnapshot(
+            String sourceKey,
+            long modifiedAt,
+            long size,
+            NameplateTemplateConfig config,
+            String fontVersion
+    ) {
+        private static TemplateSnapshot builtIn() {
+            NameplateTemplateConfig config = new NameplateTemplateConfig();
+            config.validate();
+            return new TemplateSnapshot("builtin", -1L, -1L, config, "builtin-font");
+        }
+
+        private boolean matches(String source, long modified, long fileSize, String currentFontVersion) {
+            return sourceKey.equals(source)
+                    && modifiedAt == modified
+                    && size == fileSize
+                    && fontVersion.equals(currentFontVersion);
+        }
+
+        private String version() {
+            return sourceKey + ":" + modifiedAt + ":" + size + ":" + fontVersion;
         }
     }
 
@@ -509,11 +658,12 @@ public class NameplateService {
         content.endText();
     }
 
-    private String formatAge(String age) {
+    private String formatAgeValue(String age) {
         if (age == null || age.isBlank() || "未填写".equals(age)) {
             return "未填写";
         }
-        return age.endsWith("岁") ? age : age + "岁";
+        String normalized = age.endsWith("岁") ? age.substring(0, age.length() - 1).trim() : age;
+        return normalized.isBlank() ? "未填写" : normalized;
     }
 
     private String safe(String value) {

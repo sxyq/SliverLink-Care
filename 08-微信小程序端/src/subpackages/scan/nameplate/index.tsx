@@ -25,6 +25,7 @@ function NameplatePreviewPage() {
   const router = useRouter();
   const elderId = String(router.params?.elderId || '');
   const session = getAuthSession();
+  const ageUnit = t('common.yearsOld', { age: '' }).trim();
 
   const [preview, setPreview] = useState<NameplatePreviewInfo | null>(null);
   const [loading, setLoading] = useState(true);
@@ -224,13 +225,22 @@ function NameplatePreviewPage() {
                           <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-front-grid'>
-                          <View className='scan-nameplate-field scan-nameplate-field--compact'>
+                          <View className='scan-nameplate-field scan-nameplate-field--compact scan-nameplate-line-field'>
                             <Text className='scan-nameplate-label'>{t('common.name')}</Text>
-                            <Text className='scan-nameplate-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontName || t('scan.unanswered')}</Text>
+                            <View className='scan-nameplate-line-value-wrap'>
+                              <Text className='scan-nameplate-line-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontName || t('scan.unanswered')}</Text>
+                              <View className='scan-nameplate-line' />
+                            </View>
                           </View>
-                          <View className='scan-nameplate-field scan-nameplate-field--compact'>
+                          <View className='scan-nameplate-field scan-nameplate-field--compact scan-nameplate-line-field'>
                             <Text className='scan-nameplate-label'>{t('common.age')}</Text>
-                            <Text className='scan-nameplate-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontAge ? t('common.yearsOld', { age: preview.frontAge }) : t('scan.unanswered')}</Text>
+                            <View className='scan-nameplate-age-value-wrap'>
+                              <View className='scan-nameplate-line-value-wrap scan-nameplate-age-line'>
+                                <Text className='scan-nameplate-line-value sl-auto-data' {...{ dir: 'auto' }}>{preview.frontAge || t('scan.unanswered')}</Text>
+                                <View className='scan-nameplate-line' />
+                              </View>
+                              <Text className='scan-nameplate-age-unit'>{ageUnit}</Text>
+                            </View>
                           </View>
                           <View className='scan-nameplate-field scan-nameplate-field--full'>
                             <Text className='scan-nameplate-label'>{t('common.contactPhone')}</Text>

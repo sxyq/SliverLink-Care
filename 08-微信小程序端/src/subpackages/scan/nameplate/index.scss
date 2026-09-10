@@ -121,6 +121,12 @@
   gap: 16rpx;
 }
 
+.scan-nameplate-line-field {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: end;
+  gap: 12rpx;
+}
+
 .scan-nameplate-field {
   display: grid;
   gap: 10rpx;
@@ -144,6 +150,60 @@
   line-height: 1.2;
   color: var(--sl-text-secondary);
   font-weight: 700;
+}
+
+.scan-nameplate-line-value-wrap {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 54rpx;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 4rpx;
+}
+
+.scan-nameplate-line-value {
+  position: relative;
+  z-index: 1;
+  max-width: 100%;
+  padding: 0 6rpx;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--sl-text);
+  font-size: 32rpx;
+  line-height: 1.25;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.scan-nameplate-line {
+  position: absolute;
+  right: 0;
+  bottom: 7rpx;
+  left: 0;
+  height: 1rpx;
+  background: var(--sl-primary-deep);
+}
+
+.scan-nameplate-age-value-wrap {
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  gap: 8rpx;
+}
+
+.scan-nameplate-age-line {
+  flex: 1;
+}
+
+.scan-nameplate-age-unit {
+  flex: 0 0 auto;
+  padding-bottom: 7rpx;
+  color: var(--sl-text);
+  font-size: 26rpx;
+  line-height: 1.25;
+  font-weight: 800;
 }
 
 .scan-nameplate-value {

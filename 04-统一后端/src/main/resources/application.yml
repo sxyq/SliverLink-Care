@@ -55,6 +55,8 @@ silverlink:
       prefix: ${SILVERLINK_CACHE_REDIS_PREFIX:silverlink:cache:}
   qrcode:
     public-base-url: ${SILVERLINK_SCAN_URL_PREFIX:https://sxyq27.online/silverlink/scan/?token=}
+  nameplate:
+    template-config-file: ${SILVERLINK_NAMEPLATE_TEMPLATE_CONFIG_FILE:}
   security:
     jwt-secret: ${SILVERLINK_JWT_SECRET}
     aes-key-id: demo-key-v1

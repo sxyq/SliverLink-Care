@@ -8,13 +8,19 @@ import com.silverlink.care.module.qrcode.QrCodeService;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.pdfbox.text.PDFTextStripperByArea;
+import org.apache.pdfbox.text.TextPosition;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -34,6 +40,9 @@ class NameplateServiceTest {
     private SilverLinkDataService data;
     private QrCodeService qrCodeService;
     private NameplateService service;
+
+    @TempDir
+    private Path tempDir;
 
     @BeforeEach
     void setUp() {
@@ -76,6 +85,17 @@ class NameplateServiceTest {
         assertEquals("https://public/scan?token=token-1", response.getBackQrToken());
         assertEquals("A-001", response.getBackArchiveNo());
         assertEquals("扫码查看基础信息", response.getBackHint());
+
+        when(data.elderDetail("elder-1-with-suffix", false)).thenReturn(Map.of(
+                "name", "李爷爷",
+                "age", "80岁",
+                "archiveNo", "A-001-SUFFIX"
+        ));
+        when(qrCodeService.findCurrentByElder("elder-1-with-suffix")).thenReturn(current);
+
+        NameplatePreviewResponse normalized = service.preview("elder-1-with-suffix", false);
+
+        assertEquals("80", normalized.getFrontAge());
     }
 
     @Test
@@ -180,6 +200,16 @@ class NameplateServiceTest {
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), attribution));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), "智护空巢"));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), "智护空巢"));
+
+            CapturingTextStripper textStripper = new CapturingTextStripper();
+            textStripper.getText(document);
+            TextBounds nameBounds = findBounds(textStripper.positions, "李奶奶");
+            TextBounds ageBounds = findBounds(textStripper.positions, "78");
+            TextBounds ageUnitBounds = findBounds(textStripper.positions, "岁");
+            assertEquals(263.3f, nameBounds.center(), 2f);
+            assertEquals(263.3f, ageBounds.center(), 2f);
+            assertTrue(ageUnitBounds.start() > 304f);
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), "岁"));
         }
         assertArrayEquals(first, second);
         assertNotSame(first, second);
@@ -188,7 +218,7 @@ class NameplateServiceTest {
     }
 
     @Test
-    void generateDemoPdfWorksWithoutFontResourceCacheAndPreservesAgeSuffix() {
+    void generateDemoPdfWorksWithoutFontResourceCacheAndPreservesAgeSuffix() throws IOException {
         ReflectionTestUtils.setField(service, "fontResourceCacheEnabled", false);
         ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
         ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
@@ -206,6 +236,39 @@ class NameplateServiceTest {
         byte[] pdf = service.generateDemoPdf("elder-age");
 
         assertTrue(pdf.length > 0);
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            String pdfText = new PDFTextStripper().getText(document);
+            assertTrue(pdfText.contains("80"));
+            assertEquals(1, countOccurrences(pdfText, "岁"));
+        }
+    }
+
+    @Test
+    void reloadsExternalTemplateAndUsesTheNewPositionForPdf() throws Exception {
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "qrImageCacheTtlMs", 0L);
+        when(data.elderDetail("elder-template", false)).thenReturn(Map.of(
+                "name", "李奶奶",
+                "age", 78,
+                "emergencyContactPhone", "13800000000",
+                "archiveNo", "A-TEMPLATE"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-template");
+        when(qrCodeService.findCurrentByElder("elder-template")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-template")).thenReturn("https://public/scan?token=token-template");
+
+        Path config = tempDir.resolve("nameplate-template.json");
+        ReflectionTestUtils.setField(service, "templateConfigFile", config.toString());
+        Files.writeString(config, "{\"frontNameLineXRatio\":0.33}");
+        float initialCenter = textCenter(service.generateDemoPdf("elder-template"), "李奶奶");
+
+        Files.writeString(config, "{\"frontNameLineXRatio\":0.4}");
+        float updatedCenter = textCenter(service.generateDemoPdf("elder-template"), "李奶奶");
+
+        assertEquals(263.3f, initialCenter, 2f);
+        assertEquals(292f, updatedCenter, 2f);
     }
 
     private static int countOccurrences(String text, String value) {
@@ -216,5 +279,51 @@ class NameplateServiceTest {
             index += value.length();
         }
         return count;
+    }
+
+    private static TextBounds findBounds(List<TextPosition> positions, String value) {
+        for (int start = 0; start <= positions.size() - value.length(); start++) {
+            boolean matches = true;
+            for (int offset = 0; offset < value.length(); offset++) {
+                if (!value.substring(offset, offset + 1).equals(positions.get(start + offset).getUnicode())) {
+                    matches = false;
+                    break;
+                }
+            }
+            if (matches) {
+                TextPosition first = positions.get(start);
+                TextPosition last = positions.get(start + value.length() - 1);
+                return new TextBounds(first.getXDirAdj(), last.getXDirAdj() + last.getWidthDirAdj());
+            }
+        }
+        throw new AssertionError("PDF text not found: " + value);
+    }
+
+    private static float textCenter(byte[] pdf, String value) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            CapturingTextStripper textStripper = new CapturingTextStripper();
+            textStripper.getText(document);
+            return findBounds(textStripper.positions, value).center();
+        }
+    }
+
+    private record TextBounds(float start, float end) {
+        private float center() {
+            return (start + end) / 2f;
+        }
+    }
+
+    private static final class CapturingTextStripper extends PDFTextStripper {
+        private final List<TextPosition> positions = new ArrayList<>();
+
+        private CapturingTextStripper() throws IOException {
+            setSortByPosition(true);
+        }
+
+        @Override
+        protected void writeString(String text, List<TextPosition> textPositions) throws IOException {
+            positions.addAll(textPositions);
+            super.writeString(text, textPositions);
+        }
     }
 }
