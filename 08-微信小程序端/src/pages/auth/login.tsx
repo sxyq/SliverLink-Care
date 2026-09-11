@@ -40,7 +40,7 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
   const [invitation, setInvitation] = useState<VolunteerInvitationPreview | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [checkingInvitation, setCheckingInvitation] = useState(false);
-  const [agreementAccepted, setAgreementAccepted] = useState(true);
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [agreementViewed, setAgreementViewed] = useState(() => Boolean(getAppSession().privacyAccepted));
   const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const openScan = useScanEntry();

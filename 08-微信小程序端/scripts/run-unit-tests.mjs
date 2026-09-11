@@ -57,6 +57,8 @@ async function assertLanguageMenuContracts() {
 
   const ltrLoginFields = loginSource.match(/auth-login-field__input sl-ltr-data/g) || [];
   assert.ok(ltrLoginFields.length >= 5, 'account, password, invitation code and phone fields must stay LTR');
+  assert.match(loginSource, /agreementAccepted, setAgreementAccepted\] = useState\(false\)/, 'agreement consent must be unchecked by default');
+  assert.match(loginSource, /if \(!agreementAccepted\)/, 'login must require agreement consent');
   assert.doesNotMatch(formatterSource, /locale\s*===\s*['"]zh-CN['"]/);
   assert.match(formatterSource, /\$\{year\}-\$\{month\}-\$\{day\} \$\{hour\}:\$\{minute\}/);
 
