@@ -48,7 +48,6 @@ import javax.imageio.ImageIO;
 public class NameplateService {
 
     private static final Logger log = LoggerFactory.getLogger(NameplateService.class);
-    private static final String NAMEPLATE_SUBTITLE = "智护空巢";
     private static final String FOOTER_ATTRIBUTION = "重庆医科大学空巢养老团";
     private static volatile byte[] cachedFontBytes;
     private static volatile String cachedFontKey;
@@ -244,8 +243,8 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredText(content, font, 38f, "智联名牌", x + width / 2f, y + height * 0.69f, ink);
-        drawCenteredText(content, font, 16f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.615f, mutedInk);
+        drawCenteredText(content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
+        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
@@ -277,8 +276,8 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredText(content, font, 25f, "智联名牌", x + width / 2f, y + height * 0.82f, ink);
-        drawCenteredText(content, font, 14f, NAMEPLATE_SUBTITLE, x + width / 2f, y + height * 0.765f, mutedInk);
+        drawCenteredText(content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
+        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
         float qrX = x + width * 0.11f;

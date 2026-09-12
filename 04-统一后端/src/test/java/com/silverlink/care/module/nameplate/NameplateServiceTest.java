@@ -190,6 +190,7 @@ class NameplateServiceTest {
             assertEquals(2, countOccurrences(pdfText, attribution));
             assertFalse(pdfText.contains("重庆医科大学护理学院 空巢养老团"));
             assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
+            assertEquals(2, countOccurrences(pdfText, "智康信息卡"));
             assertEquals(2, countOccurrences(pdfText, "智护空巢"));
 
             PDFTextStripperByArea areaStripper = new PDFTextStripperByArea();
@@ -198,6 +199,8 @@ class NameplateServiceTest {
             areaStripper.extractRegions(document.getPage(0));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), attribution));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), attribution));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), "智康信息卡"));
+            assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), "智康信息卡"));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("front"), "智护空巢"));
             assertEquals(1, countOccurrences(areaStripper.getTextForRegion("back"), "智护空巢"));
 
@@ -261,7 +264,7 @@ class NameplateServiceTest {
 
         Path config = tempDir.resolve("nameplate-template.json");
         ReflectionTestUtils.setField(service, "templateConfigFile", config.toString());
-        Files.writeString(config, "{\"frontNameLineXRatio\":0.33}");
+        Files.writeString(config, "{\"title\":\"智康信息卡\",\"frontNameLineXRatio\":0.33}");
         float initialCenter = textCenter(service.generateDemoPdf("elder-template"), "李奶奶");
 
         Files.writeString(config, "{\"frontNameLineXRatio\":0.4}");

@@ -9,6 +9,7 @@ public final class NameplateTemplateConfig {
     private static final float FRONT_CARD_WIDTH = 410f;
     private static final float FRONT_CARD_RIGHT_MARGIN = 20f;
 
+    public String title = "智康信息卡";
     public String fontResource = "/fonts/ArialUnicode.ttf";
     public String ink = "#054A5F";
     public String mutedInk = "#52727C";
@@ -26,6 +27,9 @@ public final class NameplateTemplateConfig {
     public float frontAgeUnitGap = 8f;
 
     public void validate() {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
         requireColor(ink, "ink");
         requireColor(mutedInk, "mutedInk");
         requireColor(mint, "mint");
