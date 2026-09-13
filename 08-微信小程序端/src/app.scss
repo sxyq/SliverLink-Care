@@ -63,7 +63,7 @@ page {
   background:
     radial-gradient(circle at top, rgba(255, 255, 255, 0.95), transparent 35%),
     linear-gradient(180deg, #f8fdff 0%, $sl-bg 46%, #eaf6f9 100%);
-  font-family: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Naskh Arabic', 'Noto Sans Arabic', sans-serif;
+  font-family: 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Noto Sans Yi', 'Microsoft Yi Baiti', sans-serif;
   direction: ltr;
 }
 
@@ -78,7 +78,7 @@ page {
 .sl-app-root.sl-dir-rtl button {
   direction: rtl;
   text-align: start;
-  font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-family: 'Noto Naskh Arabic', 'Noto Sans Arabic', 'Noto Sans Yi', 'Microsoft Yi Baiti', 'Avenir Next', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
 }
 
 .sl-app-root .sl-auto-data,

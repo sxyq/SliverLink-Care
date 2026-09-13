@@ -68,6 +68,7 @@ describe('I18nProvider', () => {
           <output data-testid="direction">{direction}</output>
           <button type="button" onClick={() => setLocale('ug-Arab-CN')}>to-ug</button>
           <button type="button" onClick={() => setLocale('kk-Arab-CN')}>to-kk</button>
+          <button type="button" onClick={() => setLocale('ii-CN')}>to-ii</button>
           <button type="button" onClick={() => setLocale('zh-CN')}>to-zh</button>
         </>
       );
@@ -94,6 +95,11 @@ describe('I18nProvider', () => {
     expect(document.documentElement.lang).toBe('kk-Arab-CN');
     expect(document.documentElement.dir).toBe('rtl');
     expect(document.documentElement.dataset.locale).toBe('kk-Arab-CN');
+
+    fireEvent.click(screen.getByRole('button', { name: 'to-ii' }));
+    expect(document.documentElement.lang).toBe('ii-CN');
+    expect(document.documentElement.dir).toBe('ltr');
+    expect(document.documentElement.dataset.locale).toBe('ii-CN');
 
     fireEvent.click(screen.getByRole('button', { name: 'to-zh' }));
     expect(document.documentElement.lang).toBe('zh-CN');

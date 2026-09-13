@@ -1,4 +1,4 @@
-export const SUPPORTED_LOCALES = ['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN'] as const;
+export const SUPPORTED_LOCALES = ['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN', 'ii-CN'] as const;
 export type Locale = (typeof SUPPORTED_LOCALES)[number];
 export type Direction = 'ltr' | 'rtl';
 
@@ -14,6 +14,7 @@ export const LOCALE_META: Record<Locale, { label: string; direction: Direction }
   'zh-CN': { label: '中文', direction: 'ltr' },
   'ug-Arab-CN': { label: 'ئۇيغۇرچە', direction: 'rtl' },
   'kk-Arab-CN': { label: 'قازاقشا', direction: 'rtl' },
+  'ii-CN': { label: 'ꆇꉙ', direction: 'ltr' },
 };
 
 export function isSupportedLocale(value: unknown): value is Locale {
@@ -1317,11 +1318,12 @@ export const messages: Record<Locale, MessageTree> = {
       privacyTitle: 'مەخپىيەتلىك سىياسىتى',
       consentPrefix: 'مەن ئوقۇپ چىقتىم ۋە قوشۇلدۇم',
       consentJoin: 'ۋە',
-      viewAction: 'كۆرۈش',
       required: 'ئاۋۋال ئىشلەتكۈچى مۇلازىمەت كېلىشىمى ۋە مەخپىيەتلىك سىياسىتىنى ئوقۇپ قوشۇلۇڭ',
       viewRequired: 'داۋاملاشتۇرۇشتىن بۇرۇن كېلىشىم مەزمۇنىنى كۆرۈپ چىقىڭ',
+      viewAction: 'كۆرۈش',
       backToLogin: 'كىرىشكە قايتىش',
       updatedAt: 'ئەڭ يېڭى يېڭىلانغان: {date}',
+      agree: 'قوشۇلۇپ قايتىش',
     },
     status: {
       active: 'كۈچكە ئىگە',
@@ -2026,6 +2028,19 @@ export const messages: Record<Locale, MessageTree> = {
       contactsUpdated: 'بايلانىس اقپاراتى جاڭارتىلدى',
       coordinatorAccount: 'تاۋەلدى بىرلەسكەن باسقارۋ شوتى',
     },
+    agreement: {
+      title: 'پايدالانۋشى كەلىسىمى',
+      serviceTitle: 'پايدالانۋشى قىزمەت كەلىسىمى',
+      privacyTitle: 'جەكەلىك قۇپىيالىق ساياساتى',
+      consentPrefix: 'مەن وقىپ شىقتىم جانە كەلىستىم',
+      consentJoin: 'جانە',
+      required: 'الدىمەن پايدالانۋشى قىزمەت كەلىسىمى مەن جەكەلىك قۇپىيالىق ساياساتىن وقىپ, كەلىسىڭىز',
+      viewRequired: 'جالعاستىرۋدەن بۇرىن كەلىسىم مازمۇنىن كورىپ شىعىڭىز',
+      viewAction: 'كۆرۈش',
+      backToLogin: 'كىرۋگە قايتۋ',
+      updatedAt: 'جاڭارتىلعان: {date}',
+      agree: 'كەلىسىپ قايتۋ',
+    },
     status: {
       active: 'بەلسەندى',
       used: 'پايدالانىلعان',
@@ -2155,7 +2170,182 @@ export const messages: Record<Locale, MessageTree> = {
       unsavedMedication: 'اعىمداعى وزگەرىستەر جىبەرىلمەدى, مۇراعات جازباسىنا سينحرونداۋ ءۇشىن «جىبەرۋ جانە ساقتاۋ» تۇيمەسىن باسىڭىز.',
     },
   },
+  'ii-CN': {
+    common: {},
+    auth: {},
+    scan: {},
+    verification: {},
+    workbench: {},
+    family: {},
+    status: {},
+    errors: {},
+  },
 };
+
+const YI_MESSAGE_OVERRIDES: Record<string, string> = {
+  'common.home': 'ꂴꏾꌠ',
+  'common.back': 'ꀱꇁ',
+  'common.backHome': 'ꀱꇁꂴꏾꌠ',
+  'common.moreActions': 'ꀉꑌꃅꑽ、ꃅꈧ',
+  'common.close': 'ꈢ(ꈢꇧꎭ)',
+  'common.cancel': 'ꇤꇧꎭ',
+  'common.confirm': 'ꉬꄷꄉ',
+  'common.continue': 'ꐪꊛ',
+  'common.continueView': 'ꐪꊛꍤꄻ',
+  'common.refresh': 'ꋌꏀꅐ',
+  'common.search': 'ꎹꈹ、ꌥꉩ',
+  'common.save': 'ꀧꌋꃅꄉ',
+  'common.loginSuccess': 'ꅔꅐ (ꆸꄻ)ꃅꊋꐛ',
+  'common.registerSuccess': 'ꁱꄀꃅꊋꐛ',
+  'common.submit': 'ꄜꏮ',
+  'common.edit': 'ꏓꁱ',
+  'common.delete': 'ꌉꇧꎭ',
+  'common.name': 'ꑮꂓ',
+  'common.age': 'ꈎꄜ',
+  'common.yearsOld': '{age} ꈎ',
+  'common.gender': 'ꀞꃀ、ꌺꅪ',
+  'common.relationship': 'ꐮꃆꂮ',
+  'common.status': 'ꐛꄟ',
+  'common.contactPhone': 'ꑌꑲꄆꅇ',
+  'common.recordDate': 'ꎺꁱꃅꑍ',
+  'common.healthRecordNo': 'ꒉꄚꄉꇮꌐꂷꄻ',
+  'common.archiveNumber': 'ꄉꇮꌐꂷꄻ',
+  'common.phoneLabel': 'ꄆꅇ',
+  'common.bloodType': 'ꌦꉹ',
+  'common.familyLabel': 'ꃌꌺ',
+  'common.ladyLabel': 'ꌋꅪ',
+  'common.elderCount': 'ꃀꌠꌐꂷ',
+  'common.assignedCount': 'ꃀꌠꌐꂷ',
+  'common.phoneNumber': 'ꄆꅇꌐꂷ',
+  'common.verify': 'ꍤꎖ、ꊫꎖ、ꎕꊩ',
+  'common.download': 'ꑢꌬ',
+  'common.elderName': 'ꃀꌠꑮꂓ',
+  'common.saveChanges': 'ꀧꌋꃅꄉꄺꀱ',
+  'common.elderArchive': 'ꃀꌠꄉꇮ',
+  'common.progress': 'ꐳꐨ',
+  'common.currentScale': 'ꂴꆽꎖ、ꎖꃷꁨꑴꉻ',
+  'common.recentSaved': 'ꀋꑍꊂꀧꌋꃅꄉ',
+  'common.cancelEdit': 'ꇤꇧꎭꏓꁱ',
+  'common.editScale': 'ꏓꁱꎖ、ꎖꃷꁨꑴꉻ',
+  'common.startFilling': 'ꇬꅷꁧ、ꀨꇬ、ꄑꁱꇱ',
+  'common.points': 'ꃏ、ꎄ',
+
+  'auth.login': 'ꅔꅐ (ꆸꄻ)',
+  'auth.accessVerification': 'ꅲꇫꍤꎖ、ꊫꎖ、ꎕꊩ',
+  'auth.scanElderInfo': 'ꃀꌠꅺꈨꅇ、ꈴꌗ',
+  'auth.currentPassword': 'ꂴꆽꂁꊈꂷ、ꂁꌐꂷ',
+  'auth.confirmPassword': 'ꉬꄷꄉꂁꊈꂷ、ꂁꌐꂷ',
+
+  'scan.basicInfo': 'ꅉꀨꅺꈨꅇ、ꈴꌗ',
+  'scan.medicalInfo': 'ꆄꄻꅺꈨꅇ、ꈴꌗ',
+  'scan.viewHealthArchive': 'ꍤꄻꒉꄚꄉꇮ',
+  'scan.viewScale': 'ꍤꄻꎖ、ꎖꃷꁨꑴꉻ',
+  'scan.healthArchive': 'ꒉꄚꄉꇮ',
+  'scan.weight': 'ꇭꀧꀉꇖꐨ',
+  'scan.recentUpdate': 'ꀋꑍꊂꏀꅐ、ꏀꊛ',
+  'scan.recentRecord': 'ꀋꑍꊂꎺꁱ',
+  'scan.scaleRecords': 'ꎖ、ꎖꃷꁨꑴꉻꎺꁱ',
+  'scan.scaleInfo': 'ꎖ、ꎖꃷꁨꑴꉻꅺꈨꅇ、ꈴꌗ',
+  'scan.scaleList': 'ꀱꇁꎖ、ꎖꃷꁨꑴꉻꅺꌡꑴꉻ',
+  'scan.continueOtherScales': 'ꐪꊛꍤꄻꀉꁁꎖ、ꎖꃷꁨꑴꉻꎺꁱ',
+  'scan.score': 'ꊌꃷꁨ',
+  'scan.currentScore': 'ꂴꆽꊌꃷꁨ',
+  'scan.resultDescription': 'ꄽꂫꉉꀽ',
+  'scan.result': 'ꄽꂫ',
+  'scan.recordDetails': 'ꎺꁱꑭꃆꋧꂮ',
+  'scan.backToArchive': 'ꀱꇁꄉꇮ',
+  'scan.backToVerify': 'ꀱꇁꍤꎖ、ꊫꎖ、ꎕꊩꏾ',
+  'scan.reverify': 'ꀱꍤꎖ、ꊫꎖ、ꎕꊩ',
+  'scan.downloadNameplate': 'ꑢꌬꂓꅑꌠ',
+  'scan.carryWithYou': 'ꊨꏦꌌꐺꌌꐺ',
+  'scan.scalePhqQuestion7': 'ꋓꉪꁨꊋꈜꀋꐛꏓ',
+  'scan.levelModerate': 'ꐧꀠꄗ',
+  'scan.levelNormal': 'ꑌꐚ、ꑴꀋꅑ、ꎃꐚꈍꈐ、ꑭꊂ',
+  'scan.answerNotAtAll': 'ꐛꒆꀋꇮ',
+  'scan.answerSometimes': 'ꋍꇅ',
+  'scan.answerAlways': 'ꊒꆽꀕ',
+
+  'verification.identity': 'ꐤꏦꁱꄉ',
+  'verification.idRegistration': 'ꊫꌐꁱꄉ',
+  'verification.copyContent': 'ꌡꄉꄻꐊꇐ',
+  'verification.smsVerified': 'ꍤꎖ、ꊫꎖ、ꎕꊩꃅꊋꐛ',
+  'verification.resend': 'ꀱꁊꃑ',
+
+  'workbench.currentElderArchive': 'ꂴꆽꌄꇤ、ꆼꎍꃀꌠꄉꇮ',
+  'workbench.enterArchive': 'ꃹꆹꄉꇮ',
+  'workbench.archiveData': 'ꄉꇮꌬꇐ',
+  'workbench.addArchive': 'ꁦꎆꄉꇮ',
+  'workbench.saveBasicInfo': 'ꀧꌋꃅꄉꅉꀨꅺꈨꅇ、ꈴꌗ',
+  'workbench.saveHealthRecord': 'ꀧꌋꃅꄉꒉꄚꄉꇮ',
+  'workbench.medicationName': 'ꁬꋌꂓ',
+  'workbench.scaleQuestions': 'ꎖ、ꎖꃷꁨꑴꉻꅇꊧ',
+  'workbench.completeScale': 'ꃅꌐꎖ、ꎖꃷꁨꑴꉻ',
+  'workbench.generatedAt': 'ꁏꐛꃅꑍꃅꉖ',
+  'workbench.logout': 'ꎞꉇꇁ、ꉈꎞꅔꅐ (ꆸꄻ)',
+  'workbench.saveDraft': 'ꀧꌋꃅꄉꂴꁱꉇꌠ',
+  'workbench.submitSave': 'ꄜꏮꀧꌋꃅꄉ',
+  'workbench.actions': 'ꃅꑽ、ꃅꈧ',
+  'workbench.deleteMedication': 'ꌉꇧꎭꁬꋌ',
+  'workbench.editMedication': 'ꏓꁱꁬꋌ',
+  'workbench.confirmSave': 'ꉬꄷꄉꀧꌋꃅꄉ',
+  'workbench.elderDetail': 'ꃀꌠꑭꃆꋧꂮ',
+  'workbench.editEntry': 'ꃹꆹꏓꁱ',
+  'workbench.basicInfoEdit': 'ꅉꀨꅺꈨꅇ、ꈴꌗꏓꁱ',
+  'workbench.healthRecordForm': 'ꒉꄚꄉꇮꁱꇱ',
+  'workbench.healthIndicators': 'ꒉꄚꌐꑘ',
+  'workbench.veryGood': 'ꋬꂻꑴ',
+  'workbench.average': 'ꐯꌟ、ꎃꐚ',
+  'workbench.suspicious': 'ꊽꉌꋲꀕ',
+  'workbench.abnormal': 'ꐋꀋꌡ',
+  'workbench.currentElder': 'ꂴꆽꃀꌠ',
+  'workbench.regenerate': 'ꀱꁏꐛ',
+  'workbench.regenerating': 'ꀱꁏꐛꐧꀠ',
+  'workbench.submitPending': 'ꄜꏮꐧꀠ',
+  'workbench.reviewing': 'ꍤꊪꐧꀠ',
+  'workbench.regenerateFailed': 'ꀱꁏꐛꈔ',
+
+  'family.qrEnabled': 'ꌬ',
+  'family.spouse': 'ꃌꒆ',
+  'family.siblings': 'ꃺꃶꀁꑳꂓꃀ',
+  'family.other': 'ꀉꁁ',
+  'family.closeIncreaseArchive': 'ꈢ(ꈢꇧꎭ)ꁦꎆꄉꇮ',
+
+  'agreement.consentJoin': 'ꇱꐙ',
+  'agreement.viewAction': 'ꍤꄻ',
+  'agreement.backToLogin': 'ꀱꇁꅔꅐ (ꆸꄻ)',
+  'status.active': 'ꇿꋌꐥ',
+  'errors.cameraPermissionTitle': 'ꈉꐨꁰꒌꍑꅍꌅꈐ',
+  'errors.noPhone': 'ꊁꌤꃅꌠꌐꋉꂓꌐ',
+};
+
+function cloneMessageTree(tree: MessageTree): MessageTree {
+  return Object.entries(tree).reduce<MessageTree>((result, [key, value]) => {
+    result[key] = typeof value === 'string' ? value : cloneMessageTree(value);
+    return result;
+  }, {});
+}
+
+function applyMessageOverrides(base: MessageTree, overrides: Record<string, string>): MessageTree {
+  const result = cloneMessageTree(base);
+
+  Object.entries(overrides).forEach(([key, value]) => {
+    const parts = key.split('.');
+    const leaf = parts.pop();
+    if (!leaf) return;
+
+    let target = result;
+    parts.forEach((part) => {
+      const current = target[part];
+      if (!current || typeof current === 'string') target[part] = {};
+      target = target[part] as MessageTree;
+    });
+    target[leaf] = value;
+  });
+
+  return result;
+}
+
+messages['ii-CN'] = applyMessageOverrides(messages['zh-CN'], YI_MESSAGE_OVERRIDES);
 
 function readMessage(tree: MessageTree, key: string): string | undefined {
   const value = key.split('.').reduce<string | MessageTree | undefined>((current, part) => {

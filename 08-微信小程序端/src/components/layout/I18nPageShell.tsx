@@ -15,7 +15,7 @@ export function I18nPageShell({ children, navigationTitleKey }: { children: Reac
   }, [locale, navigationTitleKey, t]);
 
   return (
-    <View className={`sl-app-root sl-dir-${direction}`} {...{ dir: direction }}>
+    <View className={`sl-app-root sl-dir-${direction}`} {...{ dir: direction, lang: locale }}>
       <LanguageSwitcher />
       {children}
       {!isWorkbenchPage ? <Text className='sl-app-attribution'>{t('common.attribution')}</Text> : null}

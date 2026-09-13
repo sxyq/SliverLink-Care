@@ -15,8 +15,8 @@ import {
   type Locale,
 } from '@shared-i18n/messages';
 
-const EXPECTED_GROUPS = ['common', 'auth', 'scan', 'verification', 'workbench', 'family', 'status', 'errors'];
-const EXPECTED_LEAF_KEY_COUNT = 686;
+const EXPECTED_GROUPS = ['common', 'auth', 'scan', 'verification', 'workbench', 'family', 'agreement', 'status', 'errors'];
+const EXPECTED_LEAF_KEY_COUNT = 696;
 
 function readLeaf(tree: unknown, key: string): string {
   const value = key.split('.').reduce<unknown>((current, part) => {
@@ -57,11 +57,13 @@ describe('shared i18n message catalog', () => {
       'zh-CN': '重庆医科大学空巢养老团',
       'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
       'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
+      'ii-CN': '重庆医科大学空巢养老团',
     } as const;
     const expectedNameplateSubtitle = {
       'zh-CN': '智护空巢',
       'ug-Arab-CN': 'بوش ئۇۋىلىق ياشانغانلارغا ئەقلىي غەمخورلۇق',
       'kk-Arab-CN': 'بوس ۇياداعى قارتتارعا اقىلدى قامقورلىق',
+      'ii-CN': '智护空巢',
     } as const;
     const previousAttribution = [
       ['重庆医科大学护理学院', ' ', '\u94f6\u9f84\u5b88\u62a4\u56e2\u961f'].join(''),
@@ -99,8 +101,8 @@ describe('shared i18n message catalog', () => {
     expect(catalogValues.every((value) => !value.includes('\u0643\u06c7\u0645\u0649\u0633 \u062c\u0627\u0633\u0649 \u0628\u0648\u064a\u0649\u0646\u0634\u0627'))).toBe(true);
   });
 
-  it('keeps all three eight-group trees complete, unique, non-empty, and placeholder-compatible', () => {
-    expect(SUPPORTED_LOCALES).toEqual(['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN']);
+  it('keeps all four eight-group trees complete, unique, non-empty, and placeholder-compatible', () => {
+    expect(SUPPORTED_LOCALES).toEqual(['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN', 'ii-CN']);
 
     const chineseKeys = getMessageKeys(messages['zh-CN']);
     for (const locale of SUPPORTED_LOCALES) {
@@ -124,23 +126,30 @@ describe('shared i18n message catalog', () => {
 
     const kkValues = collectStringValues(messages['kk-Arab-CN']);
     expect(kkValues.every((value) => !/[\u4e00-\u9fff\u0400-\u04ff]/.test(value))).toBe(true);
+    expect(messages['ii-CN']).not.toBe(messages['zh-CN']);
+    expect((messages['ii-CN'].common as Record<string, unknown>)).not.toBe(messages['zh-CN'].common);
+    expect(readLeaf(messages['ii-CN'], 'common.home')).toBe('ꂴꏾꌠ');
   });
 });
 
 describe('shared i18n runtime', () => {
-  it('exposes the three locale labels and directions', () => {
+  it('exposes the four locale labels and directions', () => {
     expect(isSupportedLocale('zh-CN')).toBe(true);
     expect(isSupportedLocale('ug-Arab-CN')).toBe(true);
     expect(isSupportedLocale('kk-Arab-CN')).toBe(true);
+    expect(isSupportedLocale('ii-CN')).toBe(true);
     expect(isSupportedLocale('kk')).toBe(false);
     expect(isSupportedLocale(null)).toBe(false);
     expect(LOCALE_META['zh-CN'].direction).toBe('ltr');
     expect(LOCALE_META['ug-Arab-CN'].direction).toBe('rtl');
     expect(LOCALE_META['kk-Arab-CN'].direction).toBe('rtl');
+    expect(LOCALE_META['ii-CN'].direction).toBe('ltr');
     expect(getDirection('zh-CN')).toBe('ltr');
     expect(getDirection('ug-Arab-CN')).toBe('rtl');
     expect(getDirection('kk-Arab-CN')).toBe('rtl');
+    expect(getDirection('ii-CN')).toBe('ltr');
     expect(getLocaleLabel('kk-Arab-CN')).toBe('قازاقشا');
+    expect(getLocaleLabel('ii-CN')).toBe('ꆇꉙ');
   });
 
   it('defaults invalid stored values to Chinese and persists every supported locale', () => {
@@ -202,6 +211,7 @@ describe('shared i18n runtime', () => {
       'zh-CN': '78 岁',
       'ug-Arab-CN': '78 ياش',
       'kk-Arab-CN': '78 جىل',
+      'ii-CN': '78 ꈎ',
     } as const;
 
     for (const locale of SUPPORTED_LOCALES) {

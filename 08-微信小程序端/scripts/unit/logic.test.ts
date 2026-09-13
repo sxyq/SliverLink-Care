@@ -43,7 +43,7 @@ import {
 import { httpClient } from '@/services/api/httpClient';
 import { i18nRuntime } from '@/i18n';
 import { normalizeLocalizedError } from '@/hooks/useLocalizedError';
-import { ApiMessageError, getErrorMessage } from '@shared-i18n/messages';
+import { ApiMessageError, getErrorMessage, LOCALE_META, SUPPORTED_LOCALES } from '@shared-i18n/messages';
 import {
   getScanVerificationStatus,
   resolveScanToken,
@@ -239,6 +239,18 @@ test('formatters normalize empty values, dates, phones, ages, and scores', () =>
   assert.equal(formatAgeLabel('78'), '78 岁');
   assert.equal(formatScoreLabel(''), '未评分');
   assert.equal(formatScoreLabel(12), '12 分');
+});
+
+test('Yi locale is available in the miniapp runtime with LTR text direction', () => {
+  assert.deepEqual(SUPPORTED_LOCALES, ['zh-CN', 'ug-Arab-CN', 'kk-Arab-CN', 'ii-CN']);
+  assert.equal(LOCALE_META['ii-CN'].label, 'ꆇꉙ');
+  assert.equal(LOCALE_META['ii-CN'].direction, 'ltr');
+
+  i18nRuntime.setLocale('ii-CN');
+  assert.equal(i18nRuntime.getLocale(), 'ii-CN');
+  assert.equal(i18nRuntime.getDirection(), 'ltr');
+  assert.equal(i18nRuntime.t('common.home'), 'ꂴꏾꌠ');
+  i18nRuntime.setLocale('zh-CN');
 });
 
 test('sync storage supports fallback, ttl expiration, removal, and cleanup', async () => {

@@ -40,13 +40,15 @@ describe('LanguageSwitcher', () => {
 
     const menu = screen.getByRole('menu');
     const items = within(menu).getAllByRole('menuitemradio');
-    expect(items.map((item) => item.textContent?.replace('✓', ''))).toEqual(['中文', 'ئۇيغۇرچە', 'قازاقشا']);
+    expect(items.map((item) => item.textContent?.replace('✓', ''))).toEqual(['中文', 'ئۇيغۇرچە', 'قازاقشا', 'ꆇꉙ']);
     expect(items[0]).toHaveAttribute('lang', 'zh-CN');
     expect(items[0]).toHaveAttribute('dir', 'ltr');
     expect(items[1]).toHaveAttribute('lang', 'ug-Arab-CN');
     expect(items[1]).toHaveAttribute('dir', 'rtl');
     expect(items[2]).toHaveAttribute('lang', 'kk-Arab-CN');
     expect(items[2]).toHaveAttribute('dir', 'rtl');
+    expect(items[3]).toHaveAttribute('lang', 'ii-CN');
+    expect(items[3]).toHaveAttribute('dir', 'ltr');
     expect(items[0]).toHaveFocus();
 
     await user.keyboard('{ArrowDown}');
@@ -56,18 +58,18 @@ describe('LanguageSwitcher', () => {
     await user.keyboard('{Home}');
     expect(items[0]).toHaveFocus();
     await user.keyboard('{End}');
-    expect(items[2]).toHaveFocus();
+    expect(items[3]).toHaveFocus();
     await user.keyboard('{ArrowUp}');
-    expect(items[1]).toHaveFocus();
+    expect(items[2]).toHaveFocus();
     await user.keyboard('{ArrowLeft}');
-    expect(items[0]).toHaveFocus();
+    expect(items[1]).toHaveFocus();
     await user.keyboard('{End}{Enter}');
 
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
     expect(trigger).toHaveFocus();
-    expect(trigger).toHaveAttribute('lang', 'kk-Arab-CN');
-    expect(document.documentElement).toHaveAttribute('dir', 'rtl');
-    expect(values.get(LOCALE_STORAGE_KEY)).toBe('kk-Arab-CN');
+    expect(trigger).toHaveAttribute('lang', 'ii-CN');
+    expect(document.documentElement).toHaveAttribute('dir', 'ltr');
+    expect(values.get(LOCALE_STORAGE_KEY)).toBe('ii-CN');
   });
 
   it('closes by Space, Escape, Tab and outside pointer while restoring focus after selection', async () => {

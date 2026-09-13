@@ -391,11 +391,13 @@ export const AGREEMENT_DOCUMENTS: Record<AgreementDocKey, Record<Locale, Agreeme
     'zh-CN': zhService,
     'ug-Arab-CN': ugService,
     'kk-Arab-CN': kkService,
+    'ii-CN': zhService,
   },
   privacy: {
     'zh-CN': zhPrivacy,
     'ug-Arab-CN': ugPrivacy,
     'kk-Arab-CN': kkPrivacy,
+    'ii-CN': zhPrivacy,
   },
 };
 
