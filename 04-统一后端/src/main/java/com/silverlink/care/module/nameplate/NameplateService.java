@@ -253,7 +253,7 @@ public class NameplateService {
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
         drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
-        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
+        drawRasterizedCenteredText(document, content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
@@ -286,7 +286,7 @@ public class NameplateService {
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
         drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
-        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
+        drawRasterizedCenteredText(document, content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
         float qrX = x + width * 0.11f;
