@@ -21,7 +21,8 @@
 - `npm run test:dist-security`：通过，扫描 73 个 `dist` 文件，覆盖 source map、私钥/密钥、JWT、硬编码手机号/身份证、本机路径、内网地址、数据库/SQL 文件、DevTools 私有配置、CI 临时产物和敏感 DevTools query 泄漏面。
 - `npm run test:artifact`：通过。
 - `npm run test:performance-budget`：通过，按性能文档阈值确认总包 `< 2MB`、扫码分包 `< 500KB`、工作台分包 `< 700KB`。
-- `npm run ci:upload`：已绑定 `preci:upload`，上传前自动运行 `run_weapp_local_checks.sh`。
+- `npm run ci:upload`：已绑定 `preci:upload`，上传前自动运行 `run_weapp_local_checks.sh`；实际上传使用 `miniprogram-ci@2.1.31`，配置和私钥分别位于小程序目录的 `.local/wechat-ci/` 与本机私钥文件。
+- 当前机器的完整上传命令：`PATH="$HOME/.trae-cn/binaries/node/versions/24.16.0/bin:$PATH" npm run ci:upload`，目标版本为 `0.1.5`。
 - `bash 06-测试与质量保障/scripts/regression/run_weapp_local_checks.sh`：通过。
 - `SILVERLINK_RUN_WEAPP_DEVTOOLS=1 bash 06-测试与质量保障/scripts/regression/run_all_checks.sh`：可选触发微信开发者工具运行时复测；不属于当前代码层回归门禁。
 - `node 06-测试与质量保障/scripts/regression/check_weapp_evidence.mjs`：通过，校验小程序代码层报告、六层矩阵、性能 JSON、命令日志、CI 预览二维码和非目标说明引用一致。
