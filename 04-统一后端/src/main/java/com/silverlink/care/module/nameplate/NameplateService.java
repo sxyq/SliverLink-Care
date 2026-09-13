@@ -301,7 +301,7 @@ public class NameplateService {
         content.stroke();
         drawBackgroundImage(document, content, qrImage, qrX, qrY, qrSize, qrSize);
 
-        drawText(content, font, 22f, "扫码查看基础信息", x + width * 0.50f, y + height * 0.46f, ink);
+        drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", x + width * 0.68f, y + height * 0.46f, ink);
         drawDividerWithHealthIcon(content, x + width * 0.68f, y + height * 0.35f, 44f, color(template.gold), line);
 
         drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
@@ -366,8 +366,8 @@ public class NameplateService {
             Color lineColor
     )
             throws IOException {
-        drawLine(content, centerX - lineLength - 22f, y, centerX - 20f, y, lineColor, 1f);
-        drawLine(content, centerX + 20f, y, centerX + lineLength + 22f, y, lineColor, 1f);
+        drawLine(content, centerX - lineLength - 22f, y, centerX - 24f, y, lineColor, 1f);
+        drawLine(content, centerX + 22f, y, centerX + lineLength + 32f, y, lineColor, 1f);
         content.setNonStrokingColor(iconColor);
         addCircle(content, centerX, y + 1f, 10f);
         content.fill();
@@ -658,13 +658,18 @@ public class NameplateService {
 
     private void drawCenteredTitle(PDDocument document, PDPageContentStream content, PDFont font, float size, String title, float centerX, float y, Color color)
             throws IOException {
-        float textWidth = font.getStringWidth(title) / 1000f * size;
+        drawRasterizedCenteredText(document, content, font, size, title, centerX, y, color);
+    }
+
+    private void drawRasterizedCenteredText(PDDocument document, PDPageContentStream content, PDFont font, float size, String text, float centerX, float y, Color color)
+            throws IOException {
+        float textWidth = font.getStringWidth(text) / 1000f * size;
         float left = centerX - (textWidth / 2f);
-        BufferedImage titleImage = renderTitleImage(title, size, color);
+        BufferedImage titleImage = renderTitleImage(text, size, color);
         PDImageXObject titleObject = LosslessFactory.createFromImage(document, titleImage);
         Font titleFont = titleFont(size);
         FontRenderContext frc = new FontRenderContext(null, true, true);
-        int baseline = 4 + (int) Math.ceil(titleFont.getLineMetrics(title, frc).getAscent());
+        int baseline = 4 + (int) Math.ceil(titleFont.getLineMetrics(text, frc).getAscent());
         float imageLeft = centerX - titleImage.getWidth() / 8f;
         float imageBottom = y - (titleImage.getHeight() - baseline) / 4f;
         content.drawImage(titleObject, imageLeft, imageBottom, titleImage.getWidth() / 4f, titleImage.getHeight() / 4f);
@@ -674,7 +679,7 @@ public class NameplateService {
         content.setRenderingMode(RenderingMode.NEITHER);
         content.setFont(font, size);
         content.newLineAtOffset(left, y);
-        content.showText(title);
+        content.showText(text);
         content.setRenderingMode(RenderingMode.FILL);
         content.endText();
     }
