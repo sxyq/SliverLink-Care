@@ -337,6 +337,28 @@
   gap: 14rpx;
 }
 
+.auth-login-language-switcher {
+  align-self: flex-start;
+  width: 260rpx;
+  margin-left: 16rpx;
+}
+
+.auth-login-language-switcher .sl-language-switcher {
+  position: relative;
+  top: auto;
+  right: auto;
+  left: auto;
+  z-index: 4;
+}
+
+.auth-login-language-switcher .sl-language-menu {
+  position: static;
+  top: auto;
+  right: auto;
+  left: auto;
+  margin-top: 12rpx;
+}
+
 .auth-login-hint {
   color: #5f7888;
   font-size: 22rpx;
@@ -410,4 +432,10 @@
   color: #4d6c7f;
   font-size: 22rpx;
   line-height: 1.6;
+}
+
+@media (max-width: 360px) {
+  .auth-login-language-switcher {
+    width: 236rpx;
+  }
 }

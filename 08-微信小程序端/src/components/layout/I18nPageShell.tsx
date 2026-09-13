@@ -6,7 +6,15 @@ import Taro from '@tarojs/taro';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useI18n } from '@/i18n';
 
-export function I18nPageShell({ children, navigationTitleKey }: { children: ReactNode; navigationTitleKey: string }) {
+export function I18nPageShell({
+  children,
+  navigationTitleKey,
+  showLanguageSwitcher = true,
+}: {
+  children: ReactNode;
+  navigationTitleKey: string;
+  showLanguageSwitcher?: boolean;
+}) {
   const { direction, locale, t } = useI18n();
   const isWorkbenchPage = navigationTitleKey.startsWith('workbench.');
 
@@ -16,7 +24,7 @@ export function I18nPageShell({ children, navigationTitleKey }: { children: Reac
 
   return (
     <View className={`sl-app-root sl-dir-${direction}`} {...{ dir: direction, lang: locale }}>
-      <LanguageSwitcher />
+      {showLanguageSwitcher ? <LanguageSwitcher /> : null}
       {children}
       {!isWorkbenchPage ? <Text className='sl-app-attribution'>{t('common.attribution')}</Text> : null}
     </View>

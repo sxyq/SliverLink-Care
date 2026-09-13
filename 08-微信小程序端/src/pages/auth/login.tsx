@@ -17,6 +17,7 @@ import { updateAppSession } from '@/store/app/appSessionStore';
 import { getAuthSession, saveAuthSession } from '@/store/auth/authStore';
 import { getAppSession } from '@/store/app/appSessionStore';
 import { useI18n } from '@/i18n';
+import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { I18nPageShell } from '@/components/layout/I18nPageShell';
 
 import './login.scss';
@@ -239,6 +240,9 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
               </View>
 
               <View className='auth-login-form'>
+                <View className='auth-login-language-switcher'>
+                  <LanguageSwitcher />
+                </View>
                 {mode === 'login' ? (
                   <>
                     <View className='auth-login-field'>
@@ -407,7 +411,7 @@ function LoginPage() {
 
 export default function LoginPageEntry() {
   return (
-    <I18nPageShell navigationTitleKey='common.brandTitle'>
+    <I18nPageShell navigationTitleKey='common.brandTitle' showLanguageSwitcher={false}>
       <LoginPage />
     </I18nPageShell>
   );

@@ -59,6 +59,8 @@ async function assertLanguageMenuContracts() {
   assert.ok(ltrLoginFields.length >= 5, 'account, password, invitation code and phone fields must stay LTR');
   assert.match(loginSource, /agreementAccepted, setAgreementAccepted\] = useState\(false\)/, 'agreement consent must be unchecked by default');
   assert.match(loginSource, /if \(!agreementAccepted\)/, 'login must require agreement consent');
+  assert.match(loginSource, /auth-login-language-switcher[\s\S]*<LanguageSwitcher\s*\/>/, 'login language switcher must sit inside the form');
+  assert.match(loginSource, /I18nPageShell navigationTitleKey='common\.brandTitle' showLanguageSwitcher=\{false\}/, 'login must disable the global language switcher');
   assert.doesNotMatch(formatterSource, /locale\s*===\s*['"]zh-CN['"]/);
   assert.match(formatterSource, /\$\{year\}-\$\{month\}-\$\{day\} \$\{hour\}:\$\{minute\}/);
 
@@ -86,7 +88,7 @@ async function assertLanguageMenuContracts() {
   assert.equal(pageSources.length, 16, 'all registered page roots must be covered by the page-level i18n shell');
   for (const pageSource of pageSources) {
     assert.match(pageSource, /I18nPageShell/);
-    assert.match(pageSource, /export default function \w+Entry\(\)[\s\S]*<I18nPageShell navigationTitleKey=['"][a-z]+\.[A-Za-z]+['"]>/);
+    assert.match(pageSource, /export default function \w+Entry\(\)[\s\S]*<I18nPageShell navigationTitleKey=['"][a-z]+\.[A-Za-z]+['"][^>]*>/);
   }
 }
 
