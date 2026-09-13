@@ -252,9 +252,9 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.76f, ink);
-        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.685f, mutedInk);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.62f, 56f, mintDeep, line);
+        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
+        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
         float lineX = x + width * template.frontNameLineXRatio;
@@ -285,9 +285,9 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.86f, ink);
-        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.805f, mutedInk);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.74f, 42f, mintDeep, line);
+        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
+        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
@@ -664,9 +664,10 @@ public class NameplateService {
         PDImageXObject titleObject = LosslessFactory.createFromImage(document, titleImage);
         Font titleFont = titleFont(size);
         FontRenderContext frc = new FontRenderContext(null, true, true);
-        int ascent = (int) Math.ceil(titleFont.getLineMetrics(title, frc).getAscent());
+        int baseline = 4 + (int) Math.ceil(titleFont.getLineMetrics(title, frc).getAscent());
         float imageLeft = centerX - titleImage.getWidth() / 8f;
-        content.drawImage(titleObject, imageLeft, y - ascent, titleImage.getWidth() / 4f, titleImage.getHeight() / 4f);
+        float imageBottom = y - (titleImage.getHeight() - baseline) / 4f;
+        content.drawImage(titleObject, imageLeft, imageBottom, titleImage.getWidth() / 4f, titleImage.getHeight() / 4f);
 
         // Keep an invisible text layer so PDF search and extraction retain the title.
         content.beginText();
