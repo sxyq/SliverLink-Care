@@ -243,7 +243,7 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredText(content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
+        drawCenteredTitle(content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
         drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
@@ -276,7 +276,7 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredText(content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
+        drawCenteredTitle(content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
         drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
@@ -645,6 +645,19 @@ public class NameplateService {
             throws IOException {
         float textWidth = font.getStringWidth(text) / 1000f * size;
         drawText(content, font, size, text, centerX - (textWidth / 2f), y, color);
+    }
+
+    private void drawCenteredTitle(PDPageContentStream content, PDFont font, float size, String title, float centerX, float y, Color color)
+            throws IOException {
+        float textWidth = font.getStringWidth(title) / 1000f * size;
+        float cursorX = centerX - (textWidth / 2f);
+        for (int offset = 0; offset < title.length();) {
+            int codePoint = title.codePointAt(offset);
+            String glyph = new String(Character.toChars(codePoint));
+            drawText(content, font, size, glyph, cursorX, y, color);
+            cursorX += font.getStringWidth(glyph) / 1000f * size;
+            offset += Character.charCount(codePoint);
+        }
     }
 
     private void drawText(PDPageContentStream content, PDFont font, float size, String text, float x, float y, Color color)
