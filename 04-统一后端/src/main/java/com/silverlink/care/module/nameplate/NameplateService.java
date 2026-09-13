@@ -19,6 +19,7 @@ import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
+import org.apache.pdfbox.pdmodel.graphics.state.RenderingMode;
 import org.apache.pdfbox.pdmodel.graphics.image.LosslessFactory;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.apache.pdfbox.rendering.PDFRenderer;
@@ -28,7 +29,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -51,6 +56,7 @@ public class NameplateService {
     private static final String FOOTER_ATTRIBUTION = "重庆医科大学空巢养老团";
     private static volatile byte[] cachedFontBytes;
     private static volatile String cachedFontKey;
+    private static volatile Font cachedTitleFont;
 
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
@@ -180,7 +186,7 @@ public class NameplateService {
 
         drawCardBase(content, leftX, cardY, cardWidth, cardHeight, false, template);
         drawCardBase(content, rightX, cardY, cardWidth, cardHeight, true, template);
-        drawFrontCard(content, font, leftX, cardY, cardWidth, cardHeight, preview, template);
+        drawFrontCard(document, content, font, leftX, cardY, cardWidth, cardHeight, preview, template);
         drawBackCard(document, content, font, rightX, cardY, cardWidth, cardHeight, preview, qrImage, template);
     }
 
@@ -230,6 +236,7 @@ public class NameplateService {
     }
 
     private void drawFrontCard(
+            PDDocument document,
             PDPageContentStream content,
             PDFont font,
             float x,
@@ -243,7 +250,7 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
+        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
         drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
@@ -276,7 +283,7 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
+        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
         drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
 
@@ -647,17 +654,62 @@ public class NameplateService {
         drawText(content, font, size, text, centerX - (textWidth / 2f), y, color);
     }
 
-    private void drawCenteredTitle(PDPageContentStream content, PDFont font, float size, String title, float centerX, float y, Color color)
+    private void drawCenteredTitle(PDDocument document, PDPageContentStream content, PDFont font, float size, String title, float centerX, float y, Color color)
             throws IOException {
         float textWidth = font.getStringWidth(title) / 1000f * size;
-        float cursorX = centerX - (textWidth / 2f);
-        for (int offset = 0; offset < title.length();) {
-            int codePoint = title.codePointAt(offset);
-            String glyph = new String(Character.toChars(codePoint));
-            drawText(content, font, size, glyph, cursorX, y, color);
-            cursorX += font.getStringWidth(glyph) / 1000f * size;
-            offset += Character.charCount(codePoint);
+        float left = centerX - (textWidth / 2f);
+        BufferedImage titleImage = renderTitleImage(title, size, color);
+        PDImageXObject titleObject = LosslessFactory.createFromImage(document, titleImage);
+        Font titleFont = titleFont(size);
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        int ascent = (int) Math.ceil(titleFont.getLineMetrics(title, frc).getAscent());
+        float imageLeft = centerX - titleImage.getWidth() / 8f;
+        content.drawImage(titleObject, imageLeft, y - ascent, titleImage.getWidth() / 4f, titleImage.getHeight() / 4f);
+
+        // Keep an invisible text layer so PDF search and extraction retain the title.
+        content.beginText();
+        content.setRenderingMode(RenderingMode.NEITHER);
+        content.setFont(font, size);
+        content.newLineAtOffset(left, y);
+        content.showText(title);
+        content.setRenderingMode(RenderingMode.FILL);
+        content.endText();
+    }
+
+    private BufferedImage renderTitleImage(String title, float size, Color color) throws IOException {
+        Font titleFont = titleFont(size);
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        int width = (int) Math.ceil(titleFont.getStringBounds(title, frc).getWidth()) + 8;
+        int height = (int) Math.ceil(titleFont.getLineMetrics(title, frc).getHeight()) + 8;
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        graphics.setColor(color);
+        graphics.setFont(titleFont);
+        graphics.drawString(title, 4, 4 + titleFont.getLineMetrics(title, frc).getAscent());
+        graphics.dispose();
+        return image;
+    }
+
+    private Font titleFont(float size) throws IOException {
+        Font current = cachedTitleFont;
+        if (current == null) {
+            synchronized (NameplateService.class) {
+                current = cachedTitleFont;
+                if (current == null) {
+                    try (InputStream stream = NameplateService.class.getResourceAsStream("/fonts/NotoSansSC-Regular.ttf")) {
+                        if (stream == null) {
+                            throw new IllegalStateException("缺少标题中文字体资源");
+                        }
+                        current = Font.createFont(Font.TRUETYPE_FONT, stream);
+                        cachedTitleFont = current;
+                    } catch (FontFormatException e) {
+                        throw new IOException("标题中文字体资源格式无效", e);
+                    }
+                }
+            }
         }
+        return current.deriveFont(Font.PLAIN, size * 4f);
     }
 
     private void drawText(PDPageContentStream content, PDFont font, float size, String text, float x, float y, Color color)
