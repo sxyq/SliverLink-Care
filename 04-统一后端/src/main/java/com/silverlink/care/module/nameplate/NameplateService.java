@@ -47,6 +47,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.imageio.ImageIO;
 
 @Service
@@ -57,6 +58,7 @@ public class NameplateService {
     private static volatile byte[] cachedFontBytes;
     private static volatile String cachedFontKey;
     private static volatile Font cachedTitleFont;
+    private static final Map<String, BufferedImage> titleImageCache = new ConcurrentHashMap<>();
 
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
@@ -250,9 +252,9 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
-        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
+        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.76f, ink);
+        drawCenteredText(content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.685f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.62f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
         float lineX = x + width * template.frontNameLineXRatio;
@@ -283,9 +285,9 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
-        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
+        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.86f, ink);
+        drawCenteredText(content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.805f, mutedInk);
+        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.74f, 42f, mintDeep, line);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
@@ -545,7 +547,7 @@ public class NameplateService {
         byte[] pdfBytes = renderPdfBytes(preview, template);
         try (PDDocument document = PDDocument.load(pdfBytes);
              ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            BufferedImage pageImage = new PDFRenderer(document).renderImageWithDPI(0, 144);
+            BufferedImage pageImage = new PDFRenderer(document).renderImageWithDPI(0, 110);
             ImageIO.write(pageImage, "png", output);
             return Base64.getEncoder().encodeToString(output.toByteArray());
         } catch (IOException e) {
@@ -677,6 +679,11 @@ public class NameplateService {
     }
 
     private BufferedImage renderTitleImage(String title, float size, Color color) throws IOException {
+        String cacheKey = title + "|" + size + "|" + color.getRGB();
+        BufferedImage cached = titleImageCache.get(cacheKey);
+        if (cached != null) {
+            return cached;
+        }
         Font titleFont = titleFont(size);
         FontRenderContext frc = new FontRenderContext(null, true, true);
         int width = (int) Math.ceil(titleFont.getStringBounds(title, frc).getWidth()) + 8;
@@ -688,7 +695,8 @@ public class NameplateService {
         graphics.setFont(titleFont);
         graphics.drawString(title, 4, 4 + titleFont.getLineMetrics(title, frc).getAscent());
         graphics.dispose();
-        return image;
+        BufferedImage previous = titleImageCache.putIfAbsent(cacheKey, image);
+        return previous == null ? image : previous;
     }
 
     private Font titleFont(float size) throws IOException {
