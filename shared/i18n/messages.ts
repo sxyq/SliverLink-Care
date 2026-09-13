@@ -2311,6 +2311,7 @@ const YI_MESSAGE_OVERRIDES: Record<string, string> = {
   'family.closeIncreaseArchive': 'ꈢ(ꈢꇧꎭ)ꁦꎆꄉꇮ',
 
   'agreement.consentJoin': 'ꇱꐙ',
+  'agreement.agree': 'ꉬꄷꀱꇁ',
   'agreement.viewAction': 'ꍤꄻ',
   'agreement.backToLogin': 'ꀱꇁꅔꅐ (ꆸꄻ)',
   'status.active': 'ꇿꋌꐥ',

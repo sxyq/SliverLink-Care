@@ -250,6 +250,7 @@ test('Yi locale is available in the miniapp runtime with LTR text direction', ()
   assert.equal(i18nRuntime.getLocale(), 'ii-CN');
   assert.equal(i18nRuntime.getDirection(), 'ltr');
   assert.equal(i18nRuntime.t('common.home'), 'ꂴꏾꌠ');
+  assert.equal(i18nRuntime.t('agreement.agree'), 'ꉬꄷꀱꇁ');
   i18nRuntime.setLocale('zh-CN');
 });
 
