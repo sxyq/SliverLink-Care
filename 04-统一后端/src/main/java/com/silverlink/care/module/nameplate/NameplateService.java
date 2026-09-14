@@ -265,7 +265,7 @@ public class NameplateService {
         drawText(content, font, 17f, "岁", lineX + lineWidth + template.frontAgeUnitGap, ageBaseline, ink);
         drawLabeledValue(content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f, ink);
 
-        drawCareMark(content, x + width * 0.76f, y + height * 0.075f, color(template.careMark));
+        drawCareMark(content, x + width * template.frontCareMarkXRatio, y + height * template.frontCareMarkYRatio, color(template.careMark));
         drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, mutedInk);
     }
 
@@ -305,8 +305,13 @@ public class NameplateService {
         drawDividerWithHealthIcon(content, x + width * 0.68f, y + height * 0.35f, 44f, color(template.gold), line);
 
         drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
-        drawText(content, font, 15f, safe(preview.getBackArchiveNo()), x + width * 0.43f, y + height * 0.13f, ink);
-        drawLine(content, x + width * 0.43f, y + height * 0.105f, x + width * 0.70f, y + height * 0.105f, ink, 0.9f);
+        String archiveNo = safe(preview.getBackArchiveNo());
+        float archiveNoX = x + width * 0.43f;
+        float archiveNoBaseline = y + height * 0.13f;
+        drawText(content, font, 15f, archiveNo, archiveNoX, archiveNoBaseline, ink);
+        float archiveNoWidth = font.getStringWidth(archiveNo) / 1000f * 15f;
+        float archiveLineEnd = Math.min(x + width * 0.88f, archiveNoX + archiveNoWidth + 4f);
+        drawLine(content, archiveNoX - 2f, y + height * 0.105f, archiveLineEnd, y + height * 0.105f, ink, 0.9f);
         drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.5f, y + height * 0.032f, mutedInk);
     }
 

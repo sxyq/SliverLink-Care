@@ -17,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.awt.geom.Rectangle2D;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -173,7 +174,7 @@ class NameplateServiceTest {
                 "name", "李奶奶",
                 "age", 78,
                 "emergencyContactPhone", "13800000000",
-                "archiveNo", "A-PDF"
+                "archiveNo", "A178435885041"
         ));
         QrCodeEntity current = new QrCodeEntity();
         current.setQrToken("token-pdf");
@@ -192,6 +193,7 @@ class NameplateServiceTest {
             assertFalse(pdfText.contains("重庆医科大学护理学院 \u94f6\u9f84\u5b88\u62a4\u56e2\u961f"));
             assertEquals(2, countOccurrences(pdfText, "智康信息卡"));
             assertEquals(2, countOccurrences(pdfText, "智护空巢"));
+            assertTrue(pdfText.contains("A178435885041"));
 
             PDFTextStripperByArea areaStripper = new PDFTextStripperByArea();
             areaStripper.addRegion("front", new Rectangle2D.Double(83, 158, 414, 262));
@@ -274,6 +276,34 @@ class NameplateServiceTest {
         assertEquals(292f, updatedCenter, 2f);
     }
 
+    @Test
+    void positionsFrontCareMarkNearTheRightBottomReferencePoint() throws Exception {
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "qrImageCacheTtlMs", 0L);
+        when(data.elderDetail("elder-care-mark", false)).thenReturn(Map.of(
+                "name", "李奶奶",
+                "age", 78,
+                "emergencyContactPhone", "13800000000",
+                "archiveNo", "A-CARE-MARK"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-care-mark");
+        when(qrCodeService.findCurrentByElder("elder-care-mark")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-care-mark")).thenReturn("https://public/scan?token=token-care-mark");
+
+        Path config = tempDir.resolve("nameplate-care-mark.json");
+        ReflectionTestUtils.setField(service, "templateConfigFile", config.toString());
+        Files.writeString(config, "{}");
+        float referenceCenter = careMarkCenter(service.generateDemoPdf("elder-care-mark"), 438);
+
+        Files.writeString(config, "{\"frontCareMarkXRatio\":0.70}");
+        float shiftedCenter = careMarkCenter(service.generateDemoPdf("elder-care-mark"), 372);
+
+        assertEquals(436f, referenceCenter, 5f);
+        assertEquals(370f, shiftedCenter, 5f);
+    }
+
     private static int countOccurrences(String text, String value) {
         int count = 0;
         int index = 0;
@@ -307,6 +337,30 @@ class NameplateServiceTest {
             CapturingTextStripper textStripper = new CapturingTextStripper();
             textStripper.getText(document);
             return findBounds(textStripper.positions, value).center();
+        }
+    }
+
+    private static float careMarkCenter(byte[] pdf, int expectedCenter) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            BufferedImage image = new org.apache.pdfbox.rendering.PDFRenderer(document).renderImageWithDPI(0, 72);
+            long xTotal = 0;
+            int pixels = 0;
+            for (int y = 350; y <= 400; y++) {
+                for (int x = expectedCenter - 35; x <= expectedCenter + 35; x++) {
+                    int rgb = image.getRGB(x, y);
+                    int red = (rgb >>> 16) & 0xff;
+                    int green = (rgb >>> 8) & 0xff;
+                    int blue = rgb & 0xff;
+                    if (red < 110 && green > red + 30 && blue > red + 20 && green < 190) {
+                        xTotal += x;
+                        pixels++;
+                    }
+                }
+            }
+            if (pixels == 0) {
+                throw new AssertionError("front care mark pixels not found");
+            }
+            return (float) xTotal / pixels;
         }
     }
 

@@ -25,6 +25,8 @@ public final class NameplateTemplateConfig {
     public float frontNameBaselineRatio = 0.43f;
     public float frontAgeBaselineRatio = 0.30f;
     public float frontAgeUnitGap = 8f;
+    public float frontCareMarkXRatio = 0.86f;
+    public float frontCareMarkYRatio = 0.075f;
 
     public void validate() {
         if (title == null || title.isBlank()) {
@@ -46,6 +48,8 @@ public final class NameplateTemplateConfig {
         requireRange(frontNameBaselineRatio, 0.10f, 0.80f, "frontNameBaselineRatio");
         requireRange(frontAgeBaselineRatio, 0.10f, 0.80f, "frontAgeBaselineRatio");
         requireRange(frontAgeUnitGap, 0f, 40f, "frontAgeUnitGap");
+        requireRange(frontCareMarkXRatio, 0.65f, 0.92f, "frontCareMarkXRatio");
+        requireRange(frontCareMarkYRatio, 0.03f, 0.16f, "frontCareMarkYRatio");
         if (frontNameLineXRatio * FRONT_CARD_WIDTH + frontLineWidth + frontAgeUnitGap
                 > FRONT_CARD_WIDTH - FRONT_CARD_RIGHT_MARGIN) {
             throw new IllegalArgumentException("front name and age fields exceed the card width");
