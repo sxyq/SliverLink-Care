@@ -271,7 +271,7 @@ test('all shipped locale messages are complete and Yi UI text is translated', ()
   };
   const placeholders = (value: string) => [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
   const sourceKeys = getMessageKeys(messages['zh-CN']);
-  const allowedYiChineseKeys = new Set(['common.appName', 'common.brandTitle', 'common.attribution']);
+  const allowedYiChineseKeys = new Set(['common.token', 'scan.bmi']);
 
   assert.equal(sourceKeys.length, 698);
   for (const locale of SUPPORTED_LOCALES) {
@@ -281,7 +281,7 @@ test('all shipped locale messages are complete and Yi UI text is translated', ()
       const translated = readMessage(messages[locale], key);
       assert.ok(translated, `${locale} is missing ${key}`);
       assert.deepEqual(placeholders(translated), placeholders(source), `${locale} placeholder drifted for ${key}`);
-      if (locale === 'ii-CN' && !allowedYiChineseKeys.has(key) && !['common.token', 'scan.bmi'].includes(key)) {
+      if (locale === 'ii-CN' && !allowedYiChineseKeys.has(key)) {
         assert.equal(/[\u3400-\u9fff]/.test(translated), false, `Yi message still contains Chinese for ${key}`);
         assert.notEqual(translated, source, `Yi message still uses Chinese for ${key}`);
       }

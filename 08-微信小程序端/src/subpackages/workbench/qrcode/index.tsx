@@ -206,7 +206,7 @@ function WorkbenchQrCodePage() {
       setInfo(result);
       setMessageText(t('errors.qrRegenerated'));
     } catch (error) {
-      setError(error, 'errors.regenerateFailed');
+      setError(error, 'workbench.regenerateFailed');
     } finally {
       setBusyAction('');
     }

@@ -352,10 +352,11 @@
 }
 
 .auth-login-language-switcher .sl-language-menu {
-  position: static;
+  position: relative;
   top: auto;
   right: auto;
   left: auto;
+  z-index: 2;
   margin-top: 12rpx;
 }
 

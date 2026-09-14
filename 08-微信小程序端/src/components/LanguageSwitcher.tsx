@@ -25,7 +25,7 @@ export function LanguageSwitcher() {
 
   return (
     <View className='sl-language-switcher' {...{ dir: 'ltr' }}>
-      {open ? <View className='sl-language-switcher__scrim' onClick={() => setOpen(false)} catchMove /> : null}
+      {open ? <View className='sl-language-switcher__scrim' onTap={() => setOpen(false)} catchMove /> : null}
       <Button
         className={`sl-language-switcher__trigger is-${getDirection(locale)}`}
         lang={locale as never}
@@ -34,7 +34,7 @@ export function LanguageSwitcher() {
         aria-haspopup='menu'
         aria-expanded={open}
         aria-controls='sl-language-menu'
-        onClick={() => setOpen((current) => !current)}
+        onTap={() => setOpen((current) => !current)}
       >
         <Text>{getLocaleLabel(locale)}</Text>
         <Text className='sl-language-switcher__chevron' aria-hidden='true'>⌄</Text>
@@ -49,7 +49,7 @@ export function LanguageSwitcher() {
               lang={optionLocale as never}
               {...{ dir: getDirection(optionLocale), role: 'menuitemradio' }}
               aria-checked={locale === optionLocale}
-              onClick={() => selectLocale(optionLocale)}
+              onTap={() => selectLocale(optionLocale)}
             >
               <Text>{getLocaleLabel(optionLocale)}</Text>
               {locale === optionLocale ? <Text aria-hidden='true'>✓</Text> : null}

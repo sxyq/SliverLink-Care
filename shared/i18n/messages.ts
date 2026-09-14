@@ -2189,6 +2189,9 @@ export const messages: Record<Locale, MessageTree> = {
 };
 
 const YI_MESSAGE_OVERRIDES: Record<string, string> = {
+  'common.appName': 'ꆇꉙꂓꅑꌠ',
+  'common.brandTitle': 'ꆇꉙꃀꌠꂓꅑꌠ',
+  'common.attribution': 'ꀉꇙꌠꐥꑌꄉꇮꌠꃀꌠꌌꐺꌠ',
   'common.home': 'ꂴꏾꌠ',
   'common.back': 'ꀱꇁ',
   'common.backHome': 'ꀱꇁꂴꏾꌠ',

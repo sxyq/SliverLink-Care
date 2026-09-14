@@ -28,10 +28,11 @@ async function collectTsxFiles(directory) {
 }
 
 async function assertLanguageMenuContracts() {
-  const [switcherSource, appStyles, loginSource, homeSource, formatterSource, qrcodeSource, pageShellSource, i18nSource, appEntrySource, pageSources] = await Promise.all([
+  const [switcherSource, appStyles, loginSource, loginStyles, homeSource, formatterSource, qrcodeSource, pageShellSource, i18nSource, appEntrySource, pageSources] = await Promise.all([
     fsp.readFile(path.join(projectRoot, 'src/components/LanguageSwitcher.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/app.scss'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/pages/auth/login.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/pages/auth/login.scss'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/pages/home/index.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/utils/formatters.ts'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/subpackages/workbench/qrcode/index.tsx'), 'utf8'),
@@ -48,6 +49,8 @@ async function assertLanguageMenuContracts() {
   assert.match(switcherSource, /LOCALE_META/);
   assert.match(switcherSource, /Button, Text, View/);
   assert.match(switcherSource, /sl-language-switcher__scrim/);
+  assert.match(switcherSource, /onTap=\{\(\) => setOpen\(\(current\) => !current\)\}/, 'language trigger must use the WeChat tap event');
+  assert.match(switcherSource, /onTap=\{\(\) => selectLocale\(optionLocale\)\}/, 'language options must use the WeChat tap event');
   assert.match(switcherSource, /dir: getDirection\(optionLocale\)/);
   assert.match(switcherSource, /is-\$\{getDirection\(optionLocale\)\}/);
   assert.doesNotMatch(switcherSource, /\bdocument\b/);
@@ -55,6 +58,7 @@ async function assertLanguageMenuContracts() {
   assert.match(appStyles, /safe-area-inset-top/);
   assert.match(appStyles, /\.sl-language-menu[\s\S]*?right: 0;[\s\S]*?left: auto;/);
   assert.match(appStyles, /\.sl-language-switcher__scrim[\s\S]*?position: fixed;/);
+  assert.match(loginStyles, /\.auth-login-language-switcher \.sl-language-menu[\s\S]*?position: relative;[\s\S]*?z-index: 2;/, 'login language menu must stay above the scrim');
 
   const ltrLoginFields = loginSource.match(/auth-login-field__input sl-ltr-data/g) || [];
   assert.ok(ltrLoginFields.length >= 5, 'account, password, invitation code and phone fields must stay LTR');
