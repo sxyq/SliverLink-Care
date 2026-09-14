@@ -69,10 +69,10 @@ const scaleQuestions: Record<WorkbenchScaleType, string[]> = {
   ],
 };
 
-const optionLabels: Record<WorkbenchScaleType, string[]> = {
-  'PHQ-9': ['从不(0分)', '几天(1分)', '一半以上(2分)', '几乎每天(3分)'],
-  'GAD-7': ['从不(0分)', '几天(1分)', '一半以上(2分)', '几乎每天(3分)'],
-  UCLA: ['从不(0分)', '很少(1分)', '有时(2分)', '经常(3分)'],
+const optionCounts: Record<WorkbenchScaleType, number> = {
+  'PHQ-9': 4,
+  'GAD-7': 4,
+  UCLA: 4,
 };
 
 const optionLabelKeys: Record<WorkbenchScaleType, string[]> = {
@@ -287,7 +287,7 @@ function WorkbenchScalePage() {
                 <View key={`${activeType}-${index}`} className='sl-question'>
                   <Text className='sl-question-text'><Text className='sl-question-num'>{index + 1}.</Text>{t(questionKeys[activeType][index])}</Text>
                   <View className='sl-scale-options'>
-                    {optionLabels[activeType].map((_label, value) => (
+                    {Array.from({ length: optionCounts[activeType] }, (_, value) => (
                       <View
                         key={`${activeType}-${index}-${value}`}
                         className={

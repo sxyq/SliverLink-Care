@@ -28,10 +28,11 @@ async function collectTsxFiles(directory) {
 }
 
 async function assertLanguageMenuContracts() {
-  const [switcherSource, appStyles, loginSource, formatterSource, qrcodeSource, pageShellSource, i18nSource, appEntrySource, pageSources] = await Promise.all([
+  const [switcherSource, appStyles, loginSource, homeSource, formatterSource, qrcodeSource, pageShellSource, i18nSource, appEntrySource, pageSources] = await Promise.all([
     fsp.readFile(path.join(projectRoot, 'src/components/LanguageSwitcher.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/app.scss'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/pages/auth/login.tsx'), 'utf8'),
+    fsp.readFile(path.join(projectRoot, 'src/pages/home/index.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/utils/formatters.ts'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/subpackages/workbench/qrcode/index.tsx'), 'utf8'),
     fsp.readFile(path.join(projectRoot, 'src/components/layout/I18nPageShell.tsx'), 'utf8'),
@@ -61,6 +62,8 @@ async function assertLanguageMenuContracts() {
   assert.match(loginSource, /if \(!agreementAccepted\)/, 'login must require agreement consent');
   assert.match(loginSource, /auth-login-language-switcher[\s\S]*<LanguageSwitcher\s*\/>/, 'login language switcher must sit inside the form');
   assert.match(loginSource, /I18nPageShell navigationTitleKey='common\.brandTitle' showLanguageSwitcher=\{false\}/, 'login must disable the global language switcher');
+  assert.match(homeSource, /I18nPageShell navigationTitleKey='common\.brandTitle' showLanguageSwitcher=\{false\}/, 'home must keep only the form language switcher');
+  assert.doesNotMatch(loginSource, /<LanguageSwitcher\s*\/>[\s\S]*<LanguageSwitcher\s*\/>/, 'login must not render duplicate language switchers');
   assert.doesNotMatch(formatterSource, /locale\s*===\s*['"]zh-CN['"]/);
   assert.match(formatterSource, /\$\{year\}-\$\{month\}-\$\{day\} \$\{hour\}:\$\{minute\}/);
 
@@ -77,7 +80,8 @@ async function assertLanguageMenuContracts() {
   assert.match(pageShellSource, /<LanguageSwitcher\s*\/>/);
   assert.match(pageShellSource, /Taro\.setNavigationBarTitle\(\{ title: t\(navigationTitleKey\) \}\)/);
   assert.doesNotMatch(pageShellSource, /withI18nPage|useDidShow\(|getCurrentPages\(/);
-  assert.match(i18nSource, /localeListeners/);
+  assert.match(i18nSource, /useSyncExternalStore/);
+  assert.match(i18nSource, /subscribeLocale/);
   assert.match(i18nSource, /i18nRuntime\.setLocale\(nextLocale\)/);
   assert.match(i18nSource, /localeListeners\.forEach/);
   assert.doesNotMatch(appEntrySource, /LanguageSwitcher|sl-app-root|I18nProvider/);

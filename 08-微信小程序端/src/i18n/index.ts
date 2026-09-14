@@ -1,5 +1,5 @@
 import Taro from '@tarojs/taro';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useSyncExternalStore } from 'react';
 
 import {
   createI18nRuntime,
@@ -27,22 +27,23 @@ const miniStorage = {
 };
 
 export const i18nRuntime = createI18nRuntime(miniStorage);
-const localeListeners = new Set<(locale: Locale) => void>();
+const localeListeners = new Set<() => void>();
+
+function subscribeLocale(listener: () => void) {
+  localeListeners.add(listener);
+  return () => localeListeners.delete(listener);
+}
+
+function getLocaleSnapshot() {
+  return i18nRuntime.getLocale();
+}
 
 export function useI18n() {
-  const [locale, setLocaleState] = useState<Locale>(() => i18nRuntime.getLocale());
-
-  useEffect(() => {
-    localeListeners.add(setLocaleState);
-    return () => {
-      localeListeners.delete(setLocaleState);
-    };
-  }, []);
+  const locale = useSyncExternalStore(subscribeLocale, getLocaleSnapshot, getLocaleSnapshot);
 
   const setLocale = useCallback((nextLocale: Locale) => {
     i18nRuntime.setLocale(nextLocale);
-    const resolvedLocale = i18nRuntime.getLocale();
-    localeListeners.forEach((listener) => listener(resolvedLocale));
+    localeListeners.forEach((listener) => listener());
   }, []);
 
   const direction: Direction = i18nRuntime.getDirection(locale);

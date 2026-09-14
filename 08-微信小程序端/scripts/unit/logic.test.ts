@@ -43,7 +43,14 @@ import {
 import { httpClient } from '@/services/api/httpClient';
 import { i18nRuntime } from '@/i18n';
 import { normalizeLocalizedError } from '@/hooks/useLocalizedError';
-import { ApiMessageError, getErrorMessage, LOCALE_META, SUPPORTED_LOCALES } from '@shared-i18n/messages';
+import {
+  ApiMessageError,
+  getErrorMessage,
+  getMessageKeys,
+  LOCALE_META,
+  messages,
+  SUPPORTED_LOCALES,
+} from '@shared-i18n/messages';
 import {
   getScanVerificationStatus,
   resolveScanToken,
@@ -252,6 +259,34 @@ test('Yi locale is available in the miniapp runtime with LTR text direction', ()
   assert.equal(i18nRuntime.t('common.home'), 'ꂴꏾꌠ');
   assert.equal(i18nRuntime.t('agreement.agree'), 'ꉬꄷꀱꇁ');
   i18nRuntime.setLocale('zh-CN');
+});
+
+test('all shipped locale messages are complete and Yi UI text is translated', () => {
+  const readMessage = (tree: unknown, key: string): string => {
+    const value = key.split('.').reduce<unknown>((current, part) => {
+      if (!current || typeof current !== 'object') return undefined;
+      return (current as Record<string, unknown>)[part];
+    }, tree);
+    return typeof value === 'string' ? value : '';
+  };
+  const placeholders = (value: string) => [...value.matchAll(/\{(\w+)\}/g)].map((match) => match[1]).sort();
+  const sourceKeys = getMessageKeys(messages['zh-CN']);
+  const allowedYiChineseKeys = new Set(['common.appName', 'common.brandTitle', 'common.attribution']);
+
+  assert.equal(sourceKeys.length, 698);
+  for (const locale of SUPPORTED_LOCALES) {
+    assert.deepEqual(getMessageKeys(messages[locale]), sourceKeys);
+    for (const key of sourceKeys) {
+      const source = readMessage(messages['zh-CN'], key);
+      const translated = readMessage(messages[locale], key);
+      assert.ok(translated, `${locale} is missing ${key}`);
+      assert.deepEqual(placeholders(translated), placeholders(source), `${locale} placeholder drifted for ${key}`);
+      if (locale === 'ii-CN' && !allowedYiChineseKeys.has(key) && !['common.token', 'scan.bmi'].includes(key)) {
+        assert.equal(/[\u3400-\u9fff]/.test(translated), false, `Yi message still contains Chinese for ${key}`);
+        assert.notEqual(translated, source, `Yi message still uses Chinese for ${key}`);
+      }
+    }
+  }
 });
 
 test('sync storage supports fallback, ttl expiration, removal, and cleanup', async () => {

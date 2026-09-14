@@ -9,7 +9,7 @@ function HomePage() {
 
 export default function HomePageEntry() {
   return (
-    <I18nPageShell navigationTitleKey='common.brandTitle'>
+    <I18nPageShell navigationTitleKey='common.brandTitle' showLanguageSwitcher={false}>
       <HomePage />
     </I18nPageShell>
   );

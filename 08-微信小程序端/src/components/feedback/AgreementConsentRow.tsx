@@ -1,7 +1,5 @@
 import { Button, Checkbox, Text, View } from '@tarojs/components';
-import Taro from '@tarojs/taro';
 
-import { APP_ROUTES } from '@/app/app.constants';
 import { useI18n } from '@/i18n';
 
 import './AgreementConsentRow.scss';
@@ -17,7 +15,6 @@ export function AgreementConsentRow({ checked, onToggle, onOpenAgreement }: Agre
 
   function openAgreement() {
     onOpenAgreement();
-    void Taro.navigateTo({ url: APP_ROUTES.agreement });
   }
 
   return (
