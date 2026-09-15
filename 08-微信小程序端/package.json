@@ -8,6 +8,7 @@
     "dev:weapp": "taro build --type weapp --watch",
     "build:weapp": "taro build --type weapp",
     "test:unit": "node ./scripts/run-unit-tests.mjs",
+    "test:i18n-audit": "node ./scripts/check-i18n-audit.mjs",
     "test:static": "node ./scripts/run-static-audit.mjs",
     "test:route-contract": "node ./scripts/check-route-contract.mjs",
     "test:platform-contract": "node ./scripts/check-platform-contract.mjs",

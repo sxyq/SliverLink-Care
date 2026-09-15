@@ -66,7 +66,7 @@ function HeaderAction({ label, icon, onClick, compact = true, disabled = false }
     >
       {icon ? <Text className={icon === '←' || icon === '→' ? 'sl-header-icon-glyph is-directional' : 'sl-header-icon-glyph'}>{icon}</Text> : null}
       {compact ? null : <Text className='sl-header-icon-label'>{label}</Text>}
-      {!icon ? label : null}
+      {compact && !icon ? label : null}
     </View>
   );
 }

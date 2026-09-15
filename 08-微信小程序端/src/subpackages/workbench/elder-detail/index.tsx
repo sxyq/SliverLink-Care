@@ -129,7 +129,7 @@ function WorkbenchElderDetailPage() {
       <WorkbenchHeader
         title={t('workbench.elderDetail')}
         leadingAction={{ label: t('common.back'), icon: '←', onClick: handleBack }}
-        trailingAction={{ label: t('common.edit'), icon: '', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
+        trailingAction={{ label: t('common.edit'), icon: '✎', onClick: () => void handleOpenPage(APP_ROUTES.workbenchBasic), compact: false }}
       />
 
       {loading ? <View className='sl-card'><View className='sl-empty-state'>{t('common.loading')} {t('workbench.elderDetail')}</View></View> : null}

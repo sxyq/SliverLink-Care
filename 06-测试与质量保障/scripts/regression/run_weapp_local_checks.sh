@@ -7,6 +7,7 @@ WEAPP_DIR="$ROOT_DIR/08-微信小程序端"
 cd "$WEAPP_DIR"
 
 npm run test:unit
+npm run test:i18n-audit
 npm run test:static
 npm run test:route-contract
 npm run test:platform-contract

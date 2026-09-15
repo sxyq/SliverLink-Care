@@ -20,6 +20,53 @@
     "ignoreDevUnusedFiles": true,
     "bigPackageSizeSupport": false
   },
-  "condition": {},
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "subpackages/scan/landing/index",
+          "pathName": "subpackages/scan/landing/index",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "subpackages/workbench/elder-list/index",
+          "pathName": "subpackages/workbench/elder-list/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/auth/login",
+          "pathName": "pages/auth/login",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/auth/login",
+          "pathName": "pages/auth/login",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/auth/login",
+          "pathName": "pages/auth/login",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/home/index",
+          "pathName": "pages/home/index",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        }
+      ]
+    }
+  },
   "libVersion": "3.16.1"
 }

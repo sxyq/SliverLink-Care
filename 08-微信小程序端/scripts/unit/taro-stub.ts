@@ -147,6 +147,21 @@ export function getSystemInfoSync() {
   return systemInfo;
 }
 
+export function getMenuButtonBoundingClientRect() {
+  return {
+    top: 26,
+    bottom: 58,
+    height: 32,
+    width: 87,
+    left: 278,
+    right: 365,
+  };
+}
+
+export function useRouter() {
+  return { params: {} as Record<string, string> };
+}
+
 export async function getSetting() {
   return runPlatformCall('getSetting', {}, { authSetting: {} });
 }
@@ -236,6 +251,8 @@ const Taro = {
   setStorage,
   removeStorage,
   getSystemInfoSync,
+  getMenuButtonBoundingClientRect,
+  useRouter,
   getSetting,
   authorize,
   openSetting,

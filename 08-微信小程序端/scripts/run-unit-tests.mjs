@@ -7,12 +7,17 @@ import path from 'node:path';
 import { pathToFileURL, fileURLToPath } from 'node:url';
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const testEntry = path.join(projectRoot, 'scripts/unit/logic.test.ts');
+const testEntries = [
+  path.join(projectRoot, 'scripts/unit/logic.test.ts'),
+  path.join(projectRoot, 'scripts/unit/i18n-pages.test.ts'),
+];
 const taroStub = path.join(projectRoot, 'scripts/unit/taro-stub.ts');
+const taroComponentsStub = path.join(projectRoot, 'scripts/unit/taro-components-stub.ts');
 const qrcodeStub = path.join(projectRoot, 'scripts/unit/qrcode-stub.ts');
 const reactPackage = path.join(projectRoot, 'node_modules/react');
-const outdir = path.join(os.tmpdir(), 'silverlink-weapp-unit-tests');
-const outfile = path.join(outdir, 'logic.test.mjs');
+const reactDomPackage = path.join(projectRoot, 'node_modules/react-dom');
+const sharedI18nRoot = path.resolve(projectRoot, '../shared/i18n');
+const outdir = path.join(projectRoot, '.local/weapp-unit-tests');
 
 async function collectTsxFiles(directory) {
   const entries = await fsp.readdir(directory, { withFileTypes: true });
@@ -124,10 +129,10 @@ const testAliasPlugin = {
   name: 'silverlink-weapp-test-alias',
   setup(builder) {
     builder.onResolve({ filter: /^@tarojs\/taro$/ }, () => ({ path: taroStub }));
+    builder.onResolve({ filter: /^@tarojs\/components$/ }, () => ({ path: taroComponentsStub }));
     builder.onResolve({ filter: /^qrcode$/ }, () => ({ path: qrcodeStub }));
-    builder.onResolve({ filter: /^react(?:\/.*)?$/ }, (args) => ({
-      path: args.path === 'react' ? path.join(reactPackage, 'index.js') : path.join(reactPackage, `${args.path.slice('react/'.length)}.js`),
-    }));
+    builder.onResolve({ filter: /^@shared-i18n\/messages$/ }, () => ({ path: path.join(sharedI18nRoot, 'messages.ts') }));
+    builder.onResolve({ filter: /^react(?:-dom)?(?:\/.*)?$/ }, (args) => ({ path: args.path, external: true }));
     builder.onResolve({ filter: /^@\// }, (args) => ({ path: resolveSourceImport(args.path) }));
   },
 };
@@ -136,16 +141,21 @@ await fsp.rm(outdir, { recursive: true, force: true });
 await fsp.mkdir(outdir, { recursive: true });
 await assertLanguageMenuContracts();
 
-await build({
-  entryPoints: [testEntry],
-  outfile,
-  bundle: true,
-  platform: 'node',
-  format: 'esm',
-  target: 'node20',
-  sourcemap: 'inline',
-  plugins: [testAliasPlugin],
-  logLevel: 'silent',
-});
-
-await import(pathToFileURL(outfile).href);
+for (const testEntry of testEntries) {
+  const outfile = path.join(outdir, `${path.basename(testEntry, path.extname(testEntry))}.mjs`);
+  await build({
+    entryPoints: [testEntry],
+    outfile,
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node20',
+    sourcemap: 'inline',
+    external: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime'],
+    jsx: 'automatic',
+    loader: { '.scss': 'empty', '.css': 'empty' },
+    plugins: [testAliasPlugin],
+    logLevel: 'silent',
+  });
+  await import(pathToFileURL(outfile).href);
+}
