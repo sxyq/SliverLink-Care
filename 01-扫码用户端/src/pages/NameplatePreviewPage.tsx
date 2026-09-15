@@ -38,7 +38,7 @@ export function NameplatePreviewPage({
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${t('common.appName')}_${archiveNo || elderId}.pdf`;
+      a.download = `${t('common.nameplateTitle')}_${archiveNo || elderId}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -71,8 +71,10 @@ export function NameplatePreviewPage({
         </div>
         <div className="sl-nameplate-front">
           <div className="sl-nameplate-brand">
-            <strong>{t('common.appName')}</strong>
-            <span>{t('common.nameplateSubtitle')}</span>
+            <div className="sl-nameplate-brand-line">
+              <strong>{t('common.nameplateTitle')}</strong>
+              <span>{t('common.nameplateSubtitle')}</span>
+            </div>
           </div>
           <div className="sl-nameplate-field">
             <span className="sl-nameplate-label">{t('common.name')}</span>
@@ -95,13 +97,19 @@ export function NameplatePreviewPage({
           <h2>{t('scan.backNameplate')}</h2>
         </div>
         <div className="sl-nameplate-back">
-          <div className="sl-nameplate-brand">
-            <strong>{t('common.appName')}</strong>
-            <span>{t('common.nameplateSubtitle')}</span>
-          </div>
-          <div className="sl-nameplate-qr-area">
-            <QrCode size={64} />
-            <span className="sl-nameplate-qr-hint">{t('scan.wechatScanHealthArchive')}</span>
+          <div className="sl-nameplate-back-content">
+            <div className="sl-nameplate-qr-area">
+              <QrCode size={64} />
+            </div>
+            <div className="sl-nameplate-back-info">
+              <div className="sl-nameplate-brand">
+                <div className="sl-nameplate-brand-line">
+                  <strong>{t('common.nameplateTitle')}</strong>
+                  <span>{t('common.nameplateSubtitle')}</span>
+                </div>
+              </div>
+              <span className="sl-nameplate-qr-hint">{t('scan.wechatScanHealthArchive')}</span>
+            </div>
           </div>
           <div className="sl-nameplate-divider" />
           <div className="sl-nameplate-field">

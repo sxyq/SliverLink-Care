@@ -25,6 +25,7 @@ export const messages: Record<Locale, MessageTree> = {
   'zh-CN': {
     common: {
       appName: '智联名牌',
+      nameplateTitle: '智联卡片',
       brandSubtitle: '用心守护 温暖相伴',
       nameplateSubtitle: '智护空巢',
       attribution: '重庆医科大学空巢养老团',
@@ -743,6 +744,7 @@ export const messages: Record<Locale, MessageTree> = {
   'ug-Arab-CN': {
     common: {
       appName: 'ئەقلىي ئىسىم تاختىسى',
+      nameplateTitle: 'ئەقلىي ئىسىم تاختىسى',
       brandSubtitle: 'كۆڭۈل قويۇپ قوغدايمىز، ئىللىق ھەمراھ بولىمىز',
       nameplateSubtitle: 'بوش ئۇۋىلىق ياشانغانلارغا ئەقلىي غەمخورلۇق',
       attribution: 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
@@ -1461,6 +1463,7 @@ export const messages: Record<Locale, MessageTree> = {
   'kk-Arab-CN': {
     common: {
       appName: 'اقىلدى بايلانىس تاقتاشاسى',
+      nameplateTitle: 'اقىلدى بايلانىس تاقتاشاسى',
       brandSubtitle: 'جىلى جۇرەكپەن ساقتاۋ',
       nameplateSubtitle: 'بوس ۇياداعى قارتتارعا اقىلدى قامقورلىق',
       attribution: 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
@@ -2190,6 +2193,7 @@ export const messages: Record<Locale, MessageTree> = {
 
 const YI_MESSAGE_OVERRIDES: Record<string, string> = {
   'common.appName': 'ꆇꉙꂓꅑꌠ',
+  'common.nameplateTitle': 'ꆇꉙꂓꅑꌠ',
   'common.brandTitle': 'ꆇꉙꃀꌠꂓꅑꌠ',
   'common.attribution': 'ꀉꇙꌠꐥꑌꄉꇮꌠꃀꌠꌌꐺꌠ',
   'common.home': 'ꂴꏾꌠ',

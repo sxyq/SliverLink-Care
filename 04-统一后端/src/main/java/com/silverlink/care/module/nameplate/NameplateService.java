@@ -252,8 +252,8 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 38f, template.title, x + width / 2f, y + height * 0.69f, ink);
-        drawRasterizedCenteredText(document, content, font, 16f, "智护空巢", x + width / 2f, y + height * 0.615f, mutedInk);
+        drawHorizontalBrand(document, content, font, 38f, 16f, template.title, template.subtitle,
+                x + width / 2f, y + height * 0.69f, template.frontBrandGap, ink, mutedInk);
         drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.55f, 56f, mintDeep, line);
 
         float labelX = x + width * 0.14f;
@@ -285,9 +285,12 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        drawCenteredTitle(document, content, font, 25f, template.title, x + width / 2f, y + height * 0.82f, ink);
-        drawRasterizedCenteredText(document, content, font, 14f, "智护空巢", x + width / 2f, y + height * 0.765f, mutedInk);
-        drawDividerWithHealthIcon(content, x + width / 2f, y + height * 0.70f, 42f, mintDeep, line);
+        float brandCenterX = x + width * template.backBrandXRatio;
+        drawHorizontalBrand(document, content, font, template.backTitleSize, template.backSubtitleSize,
+                template.title, template.subtitle, brandCenterX,
+                y + height * template.backTitleBaselineRatio, template.backBrandGap, ink, mutedInk);
+        drawDividerWithHealthIcon(content, brandCenterX, y + height * template.backDividerBaselineRatio,
+                template.backDividerLength, mintDeep, line);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
@@ -326,6 +329,29 @@ public class NameplateService {
     ) throws IOException {
         PDImageXObject object = LosslessFactory.createFromImage(document, image);
         content.drawImage(object, x, y, width, height);
+    }
+
+    private void drawHorizontalBrand(
+            PDDocument document,
+            PDPageContentStream content,
+            PDFont font,
+            float titleSize,
+            float subtitleSize,
+            String title,
+            String subtitle,
+            float centerX,
+            float baseline,
+            float gap,
+            Color titleColor,
+            Color subtitleColor
+    ) throws IOException {
+        float titleWidth = font.getStringWidth(title) / 1000f * titleSize;
+        float subtitleWidth = font.getStringWidth(subtitle) / 1000f * subtitleSize;
+        float startX = centerX - (titleWidth + gap + subtitleWidth) / 2f;
+        drawCenteredTitle(document, content, font, titleSize, title,
+                startX + titleWidth / 2f, baseline, titleColor);
+        drawRasterizedCenteredText(document, content, font, subtitleSize, subtitle,
+                startX + titleWidth + gap + subtitleWidth / 2f, baseline, subtitleColor);
     }
 
     private void drawLabeledValue(

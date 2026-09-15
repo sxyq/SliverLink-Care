@@ -16,7 +16,7 @@ import {
 } from '@shared-i18n/messages';
 
 const EXPECTED_GROUPS = ['common', 'auth', 'scan', 'verification', 'workbench', 'family', 'agreement', 'status', 'errors'];
-const EXPECTED_LEAF_KEY_COUNT = 698;
+const EXPECTED_LEAF_KEY_COUNT = 699;
 
 function readLeaf(tree: unknown, key: string): string {
   const value = key.split('.').reduce<unknown>((current, part) => {
@@ -57,7 +57,7 @@ describe('shared i18n message catalog', () => {
       'zh-CN': '重庆医科大学空巢养老团',
       'ug-Arab-CN': 'چۇڭچىڭ تېببىي ئۇنىۋېرسىتېتىنىڭ «بوش ئۇۋىلىق ياشانغانلارغا كۆڭۈل بۆلۈش» گۇرۇپپىسى',
       'kk-Arab-CN': 'چۋنتسين مەديتسينالىق ۋنيۆەرسيتەتىنىڭ بوس ۇياداعى قارتتارعا كۇتىم كۆرسەتۋ توبى',
-      'ii-CN': '重庆医科大学空巢养老团',
+      'ii-CN': 'ꀉꇙꌠꐥꑌꄉꇮꌠꃀꌠꌌꐺꌠ',
     } as const;
     const expectedNameplateSubtitle = {
       'zh-CN': '智护空巢',

@@ -31,7 +31,7 @@ export function AdminLoginPage({ onLogin }: { onLogin: (role: string) => void })
         <div style={{ display: 'flex', justifyContent: 'center' }}>
           <ShieldCheck size={40} color="#115f72" />
         </div>
-        <h1>智康信息卡管理后台</h1>
+        <h1>智联卡片管理后台</h1>
         <input
           placeholder="账号"
           value={account}

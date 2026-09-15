@@ -220,8 +220,10 @@ function NameplatePreviewPage() {
                           <View className='scan-nameplate-card__tag'>{t('scan.carryWithYou')}</View>
                         </View>
                         <View className='scan-nameplate-front-hero'>
-                          <View className='scan-nameplate-front-hero__title'>{t('common.appName')}</View>
-                          <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
+                          <View className='scan-nameplate-brand-line'>
+                            <View className='scan-nameplate-front-hero__title'>{t('common.nameplateTitle')}</View>
+                            <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
+                          </View>
                           <View className='scan-nameplate-front-hero__divider' />
                         </View>
                         <View className='scan-nameplate-front-grid'>
@@ -254,24 +256,30 @@ function NameplatePreviewPage() {
                           <View className='scan-nameplate-card__kicker'>{t('scan.backNameplate')}</View>
                           <View className='scan-nameplate-card__tag'>{t('auth.scanView')}</View>
                         </View>
-                        <View className='scan-nameplate-front-hero scan-nameplate-back-brand'>
-                          <View className='scan-nameplate-front-hero__title'>{t('common.appName')}</View>
-                          <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
-                          <View className='scan-nameplate-front-hero__divider' />
-                        </View>
-                        <View className='scan-nameplate-qr-area'>
-                          <View className='scan-nameplate-qr-box'>
-                            {qrImage ? (
-                              <Image className='scan-nameplate-qr-image' mode='aspectFit' src={qrImage} />
-                            ) : (
-                              <View className='scan-nameplate-qr-empty'>
-                                <Text className='scan-nameplate-qr-empty__icon'>⌁</Text>
-                                <Text className='scan-nameplate-qr-empty__title'>{t('workbench.qrPreviewUnavailable')}</Text>
-                                <Text className='scan-nameplate-qr-empty__caption'>{t('scan.qrPreviewRetry')}</Text>
-                              </View>
-                            )}
+                        <View className='scan-nameplate-back-content'>
+                          <View className='scan-nameplate-qr-area'>
+                            <View className='scan-nameplate-qr-box'>
+                              {qrImage ? (
+                                <Image className='scan-nameplate-qr-image' mode='aspectFit' src={qrImage} />
+                              ) : (
+                                <View className='scan-nameplate-qr-empty'>
+                                  <Text className='scan-nameplate-qr-empty__icon'>⌁</Text>
+                                  <Text className='scan-nameplate-qr-empty__title'>{t('workbench.qrPreviewUnavailable')}</Text>
+                                  <Text className='scan-nameplate-qr-empty__caption'>{t('scan.qrPreviewRetry')}</Text>
+                                </View>
+                              )}
+                            </View>
                           </View>
-                          <Text className='scan-nameplate-qr-hint sl-auto-data' {...{ dir: 'auto' }}>{preview.backHint || t('scan.wechatScanHealthArchive')}</Text>
+                          <View className='scan-nameplate-back-info'>
+                            <View className='scan-nameplate-front-hero scan-nameplate-back-brand'>
+                              <View className='scan-nameplate-brand-line'>
+                                <View className='scan-nameplate-front-hero__title'>{t('common.nameplateTitle')}</View>
+                                <Text className='scan-nameplate-front-hero__subtitle'>{t('common.nameplateSubtitle')}</Text>
+                              </View>
+                              <View className='scan-nameplate-front-hero__divider' />
+                            </View>
+                            <Text className='scan-nameplate-qr-hint sl-auto-data' {...{ dir: 'auto' }}>{preview.backHint || t('scan.wechatScanHealthArchive')}</Text>
+                          </View>
                         </View>
                         <View className='scan-nameplate-divider' />
                         <View className='scan-nameplate-field scan-nameplate-field--compact'>

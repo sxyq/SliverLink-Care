@@ -273,7 +273,7 @@ test('all shipped locale messages are complete and Yi UI text is translated', ()
   const sourceKeys = getMessageKeys(messages['zh-CN']);
   const allowedYiChineseKeys = new Set(['common.token', 'scan.bmi']);
 
-  assert.equal(sourceKeys.length, 698);
+  assert.equal(sourceKeys.length, 699);
   for (const locale of SUPPORTED_LOCALES) {
     assert.deepEqual(getMessageKeys(messages[locale]), sourceKeys);
     for (const key of sourceKeys) {

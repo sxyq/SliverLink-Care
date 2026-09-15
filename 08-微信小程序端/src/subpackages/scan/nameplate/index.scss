@@ -82,8 +82,18 @@
 
 .scan-nameplate-front-hero {
   display: grid;
-  justify-items: start;
+  justify-items: center;
   gap: 12rpx;
+  text-align: center;
+}
+
+.scan-nameplate-brand-line {
+  display: flex;
+  max-width: 100%;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12rpx;
+  flex-wrap: wrap;
 }
 
 .scan-nameplate-front-hero__title {
@@ -111,8 +121,46 @@
 }
 
 .scan-nameplate-back-brand {
+  width: 100%;
+}
+
+.scan-nameplate-back-content {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 20rpx;
+}
+
+.scan-nameplate-back-content .scan-nameplate-qr-area {
+  min-width: 0;
+  padding: 0;
+}
+
+.scan-nameplate-back-info {
+  display: grid;
+  min-width: 0;
   justify-items: center;
+  gap: 18rpx;
   text-align: center;
+}
+
+.scan-nameplate-back-brand .scan-nameplate-front-hero__title {
+  font-size: 38rpx;
+  letter-spacing: 0;
+}
+
+.scan-nameplate-back-brand .scan-nameplate-front-hero__subtitle {
+  font-size: 24rpx;
+  letter-spacing: 0;
+}
+
+.scan-nameplate-back-brand .scan-nameplate-front-hero__divider {
+  width: 64rpx;
+  height: 6rpx;
+}
+
+.scan-nameplate-back-info .scan-nameplate-qr-hint {
+  max-width: 100%;
 }
 
 .scan-nameplate-front-grid {

@@ -374,9 +374,16 @@ html[dir='rtl'] .sl-topbar-icon.is-leading-back svg {
 .sl-nameplate-brand {
   display: grid;
   justify-items: center;
-  gap: 4px;
   margin-bottom: 14px;
   text-align: center;
+}
+
+.sl-nameplate-brand-line {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .sl-nameplate-brand strong {
@@ -401,6 +408,36 @@ html[dir='rtl'] .sl-topbar-icon.is-leading-back svg {
 
 .sl-nameplate-back {
   background: linear-gradient(145deg, #f4f8ff 0%, #ffffff 72%);
+}
+
+.sl-nameplate-back-content {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 18px;
+}
+
+.sl-nameplate-back-info {
+  display: grid;
+  min-width: 0;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.sl-nameplate-back-info .sl-nameplate-brand {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.sl-nameplate-back-info .sl-nameplate-brand strong {
+  font-size: 19px;
+  letter-spacing: 0.04em;
+}
+
+.sl-nameplate-back-info .sl-nameplate-brand span {
+  font-size: 13px;
+  letter-spacing: 0.02em;
 }
 
 .sl-nameplate-field {

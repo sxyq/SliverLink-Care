@@ -76,7 +76,7 @@ export function Sidebar({ role, onLogout, collapsed, onToggleCollapse }: Sidebar
   return (
     <aside className={`sidebar${collapsed ? ' sidebar--collapsed' : ''}`}>
       <div className="sidebar-header">
-        <h1>{collapsed ? '智康' : '智康信息卡'}</h1>
+        <h1>{collapsed ? '智联' : '智联卡片'}</h1>
         <button
           type="button"
           className="sidebar-toggle"

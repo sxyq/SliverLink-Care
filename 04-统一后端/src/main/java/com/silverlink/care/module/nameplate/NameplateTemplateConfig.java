@@ -9,7 +9,8 @@ public final class NameplateTemplateConfig {
     private static final float FRONT_CARD_WIDTH = 410f;
     private static final float FRONT_CARD_RIGHT_MARGIN = 20f;
 
-    public String title = "智康信息卡";
+    public String title = "智联卡片";
+    public String subtitle = "智护空巢";
     public String fontResource = "/fonts/ArialUnicode.ttf";
     public String ink = "#054A5F";
     public String mutedInk = "#52727C";
@@ -27,10 +28,22 @@ public final class NameplateTemplateConfig {
     public float frontAgeUnitGap = 8f;
     public float frontCareMarkXRatio = 0.86f;
     public float frontCareMarkYRatio = 0.075f;
+    public float frontBrandGap = 12f;
+
+    public float backBrandXRatio = 0.68f;
+    public float backTitleBaselineRatio = 0.68f;
+    public float backDividerBaselineRatio = 0.57f;
+    public float backTitleSize = 22f;
+    public float backSubtitleSize = 13f;
+    public float backBrandGap = 8f;
+    public float backDividerLength = 42f;
 
     public void validate() {
         if (title == null || title.isBlank()) {
             throw new IllegalArgumentException("title must not be blank");
+        }
+        if (subtitle == null || subtitle.isBlank()) {
+            throw new IllegalArgumentException("subtitle must not be blank");
         }
         requireColor(ink, "ink");
         requireColor(mutedInk, "mutedInk");
@@ -50,6 +63,14 @@ public final class NameplateTemplateConfig {
         requireRange(frontAgeUnitGap, 0f, 40f, "frontAgeUnitGap");
         requireRange(frontCareMarkXRatio, 0.65f, 0.92f, "frontCareMarkXRatio");
         requireRange(frontCareMarkYRatio, 0.03f, 0.16f, "frontCareMarkYRatio");
+        requireRange(frontBrandGap, 0f, 40f, "frontBrandGap");
+        requireRange(backBrandXRatio, 0.55f, 0.82f, "backBrandXRatio");
+        requireRange(backTitleBaselineRatio, 0.55f, 0.80f, "backTitleBaselineRatio");
+        requireRange(backDividerBaselineRatio, 0.45f, 0.68f, "backDividerBaselineRatio");
+        requireRange(backTitleSize, 16f, 32f, "backTitleSize");
+        requireRange(backSubtitleSize, 8f, 20f, "backSubtitleSize");
+        requireRange(backBrandGap, 0f, 32f, "backBrandGap");
+        requireRange(backDividerLength, 20f, 80f, "backDividerLength");
         if (frontNameLineXRatio * FRONT_CARD_WIDTH + frontLineWidth + frontAgeUnitGap
                 > FRONT_CARD_WIDTH - FRONT_CARD_RIGHT_MARGIN) {
             throw new IllegalArgumentException("front name and age fields exceed the card width");

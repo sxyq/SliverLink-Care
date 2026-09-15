@@ -68,7 +68,7 @@ describe('admin components and security formatting', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByText('智康信息卡')).toBeInTheDocument();
+    expect(screen.getByText('智联卡片')).toBeInTheDocument();
     expect(screen.queryByLabelText('老人档案')).not.toBeInTheDocument();
     expect(screen.getByLabelText('管理员操作')).toBeInTheDocument();
     await user.click(screen.getByLabelText('收起导航'));
@@ -81,7 +81,7 @@ describe('admin components and security formatting', () => {
         <Sidebar role="未知角色" collapsed onLogout={onLogout} onToggleCollapse={onToggleCollapse} />
       </MemoryRouter>,
     );
-    expect(screen.getByText('智康')).toBeInTheDocument();
+    expect(screen.getByText('智联')).toBeInTheDocument();
     expect(screen.getByLabelText('老人档案')).toHaveAttribute('title', '老人档案');
   });
 
