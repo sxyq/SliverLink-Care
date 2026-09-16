@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         SecurityConfigIntegrationTest.SecurityTestController.class
 })
 @AutoConfigureMockMvc
-@TestPropertySource(properties = "silverlink.security.allowed-origins=https://sxyq27.online")
+@TestPropertySource(properties = "silverlink.security.allowed-origins=https://sxyq27.online,https://www.sxyq27.online")
 class SecurityConfigIntegrationTest {
 
     @Autowired
@@ -94,12 +94,14 @@ class SecurityConfigIntegrationTest {
 
     @Test
     void preflightRequestsFromAllowedOriginAreAccepted() throws Exception {
-        mockMvc.perform(options("/api/volunteer/login")
-                        .header("Origin", "https://sxyq27.online")
-                        .header("Access-Control-Request-Method", "POST")
-                        .header("Access-Control-Request-Headers", "content-type"))
-                .andExpect(status().isOk())
-                .andExpect(header().string("Access-Control-Allow-Origin", "https://sxyq27.online"));
+        for (String origin : new String[] {"https://sxyq27.online", "https://www.sxyq27.online"}) {
+            mockMvc.perform(options("/api/volunteer/login")
+                            .header("Origin", origin)
+                            .header("Access-Control-Request-Method", "POST")
+                            .header("Access-Control-Request-Headers", "content-type"))
+                    .andExpect(status().isOk())
+                    .andExpect(header().string("Access-Control-Allow-Origin", origin));
+        }
     }
 
     @TestConfiguration
