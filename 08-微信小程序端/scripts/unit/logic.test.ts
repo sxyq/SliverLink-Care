@@ -391,6 +391,8 @@ test('auth, app session, and current elder stores persist expected state', () =>
   assert.deepEqual(getCachedVolunteerMedications('elder-privacy'), []);
 
   assert.equal(getAppSession().homeEntrySource, 'unknown');
+  assert.equal(getAppSession().agreementViewed, false);
+  assert.equal(updateAppSession({ agreementViewed: true, agreementViewedAt: 1780680000200 }).agreementViewed, true);
   assert.equal(updateAppSession({ homeEntrySource: 'scan', privacyAccepted: true }).privacyAccepted, true);
 
   const elderSummary = {

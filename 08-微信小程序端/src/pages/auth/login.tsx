@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Button, Input, Text, View } from '@tarojs/components';
-import Taro from '@tarojs/taro';
+import Taro, { useDidShow } from '@tarojs/taro';
 
 import { APP_ROUTES } from '@/app/app.constants';
 import { AGREEMENT_VERSION } from '@/content/agreements';
@@ -42,9 +42,19 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
   const [submitting, setSubmitting] = useState(false);
   const [checkingInvitation, setCheckingInvitation] = useState(false);
   const [agreementAccepted, setAgreementAccepted] = useState(false);
-  const [agreementViewed, setAgreementViewed] = useState(() => Boolean(getAppSession().privacyAccepted));
+  const [agreementViewed, setAgreementViewed] = useState(() => {
+    const session = getAppSession();
+    return Boolean(session.agreementViewed || session.privacyAccepted);
+  });
   const { clearError, errorText, setError, setErrorKey } = useLocalizedError(t);
   const openScan = useScanEntry();
+
+  useDidShow(() => {
+    const session = getAppSession();
+    if (session.agreementViewed || session.privacyAccepted) {
+      setAgreementViewed(true);
+    }
+  });
 
   function handleScanEntry() {
     void openScan();
@@ -56,7 +66,8 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
       return false;
     }
 
-    if (!agreementViewed && !getAppSession().privacyAccepted) {
+    const session = getAppSession();
+    if (!agreementViewed && !session.agreementViewed && !session.privacyAccepted) {
       setErrorKey('agreement.viewRequired');
       return false;
     }
@@ -71,6 +82,10 @@ export function AuthLoginShell({ showScanEntry = true }: AuthLoginShellProps) {
 
   function handleOpenAgreement() {
     setAgreementViewed(true);
+    updateAppSession({
+      agreementViewed: true,
+      agreementViewedAt: Date.now(),
+    });
     void Taro.navigateTo({ url: APP_ROUTES.agreement });
   }
 

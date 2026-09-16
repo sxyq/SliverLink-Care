@@ -69,6 +69,9 @@ async function assertLanguageMenuContracts() {
   assert.ok(ltrLoginFields.length >= 5, 'account, password, invitation code and phone fields must stay LTR');
   assert.match(loginSource, /agreementAccepted, setAgreementAccepted\] = useState\(false\)/, 'agreement consent must be unchecked by default');
   assert.match(loginSource, /if \(!agreementAccepted\)/, 'login must require agreement consent');
+  const agreementSource = await fsp.readFile(path.join(projectRoot, 'src/components/feedback/AgreementConsentRow.tsx'), 'utf8');
+  assert.match(agreementSource, /<CheckboxGroup[\s\S]*onChange=\{\(event\) => onToggle\(event\.detail\.value\.includes\('agreement'\)\)\}/, 'weapp checkbox state must come from CheckboxGroup change event');
+  assert.doesNotMatch(agreementSource, /<Checkbox(?:\s|>)[\s\S]*onChange=/, 'weapp checkbox must not bind the unsupported Checkbox change event');
   assert.match(loginSource, /auth-login-language-switcher[\s\S]*<LanguageSwitcher\s*\/>/, 'login language switcher must sit inside the form');
   assert.match(loginSource, /I18nPageShell navigationTitleKey='common\.brandTitle' showLanguageSwitcher=\{false\}/, 'login must disable the global language switcher');
   assert.match(homeSource, /I18nPageShell navigationTitleKey='common\.brandTitle' showLanguageSwitcher=\{false\}/, 'home must keep only the form language switcher');

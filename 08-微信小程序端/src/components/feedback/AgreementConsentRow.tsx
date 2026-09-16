@@ -1,4 +1,4 @@
-import { Button, Checkbox, Text, View } from '@tarojs/components';
+import { Button, Checkbox, CheckboxGroup, Text, View } from '@tarojs/components';
 
 import { useI18n } from '@/i18n';
 
@@ -19,12 +19,12 @@ export function AgreementConsentRow({ checked, onToggle, onOpenAgreement }: Agre
 
   return (
     <View className='sl-agreement-consent'>
-      <Checkbox
+      <CheckboxGroup
         className='sl-agreement-consent__box'
-        value='agreement'
-        checked={checked}
-        onClick={() => onToggle(!checked)}
-      />
+        onChange={(event) => onToggle(event.detail.value.includes('agreement'))}
+      >
+        <Checkbox value='agreement' checked={checked} />
+      </CheckboxGroup>
       <Text className='sl-agreement-consent__text'>{t('agreement.consentPrefix')}</Text>
       <Button className='sl-agreement-consent__link' onClick={openAgreement}>
         {t('agreement.serviceTitle')}

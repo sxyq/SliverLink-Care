@@ -5,7 +5,7 @@ function toDomProps(props = {}) {
   for (const [key, value] of Object.entries(props)) {
     if (key === 'className') {
       next.className = value;
-    } else if (['onClick', 'onTap', 'onInput', 'catchMove', 'loading', 'password', 'checked', 'value', 'disabled'].includes(key)) {
+    } else if (['onClick', 'onTap', 'onInput', 'onChange', 'catchMove', 'loading', 'password', 'checked', 'value', 'disabled'].includes(key)) {
       // unit render: skip interactive/form props that trigger DOM warnings
     } else if (key === 'children') {
       // handled below
@@ -31,6 +31,7 @@ export const Image = createHostComponent('img');
 export const ScrollView = createHostComponent('div');
 export const Picker = createHostComponent('div');
 export const Checkbox = createHostComponent('input');
+export const CheckboxGroup = createHostComponent('div');
 export const Label = createHostComponent('label');
 export const Form = createHostComponent('form');
 

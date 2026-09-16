@@ -162,6 +162,10 @@ export function useRouter() {
   return { params: {} as Record<string, string> };
 }
 
+export function useDidShow(_callback: () => void) {
+  // Page lifecycle is controlled by the real Taro runtime; unit tests only need the export.
+}
+
 export async function getSetting() {
   return runPlatformCall('getSetting', {}, { authSetting: {} });
 }

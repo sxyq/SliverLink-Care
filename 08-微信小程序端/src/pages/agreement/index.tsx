@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, ScrollView, Text, View } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 
@@ -6,6 +6,7 @@ import { resolveAgreementDocument, type AgreementDocKey } from '@/content/agreem
 import { APP_ROUTES } from '@/app/app.constants';
 import { I18nPageShell } from '@/components/layout/I18nPageShell';
 import { useI18n } from '@/i18n';
+import { updateAppSession } from '@/store/app/appSessionStore';
 
 import './index.scss';
 
@@ -35,6 +36,13 @@ function AgreementPage() {
   const { locale, t } = useI18n();
   const [activeTab, setActiveTab] = useState<AgreementDocKey>('service');
   const document = resolveAgreementDocument(locale, activeTab);
+
+  useEffect(() => {
+    updateAppSession({
+      agreementViewed: true,
+      agreementViewedAt: Date.now(),
+    });
+  }, []);
 
   function handleBack() {
     void Taro.navigateBack({ delta: 1 }).catch(() => Taro.redirectTo({ url: APP_ROUTES.home }));

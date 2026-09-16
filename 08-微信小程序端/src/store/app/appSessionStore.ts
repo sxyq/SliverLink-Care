@@ -5,6 +5,8 @@ export type HomeEntrySource = (typeof ENTRY_KEYS)[keyof typeof ENTRY_KEYS] | 'un
 
 export interface AppSessionState {
   homeEntrySource: HomeEntrySource;
+  agreementViewed: boolean;
+  agreementViewedAt: number;
   privacyAccepted: boolean;
   privacyAcceptedAt: number;
   privacyPolicyVersion: string;
@@ -13,6 +15,8 @@ export interface AppSessionState {
 
 const DEFAULT_APP_SESSION: AppSessionState = {
   homeEntrySource: 'unknown',
+  agreementViewed: false,
+  agreementViewedAt: 0,
   privacyAccepted: false,
   privacyAcceptedAt: 0,
   privacyPolicyVersion: '',
