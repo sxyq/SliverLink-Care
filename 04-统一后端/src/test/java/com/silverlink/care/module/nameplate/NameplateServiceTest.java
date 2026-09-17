@@ -272,9 +272,15 @@ class NameplateServiceTest {
         float qrSize = cardWidth * 0.27f;
         float expectedCenter = (qrX + qrSize + 12f + 18f + rightX + cardWidth - 18f) / 2f;
 
-        float actualCenter = textCenter(service.generateDemoPdf("elder-back-prompt"), "扫码查看基础信息");
+        byte[] pdf = service.generateDemoPdf("elder-back-prompt");
+        float actualCenter = textCenterInXRange(pdf, "扫码查看基础信息", 700f, 950f);
+        TextBounds brandTitleBounds = textBoundsInXRange(pdf, "智联卡片", 700f, 950f);
+        TextBounds brandSubtitleBounds = textBoundsInXRange(pdf, "智护空巢", 700f, 950f);
+        float brandCenter = (brandTitleBounds.start() + brandSubtitleBounds.end()) / 2f;
 
         assertEquals(expectedCenter, actualCenter, 2f);
+        assertEquals(expectedCenter, brandCenter, 2f);
+        assertEquals(expectedCenter, visibleInkCenter(pdf, expectedCenter), 2f);
     }
 
     @Test
@@ -366,6 +372,47 @@ class NameplateServiceTest {
             CapturingTextStripper textStripper = new CapturingTextStripper();
             textStripper.getText(document);
             return findBounds(textStripper.positions, value).center();
+        }
+    }
+
+    private static float textCenterInXRange(byte[] pdf, String value, float minX, float maxX) throws IOException {
+        return textBoundsInXRange(pdf, value, minX, maxX).center();
+    }
+
+    private static TextBounds textBoundsInXRange(byte[] pdf, String value, float minX, float maxX) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            CapturingTextStripper textStripper = new CapturingTextStripper();
+            textStripper.getText(document);
+            List<TextPosition> positions = textStripper.positions.stream()
+                    .filter(position -> position.getXDirAdj() >= minX && position.getXDirAdj() <= maxX)
+                    .toList();
+            return findBounds(positions, value);
+        }
+    }
+
+    private static float visibleInkCenter(byte[] pdf, float expectedCenter) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            BufferedImage image = new org.apache.pdfbox.rendering.PDFRenderer(document).renderImageWithDPI(0, 72);
+            long xTotal = 0;
+            int pixels = 0;
+            int minX = Math.max(0, (int) Math.floor(expectedCenter - 110f));
+            int maxX = Math.min(image.getWidth() - 1, (int) Math.ceil(expectedCenter + 110f));
+            for (int y = 255; y <= 325; y++) {
+                for (int x = minX; x <= maxX; x++) {
+                    int rgb = image.getRGB(x, y);
+                    int red = (rgb >>> 16) & 0xff;
+                    int green = (rgb >>> 8) & 0xff;
+                    int blue = rgb & 0xff;
+                    if (red < 100 && green < 140 && blue < 160 && blue > green) {
+                        xTotal += x;
+                        pixels++;
+                    }
+                }
+            }
+            if (pixels == 0) {
+                throw new AssertionError("back prompt pixels not found");
+            }
+            return (float) xTotal / pixels;
         }
     }
 

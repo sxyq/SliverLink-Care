@@ -285,12 +285,6 @@ public class NameplateService {
         Color mutedInk = color(template.mutedInk);
         Color line = color(template.line);
         Color mintDeep = color(template.mintDeep);
-        float brandCenterX = x + width * template.backBrandXRatio;
-        drawHorizontalBrand(document, content, font, template.backTitleSize, template.backSubtitleSize,
-                template.title, template.subtitle, brandCenterX,
-                y + height * template.backTitleBaselineRatio, template.backBrandGap, ink, mutedInk);
-        drawDividerWithHealthIcon(content, brandCenterX, y + height * template.backDividerBaselineRatio,
-                template.backDividerLength, mintDeep, line);
 
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
@@ -299,6 +293,13 @@ public class NameplateService {
         float backInfoLeft = qrFrameRight + 18f;
         float backInfoRight = x + width - 18f;
         float backInfoCenterX = (backInfoLeft + backInfoRight) / 2f;
+
+        drawHorizontalBrand(document, content, font, template.backTitleSize, template.backSubtitleSize,
+                template.title, template.subtitle, backInfoCenterX,
+                y + height * template.backTitleBaselineRatio, template.backBrandGap, ink, mutedInk);
+        drawDividerWithHealthIcon(content, backInfoCenterX, y + height * template.backDividerBaselineRatio,
+                template.backDividerLength, mintDeep, line);
+
         content.setNonStrokingColor(Color.WHITE);
         addRoundRect(content, qrX - 12f, qrY - 12f, qrSize + 24f, qrSize + 24f, 12f);
         content.fill();
