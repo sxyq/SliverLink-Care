@@ -295,6 +295,10 @@ public class NameplateService {
         float qrX = x + width * 0.11f;
         float qrY = y + height * 0.32f;
         float qrSize = width * 0.27f;
+        float qrFrameRight = qrX + qrSize + 12f;
+        float backInfoLeft = qrFrameRight + 18f;
+        float backInfoRight = x + width - 18f;
+        float backInfoCenterX = (backInfoLeft + backInfoRight) / 2f;
         content.setNonStrokingColor(Color.WHITE);
         addRoundRect(content, qrX - 12f, qrY - 12f, qrSize + 24f, qrSize + 24f, 12f);
         content.fill();
@@ -304,8 +308,8 @@ public class NameplateService {
         content.stroke();
         drawBackgroundImage(document, content, qrImage, qrX, qrY, qrSize, qrSize);
 
-        drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", x + width * 0.68f, y + height * 0.46f, ink);
-        drawDividerWithHealthIcon(content, x + width * 0.68f, y + height * 0.35f, 44f, color(template.gold), line);
+        drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", backInfoCenterX, y + height * 0.46f, ink);
+        drawDividerWithHealthIcon(content, backInfoCenterX, y + height * 0.35f, 44f, color(template.gold), line);
 
         drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
         String archiveNo = safe(preview.getBackArchiveNo());

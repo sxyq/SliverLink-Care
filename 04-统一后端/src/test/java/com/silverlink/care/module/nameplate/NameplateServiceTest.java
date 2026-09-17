@@ -249,6 +249,35 @@ class NameplateServiceTest {
     }
 
     @Test
+    void centersBackPromptWithinTheRightInfoArea() throws IOException {
+        ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
+        ReflectionTestUtils.setField(service, "qrImageCacheTtlMs", 0L);
+        when(data.elderDetail("elder-back-prompt", false)).thenReturn(Map.of(
+                "name", "李奶奶",
+                "age", 78,
+                "emergencyContactPhone", "13800000000",
+                "archiveNo", "A-BACK-PROMPT"
+        ));
+        QrCodeEntity current = new QrCodeEntity();
+        current.setQrToken("token-back-prompt");
+        when(qrCodeService.findCurrentByElder("elder-back-prompt")).thenReturn(current);
+        when(qrCodeService.buildPublicUrl("token-back-prompt")).thenReturn("https://public/scan?token=token-back-prompt");
+
+        float pageWidth = 1024f;
+        float cardWidth = 410f;
+        float gap = 34f;
+        float rightX = (pageWidth - (cardWidth * 2f) - gap) / 2f + cardWidth + gap;
+        float qrX = rightX + cardWidth * 0.11f;
+        float qrSize = cardWidth * 0.27f;
+        float expectedCenter = (qrX + qrSize + 12f + 18f + rightX + cardWidth - 18f) / 2f;
+
+        float actualCenter = textCenter(service.generateDemoPdf("elder-back-prompt"), "扫码查看基础信息");
+
+        assertEquals(expectedCenter, actualCenter, 2f);
+    }
+
+    @Test
     void reloadsExternalTemplateAndUsesTheNewPositionForPdf() throws Exception {
         ReflectionTestUtils.setField(service, "previewCacheTtlMs", 0L);
         ReflectionTestUtils.setField(service, "pdfCacheTtlMs", 0L);
