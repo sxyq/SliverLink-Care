@@ -59,6 +59,7 @@ public class NameplateService {
     private static volatile String cachedFontKey;
     private static volatile Font cachedTitleFont;
     private static final Map<String, BufferedImage> titleImageCache = new ConcurrentHashMap<>();
+    private static final Map<String, Float> rasterizedTextCenterOffsetCache = new ConcurrentHashMap<>();
 
     private final SilverLinkDataService data;
     private final QrCodeService qrCodeService;
@@ -294,10 +295,15 @@ public class NameplateService {
         float backInfoRight = x + width - 18f;
         float backInfoCenterX = (backInfoLeft + backInfoRight) / 2f;
 
+        float brandDividerY = y + height * template.backDividerBaselineRatio;
+        float promptDividerY = y + height * 0.35f;
+        float promptCenterY = (brandDividerY + promptDividerY) / 2f;
+        float promptBaselineY = rasterizedTextBaselineForCenter("扫码查看基础信息", 22f, promptCenterY, ink);
+
         drawHorizontalBrand(document, content, font, template.backTitleSize, template.backSubtitleSize,
                 template.title, template.subtitle, backInfoCenterX,
                 y + height * template.backTitleBaselineRatio, template.backBrandGap, ink, mutedInk);
-        drawDividerWithHealthIcon(content, backInfoCenterX, y + height * template.backDividerBaselineRatio,
+        drawDividerWithHealthIcon(content, backInfoCenterX, brandDividerY,
                 template.backDividerLength, mintDeep, line);
 
         content.setNonStrokingColor(Color.WHITE);
@@ -309,8 +315,8 @@ public class NameplateService {
         content.stroke();
         drawBackgroundImage(document, content, qrImage, qrX, qrY, qrSize, qrSize);
 
-        drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", backInfoCenterX, y + height * 0.46f, ink);
-        drawDividerWithHealthIcon(content, backInfoCenterX, y + height * 0.35f, 44f, color(template.gold), line);
+        drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", backInfoCenterX, promptBaselineY, ink);
+        drawDividerWithHealthIcon(content, backInfoCenterX, promptDividerY, 44f, color(template.gold), line);
 
         drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
         String archiveNo = safe(preview.getBackArchiveNo());
@@ -739,6 +745,37 @@ public class NameplateService {
         graphics.dispose();
         BufferedImage previous = titleImageCache.putIfAbsent(cacheKey, image);
         return previous == null ? image : previous;
+    }
+
+    private float rasterizedTextBaselineForCenter(String text, float size, float centerY, Color color) throws IOException {
+        String cacheKey = text + "|" + size;
+        Float cachedOffset = rasterizedTextCenterOffsetCache.get(cacheKey);
+        if (cachedOffset != null) {
+            return centerY - cachedOffset;
+        }
+
+        BufferedImage image = renderTitleImage(text, size, color);
+        Font font = titleFont(size);
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        int baseline = 4 + (int) Math.ceil(font.getLineMetrics(text, frc).getAscent());
+        int firstVisibleY = image.getHeight();
+        int lastVisibleY = -1;
+        for (int imageY = 0; imageY < image.getHeight(); imageY++) {
+            for (int imageX = 0; imageX < image.getWidth(); imageX++) {
+                if (((image.getRGB(imageX, imageY) >>> 24) & 0xff) > 0) {
+                    firstVisibleY = Math.min(firstVisibleY, imageY);
+                    lastVisibleY = Math.max(lastVisibleY, imageY);
+                }
+            }
+        }
+        if (lastVisibleY < firstVisibleY) {
+            return centerY;
+        }
+
+        float visibleCenterY = (firstVisibleY + lastVisibleY + 1f) / 2f;
+        float centerOffset = (baseline - visibleCenterY) / 4f;
+        Float previous = rasterizedTextCenterOffsetCache.putIfAbsent(cacheKey, centerOffset);
+        return centerY - (previous == null ? centerOffset : previous);
     }
 
     private Font titleFont(float size) throws IOException {

@@ -271,6 +271,9 @@ class NameplateServiceTest {
         float qrX = rightX + cardWidth * 0.11f;
         float qrSize = cardWidth * 0.27f;
         float expectedCenter = (qrX + qrSize + 12f + 18f + rightX + cardWidth - 18f) / 2f;
+        float cardY = 160f;
+        float cardHeight = 258f;
+        float expectedVerticalCenter = 576f - ((cardY + cardHeight * 0.57f + cardY + cardHeight * 0.35f) / 2f);
 
         byte[] pdf = service.generateDemoPdf("elder-back-prompt");
         float actualCenter = textCenterInXRange(pdf, "扫码查看基础信息", 700f, 950f);
@@ -281,6 +284,7 @@ class NameplateServiceTest {
         assertEquals(expectedCenter, actualCenter, 2f);
         assertEquals(expectedCenter, brandCenter, 2f);
         assertEquals(expectedCenter, visibleInkCenter(pdf, expectedCenter), 2f);
+        assertEquals(expectedVerticalCenter, visibleInkCenterY(pdf, expectedCenter), 2f);
     }
 
     @Test
@@ -413,6 +417,32 @@ class NameplateServiceTest {
                 throw new AssertionError("back prompt pixels not found");
             }
             return (float) xTotal / pixels;
+        }
+    }
+
+    private static float visibleInkCenterY(byte[] pdf, float expectedCenter) throws IOException {
+        try (PDDocument document = PDDocument.load(new ByteArrayInputStream(pdf))) {
+            BufferedImage image = new org.apache.pdfbox.rendering.PDFRenderer(document).renderImageWithDPI(0, 72);
+            long yTotal = 0;
+            int pixels = 0;
+            int minX = Math.max(0, (int) Math.floor(expectedCenter - 110f));
+            int maxX = Math.min(image.getWidth() - 1, (int) Math.ceil(expectedCenter + 110f));
+            for (int y = 255; y <= 325; y++) {
+                for (int x = minX; x <= maxX; x++) {
+                    int rgb = image.getRGB(x, y);
+                    int red = (rgb >>> 16) & 0xff;
+                    int green = (rgb >>> 8) & 0xff;
+                    int blue = rgb & 0xff;
+                    if (red < 100 && green < 140 && blue < 160 && blue > green) {
+                        yTotal += y;
+                        pixels++;
+                    }
+                }
+            }
+            if (pixels == 0) {
+                throw new AssertionError("back prompt pixels not found");
+            }
+            return (float) yTotal / pixels;
         }
     }
 
