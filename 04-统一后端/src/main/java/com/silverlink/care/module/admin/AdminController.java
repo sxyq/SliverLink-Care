@@ -50,17 +50,22 @@ public class AdminController {
             HttpServletResponse response
     ) {
         String account = body.getOrDefault("account", body.get("username"));
-        var user = data.login(account, body.get("password"), "SYSTEM_ADMIN");
+        String loginAccount = account == null ? "" : account.trim();
+        var user = data.login(loginAccount, body.get("password"), "SYSTEM_ADMIN");
         if (user.isPresent()) {
-            String token = jwtTokenProvider.generateToken(account, "SYSTEM_ADMIN", 7200000L);
+            String canonicalAccount = data.str(user.get().get("account"));
+            if (canonicalAccount == null || canonicalAccount.isBlank()) {
+                canonicalAccount = loginAccount;
+            }
+            String token = jwtTokenProvider.generateToken(canonicalAccount, "SYSTEM_ADMIN", 7200000L);
             authCookieService.issueAdminCookie(request, response, token, 7200000L);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("role", "系统管理员");
-            map.put("account", account);
-            auditLogService.record(account, "SYSTEM_ADMIN", request, "系统", "LOGIN", "SUCCESS", null, null);
+            map.put("account", canonicalAccount);
+            auditLogService.record(canonicalAccount, "SYSTEM_ADMIN", request, "系统", "LOGIN", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         }
-        auditLogService.record(account, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
+        auditLogService.record(loginAccount, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
         return ApiResponse.fail(401, "账号或密码错误");
     }
 

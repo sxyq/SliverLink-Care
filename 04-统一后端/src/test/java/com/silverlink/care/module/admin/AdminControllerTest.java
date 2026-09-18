@@ -51,14 +51,19 @@ class AdminControllerTest {
 
     @Test
     void loginReturnsTokenOnSuccessAndFailOtherwise() {
-        when(data.login("admin", "pwd", "SYSTEM_ADMIN")).thenReturn(Optional.of(Map.of("name_enc", "enc")));
-        when(jwtTokenProvider.generateToken("admin", "SYSTEM_ADMIN", 7200000L)).thenReturn("token-admin");
+        when(data.login("admin", "pwd", "SYSTEM_ADMIN")).thenReturn(Optional.of(Map.of(
+                "account", "ADMIN",
+                "name_enc", "enc"
+        )));
+        when(data.str("ADMIN")).thenReturn("ADMIN");
+        when(jwtTokenProvider.generateToken("ADMIN", "SYSTEM_ADMIN", 7200000L)).thenReturn("token-admin");
 
         var ok = controller.login(Map.of("account", "admin", "password", "pwd"), request, response);
         assertEquals(200, ok.getCode());
         assertNull(ok.getData().get("token"));
         assertEquals("系统管理员", ok.getData().get("role"));
         verify(authCookieService).issueAdminCookie(request, response, "token-admin", 7200000L);
+        assertEquals("ADMIN", ok.getData().get("account"));
 
         when(data.login("admin", "bad", "SYSTEM_ADMIN")).thenReturn(Optional.empty());
         var fail = controller.login(Map.of("username", "admin", "password", "bad"), request, response);

@@ -66,6 +66,11 @@ class NameplateServiceTest {
     }
 
     @Test
+    void defaultTemplateKeepsArialAsTheSearchablePdfTextLayerFont() {
+        assertEquals("/fonts/ArialUnicode.ttf", new NameplateTemplateConfig().fontResource);
+    }
+
+    @Test
     void previewUsesCurrentQrAndFallsBackForMissingFields() {
         when(data.elderDetail("elder-1", false)).thenReturn(Map.of(
                 "name", "李奶奶",

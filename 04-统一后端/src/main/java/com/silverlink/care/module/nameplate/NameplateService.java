@@ -260,14 +260,14 @@ public class NameplateService {
         float labelX = x + width * 0.14f;
         float lineX = x + width * template.frontNameLineXRatio;
         float lineWidth = template.frontLineWidth;
-        drawCenteredLabeledValue(content, font, "姓名：", safe(preview.getFrontName()), labelX, lineX, y + height * template.frontNameBaselineRatio, 17f, lineWidth, ink);
+        drawCenteredLabeledValue(document, content, font, "姓名：", safe(preview.getFrontName()), labelX, lineX, y + height * template.frontNameBaselineRatio, 17f, lineWidth, ink);
         float ageBaseline = y + height * template.frontAgeBaselineRatio;
-        drawCenteredLabeledValue(content, font, "年龄：", formatAgeValue(preview.getFrontAge()), labelX, lineX, ageBaseline, 17f, lineWidth, ink);
-        drawText(content, font, 17f, "岁", lineX + lineWidth + template.frontAgeUnitGap, ageBaseline, ink);
-        drawLabeledValue(content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f, ink);
+        drawCenteredLabeledValue(document, content, font, "年龄：", formatAgeValue(preview.getFrontAge()), labelX, lineX, ageBaseline, 17f, lineWidth, ink);
+        drawRasterizedText(document, content, font, 17f, "岁", lineX + lineWidth + template.frontAgeUnitGap, ageBaseline, ink);
+        drawLabeledValue(document, content, font, "联系电话（亲属）：", safe(preview.getFrontPhone()), x + width * 0.09f, x + width * 0.47f, y + height * 0.17f, 15.5f, 128f, ink);
 
         drawCareMark(content, x + width * template.frontCareMarkXRatio, y + height * template.frontCareMarkYRatio, color(template.careMark));
-        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, mutedInk);
+        drawRasterizedCenteredText(document, content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.48f, y + height * 0.032f, mutedInk);
     }
 
     private void drawBackCard(
@@ -318,15 +318,15 @@ public class NameplateService {
         drawRasterizedCenteredText(document, content, font, 22f, "扫码查看基础信息", backInfoCenterX, promptBaselineY, ink);
         drawDividerWithHealthIcon(content, backInfoCenterX, promptDividerY, 44f, color(template.gold), line);
 
-        drawText(content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
+        drawRasterizedText(document, content, font, 17f, "健康档案编号：", x + width * 0.15f, y + height * 0.13f, ink);
         String archiveNo = safe(preview.getBackArchiveNo());
         float archiveNoX = x + width * 0.43f;
         float archiveNoBaseline = y + height * 0.13f;
-        drawText(content, font, 15f, archiveNo, archiveNoX, archiveNoBaseline, ink);
+        drawRasterizedText(document, content, font, 15f, archiveNo, archiveNoX, archiveNoBaseline, ink);
         float archiveNoWidth = font.getStringWidth(archiveNo) / 1000f * 15f;
         float archiveLineEnd = Math.min(x + width * 0.88f, archiveNoX + archiveNoWidth + 4f);
         drawLine(content, archiveNoX - 2f, y + height * 0.105f, archiveLineEnd, y + height * 0.105f, ink, 0.9f);
-        drawCenteredText(content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.5f, y + height * 0.032f, mutedInk);
+        drawRasterizedCenteredText(document, content, font, 8.5f, FOOTER_ATTRIBUTION, x + width * 0.5f, y + height * 0.032f, mutedInk);
     }
 
     private void drawBackgroundImage(
@@ -366,6 +366,7 @@ public class NameplateService {
     }
 
     private void drawLabeledValue(
+            PDDocument document,
             PDPageContentStream content,
             PDFont font,
             String label,
@@ -377,12 +378,13 @@ public class NameplateService {
             float lineWidth,
             Color ink
     ) throws IOException {
-        drawText(content, font, size, label, labelX, baseline, ink);
-        drawText(content, font, size - 1f, value, valueX, baseline, ink);
+        drawRasterizedText(document, content, font, size, label, labelX, baseline, ink);
+        drawRasterizedText(document, content, font, size - 1f, value, valueX, baseline, ink);
         drawLine(content, valueX - 2f, baseline - 6f, valueX + lineWidth, baseline - 6f, ink, 0.9f);
     }
 
     private void drawCenteredLabeledValue(
+            PDDocument document,
             PDPageContentStream content,
             PDFont font,
             String label,
@@ -394,8 +396,8 @@ public class NameplateService {
             float lineWidth,
             Color ink
     ) throws IOException {
-        drawText(content, font, size, label, labelX, baseline, ink);
-        drawCenteredText(content, font, size - 1f, value, lineX + lineWidth / 2f, baseline, ink);
+        drawRasterizedText(document, content, font, size, label, labelX, baseline, ink);
+        drawRasterizedCenteredText(document, content, font, size - 1f, value, lineX + lineWidth / 2f, baseline, ink, false);
         drawLine(content, lineX - 2f, baseline - 6f, lineX + lineWidth, baseline - 6f, ink, 0.9f);
     }
 
@@ -703,24 +705,68 @@ public class NameplateService {
         drawRasterizedCenteredText(document, content, font, size, title, centerX, y, color);
     }
 
+    private void drawRasterizedText(
+            PDDocument document,
+            PDPageContentStream content,
+            PDFont textLayerFont,
+            float size,
+            String text,
+            float x,
+            float y,
+            Color color
+    ) throws IOException {
+        BufferedImage textImage = renderTextImage(text, size, color);
+        PDImageXObject textObject = LosslessFactory.createFromImage(document, textImage);
+        Font displayFont = titleFont(size);
+        FontRenderContext frc = new FontRenderContext(null, true, true);
+        int baseline = 4 + (int) Math.ceil(displayFont.getLineMetrics(text, frc).getAscent());
+        float imageBottom = y - (textImage.getHeight() - baseline) / 4f;
+        content.drawImage(textObject, x - 1f, imageBottom, textImage.getWidth() / 4f, textImage.getHeight() / 4f);
+        drawInvisibleTextLayer(content, textLayerFont, size, text, x, y);
+    }
+
     private void drawRasterizedCenteredText(PDDocument document, PDPageContentStream content, PDFont font, float size, String text, float centerX, float y, Color color)
             throws IOException {
+        drawRasterizedCenteredText(document, content, font, size, text, centerX, y, color, true);
+    }
+
+    private void drawRasterizedCenteredText(
+            PDDocument document,
+            PDPageContentStream content,
+            PDFont font,
+            float size,
+            String text,
+            float centerX,
+            float y,
+            Color color,
+            boolean cacheImage
+    ) throws IOException {
         float textWidth = font.getStringWidth(text) / 1000f * size;
         float left = centerX - (textWidth / 2f);
-        BufferedImage titleImage = renderTitleImage(text, size, color);
+        BufferedImage titleImage = cacheImage ? renderTitleImage(text, size, color) : renderTextImage(text, size, color);
         PDImageXObject titleObject = LosslessFactory.createFromImage(document, titleImage);
-        Font titleFont = titleFont(size);
+        Font displayFont = titleFont(size);
         FontRenderContext frc = new FontRenderContext(null, true, true);
-        int baseline = 4 + (int) Math.ceil(titleFont.getLineMetrics(text, frc).getAscent());
+        int baseline = 4 + (int) Math.ceil(displayFont.getLineMetrics(text, frc).getAscent());
         float imageLeft = centerX - titleImage.getWidth() / 8f;
         float imageBottom = y - (titleImage.getHeight() - baseline) / 4f;
         content.drawImage(titleObject, imageLeft, imageBottom, titleImage.getWidth() / 4f, titleImage.getHeight() / 4f);
 
-        // Keep an invisible text layer so PDF search and extraction retain the title.
+        drawInvisibleTextLayer(content, font, size, text, left, y);
+    }
+
+    private void drawInvisibleTextLayer(
+            PDPageContentStream content,
+            PDFont font,
+            float size,
+            String text,
+            float x,
+            float y
+    ) throws IOException {
         content.beginText();
         content.setRenderingMode(RenderingMode.NEITHER);
         content.setFont(font, size);
-        content.newLineAtOffset(left, y);
+        content.newLineAtOffset(x, y);
         content.showText(text);
         content.setRenderingMode(RenderingMode.FILL);
         content.endText();
@@ -732,19 +778,24 @@ public class NameplateService {
         if (cached != null) {
             return cached;
         }
+        BufferedImage image = renderTextImage(title, size, color);
+        BufferedImage previous = titleImageCache.putIfAbsent(cacheKey, image);
+        return previous == null ? image : previous;
+    }
+
+    private BufferedImage renderTextImage(String text, float size, Color color) throws IOException {
         Font titleFont = titleFont(size);
         FontRenderContext frc = new FontRenderContext(null, true, true);
-        int width = (int) Math.ceil(titleFont.getStringBounds(title, frc).getWidth()) + 8;
-        int height = (int) Math.ceil(titleFont.getLineMetrics(title, frc).getHeight()) + 8;
+        int width = (int) Math.ceil(titleFont.getStringBounds(text, frc).getWidth()) + 8;
+        int height = (int) Math.ceil(titleFont.getLineMetrics(text, frc).getHeight()) + 8;
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         Graphics2D graphics = image.createGraphics();
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         graphics.setColor(color);
         graphics.setFont(titleFont);
-        graphics.drawString(title, 4, 4 + titleFont.getLineMetrics(title, frc).getAscent());
+        graphics.drawString(text, 4, 4 + titleFont.getLineMetrics(text, frc).getAscent());
         graphics.dispose();
-        BufferedImage previous = titleImageCache.putIfAbsent(cacheKey, image);
-        return previous == null ? image : previous;
+        return image;
     }
 
     private float rasterizedTextBaselineForCenter(String text, float size, float centerY, Color color) throws IOException {

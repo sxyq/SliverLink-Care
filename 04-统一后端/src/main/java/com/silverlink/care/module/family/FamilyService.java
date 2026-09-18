@@ -33,11 +33,16 @@ public class FamilyService {
     }
 
     public FamilyLoginResultDto login(FamilyLoginRequest req) {
-        var user = data.login(req.getPhone(), req.getPassword(), "FAMILY");
+        String phone = req.getPhone() == null ? "" : req.getPhone().trim();
+        var user = data.login(phone, req.getPassword(), "FAMILY");
         if (user.isEmpty()) {
             return new FamilyLoginResultDto(false, null, "手机号或密码错误", "errors.familyLoginFailed");
         }
-        return new FamilyLoginResultDto(true, jwtTokenProvider.generateToken(req.getPhone(), "FAMILY", 86400000L), "登录成功");
+        String canonicalPhone = data.str(user.get().get("account"));
+        if (canonicalPhone == null || canonicalPhone.isBlank()) {
+            canonicalPhone = phone;
+        }
+        return new FamilyLoginResultDto(true, jwtTokenProvider.generateToken(canonicalPhone, "FAMILY", 86400000L), "登录成功");
     }
 
     public List<FamilyElderDto> myElders(String familyAccount) {
@@ -211,7 +216,8 @@ public class FamilyService {
         if (familyAccount == null || familyAccount.isBlank()) {
             throw new BizException(401, "未登录或 Token 无效", "errors.loginRequired");
         }
-        Map<String, Object> user = data.one("select * from app_user where account=? and role='FAMILY' and status='ACTIVE'", familyAccount);
+        String normalizedAccount = familyAccount.trim().toLowerCase(Locale.ROOT);
+        Map<String, Object> user = data.one("select * from app_user where lower(trim(account))=? and role='FAMILY' and status='ACTIVE'", normalizedAccount);
         return data.str(user.get("id"));
     }
 

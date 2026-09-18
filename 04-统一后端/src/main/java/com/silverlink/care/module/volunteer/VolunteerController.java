@@ -45,19 +45,24 @@ public class VolunteerController {
             HttpServletResponse response
     ) {
         String account = body.get("account");
+        String loginAccount = account == null ? "" : account.trim();
         String password = body.get("password");
-        var user = data.login(account, password, "VOLUNTEER");
+        var user = data.login(loginAccount, password, "VOLUNTEER");
         if (user.isPresent()) {
-            String token = jwtTokenProvider.generateToken(account, "VOLUNTEER", 86400000L);
+            String canonicalAccount = data.str(user.get().get("account"));
+            if (canonicalAccount == null || canonicalAccount.isBlank()) {
+                canonicalAccount = loginAccount;
+            }
+            String token = jwtTokenProvider.generateToken(canonicalAccount, "VOLUNTEER", 86400000L);
             authCookieService.issueVolunteerCookie(request, response, token, 86400000L);
             Map<String, String> map = new LinkedHashMap<>();
             map.put("token", token);
-            map.put("account", account);
+            map.put("account", canonicalAccount);
             map.put("name", data.dec(user.get().get("name_enc")));
-            auditLogService.record(account, "VOLUNTEER", request, "系统", "LOGIN", "SUCCESS", null, null);
+            auditLogService.record(canonicalAccount, "VOLUNTEER", request, "系统", "LOGIN", "SUCCESS", null, null);
             return ApiResponse.ok(map);
         }
-        auditLogService.record(account, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
+        auditLogService.record(loginAccount, "UNKNOWN", request, "系统", "LOGIN", "FAIL", "密码错误", null);
         return ApiResponse.fail(401, "账号或密码错误", "errors.loginFailed");
     }
 

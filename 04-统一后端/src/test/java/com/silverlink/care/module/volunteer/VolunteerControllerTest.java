@@ -82,4 +82,21 @@ class VolunteerControllerTest {
         assertEquals("已停用", controller.disableMyElderQrCode("elder-1", auth, request).getData().get("status"));
         assertEquals(200, controller.logout(auth, request, response).getCode());
     }
+
+    @Test
+    void loginUsesCanonicalAccountFromDatabaseAfterCaseInsensitiveLookup() {
+        when(data.login("SYY", "pwd", "VOLUNTEER")).thenReturn(Optional.of(Map.of(
+                "account", "syy",
+                "name_enc", "enc-name"
+        )));
+        when(data.str("syy")).thenReturn("syy");
+        when(data.dec("enc-name")).thenReturn("孙一洋");
+        when(jwtTokenProvider.generateToken("syy", "VOLUNTEER", 86400000L)).thenReturn("token-syy");
+
+        var result = controller.login(Map.of("account", "SYY", "password", "pwd"), request, response);
+
+        assertEquals("syy", result.getData().get("account"));
+        assertEquals("token-syy", result.getData().get("token"));
+        verify(jwtTokenProvider).generateToken("syy", "VOLUNTEER", 86400000L);
+    }
 }

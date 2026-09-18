@@ -62,7 +62,9 @@ class FamilyServiceTest {
         req.setPassword("secret");
         Map<String, Object> userRow = new LinkedHashMap<>();
         userRow.put("id", "user-1");
+        userRow.put("account", "13800000000");
         when(data.login("13800000000", "secret", "FAMILY")).thenReturn(Optional.of(userRow));
+        when(data.str("13800000000")).thenReturn("13800000000");
         when(jwtTokenProvider.generateToken("13800000000", "FAMILY", 86400000L)).thenReturn("jwt-token");
 
         FamilyLoginResultDto result = service.login(req);

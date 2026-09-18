@@ -113,18 +113,42 @@ public class SilverLinkDataService {
     }
 
     public Optional<Map<String, Object>> login(String account, String password, String role) {
+        String normalizedAccount = normalizeLoginAccount(account);
+        String normalizedRole = normalizeRole(role);
+        String suppliedPassword = password == null ? "" : password;
+        if (normalizedAccount.isBlank() || normalizedRole.isBlank() || suppliedPassword.isBlank()) {
+            return Optional.empty();
+        }
         List<Map<String, Object>> users = jdbc.queryForList(
-                "select * from app_user where account=? and role=? and status='ACTIVE'", account, role);
+                "select * from app_user where lower(trim(account))=? and upper(trim(role))=? and status='ACTIVE'",
+                normalizedAccount, normalizedRole);
         if (users.isEmpty()) return Optional.empty();
         Map<String, Object> user = users.get(0);
-        if (!str(user.get("password_hash")).equals(password)) return Optional.empty();
+        if (!str(user.get("password_hash")).equals(suppliedPassword)) return Optional.empty();
         return Optional.of(user);
     }
 
+    private String normalizeLoginAccount(String account) {
+        return account == null ? "" : account.trim().toLowerCase(Locale.ROOT);
+    }
+
+    private String normalizeRole(String role) {
+        return role == null ? "" : role.trim().toUpperCase(Locale.ROOT);
+    }
+
+    private String normalizeStoredAccount(String account) {
+        return account == null ? "" : account.trim();
+    }
+
     public Optional<Map<String, Object>> findUser(String account, String role) {
+        String normalizedAccount = normalizeLoginAccount(account);
+        String normalizedRole = normalizeRole(role);
+        if (normalizedAccount.isBlank() || normalizedRole.isBlank()) {
+            return Optional.empty();
+        }
         List<Map<String, Object>> users = jdbc.queryForList(
-                "select * from app_user where account=? and role=?",
-                account, role
+                "select * from app_user where lower(trim(account))=? and upper(trim(role))=?",
+                normalizedAccount, normalizedRole
         );
         return users.isEmpty() ? Optional.empty() : Optional.of(users.get(0));
     }
@@ -247,7 +271,7 @@ public class SilverLinkDataService {
 
     public String createElderForVolunteer(String account, Map<String, Object> body) {
         String elderId = createElder(body);
-        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", account);
+        Map<String, Object> user = one("select * from app_user where lower(trim(account))=? and role='VOLUNTEER'", normalizeLoginAccount(account));
         jdbc.update("insert ignore into volunteer_elder_scope (id, volunteer_user_id, elder_id) values (?,?,?)",
                 UUID.randomUUID().toString(), str(user.get("id")), elderId);
         return elderId;
@@ -298,7 +322,7 @@ public class SilverLinkDataService {
     }
 
     public String createVolunteer(Map<String, Object> body) {
-        String account = value(body, "account", "vol" + System.currentTimeMillis()).trim();
+        String account = normalizeStoredAccount(value(body, "account", "vol" + System.currentTimeMillis()));
         if (account.isBlank()) {
             throw new BizException(400, "请输入登录账号");
         }
@@ -323,7 +347,7 @@ public class SilverLinkDataService {
 
     public void updateVolunteer(String id, Map<String, Object> body) {
         Map<String, Object> existing = one("select * from app_user where id=? and role='VOLUNTEER'", id);
-        String account = value(body, "account", str(existing.get("account")));
+        String account = normalizeStoredAccount(value(body, "account", str(existing.get("account"))));
         String name = value(body, "name", dec(existing.get("name_enc")));
         String phone = body.containsKey("phone") ? str(body.get("phone")) : dec(existing.get("phone_enc"));
         String status = value(body, "status", str(existing.get("status")));
@@ -356,7 +380,7 @@ public class SilverLinkDataService {
     }
 
     public List<Map<String, Object>> assignedElders(String account) {
-        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", account);
+        Map<String, Object> user = one("select * from app_user where lower(trim(account))=? and role='VOLUNTEER'", normalizeLoginAccount(account));
         List<Map<String, Object>> rows = jdbc.queryForList("""
                 select e.* from elder e join volunteer_elder_scope s on e.id=s.elder_id
                 where s.volunteer_user_id=? and e.status='ACTIVE' order by e.updated_at desc
@@ -372,7 +396,7 @@ public class SilverLinkDataService {
     }
 
     public Map<String, Object> volunteerProfile(String account) {
-        Map<String, Object> row = one("select * from app_user where account=? and role='VOLUNTEER' and status='ACTIVE'", account);
+        Map<String, Object> row = one("select * from app_user where lower(trim(account))=? and role='VOLUNTEER' and status='ACTIVE'", normalizeLoginAccount(account));
         Map<String, Object> map = new LinkedHashMap<>();
         map.put("account", str(row.get("account")));
         map.put("name", dec(row.get("name_enc")));
@@ -381,8 +405,8 @@ public class SilverLinkDataService {
     }
 
     public Map<String, Object> updateVolunteerProfile(String account, Map<String, Object> body) {
-        Map<String, Object> existing = one("select * from app_user where account=? and role='VOLUNTEER' and status='ACTIVE'", account);
-        String nextAccount = value(body, "account", str(existing.get("account")));
+        Map<String, Object> existing = one("select * from app_user where lower(trim(account))=? and role='VOLUNTEER' and status='ACTIVE'", normalizeLoginAccount(account));
+        String nextAccount = normalizeStoredAccount(value(body, "account", str(existing.get("account"))));
         String nextName = value(body, "name", dec(existing.get("name_enc")));
         String nextPhone = body.containsKey("phone") ? str(body.get("phone")) : dec(existing.get("phone_enc"));
         String currentPassword = value(body, "currentPassword", "");
@@ -395,7 +419,8 @@ public class SilverLinkDataService {
         if (nextName.isBlank()) {
             throw new BizException(400, "请输入姓名");
         }
-        if (!nextAccount.equals(account) && !findUser(nextAccount, "VOLUNTEER").isEmpty()) {
+        if (!normalizeLoginAccount(nextAccount).equals(normalizeLoginAccount(account))
+                && !findUser(nextAccount, "VOLUNTEER").isEmpty()) {
             throw new BizException(400, "该登录账号已存在，请更换后重试");
         }
 
@@ -454,7 +479,7 @@ public class SilverLinkDataService {
         if (auth == null) return;
         boolean volunteer = auth.getAuthorities().stream().anyMatch(a -> "ROLE_VOLUNTEER".equals(a.getAuthority()));
         if (!volunteer) return;
-        Map<String, Object> user = one("select * from app_user where account=? and role='VOLUNTEER'", auth.getName());
+        Map<String, Object> user = one("select * from app_user where lower(trim(account))=? and role='VOLUNTEER'", normalizeLoginAccount(auth.getName()));
         Integer count = jdbc.queryForObject("select count(*) from volunteer_elder_scope where volunteer_user_id=? and elder_id=?",
                 Integer.class, str(user.get("id")), elderId);
         if (count == null || count == 0) {

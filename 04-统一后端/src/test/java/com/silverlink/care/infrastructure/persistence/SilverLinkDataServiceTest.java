@@ -375,6 +375,16 @@ class SilverLinkDataServiceTest {
         }
 
         @Test
+        void blankPasswordNeverMatchesAStoredBlankPassword() {
+            Map<String, Object> user = new HashMap<>();
+            user.put("password_hash", "");
+            when(jdbc.queryForList(anyString(), (Object) any(), (Object) any())).thenReturn(List.of(user));
+
+            assertTrue(service.login("admin", "", "ADMIN").isEmpty());
+            assertTrue(service.login("admin", null, "ADMIN").isEmpty());
+        }
+
+        @Test
         void matchReturnsUser() {
             Map<String, Object> user = new HashMap<>();
             user.put("password_hash", "pass123");
@@ -383,6 +393,19 @@ class SilverLinkDataServiceTest {
             Optional<Map<String, Object>> result = service.login("admin1", "pass123", "ADMIN");
             assertTrue(result.isPresent());
             assertEquals("admin1", result.get().get("account"));
+        }
+
+        @Test
+        void trimsAndNormalizesAccountBeforeLookup() {
+            Map<String, Object> user = new HashMap<>();
+            user.put("password_hash", "pass123");
+            user.put("account", "syy");
+            when(jdbc.queryForList(anyString(), (Object) any(), (Object) any())).thenReturn(List.of(user));
+
+            Optional<Map<String, Object>> result = service.login(" SYY ", "pass123", "volunteer");
+
+            assertTrue(result.isPresent());
+            verify(jdbc).queryForList(contains("lower(trim(account))"), eq("syy"), eq("VOLUNTEER"));
         }
     }
 
@@ -784,7 +807,7 @@ class SilverLinkDataServiceTest {
         void duplicateAccountThrows() throws Exception {
             when(jdbc.queryForList(contains("status='ACTIVE'"), (Object) eq("vol1")))
                     .thenReturn(List.of(existingUser()));
-            when(jdbc.queryForList(contains("account=? and role=?"),
+            when(jdbc.queryForList(contains("lower(trim(account))"),
                     (Object) eq("vol2"), (Object) eq("VOLUNTEER")))
                     .thenReturn(List.of(existingUser()));
             Map<String, Object> body = Map.of("account", "vol2");
