@@ -53,6 +53,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (cookies == null) {
             return null;
         }
+        String expectedCookieName = cookieNameForPath(request.getServletPath());
+        if (expectedCookieName != null) {
+            for (Cookie cookie : cookies) {
+                if (expectedCookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+            return null;
+        }
         for (Cookie cookie : cookies) {
             String name = cookie.getName();
             if (AuthCookieService.ADMIN_COOKIE.equals(name)
@@ -62,5 +71,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    private static String cookieNameForPath(String path) {
+        if (isPathUnder(path, "/api/admin")
+                || isPathUnder(path, "/api/rbac")
+                || isPathUnder(path, "/api/audit-logs")
+                || isPathUnder(path, "/api/sms-relay/admin")) {
+            return AuthCookieService.ADMIN_COOKIE;
+        }
+        if (isPathUnder(path, "/api/volunteer")
+                || isPathUnder(path, "/api/elder")) {
+            return AuthCookieService.VOLUNTEER_COOKIE;
+        }
+        if (isPathUnder(path, "/api/family")) {
+            return AuthCookieService.FAMILY_COOKIE;
+        }
+        return null;
+    }
+
+    private static boolean isPathUnder(String path, String prefix) {
+        return path != null && (path.equals(prefix) || path.startsWith(prefix + "/"));
     }
 }

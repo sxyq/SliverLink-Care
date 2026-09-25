@@ -2,6 +2,7 @@ package com.silverlink.care.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
@@ -163,6 +164,68 @@ class JwtAuthenticationFilterTest {
         assertEquals("13800138000", auth.getName());
         assertTrue(auth.getAuthorities().stream()
                 .anyMatch(a -> "ROLE_FAMILY".equals(a.getAuthority())));
+    }
+
+    @Test
+    void doFilter_adminEndpoint_usesAdminCookieWhenVolunteerCookieComesFirst() throws ServletException, IOException {
+        String adminToken = "admin.jwt.token";
+        String volunteerToken = "volunteer.jwt.token";
+        when(request.getHeader("Authorization")).thenReturn(null);
+        when(request.getServletPath()).thenReturn("/api/admin/session");
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(AuthCookieService.VOLUNTEER_COOKIE, volunteerToken),
+                new Cookie(AuthCookieService.ADMIN_COOKIE, adminToken)
+        });
+        when(jwtTokenProvider.validateToken(adminToken)).thenReturn(true);
+        when(jwtTokenProvider.getSubject(adminToken)).thenReturn("admin");
+        when(jwtTokenProvider.getRole(adminToken)).thenReturn("SYSTEM_ADMIN");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
+        assertEquals("admin", auth.getName());
+        assertTrue(auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_SYSTEM_ADMIN".equals(a.getAuthority())));
+        verify(jwtTokenProvider).validateToken(adminToken);
+        verify(jwtTokenProvider, never()).validateToken(volunteerToken);
+    }
+
+    @Test
+    void doFilter_adminEndpoint_ignoresVolunteerCookieWhenAdminCookieIsMissing() throws ServletException, IOException {
+        when(request.getHeader("Authorization")).thenReturn(null);
+        when(request.getServletPath()).thenReturn("/api/admin/session");
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(AuthCookieService.VOLUNTEER_COOKIE, "volunteer.jwt.token")
+        });
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(jwtTokenProvider);
+    }
+
+    @Test
+    void doFilter_volunteerEndpoint_usesVolunteerCookieWhenFamilyCookieComesFirst() throws ServletException, IOException {
+        String volunteerToken = "volunteer.jwt.token";
+        when(request.getHeader("Authorization")).thenReturn(null);
+        when(request.getServletPath()).thenReturn("/api/volunteer/me/profile");
+        when(request.getCookies()).thenReturn(new Cookie[] {
+                new Cookie(AuthCookieService.FAMILY_COOKIE, "family.jwt.token"),
+                new Cookie(AuthCookieService.VOLUNTEER_COOKIE, volunteerToken)
+        });
+        when(jwtTokenProvider.validateToken(volunteerToken)).thenReturn(true);
+        when(jwtTokenProvider.getSubject(volunteerToken)).thenReturn("volunteer1");
+        when(jwtTokenProvider.getRole(volunteerToken)).thenReturn("VOLUNTEER");
+
+        filter.doFilterInternal(request, response, filterChain);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        assertNotNull(auth);
+        assertEquals("volunteer1", auth.getName());
+        assertTrue(auth.getAuthorities().stream()
+                .anyMatch(a -> "ROLE_VOLUNTEER".equals(a.getAuthority())));
+        verify(jwtTokenProvider).validateToken(volunteerToken);
     }
 
     @Test

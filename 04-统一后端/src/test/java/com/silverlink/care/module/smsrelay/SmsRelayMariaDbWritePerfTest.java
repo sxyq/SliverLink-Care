@@ -344,15 +344,15 @@ class SmsRelayMariaDbWritePerfTest {
             StubDataService dataService = new StubDataService();
             StubSmsService smsService = new StubSmsService();
             SmsRelayService service = new SmsRelayService(jdbc, smsService, dataService);
-            ReflectionTestUtils.setField(service, "receiverPhone", "13800001111");
-            ReflectionTestUtils.setField(service, "messagePrefix", "SL");
             ReflectionTestUtils.setField(service, "sessionTtlSeconds", 300L);
-            ReflectionTestUtils.setField(service, "serverUrl", "https://local.test");
             ReflectionTestUtils.setField(service, "defaultDeviceId", "relay-android-01");
-            ReflectionTestUtils.setField(service, "defaultDeviceSecret", "secret-001");
             ReflectionTestUtils.setField(service, "signatureWindowSeconds", 300L);
             ReflectionTestUtils.setField(service, "authorizationWindowSeconds", 600L);
-            service.ensureDefaultDevice();
+            String deviceSecretDigest = (String) ReflectionTestUtils.invokeMethod(service, "sha256Hex", "secret-001");
+            jdbc.update("""
+                    insert into sms_relay_device (device_id, receiver_phone, server_url, message_prefix, device_secret, status)
+                    values (?,?,?,?,?,?)
+                    """, "relay-android-01", "13800001111", "https://local.test", "SL", deviceSecretDigest, "离线");
             return new PerfFixture(dataSource, jdbc, service, db, baseDir);
         } catch (Exception exception) {
             closeQuietly(db);

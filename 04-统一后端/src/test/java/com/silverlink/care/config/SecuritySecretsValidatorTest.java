@@ -12,9 +12,7 @@ class SecuritySecretsValidatorTest {
     void acceptsConfiguredNonDemoValues() {
         SecuritySecretsValidator validator = validator(
                 "prod-jwt-secret-key-2026-silverlink-care-abcdefghijk",
-                "prod-admin-signature-secret-2026-abcdefghijk",
-                "relay-prod-device-01",
-                "relay-prod-device-secret-2026"
+                "prod-admin-signature-secret-2026-abcdefghijk"
         );
 
         assertDoesNotThrow(() -> ReflectionTestUtils.invokeMethod(validator, "validate"));
@@ -24,9 +22,7 @@ class SecuritySecretsValidatorTest {
     void rejectsKnownInsecureDefaults() {
         SecuritySecretsValidator validator = validator(
                 "demo-jwt-secret-key-2026-silverlink-care-must-be-32-bytes!!",
-                "demo-admin-signature-secret",
-                "relay-android-01",
-                "secret-001"
+                "demo-admin-signature-secret"
         );
 
         assertThrows(IllegalStateException.class, () -> ReflectionTestUtils.invokeMethod(validator, "validate"));
@@ -34,15 +30,11 @@ class SecuritySecretsValidatorTest {
 
     private static SecuritySecretsValidator validator(
             String jwtSecret,
-            String adminSignatureSecret,
-            String defaultDeviceId,
-            String defaultDeviceSecret
+            String adminSignatureSecret
     ) {
         SecuritySecretsValidator validator = new SecuritySecretsValidator();
         ReflectionTestUtils.setField(validator, "jwtSecret", jwtSecret);
         ReflectionTestUtils.setField(validator, "adminSignatureSecret", adminSignatureSecret);
-        ReflectionTestUtils.setField(validator, "defaultDeviceId", defaultDeviceId);
-        ReflectionTestUtils.setField(validator, "defaultDeviceSecret", defaultDeviceSecret);
         ReflectionTestUtils.setField(validator, "smsRelayServerUrl", "https://test.silverlink.local/api");
         return validator;
     }

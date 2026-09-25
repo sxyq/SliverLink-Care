@@ -46,8 +46,6 @@ silverlink:
     authorization-window-seconds: ${SILVERLINK_SMSRELAY_AUTHORIZATION_WINDOW_SECONDS:1200}
     signature-window-seconds: ${SILVERLINK_SMSRELAY_SIGNATURE_WINDOW_SECONDS:300}
     server-url: ${SILVERLINK_SMSRELAY_SERVER_URL:https://sxyq27.online/silverlink-api}
-    default-device-id: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_ID}
-    default-device-secret: ${SILVERLINK_SMSRELAY_DEFAULT_DEVICE_SECRET}
   wechat:
     openid-salt: ${SILVERLINK_WECHAT_OPENID_SALT:demo-wechat-openid-salt}
     app-id: ${SILVERLINK_WECHAT_APP_ID:}

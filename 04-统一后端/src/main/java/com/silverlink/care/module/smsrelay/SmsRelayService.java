@@ -16,13 +16,15 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.annotation.PostConstruct;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -47,23 +49,11 @@ public class SmsRelayService {
     private final JsonTwoLevelCache cache;
     private final ObjectMapper objectMapper;
 
-    @Value("${silverlink.smsrelay.receiver-phone:13800001111}")
-    private String receiverPhone;
-
-    @Value("${silverlink.smsrelay.message-prefix:SL}")
-    private String messagePrefix;
-
     @Value("${silverlink.smsrelay.session-ttl-seconds:300}")
     private long sessionTtlSeconds;
 
-    @Value("${silverlink.smsrelay.server-url:https://api.silverlink.example.com}")
-    private String serverUrl;
-
-    @Value("${silverlink.smsrelay.default-device-id}")
+    @Value("${silverlink.smsrelay.default-device-id:}")
     private String defaultDeviceId;
-
-    @Value("${silverlink.smsrelay.default-device-secret}")
-    private String defaultDeviceSecret;
 
     @Value("${silverlink.smsrelay.signature-window-seconds:300}")
     private long signatureWindowSeconds;
@@ -76,6 +66,9 @@ public class SmsRelayService {
 
     @Value("${silverlink.smsrelay.device-cache-ttl-ms:60000}")
     private long deviceCacheTtlMs;
+
+    @Value("${silverlink.smsrelay.enrollment-ttl-hours:168}")
+    private long enrollmentTtlHours;
 
     private final ConcurrentHashMap<String, Long> relayNonceStore = new ConcurrentHashMap<>();
     private final SimpleTtlCache<String, CachedAuthorizedSession> authorizedSessionCache = new SimpleTtlCache<>();
@@ -100,29 +93,6 @@ public class SmsRelayService {
         this.data = data;
         this.cache = cache;
         this.objectMapper = objectMapper;
-    }
-
-    @PostConstruct
-    public void ensureDefaultDevice() {
-        Integer count = jdbc.queryForObject(
-                "select count(*) from sms_relay_device where device_id=?",
-                Integer.class,
-                defaultDeviceId
-        );
-        if (count != null && count > 0) {
-            return;
-        }
-        jdbc.update("""
-                insert into sms_relay_device (device_id, receiver_phone, server_url, message_prefix, device_secret, status)
-                values (?,?,?,?,?,?)
-                """,
-                defaultDeviceId,
-                receiverPhone,
-                serverUrl,
-                messagePrefix,
-                sha256Hex(defaultDeviceSecret),
-                "离线"
-        );
     }
 
     public ScanVerificationSessionDto createScanVerificationSession(String elderId, String target, String relayDeviceId) {
@@ -412,12 +382,16 @@ public class SmsRelayService {
 
     public void handleHeartbeat(HeartbeatRequest request, String deviceSecret) {
         requireDeviceAuth(request.getDeviceId(), deviceSecret);
-        jdbc.update(
-                "update sms_relay_device set last_heartbeat=?, status=? where device_id=?",
+        int updated = jdbc.update(
+                "update sms_relay_device set last_heartbeat=?, status=? where device_id=? and status<>'已吊销'",
                 Instant.now().toString(),
                 "在线",
                 request.getDeviceId()
         );
+        if (updated == 0) {
+            deviceSnapshotCache.invalidate(request.getDeviceId());
+            throw new BizException(403, "设备已吊销");
+        }
         invalidateAdminSummary();
     }
 
@@ -533,6 +507,10 @@ public class SmsRelayService {
         if (deviceId == null || deviceId.isBlank()) {
             throw new BizException(400, "Missing device id");
         }
+        Map<String, Object> current = loadDeviceRow(deviceId);
+        if (isRevoked(current)) {
+            throw new BizException(409, "已吊销设备不能更新运行参数，请重新申请接入");
+        }
 
         String nextReceiverPhone = normalizePhone(body.getReceiverPhone());
         if (nextReceiverPhone.isBlank()) {
@@ -552,7 +530,7 @@ public class SmsRelayService {
         int updated = jdbc.update("""
                 update sms_relay_device
                 set receiver_phone=?, server_url=?, message_prefix=?
-                where device_id=?
+                where device_id=? and status<>'已吊销'
                 """,
                 nextReceiverPhone,
                 nextServerUrl,
@@ -561,13 +539,233 @@ public class SmsRelayService {
         );
 
         if (updated == 0) {
-            throw new BizException(404, "设备不存在");
+            deviceSnapshotCache.invalidate(deviceId);
+            Map<String, Object> latest = loadDeviceRow(deviceId);
+            if (isRevoked(latest)) {
+                throw new BizException(409, "已吊销设备不能更新运行参数，请重新申请接入");
+            }
+            throw new BizException(409, "设备运行参数未更新");
         }
 
         Map<String, Object> row = loadDeviceRow(deviceId);
         refreshDeviceCaches(deviceId, row);
         invalidateAdminSummary();
         return mapDevice(row);
+    }
+
+    @Transactional
+    public DeviceConfigDto revokeDevice(String deviceId) {
+        if (deviceId == null || deviceId.isBlank()) {
+            throw new BizException(400, "Missing device id");
+        }
+        Map<String, Object> current = loadDeviceRow(deviceId);
+        if (!isRevoked(current)) {
+            List<Map<String, Object>> sessions = jdbc.queryForList("""
+                    select session_id from scan_verification_session
+                    where relay_device_id=? and status in ('PENDING','VERIFIED')
+                    """, deviceId);
+            jdbc.update("update sms_relay_device set status='已吊销' where device_id=? and status<>'已吊销'", deviceId);
+            jdbc.update("""
+                    update scan_verification_session
+                    set status='EXPIRED', verified=0
+                    where relay_device_id=? and status in ('PENDING','VERIFIED')
+                    """, deviceId);
+            for (Map<String, Object> session : sessions) {
+                String sessionId = str(session.get("session_id"));
+                verifiedStatusCache.invalidate(sessionId);
+                invalidateAuthorizedSession(sessionId);
+            }
+        }
+        deviceSnapshotCache.invalidate(deviceId);
+        preferredDeviceCache.invalidate("preferred-device");
+        invalidateAdminSummary();
+        return mapDevice(loadDeviceRow(deviceId));
+    }
+
+    public SmsRelayEnrollmentStatusDto createEnrollmentRequest(SmsRelayEnrollmentRequest request, String requestToken) {
+        if (request == null) {
+            throw new BizException(400, "申请内容不能为空");
+        }
+        String requestId = normalizeEnrollmentRequestId(request.getRequestId());
+        String token = normalizeEnrollmentSecret(requestToken, "申请凭据");
+        String deviceSecret = normalizeEnrollmentSecret(request.getDeviceSecret(), "设备密钥");
+        String deviceName = str(request.getDeviceName()).trim();
+        if (deviceName.isBlank() || deviceName.length() > 100) {
+            throw new BizException(400, "设备名称长度需为 1 到 100 个字符");
+        }
+        String nextReceiverPhone = normalizePhone(request.getReceiverPhone());
+        if (!nextReceiverPhone.matches("1\\d{10}")) {
+            throw new BizException(400, "接收手机号格式不正确");
+        }
+        String nextServerUrl = validateEnrollmentServerUrl(request.getServerUrl());
+        String nextMessagePrefix = str(request.getMessagePrefix()).trim();
+        if (nextMessagePrefix.isBlank() || nextMessagePrefix.length() > 32) {
+            throw new BizException(400, "短信前缀长度需为 1 到 32 个字符");
+        }
+
+        String tokenDigest = sha256Hex(token);
+        List<Map<String, Object>> existing = jdbc.queryForList(
+                "select * from sms_relay_enrollment_request where request_id=?",
+                requestId
+        );
+        if (!existing.isEmpty()) {
+            Map<String, Object> row = existing.get(0);
+            requireEnrollmentToken(row, tokenDigest);
+            return mapEnrollmentStatus(row);
+        }
+
+        Instant expiresAt = Instant.now().plusSeconds(Math.max(1L, enrollmentTtlHours) * 3600L);
+        try {
+            jdbc.update("""
+                    insert into sms_relay_enrollment_request
+                    (request_id, device_name, receiver_phone, server_url, message_prefix,
+                     device_secret_digest, request_token_digest, status, expires_at)
+                    values (?,?,?,?,?,?,?,?,?)
+                    """,
+                    requestId,
+                    deviceName,
+                    nextReceiverPhone,
+                    nextServerUrl,
+                    nextMessagePrefix,
+                    sha256Hex(deviceSecret),
+                    tokenDigest,
+                    "PENDING",
+                    Timestamp.from(expiresAt)
+            );
+        } catch (DuplicateKeyException duplicate) {
+            List<Map<String, Object>> raced = jdbc.queryForList(
+                    "select * from sms_relay_enrollment_request where request_id=?",
+                    requestId
+            );
+            if (raced.isEmpty()) {
+                throw duplicate;
+            }
+            requireEnrollmentToken(raced.get(0), tokenDigest);
+            return mapEnrollmentStatus(raced.get(0));
+        }
+
+        SmsRelayEnrollmentStatusDto result = new SmsRelayEnrollmentStatusDto();
+        result.setRequestId(requestId);
+        result.setStatus("PENDING");
+        result.setExpiresAt(expiresAt.toString());
+        return result;
+    }
+
+    public SmsRelayEnrollmentStatusDto getEnrollmentStatus(String requestId, String requestToken) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "select * from sms_relay_enrollment_request where request_id=?",
+                normalizeEnrollmentRequestId(requestId)
+        );
+        if (rows.isEmpty()) {
+            throw new BizException(404, "设备申请不存在");
+        }
+        Map<String, Object> row = rows.get(0);
+        requireEnrollmentToken(row, sha256Hex(normalizeEnrollmentSecret(requestToken, "申请凭据")));
+        expireEnrollmentIfNeeded(row);
+        return mapEnrollmentStatus(row);
+    }
+
+    public List<SmsRelayEnrollmentAdminDto> listEnrollmentRequests() {
+        expirePendingEnrollmentRequestsScheduled();
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "select * from sms_relay_enrollment_request order by created_at desc limit 100"
+        );
+        List<SmsRelayEnrollmentAdminDto> result = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            result.add(mapEnrollmentAdmin(row));
+        }
+        return result;
+    }
+
+    @Transactional
+    public SmsRelayEnrollmentAdminDto approveEnrollmentRequest(String requestId) {
+        Map<String, Object> row = loadEnrollmentForUpdate(requestId);
+        if (expireEnrollmentIfNeeded(row)) {
+            return mapEnrollmentAdmin(row);
+        }
+        String status = str(row.get("status"));
+        if ("APPROVED".equals(status)) {
+            return mapEnrollmentAdmin(row);
+        }
+        requirePendingEnrollment(row);
+        String secretDigest = str(row.get("device_secret_digest"));
+        if (!secretDigest.matches("[0-9a-f]{64}")) {
+            throw new BizException(409, "申请凭据已失效，请重新申请");
+        }
+
+        String deviceId = "relay-" + UUID.randomUUID();
+        jdbc.update("""
+                insert into sms_relay_device
+                (device_id, device_name, receiver_phone, server_url, message_prefix, device_secret, status)
+                values (?,?,?,?,?,?,?)
+                """,
+                deviceId,
+                str(row.get("device_name")),
+                str(row.get("receiver_phone")),
+                str(row.get("server_url")),
+                str(row.get("message_prefix")),
+                secretDigest,
+                "离线"
+        );
+        Timestamp reviewedAt = Timestamp.from(Instant.now());
+        jdbc.update("""
+                update sms_relay_enrollment_request
+                set status='APPROVED', device_id=?, device_secret_digest=NULL, reviewed_at=?, review_reason=NULL
+                where request_id=? and status='PENDING'
+                """,
+                deviceId,
+                reviewedAt,
+                str(row.get("request_id"))
+        );
+
+        row.put("status", "APPROVED");
+        row.put("device_id", deviceId);
+        row.put("device_secret_digest", null);
+        row.put("reviewed_at", reviewedAt);
+        row.put("review_reason", "");
+        preferredDeviceCache.invalidate("preferred-device");
+        invalidateAdminSummary();
+        return mapEnrollmentAdmin(row);
+    }
+
+    @Transactional
+    public SmsRelayEnrollmentAdminDto rejectEnrollmentRequest(String requestId, String reason) {
+        Map<String, Object> row = loadEnrollmentForUpdate(requestId);
+        if (expireEnrollmentIfNeeded(row)) {
+            return mapEnrollmentAdmin(row);
+        }
+        if ("REJECTED".equals(str(row.get("status")))) {
+            return mapEnrollmentAdmin(row);
+        }
+        requirePendingEnrollment(row);
+        String reviewReason = str(reason).trim();
+        if (reviewReason.isBlank() || reviewReason.length() > 500) {
+            throw new BizException(400, "请填写不超过 500 个字符的拒绝原因");
+        }
+        Timestamp reviewedAt = Timestamp.from(Instant.now());
+        jdbc.update("""
+                update sms_relay_enrollment_request
+                set status='REJECTED', device_secret_digest=NULL, reviewed_at=?, review_reason=?
+                where request_id=? and status='PENDING'
+                """,
+                reviewedAt,
+                reviewReason,
+                str(row.get("request_id"))
+        );
+        row.put("status", "REJECTED");
+        row.put("device_secret_digest", null);
+        row.put("reviewed_at", reviewedAt);
+        row.put("review_reason", reviewReason);
+        return mapEnrollmentAdmin(row);
+    }
+
+    @Scheduled(fixedDelayString = "${silverlink.smsrelay.expire-enrollment-interval-ms:60000}")
+    public void expirePendingEnrollmentRequestsScheduled() {
+        jdbc.update("""
+                update sms_relay_enrollment_request
+                set status='EXPIRED', device_secret_digest=NULL
+                where status='PENDING' and expires_at < CURRENT_TIMESTAMP
+                """);
     }
 
     public List<ScanVerificationAdminDto> listVerificationSessions() {
@@ -703,6 +901,9 @@ public class SmsRelayService {
         if (!normalizedSecretHash.equals(snapshot.deviceSecret()) && !deviceSecret.equals(snapshot.deviceSecret())) {
             throw new BizException(401, "Invalid device secret");
         }
+        if ("已吊销".equals(snapshot.status())) {
+            throw new BizException(403, "设备已吊销");
+        }
         return snapshot;
     }
 
@@ -754,6 +955,7 @@ public class SmsRelayService {
     private DeviceConfigDto mapDevice(Map<String, Object> row) {
         DeviceConfigDto dto = new DeviceConfigDto();
         dto.setDeviceId(str(row.get("device_id")));
+        dto.setDeviceName(str(row.get("device_name")));
         dto.setReceiverPhone(str(row.get("receiver_phone")));
         dto.setServerUrl(str(row.get("server_url")));
         dto.setMessagePrefix(str(row.get("message_prefix")));
@@ -763,17 +965,136 @@ public class SmsRelayService {
         return dto;
     }
 
+    private SmsRelayEnrollmentAdminDto mapEnrollmentAdmin(Map<String, Object> row) {
+        SmsRelayEnrollmentAdminDto dto = new SmsRelayEnrollmentAdminDto();
+        dto.setRequestId(str(row.get("request_id")));
+        dto.setDeviceName(str(row.get("device_name")));
+        dto.setReceiverPhone(str(row.get("receiver_phone")));
+        dto.setServerUrl(str(row.get("server_url")));
+        dto.setMessagePrefix(str(row.get("message_prefix")));
+        dto.setStatus(str(row.get("status")));
+        dto.setDeviceId(str(row.get("device_id")));
+        dto.setReviewReason(str(row.get("review_reason")));
+        dto.setCreatedAt(timestampText(row.get("created_at")));
+        dto.setExpiresAt(timestampText(row.get("expires_at")));
+        dto.setReviewedAt(timestampText(row.get("reviewed_at")));
+        return dto;
+    }
+
+    private SmsRelayEnrollmentStatusDto mapEnrollmentStatus(Map<String, Object> row) {
+        SmsRelayEnrollmentStatusDto dto = new SmsRelayEnrollmentStatusDto();
+        dto.setRequestId(str(row.get("request_id")));
+        dto.setStatus(str(row.get("status")));
+        dto.setDeviceId(str(row.get("device_id")));
+        dto.setReviewReason(str(row.get("review_reason")));
+        dto.setExpiresAt(timestampText(row.get("expires_at")));
+        return dto;
+    }
+
+    private Map<String, Object> loadEnrollmentForUpdate(String requestId) {
+        List<Map<String, Object>> rows = jdbc.queryForList(
+                "select * from sms_relay_enrollment_request where request_id=? for update",
+                normalizeEnrollmentRequestId(requestId)
+        );
+        if (rows.isEmpty()) {
+            throw new BizException(404, "设备申请不存在");
+        }
+        return rows.get(0);
+    }
+
+    private void requirePendingEnrollment(Map<String, Object> row) {
+        if (!"PENDING".equals(str(row.get("status")))) {
+            throw new BizException(409, "该申请已处理或已过期");
+        }
+    }
+
+    private boolean expireEnrollmentIfNeeded(Map<String, Object> row) {
+        if ("PENDING".equals(str(row.get("status"))) && !enrollmentExpiresAt(row).isAfter(Instant.now())) {
+            jdbc.update("""
+                    update sms_relay_enrollment_request
+                    set status='EXPIRED', device_secret_digest=NULL
+                    where request_id=? and status='PENDING'
+                    """, str(row.get("request_id")));
+            row.put("status", "EXPIRED");
+            row.put("device_secret_digest", null);
+            return true;
+        }
+        return false;
+    }
+
+    private Instant enrollmentExpiresAt(Map<String, Object> row) {
+        Object value = row.get("expires_at");
+        if (value instanceof Timestamp timestamp) {
+            return timestamp.toInstant();
+        }
+        if (value instanceof Instant instant) {
+            return instant;
+        }
+        return Instant.parse(str(value));
+    }
+
+    private String timestampText(Object value) {
+        if (value instanceof Timestamp timestamp) {
+            return timestamp.toInstant().toString();
+        }
+        if (value instanceof Instant instant) {
+            return instant.toString();
+        }
+        return str(value);
+    }
+
+    private String normalizeEnrollmentRequestId(String requestId) {
+        try {
+            return UUID.fromString(str(requestId).trim()).toString();
+        } catch (IllegalArgumentException ex) {
+            throw new BizException(400, "申请编号格式不正确");
+        }
+    }
+
+    private String normalizeEnrollmentSecret(String secret, String label) {
+        String value = str(secret).trim();
+        if (value.length() < 32 || value.length() > 128) {
+            throw new BizException(400, label + "格式不正确");
+        }
+        return value;
+    }
+
+    private String validateEnrollmentServerUrl(String serverUrl) {
+        String value = str(serverUrl).trim();
+        try {
+            URI uri = URI.create(value);
+            if (!"https".equalsIgnoreCase(uri.getScheme()) || uri.getHost() == null
+                    || uri.getRawUserInfo() != null || uri.getRawQuery() != null || uri.getRawFragment() != null) {
+                throw new BizException(400, "服务器地址必须使用 HTTPS，且不能包含账号或查询参数");
+            }
+            return uri.toString().replaceAll("/+$", "");
+        } catch (IllegalArgumentException ex) {
+            throw new BizException(400, "服务器地址格式不正确");
+        }
+    }
+
+    private void requireEnrollmentToken(Map<String, Object> row, String expectedDigest) {
+        String storedDigest = str(row.get("request_token_digest"));
+        if (!MessageDigest.isEqual(
+                storedDigest.getBytes(StandardCharsets.UTF_8),
+                expectedDigest.getBytes(StandardCharsets.UTF_8)
+        )) {
+            throw new BizException(403, "申请凭据无效");
+        }
+    }
+
     private DeviceConfigDto resolvePreferredDevice() {
         return preferredDeviceCache.getOrLoad("preferred-device", deviceCacheTtlMs, () -> {
             List<Map<String, Object>> preferred = jdbc.queryForList("""
                     select device_id from sms_relay_device
+                    where status<>'已吊销'
                     order by
                         case
-                            when device_id = ? then 0
-                            when status = '在线' then 1
-                            else 2
+                            when status = '在线' then 0
+                            else 1
                         end,
-                        updated_at desc
+                        updated_at desc,
+                        case when device_id = ? then 0 else 1 end
                     limit 1
                     """, defaultDeviceId);
             if (preferred.isEmpty()) {
@@ -784,7 +1105,11 @@ public class SmsRelayService {
     }
 
     private DeviceConfigDto resolveDeviceById(String deviceId) {
-        return mapDeviceSnapshot(loadDeviceSnapshot(deviceId));
+        RelayDeviceSnapshot snapshot = loadDeviceSnapshot(deviceId);
+        if ("已吊销".equals(snapshot.status())) {
+            throw new BizException(409, "短信中转设备已吊销");
+        }
+        return mapDeviceSnapshot(snapshot);
     }
 
     private RelayDeviceSnapshot loadDeviceSnapshot(String deviceId) {
@@ -805,6 +1130,7 @@ public class SmsRelayService {
         dto.setReceiverPhone(snapshot.receiverPhone());
         dto.setServerUrl(snapshot.serverUrl());
         dto.setMessagePrefix(snapshot.messagePrefix());
+        dto.setStatus(snapshot.status());
         return dto;
     }
 
@@ -814,8 +1140,13 @@ public class SmsRelayService {
                 str(row.get("receiver_phone")),
                 str(row.get("server_url")),
                 str(row.get("message_prefix")),
-                str(row.get("device_secret"))
+                str(row.get("device_secret")),
+                str(row.get("status"))
         );
+    }
+
+    private boolean isRevoked(Map<String, Object> row) {
+        return "已吊销".equals(str(row.get("status")));
     }
 
     private void refreshDeviceCaches(String deviceId, Map<String, Object> row) {
@@ -1351,7 +1682,8 @@ public class SmsRelayService {
             String receiverPhone,
             String serverUrl,
             String messagePrefix,
-            String deviceSecret
+            String deviceSecret,
+            String status
     ) {
     }
 

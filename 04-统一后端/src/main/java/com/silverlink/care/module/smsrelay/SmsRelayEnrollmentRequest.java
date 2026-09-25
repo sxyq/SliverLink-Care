@@ -1,17 +1,15 @@
 package com.silverlink.care.module.smsrelay;
 
-public class DeviceConfigDto {
-    private String deviceId;
+public class SmsRelayEnrollmentRequest {
+    private String requestId;
     private String deviceName;
     private String receiverPhone;
     private String serverUrl;
     private String messagePrefix;
-    private String status;
-    private String serviceStatus;
-    private String lastHeartbeat;
+    private String deviceSecret;
 
-    public String getDeviceId() { return deviceId; }
-    public void setDeviceId(String deviceId) { this.deviceId = deviceId; }
+    public String getRequestId() { return requestId; }
+    public void setRequestId(String requestId) { this.requestId = requestId; }
     public String getDeviceName() { return deviceName; }
     public void setDeviceName(String deviceName) { this.deviceName = deviceName; }
     public String getReceiverPhone() { return receiverPhone; }
@@ -20,10 +18,6 @@ public class DeviceConfigDto {
     public void setServerUrl(String serverUrl) { this.serverUrl = serverUrl; }
     public String getMessagePrefix() { return messagePrefix; }
     public void setMessagePrefix(String messagePrefix) { this.messagePrefix = messagePrefix; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public String getServiceStatus() { return serviceStatus; }
-    public void setServiceStatus(String serviceStatus) { this.serviceStatus = serviceStatus; }
-    public String getLastHeartbeat() { return lastHeartbeat; }
-    public void setLastHeartbeat(String lastHeartbeat) { this.lastHeartbeat = lastHeartbeat; }
+    public String getDeviceSecret() { return deviceSecret; }
+    public void setDeviceSecret(String deviceSecret) { this.deviceSecret = deviceSecret; }
 }

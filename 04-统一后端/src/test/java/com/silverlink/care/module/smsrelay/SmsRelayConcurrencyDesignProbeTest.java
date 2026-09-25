@@ -277,12 +277,8 @@ class SmsRelayConcurrencyDesignProbeTest {
 
     private SmsRelayService createService(ProbeJdbcTemplate jdbc, SmsService smsService) {
         SmsRelayService service = new SmsRelayService(jdbc, smsService, new StubDataService());
-        ReflectionTestUtils.setField(service, "receiverPhone", "13800001111");
-        ReflectionTestUtils.setField(service, "messagePrefix", "SL");
         ReflectionTestUtils.setField(service, "sessionTtlSeconds", 300L);
-        ReflectionTestUtils.setField(service, "serverUrl", "http://localhost:8080");
         ReflectionTestUtils.setField(service, "defaultDeviceId", "relay-android-01");
-        ReflectionTestUtils.setField(service, "defaultDeviceSecret", "secret-001");
         ReflectionTestUtils.setField(service, "signatureWindowSeconds", 300L);
         ReflectionTestUtils.setField(service, "authorizationWindowSeconds", 1200L);
         return service;

@@ -24,12 +24,6 @@ public class SecuritySecretsValidator {
     @Value("${silverlink.security.admin-signature-secret}")
     private String adminSignatureSecret;
 
-    @Value("${silverlink.smsrelay.default-device-id}")
-    private String defaultDeviceId;
-
-    @Value("${silverlink.smsrelay.default-device-secret}")
-    private String defaultDeviceSecret;
-
     @Value("${silverlink.smsrelay.server-url}")
     private String smsRelayServerUrl;
 
@@ -42,8 +36,6 @@ public class SecuritySecretsValidator {
                 32,
                 DISALLOWED_ADMIN_SIGNATURE_SECRETS
         );
-        requirePresentValue("silverlink.smsrelay.default-device-id", defaultDeviceId);
-        requirePresentValue("silverlink.smsrelay.default-device-secret", defaultDeviceSecret);
         requireHttpsOrLocal("silverlink.smsrelay.server-url", smsRelayServerUrl);
     }
 
@@ -58,12 +50,6 @@ public class SecuritySecretsValidator {
         }
         if (disallowedValues.contains(value)) {
             throw new IllegalStateException("Refusing insecure default value for property: " + propertyName);
-        }
-    }
-
-    private static void requirePresentValue(String propertyName, String value) {
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Missing required property: " + propertyName);
         }
     }
 

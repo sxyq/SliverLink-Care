@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.options;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 
@@ -58,6 +59,18 @@ class SecurityConfigIntegrationTest {
                 .andExpect(status().isOk());
 
         mockMvc.perform(get("/api/unclassified/protected"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void enrollmentEndpointsArePublicForTheAppAndAdminQueueRemainsProtected() throws Exception {
+        mockMvc.perform(post("/api/sms-relay/enrollment-requests"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/sms-relay/enrollment-requests/00000000-0000-0000-0000-000000000001"))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/sms-relay/admin/enrollment-requests"))
                 .andExpect(status().isForbidden());
     }
 
@@ -142,6 +155,16 @@ class SecurityConfigIntegrationTest {
         @GetMapping("/api/qrcodes/image")
         ResponseEntity<String> publicQrImageEndpoint() {
             return ResponseEntity.ok("png");
+        }
+
+        @org.springframework.web.bind.annotation.PostMapping("/api/sms-relay/enrollment-requests")
+        ResponseEntity<String> createEnrollmentRequest() {
+            return ResponseEntity.ok("accepted");
+        }
+
+        @GetMapping("/api/sms-relay/enrollment-requests/{requestId}")
+        ResponseEntity<String> enrollmentStatus() {
+            return ResponseEntity.ok("pending");
         }
 
         @GetMapping("/api/unclassified/protected")

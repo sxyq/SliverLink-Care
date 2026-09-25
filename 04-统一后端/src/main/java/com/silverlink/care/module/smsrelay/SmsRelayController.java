@@ -2,6 +2,9 @@ package com.silverlink.care.module.smsrelay;
 
 import com.silverlink.care.common.ApiResponse;
 import com.silverlink.care.common.CursorPage;
+import com.silverlink.care.module.audit.AuditLogService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,9 +15,53 @@ import java.util.Map;
 public class SmsRelayController {
 
     private final SmsRelayService smsRelayService;
+    private final AuditLogService auditLogService;
 
-    public SmsRelayController(SmsRelayService smsRelayService) {
+    public SmsRelayController(SmsRelayService smsRelayService, AuditLogService auditLogService) {
         this.smsRelayService = smsRelayService;
+        this.auditLogService = auditLogService;
+    }
+
+    // 安卓端 - 申请接入。申请凭据仅用于读取本申请的审批结果。
+    @PostMapping("/enrollment-requests")
+    public ApiResponse<SmsRelayEnrollmentStatusDto> createEnrollmentRequest(
+            @RequestBody SmsRelayEnrollmentRequest request,
+            @RequestHeader(value = "X-Relay-Enrollment-Token", required = false) String requestToken) {
+        return ApiResponse.ok(smsRelayService.createEnrollmentRequest(request, requestToken));
+    }
+
+    @GetMapping("/enrollment-requests/{requestId}")
+    public ApiResponse<SmsRelayEnrollmentStatusDto> getEnrollmentStatus(
+            @PathVariable String requestId,
+            @RequestHeader(value = "X-Relay-Enrollment-Token", required = false) String requestToken) {
+        return ApiResponse.ok(smsRelayService.getEnrollmentStatus(requestId, requestToken));
+    }
+
+    // 管理后台 - 查看设备接入申请
+    @GetMapping("/admin/enrollment-requests")
+    public ApiResponse<List<SmsRelayEnrollmentAdminDto>> listEnrollmentRequests() {
+        return ApiResponse.ok(smsRelayService.listEnrollmentRequests());
+    }
+
+    @PostMapping("/admin/enrollment-requests/{requestId}/approve")
+    public ApiResponse<SmsRelayEnrollmentAdminDto> approveEnrollmentRequest(
+            @PathVariable String requestId,
+            HttpServletRequest request) {
+        SmsRelayEnrollmentAdminDto result = smsRelayService.approveEnrollmentRequest(requestId);
+        auditLogService.record(SecurityContextHolder.getContext().getAuthentication(), request, requestId,
+                "APPROVE_SMS_RELAY_ENROLLMENT", "SUCCESS");
+        return ApiResponse.ok(result);
+    }
+
+    @PostMapping("/admin/enrollment-requests/{requestId}/reject")
+    public ApiResponse<SmsRelayEnrollmentAdminDto> rejectEnrollmentRequest(
+            @PathVariable String requestId,
+            @RequestBody SmsRelayEnrollmentDecisionRequest body,
+            HttpServletRequest request) {
+        SmsRelayEnrollmentAdminDto result = smsRelayService.rejectEnrollmentRequest(requestId, body == null ? null : body.getReason());
+        auditLogService.record(SecurityContextHolder.getContext().getAuthentication(), request, requestId,
+                "REJECT_SMS_RELAY_ENROLLMENT", "SUCCESS");
+        return ApiResponse.ok(result);
     }
 
     // 安卓端 - 接收短信回传（需设备密钥认证）
@@ -122,6 +169,14 @@ public class SmsRelayController {
     @PutMapping("/admin/devices/{deviceId}")
     public ApiResponse<DeviceConfigDto> updateDevice(@PathVariable String deviceId, @RequestBody DeviceConfigDto body) {
         return ApiResponse.ok(smsRelayService.updateDevice(deviceId, body));
+    }
+
+    @PostMapping("/admin/devices/{deviceId}/revoke")
+    public ApiResponse<DeviceConfigDto> revokeDevice(@PathVariable String deviceId, HttpServletRequest request) {
+        DeviceConfigDto result = smsRelayService.revokeDevice(deviceId);
+        auditLogService.record(SecurityContextHolder.getContext().getAuthentication(), request, deviceId,
+                "REVOKE_SMS_RELAY_DEVICE", "SUCCESS");
+        return ApiResponse.ok(result);
     }
 
     // 管理后台 - 查看验证会话

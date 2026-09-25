@@ -44,6 +44,8 @@ public class SecurityConfig {
                             "/api/sms-relay/inbound",
                             "/api/sms-relay/heartbeat",
                             "/api/sms-relay/devices/*/config",
+                            "/api/sms-relay/enrollment-requests",
+                            "/api/sms-relay/enrollment-requests/*",
                             "/api/qrcodes/image",
                             "/api/audit-logs/report",
                             "/api/admin/login",
