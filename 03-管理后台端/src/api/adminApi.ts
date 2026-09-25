@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '../config/env';
-import type { AdminReviewRequest, AuditLog, AuditLogFilters, AuditLogSummary, CursorPage, ElderRow, SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
+import type { AdminReviewRequest, AuditLog, AuditLogFilters, AuditLogSummary, CursorPage, ElderRow, SmsRelayDeviceRow, SmsRelayEnrollmentRequestRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
 import { showAdminSuccess } from '../utils/adminNotice';
 
 const GET_CACHE_TTL_MS = 15_000;
@@ -95,13 +95,22 @@ async function request<T>(path: string, options?: RequestInit, successMessage?: 
     if (response.status === 401 || response.status === 403) {
       clearAdminSession();
       invalidateAdminCache();
+      const text = await response.text().catch(() => '');
+      if (path === '/api/admin/login') {
+        const message = normalizeErrorMessage(text);
+        if (message !== '请求失败' && message !== 'Unauthorized' && message !== 'Forbidden') {
+          throw new Error(message);
+        }
+        throw new Error(response.status === 401 ? '账号或密码错误' : '管理员登录接口被拒绝，请确认账号权限配置');
+      }
+      if (path === '/api/admin/session') {
+        throw new Error(`管理员会话校验失败（HTTP ${response.status}），请检查浏览器携带的管理员会话。`);
+      }
+      throw new Error('登录态已失效或当前账号无权访问，请重新登录管理员账号');
     }
 
     if (!response.ok) {
       const text = await response.text().catch(() => '');
-      if (response.status === 401 || response.status === 403) {
-        throw new Error('登录态已失效或当前账号无权访问，请重新登录管理员账号');
-      }
       throw new Error(normalizeErrorMessage(text));
     }
 
@@ -194,7 +203,15 @@ export async function loginAdmin(account: string, password: string) {
     }
     throw error;
   }
-  const session = await fetchAdminSession();
+  let session: { role?: string; account?: string };
+  try {
+    session = await fetchAdminSession();
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith('管理员会话校验失败')) {
+      throw new Error(`管理员账号验证通过，但${error.message}`);
+    }
+    throw error;
+  }
   adminRole = session.role || result.role || '系统管理员';
   persistAdminSession(adminRole);
   return { ok: true, role: adminRole };
@@ -627,11 +644,25 @@ export async function saveElderScales(elderId: string, items: Array<Record<strin
 function formatRelayStatus(status: unknown) {
   const value = String(status || '').trim().toUpperCase();
   if (value === '在线') return '在线';
+  if (value === 'REVOKED' || value === '已吊销') return '已吊销';
   if (value === 'UPLOADED') return '已上传';
   if (value === 'VERIFIED') return '已验证';
   if (value === 'PENDING') return '等待验证';
   if (value === 'EXPIRED') return '已过期';
   return value || '未知';
+}
+
+function mapSmsRelayDevice(row: Record<string, unknown>) {
+  return {
+    deviceId: String(row.deviceId || ''),
+    deviceName: String(row.deviceName || ''),
+    receiverPhone: String(row.receiverPhone || ''),
+    serverUrl: String(row.serverUrl || ''),
+    messagePrefix: String(row.messagePrefix || ''),
+    status: formatRelayStatus(row.status),
+    serviceStatus: String(row.serviceStatus || ''),
+    lastHeartbeat: formatDateTime(row.lastHeartbeat),
+  } as SmsRelayDeviceRow;
 }
 
 function formatDateTime(value: unknown) {
@@ -648,15 +679,46 @@ function formatDateTime(value: unknown) {
 
 export async function fetchSmsRelayDevices() {
   const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/devices');
+  return rows.map(mapSmsRelayDevice);
+}
+
+function formatEnrollmentStatus(value: unknown) {
+  const status = String(value || '').toUpperCase();
+  if (status === 'PENDING') return '待审批';
+  if (status === 'APPROVED') return '已通过';
+  if (status === 'REJECTED') return '已拒绝';
+  if (status === 'EXPIRED') return '已过期';
+  return status || '未知';
+}
+
+export async function fetchSmsRelayEnrollmentRequests() {
+  const rows = await request<Array<Record<string, unknown>>>('/api/sms-relay/admin/enrollment-requests');
   return rows.map((row) => ({
-    deviceId: String(row.deviceId || ''),
+    requestId: String(row.requestId || ''),
+    deviceName: String(row.deviceName || ''),
     receiverPhone: String(row.receiverPhone || ''),
     serverUrl: String(row.serverUrl || ''),
     messagePrefix: String(row.messagePrefix || ''),
-    status: formatRelayStatus(row.status),
-    serviceStatus: String(row.serviceStatus || ''),
-    lastHeartbeat: formatDateTime(row.lastHeartbeat),
-  })) as SmsRelayDeviceRow[];
+    status: formatEnrollmentStatus(row.status),
+    deviceId: String(row.deviceId || ''),
+    reviewReason: String(row.reviewReason || ''),
+    createdAt: formatDateTime(row.createdAt),
+    expiresAt: formatDateTime(row.expiresAt),
+    reviewedAt: formatDateTime(row.reviewedAt),
+  })) as SmsRelayEnrollmentRequestRow[];
+}
+
+export async function approveSmsRelayEnrollmentRequest(requestId: string) {
+  await request(`/api/sms-relay/admin/enrollment-requests/${encodeURIComponent(requestId)}/approve`, {
+    method: 'POST',
+  }, '设备申请已批准');
+}
+
+export async function rejectSmsRelayEnrollmentRequest(requestId: string, reason: string) {
+  await request(`/api/sms-relay/admin/enrollment-requests/${encodeURIComponent(requestId)}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  }, '设备申请已拒绝');
 }
 
 export async function updateSmsRelayDevice(deviceId: string, body: Pick<SmsRelayDeviceRow, 'receiverPhone' | 'serverUrl' | 'messagePrefix'>) {
@@ -664,15 +726,14 @@ export async function updateSmsRelayDevice(deviceId: string, body: Pick<SmsRelay
     method: 'PUT',
     body: JSON.stringify(body),
   }, '短信中转设备配置保存成功');
-  return {
-    deviceId: String(row.deviceId || ''),
-    receiverPhone: String(row.receiverPhone || ''),
-    serverUrl: String(row.serverUrl || ''),
-    messagePrefix: String(row.messagePrefix || ''),
-    status: formatRelayStatus(row.status),
-    serviceStatus: String(row.serviceStatus || ''),
-    lastHeartbeat: formatDateTime(row.lastHeartbeat),
-  } as SmsRelayDeviceRow;
+  return mapSmsRelayDevice(row);
+}
+
+export async function revokeSmsRelayDevice(deviceId: string) {
+  const row = await request<Record<string, unknown>>(`/api/sms-relay/admin/devices/${encodeURIComponent(deviceId)}/revoke`, {
+    method: 'POST',
+  }, '短信中转设备已吊销');
+  return mapSmsRelayDevice(row);
 }
 
 export async function fetchSmsRelayRecords() {

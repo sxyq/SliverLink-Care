@@ -1,22 +1,38 @@
 import { useEffect, useState } from 'react';
 import { RadioTower, RefreshCw, Smartphone } from 'lucide-react';
-import { fetchSmsRelayDevices, fetchSmsRelayRecordPage, fetchSmsRelaySessionPage, fetchSmsRelaySummary, updateSmsRelayDevice } from '../api/adminApi';
+import {
+  approveSmsRelayEnrollmentRequest,
+  fetchSmsRelayDevices,
+  fetchSmsRelayEnrollmentRequests,
+  fetchSmsRelayRecordPage,
+  fetchSmsRelaySessionPage,
+  fetchSmsRelaySummary,
+  rejectSmsRelayEnrollmentRequest,
+  revokeSmsRelayDevice,
+  updateSmsRelayDevice,
+} from '../api/adminApi';
 import { StatusTag } from '../components/StatusTag';
-import type { SmsRelayDeviceRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
+import type { SmsRelayDeviceRow, SmsRelayEnrollmentRequestRow, SmsRelayRecordRow, SmsRelaySessionRow } from '../types';
 
 export function SmsRelayManagePage() {
   const [devices, setDevices] = useState<SmsRelayDeviceRow[]>([]);
   const [records, setRecords] = useState<SmsRelayRecordRow[]>([]);
   const [sessions, setSessions] = useState<SmsRelaySessionRow[]>([]);
+  const [enrollmentRequests, setEnrollmentRequests] = useState<SmsRelayEnrollmentRequestRow[]>([]);
   const [summary, setSummary] = useState<Record<string, unknown>>({});
-  const [activeTab, setActiveTab] = useState<'devices' | 'records' | 'sessions'>('devices');
+  const [activeTab, setActiveTab] = useState<'devices' | 'requests' | 'records' | 'sessions'>('devices');
   const [recordSenderPhone, setRecordSenderPhone] = useState('');
   const [sessionReceiverPhone, setSessionReceiverPhone] = useState('');
   const [recordNextCursor, setRecordNextCursor] = useState<string | null>(null);
   const [sessionNextCursor, setSessionNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [savingDeviceId, setSavingDeviceId] = useState('');
+  const [revokingDeviceId, setRevokingDeviceId] = useState('');
   const [saveError, setSaveError] = useState('');
+  const [requestsError, setRequestsError] = useState('');
+  const [actingRequestId, setActingRequestId] = useState('');
+  const [rejectingRequestId, setRejectingRequestId] = useState('');
+  const [rejectReason, setRejectReason] = useState('');
 
   async function loadDevices() {
     setLoading(true);
@@ -50,15 +66,59 @@ export function SmsRelayManagePage() {
     } finally { setLoading(false); }
   }
 
-  function selectTab(tab: 'devices' | 'records' | 'sessions') {
+  async function loadEnrollmentRequests() {
+    setRequestsError('');
+    try {
+      setEnrollmentRequests(await fetchSmsRelayEnrollmentRequests());
+    } catch (error) {
+      setRequestsError(error instanceof Error ? error.message : '设备申请加载失败');
+    }
+  }
+
+  function selectTab(tab: 'devices' | 'requests' | 'records' | 'sessions') {
     setActiveTab(tab);
+    if (tab === 'requests' && enrollmentRequests.length === 0) loadEnrollmentRequests().catch(() => undefined);
     if (tab === 'records' && records.length === 0) loadRecords().catch(() => undefined);
     if (tab === 'sessions' && sessions.length === 0) loadSessions().catch(() => undefined);
   }
 
   useEffect(() => {
     loadDevices().catch(() => undefined);
+    loadEnrollmentRequests().catch(() => undefined);
   }, []);
+
+  async function handleApproveRequest(requestId: string) {
+    setActingRequestId(requestId);
+    setRequestsError('');
+    try {
+      await approveSmsRelayEnrollmentRequest(requestId);
+      await Promise.all([loadEnrollmentRequests(), loadDevices()]);
+    } catch (error) {
+      setRequestsError(error instanceof Error ? error.message : '批准申请失败');
+    } finally {
+      setActingRequestId('');
+    }
+  }
+
+  async function handleRejectRequest(requestId: string) {
+    const reason = rejectReason.trim();
+    if (!reason) {
+      setRequestsError('请填写拒绝原因');
+      return;
+    }
+    setActingRequestId(requestId);
+    setRequestsError('');
+    try {
+      await rejectSmsRelayEnrollmentRequest(requestId, reason);
+      setRejectingRequestId('');
+      setRejectReason('');
+      await loadEnrollmentRequests();
+    } catch (error) {
+      setRequestsError(error instanceof Error ? error.message : '拒绝申请失败');
+    } finally {
+      setActingRequestId('');
+    }
+  }
 
   async function handleSaveDevice(deviceId: string) {
     const current = devices.find((item) => item.deviceId === deviceId);
@@ -80,6 +140,21 @@ export function SmsRelayManagePage() {
     }
   }
 
+  async function handleRevokeDevice(deviceId: string) {
+    if (!window.confirm(`确认吊销设备 ${deviceId} 吗？吊销后该设备将不能继续心跳或回传短信。`)) return;
+
+    setRevokingDeviceId(deviceId);
+    setSaveError('');
+    try {
+      await revokeSmsRelayDevice(deviceId);
+      await loadDevices();
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : '设备吊销失败');
+    } finally {
+      setRevokingDeviceId('');
+    }
+  }
+
   return (
     <>
       <header className="topbar">
@@ -91,9 +166,87 @@ export function SmsRelayManagePage() {
 
       <div className="toolbar" style={{ marginTop: 14 }}>
         <button className={activeTab === 'devices' ? '' : 'secondary'} onClick={() => selectTab('devices')}>设备</button>
+        <button className={activeTab === 'requests' ? '' : 'secondary'} onClick={() => selectTab('requests')}>
+          接入申请{enrollmentRequests.some((item) => item.status === '待审批') ? ` (${enrollmentRequests.filter((item) => item.status === '待审批').length})` : ''}
+        </button>
         <button className={activeTab === 'records' ? '' : 'secondary'} onClick={() => selectTab('records')}>回传记录</button>
         <button className={activeTab === 'sessions' ? '' : 'secondary'} onClick={() => selectTab('sessions')}>验证会话</button>
       </div>
+
+      {activeTab === 'requests' ? <section className="panel sms-relay-panel" style={{ marginTop: 14 }}>
+        <div className="panel-title">
+          <Smartphone size={18} />
+          <h3>设备接入申请</h3>
+          <button className="secondary" onClick={() => loadEnrollmentRequests()} disabled={loading}>刷新申请</button>
+        </div>
+        {requestsError ? <p className="form-error" role="alert">{requestsError}</p> : null}
+        <div className="sms-relay-table-shell">
+          <table className="data-table sms-relay-device-table">
+            <thead>
+              <tr>
+                <th>设备名称</th>
+                <th>接收手机号</th>
+                <th>服务器地址</th>
+                <th>前缀规则</th>
+                <th>申请时间</th>
+                <th>状态</th>
+                <th>设备 ID / 处理说明</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enrollmentRequests.map((row) => (
+                <tr key={row.requestId}>
+                  <td>{row.deviceName}</td>
+                  <td>{row.receiverPhone}</td>
+                  <td>{row.serverUrl}</td>
+                  <td>{row.messagePrefix}</td>
+                  <td>{row.createdAt}</td>
+                  <td><StatusTag status={row.status} /></td>
+                  <td>{row.deviceId || row.reviewReason || '-'}</td>
+                  <td>
+                    {row.status === '待审批' ? <div className="toolbar">
+                      <button
+                        onClick={() => handleApproveRequest(row.requestId)}
+                        disabled={actingRequestId === row.requestId}
+                      >
+                        {actingRequestId === row.requestId ? '处理中' : '批准'}
+                      </button>
+                      <button
+                        className="secondary"
+                        onClick={() => {
+                          setRejectingRequestId(row.requestId);
+                          setRejectReason('');
+                          setRequestsError('');
+                        }}
+                      >拒绝</button>
+                    </div> : '-'}
+                    {rejectingRequestId === row.requestId ? <div className="toolbar" style={{ marginTop: 8 }}>
+                      <input
+                        aria-label="拒绝原因"
+                        placeholder="填写拒绝原因"
+                        value={rejectReason}
+                        onChange={(event) => setRejectReason(event.target.value)}
+                      />
+                      <button
+                        className="secondary"
+                        onClick={() => handleRejectRequest(row.requestId)}
+                        disabled={actingRequestId === row.requestId}
+                      >确认拒绝</button>
+                      <button
+                        className="secondary"
+                        onClick={() => setRejectingRequestId('')}
+                        disabled={actingRequestId === row.requestId}
+                      >取消</button>
+                    </div> : null}
+                  </td>
+                </tr>
+              ))}
+              {enrollmentRequests.length === 0 ? <tr><td colSpan={8}>暂无设备申请</td></tr> : null}
+            </tbody>
+          </table>
+        </div>
+      </section> : null}
 
       {activeTab === 'devices' ? <section className="panel sms-relay-panel" style={{ marginTop: 14 }}>
         <div className="panel-title">
@@ -146,6 +299,7 @@ export function SmsRelayManagePage() {
             <thead>
               <tr>
                 <th>设备 ID</th>
+                <th>设备名称</th>
                 <th>接收手机号</th>
                 <th>服务器地址</th>
                 <th>前缀规则</th>
@@ -159,9 +313,11 @@ export function SmsRelayManagePage() {
               {devices.map((row) => (
                 <tr key={row.deviceId}>
                   <td style={{ fontFamily: 'monospace' }}>{row.deviceId}</td>
+                  <td>{row.deviceName || '-'}</td>
                   <td>
                     <input
                       value={row.receiverPhone}
+                      readOnly={row.status === '已吊销'}
                       onChange={(event) => setDevices((prev) => prev.map((item) => (
                         item.deviceId === row.deviceId ? { ...item, receiverPhone: event.target.value } : item
                       )))}
@@ -170,6 +326,7 @@ export function SmsRelayManagePage() {
                   <td>
                     <input
                       value={row.serverUrl}
+                      readOnly={row.status === '已吊销'}
                       onChange={(event) => setDevices((prev) => prev.map((item) => (
                         item.deviceId === row.deviceId ? { ...item, serverUrl: event.target.value } : item
                       )))}
@@ -178,6 +335,7 @@ export function SmsRelayManagePage() {
                   <td>
                     <input
                       value={row.messagePrefix}
+                      readOnly={row.status === '已吊销'}
                       onChange={(event) => setDevices((prev) => prev.map((item) => (
                         item.deviceId === row.deviceId ? { ...item, messagePrefix: event.target.value } : item
                       )))}
@@ -187,13 +345,22 @@ export function SmsRelayManagePage() {
                   <td><StatusTag status={row.serviceStatus} /></td>
                   <td>{row.lastHeartbeat}</td>
                   <td>
-                    <button
-                      className="secondary"
-                      onClick={() => handleSaveDevice(row.deviceId)}
-                      disabled={savingDeviceId === row.deviceId}
-                    >
-                      {savingDeviceId === row.deviceId ? '保存中' : '保存配置'}
-                    </button>
+                    {row.status === '已吊销' ? '-' : <div className="toolbar">
+                      <button
+                        className="secondary"
+                        onClick={() => handleSaveDevice(row.deviceId)}
+                        disabled={savingDeviceId === row.deviceId || revokingDeviceId === row.deviceId}
+                      >
+                        {savingDeviceId === row.deviceId ? '保存中' : '更新运行参数'}
+                      </button>
+                      <button
+                        className="secondary"
+                        onClick={() => handleRevokeDevice(row.deviceId)}
+                        disabled={savingDeviceId === row.deviceId || revokingDeviceId === row.deviceId}
+                      >
+                        {revokingDeviceId === row.deviceId ? '吊销中' : '吊销设备'}
+                      </button>
+                    </div>}
                   </td>
                 </tr>
               ))}

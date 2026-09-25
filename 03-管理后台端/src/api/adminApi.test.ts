@@ -23,14 +23,18 @@ import {
   fetchMedications,
   fetchQrCodes,
   fetchSmsRelayDevices,
+  fetchSmsRelayEnrollmentRequests,
   fetchSmsRelayRecords,
   fetchSmsRelaySessions,
   fetchVolunteers,
   invalidateAdminCache,
+  approveSmsRelayEnrollmentRequest,
   loginAdmin,
   logoutAdmin,
   regenerateQrCode,
   rejectAdminReviewRequest,
+  rejectSmsRelayEnrollmentRequest,
+  revokeSmsRelayDevice,
   saveElderMedications,
   saveElderScales,
   setElderStatus,
@@ -395,6 +399,29 @@ describe('adminApi', () => {
     await expect(loginAdmin('admin', 'wrong')).rejects.toThrow('账号或密码错误');
   });
 
+  it('preserves an HTTP 401 message from the login endpoint', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ code: 401, message: '账号或密码错误', data: null }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    ));
+
+    await expect(loginAdmin('admin', 'wrong')).rejects.toThrow('账号或密码错误');
+  });
+
+  it('distinguishes accepted credentials from failed session validation', async () => {
+    const fetchMock = queueFetch(
+      { role: '系统管理员' },
+      new Response('Forbidden', { status: 403 }),
+    );
+
+    await expect(loginAdmin('admin', 'pass')).rejects.toThrow(
+      '管理员账号验证通过，但管理员会话校验失败（HTTP 403），请检查浏览器携带的管理员会话。',
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('returns default role when login response has empty role', async () => {
     queueFetch({ role: '' }, { role: '' });
 
@@ -579,5 +606,44 @@ describe('adminApi', () => {
     ));
 
     await expect(fetchElders()).rejects.toThrow('API 403');
+  });
+
+  it('loads and reviews SMS relay enrollment requests', async () => {
+    const fetchMock = queueFetch(
+      [{ requestId: 'req-1', deviceName: '中转机', receiverPhone: '13800000000', status: 'PENDING', createdAt: '2026-09-23T00:00:00Z' }],
+      { requestId: 'req-1', status: 'APPROVED', deviceId: 'relay-1' },
+      { requestId: 'req-2', status: 'REJECTED', reviewReason: '号码待确认' },
+    );
+
+    await expect(fetchSmsRelayEnrollmentRequests()).resolves.toEqual([
+      expect.objectContaining({ requestId: 'req-1', status: '待审批', deviceName: '中转机' }),
+    ]);
+    await expect(approveSmsRelayEnrollmentRequest('req-1')).resolves.toBeUndefined();
+    await expect(rejectSmsRelayEnrollmentRequest('req-2', '号码待确认')).resolves.toBeUndefined();
+    expect(fetchMock.mock.calls[1][0]).toContain('/req-1/approve');
+    expect(fetchMock.mock.calls[1][1].method).toBe('POST');
+    expect(fetchMock.mock.calls[2][1].body).toBe(JSON.stringify({ reason: '号码待确认' }));
+  });
+
+  it('revokes an SMS relay device and formats its status', async () => {
+    const fetchMock = queueFetch({
+      deviceId: 'relay/1',
+      deviceName: '值守手机',
+      receiverPhone: '13800000000',
+      serverUrl: 'https://server-a',
+      messagePrefix: 'SL',
+      status: 'REVOKED',
+      serviceStatus: '等待设备连接',
+    });
+
+    await expect(revokeSmsRelayDevice('relay/1')).resolves.toEqual(expect.objectContaining({
+      deviceId: 'relay/1',
+      deviceName: '值守手机',
+      status: '已吊销',
+    }));
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining('/api/sms-relay/admin/devices/relay%2F1/revoke'),
+      expect.objectContaining({ method: 'POST' }),
+    );
   });
 });

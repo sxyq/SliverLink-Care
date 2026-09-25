@@ -1,29 +1,37 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SmsRelayManagePage } from './SmsRelayManagePage';
 import { InvitationManagePage } from './InvitationManagePage';
 import { SecuritySettingsPage } from './SecuritySettingsPage';
 import { FamilyBindingManagePage } from './FamilyBindingManagePage';
 
 const fetchSmsRelayDevices = vi.fn();
+const fetchSmsRelayEnrollmentRequests = vi.fn();
 const fetchSmsRelayRecords = vi.fn();
 const fetchSmsRelaySessions = vi.fn();
 const fetchSmsRelaySummary = vi.fn();
 const fetchSmsRelayRecordPage = vi.fn();
 const fetchSmsRelaySessionPage = vi.fn();
 const updateSmsRelayDevice = vi.fn();
+const approveSmsRelayEnrollmentRequest = vi.fn();
+const rejectSmsRelayEnrollmentRequest = vi.fn();
+const revokeSmsRelayDevice = vi.fn();
 const fetchFamilyBindings = vi.fn();
 const unbindFamily = vi.fn();
 const exportToCsv = vi.fn();
 
 vi.mock('../api/adminApi', () => ({
   fetchSmsRelayDevices: (...args: unknown[]) => fetchSmsRelayDevices(...args),
+  fetchSmsRelayEnrollmentRequests: (...args: unknown[]) => fetchSmsRelayEnrollmentRequests(...args),
   fetchSmsRelayRecords: (...args: unknown[]) => fetchSmsRelayRecords(...args),
   fetchSmsRelaySessions: (...args: unknown[]) => fetchSmsRelaySessions(...args),
   fetchSmsRelaySummary: (...args: unknown[]) => fetchSmsRelaySummary(...args),
   fetchSmsRelayRecordPage: (...args: unknown[]) => fetchSmsRelayRecordPage(...args),
   fetchSmsRelaySessionPage: (...args: unknown[]) => fetchSmsRelaySessionPage(...args),
   updateSmsRelayDevice: (...args: unknown[]) => updateSmsRelayDevice(...args),
+  approveSmsRelayEnrollmentRequest: (...args: unknown[]) => approveSmsRelayEnrollmentRequest(...args),
+  rejectSmsRelayEnrollmentRequest: (...args: unknown[]) => rejectSmsRelayEnrollmentRequest(...args),
+  revokeSmsRelayDevice: (...args: unknown[]) => revokeSmsRelayDevice(...args),
   fetchFamilyBindings: (...args: unknown[]) => fetchFamilyBindings(...args),
   unbindFamily: (...args: unknown[]) => unbindFamily(...args),
 }));
@@ -41,17 +49,37 @@ vi.mock('../utils/exportCsv', () => ({
 }));
 
 describe('SmsRelayManagePage', () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   beforeEach(() => {
     vi.clearAllMocks();
     fetchSmsRelayDevices.mockResolvedValue([
       {
         deviceId: 'device-1',
+        deviceName: '测试设备',
         receiverPhone: '13800000000',
         serverUrl: 'https://server-a',
         messagePrefix: '【验证】',
         status: '在线',
         serviceStatus: '后台服务运行中',
         lastHeartbeat: '2026-05-26 09:00:00',
+      },
+    ]);
+    fetchSmsRelayEnrollmentRequests.mockResolvedValue([
+      {
+        requestId: 'request-1',
+        deviceName: '新中转机',
+        receiverPhone: '13700000000',
+        serverUrl: 'https://server-a',
+        messagePrefix: 'SL',
+        status: '待审批',
+        deviceId: '',
+        reviewReason: '',
+        createdAt: '2026-09-23 10:00:00',
+        expiresAt: '2026-09-30 10:00:00',
+        reviewedAt: '',
       },
     ]);
     fetchSmsRelayRecords.mockResolvedValue([
@@ -104,6 +132,10 @@ describe('SmsRelayManagePage', () => {
       serviceStatus: '后台服务运行中',
       lastHeartbeat: '2026-05-26 09:10:00',
     });
+    revokeSmsRelayDevice.mockResolvedValue({
+      deviceId: 'device-1',
+      status: '已吊销',
+    });
   });
 
   it('loads relay data, filters records and saves device config', async () => {
@@ -130,7 +162,7 @@ describe('SmsRelayManagePage', () => {
     const phoneInputs = screen.getAllByDisplayValue('13800000000');
     fireEvent.change(phoneInputs[0], { target: { value: '13900000000' } });
     fireEvent.change(screen.getByDisplayValue('【验证】'), { target: { value: '【新前缀】' } });
-    fireEvent.click(screen.getByRole('button', { name: '保存配置' }));
+    fireEvent.click(screen.getByRole('button', { name: '更新运行参数' }));
 
     await waitFor(() => {
       expect(updateSmsRelayDevice).toHaveBeenCalledWith('device-1', {
@@ -152,9 +184,83 @@ describe('SmsRelayManagePage', () => {
 
     render(<SmsRelayManagePage />);
     await screen.findByText('短信中转管理');
-    fireEvent.click(screen.getByRole('button', { name: '保存配置' }));
+    fireEvent.click(screen.getByRole('button', { name: '更新运行参数' }));
 
     expect(await screen.findByText('保存失败')).toBeInTheDocument();
+  });
+
+  it('confirms device revocation and refreshes the device summary', async () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+
+    render(<SmsRelayManagePage />);
+    await screen.findByText('短信中转管理');
+    fireEvent.click(screen.getByRole('button', { name: '吊销设备' }));
+
+    expect(confirm).toHaveBeenCalledWith(expect.stringContaining('device-1'));
+    await waitFor(() => expect(revokeSmsRelayDevice).toHaveBeenCalledWith('device-1'));
+    await waitFor(() => {
+      expect(fetchSmsRelayDevices).toHaveBeenCalledTimes(2);
+      expect(fetchSmsRelaySummary).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('shows a revoke error without refreshing device data', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    revokeSmsRelayDevice.mockRejectedValueOnce(new Error('吊销失败'));
+
+    render(<SmsRelayManagePage />);
+    await screen.findByText('短信中转管理');
+    fireEvent.click(screen.getByRole('button', { name: '吊销设备' }));
+
+    expect(await screen.findByText('吊销失败')).toBeInTheDocument();
+    expect(fetchSmsRelayDevices).toHaveBeenCalledTimes(1);
+    expect(fetchSmsRelaySummary).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders revoked devices as read-only without update or revoke actions', async () => {
+    fetchSmsRelayDevices.mockResolvedValueOnce([{
+      deviceId: 'device-revoked',
+      deviceName: '已停用中转机',
+      receiverPhone: '13800000000',
+      serverUrl: 'https://server-a',
+      messagePrefix: '【验证】',
+      status: '已吊销',
+      serviceStatus: '等待设备连接',
+      lastHeartbeat: '2026-09-25 09:00:00',
+    }]);
+
+    render(<SmsRelayManagePage />);
+
+    expect(await screen.findByText('已吊销')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('13800000000')).toHaveAttribute('readonly');
+    expect(screen.getByDisplayValue('https://server-a')).toHaveAttribute('readonly');
+    expect(screen.getByDisplayValue('【验证】')).toHaveAttribute('readonly');
+    expect(screen.queryByRole('button', { name: '更新运行参数' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '吊销设备' })).not.toBeInTheDocument();
+  });
+
+  it('allows an administrator to approve a pending device request', async () => {
+    approveSmsRelayEnrollmentRequest.mockResolvedValue(undefined);
+    render(<SmsRelayManagePage />);
+    await screen.findByText('短信中转管理');
+
+    fireEvent.click(screen.getByRole('button', { name: '接入申请 (1)' }));
+    expect(await screen.findByText('新中转机')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: '批准' }));
+
+    await waitFor(() => expect(approveSmsRelayEnrollmentRequest).toHaveBeenCalledWith('request-1'));
+    expect(fetchSmsRelayDevices).toHaveBeenCalledTimes(2);
+  });
+
+  it('requires a reason when rejecting a pending device request', async () => {
+    render(<SmsRelayManagePage />);
+    await screen.findByText('短信中转管理');
+    fireEvent.click(screen.getByRole('button', { name: '接入申请 (1)' }));
+    fireEvent.click(await screen.findByRole('button', { name: '拒绝' }));
+    fireEvent.click(screen.getByRole('button', { name: '确认拒绝' }));
+
+    expect(await screen.findByText('请填写拒绝原因')).toBeInTheDocument();
+    expect(rejectSmsRelayEnrollmentRequest).not.toHaveBeenCalled();
   });
 });
 

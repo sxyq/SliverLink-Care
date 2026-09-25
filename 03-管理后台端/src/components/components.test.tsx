@@ -31,6 +31,7 @@ describe('admin components and security formatting', () => {
     ['启用', 'status-tag--success'],
     ['失败', 'status-tag--danger'],
     ['已过期', 'status-tag--danger'],
+    ['已吊销', 'status-tag--danger'],
     ['已停用', 'status-tag--disabled'],
     ['等待设备连接', 'status-tag--disabled'],
     ['等待验证', 'status-tag--warning'],

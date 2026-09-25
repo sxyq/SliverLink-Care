@@ -202,12 +202,27 @@ export interface AdminReviewRequest {
 
 export interface SmsRelayDeviceRow {
   deviceId: string;
+  deviceName: string;
   receiverPhone: string;
   serverUrl: string;
   messagePrefix: string;
   status: string;
   serviceStatus: string;
   lastHeartbeat: string;
+}
+
+export interface SmsRelayEnrollmentRequestRow {
+  requestId: string;
+  deviceName: string;
+  receiverPhone: string;
+  serverUrl: string;
+  messagePrefix: string;
+  status: string;
+  deviceId: string;
+  reviewReason: string;
+  createdAt: string;
+  expiresAt: string;
+  reviewedAt: string;
 }
 
 export interface SmsRelayRecordRow {
