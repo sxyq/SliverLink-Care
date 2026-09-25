@@ -10,6 +10,8 @@ import com.silverlink.smsrelay.data.model.SmsRecord
 import com.silverlink.smsrelay.data.model.UploadStatus
 import com.silverlink.smsrelay.data.network.ApiClientFactory
 import com.silverlink.smsrelay.data.network.RelayApiService
+import com.silverlink.smsrelay.data.network.isRelayDeviceRevoked
+import com.silverlink.smsrelay.service.RelayServiceLauncher
 import com.silverlink.smsrelay.util.SmsParser
 import com.silverlink.smsrelay.util.SmsPermissionHelper
 import org.json.JSONArray
@@ -36,6 +38,9 @@ class SmsRelayRepository(
         advisoryMessage: String? = null,
     ): Result<Unit> {
         val config = relayPreferences.readConfig()
+        if (!relayPreferences.isDeviceActive()) {
+            return Result.failure(IllegalStateException("设备尚未获批接入"))
+        }
         val recordId = stableRecordId(senderPhone, messageBody, receivedAt)
 
         // 保存为PENDING状态
@@ -74,6 +79,9 @@ class SmsRelayRepository(
             relayPreferences.saveLastSyncTime(System.currentTimeMillis())
             incrementStatsUploaded()
         }.onFailure {
+            if (it.isRelayDeviceRevoked()) {
+                RelayServiceLauncher.markDeviceRevoked(context)
+            }
             updateRecordStatus(recordId, UploadStatus.FAILED, it.message)
             incrementStatsFailed()
         }
@@ -118,6 +126,9 @@ class SmsRelayRepository(
         }
 
         val config = relayPreferences.readConfig()
+        if (!relayPreferences.isDeviceActive()) {
+            return Result.success(0)
+        }
         val existingFingerprints = getAllRecords()
             .asSequence()
             .filter { it.status != UploadStatus.FAILED }

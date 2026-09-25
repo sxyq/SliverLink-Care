@@ -21,7 +21,12 @@ object RelayServiceLauncher {
     const val EXTRA_MEDIA_KEEPALIVE_ENABLED = "extra_media_keepalive_enabled"
 
     fun start(context: Context, immediateHeartbeat: Boolean = false) {
-        RelayPreferences(context).saveServiceState(true, context.getString(R.string.relay_service_running))
+        val preferences = RelayPreferences(context)
+        if (!preferences.isDeviceActive()) {
+            preferences.saveServiceState(false, inactiveStatus(context, preferences))
+            return
+        }
+        preferences.saveServiceState(true, context.getString(R.string.relay_service_running))
         HeartbeatScheduler.schedule(context, enqueueImmediate = immediateHeartbeat)
         val intent = Intent(context, RelayForegroundService::class.java)
             .setAction(ACTION_START)
@@ -29,8 +34,29 @@ object RelayServiceLauncher {
         ContextCompat.startForegroundService(context, intent)
     }
 
+    fun stop(context: Context) {
+        HeartbeatScheduler.cancel(context)
+        HeartbeatAlarmScheduler.cancel(context)
+        context.stopService(Intent(context, RelayForegroundService::class.java))
+        RelayPreferences(context).saveServiceState(false, context.getString(R.string.relay_service_stopped))
+    }
+
+    fun markDeviceRevoked(context: Context) {
+        val preferences = RelayPreferences(context)
+        preferences.markDeviceRevoked()
+        HeartbeatScheduler.cancel(context)
+        HeartbeatAlarmScheduler.cancel(context)
+        preferences.saveServiceState(false, context.getString(R.string.relay_service_revoked))
+        context.stopService(Intent(context, RelayForegroundService::class.java))
+    }
+
     fun ensureRunning(context: Context) {
-        RelayPreferences(context).saveServiceState(true, context.getString(R.string.relay_service_running))
+        val preferences = RelayPreferences(context)
+        if (!preferences.isDeviceActive()) {
+            preferences.saveServiceState(false, inactiveStatus(context, preferences))
+            return
+        }
+        preferences.saveServiceState(true, context.getString(R.string.relay_service_running))
         val intent = Intent(context, RelayForegroundService::class.java)
             .setAction(ACTION_START)
             .putExtra(EXTRA_IMMEDIATE_HEARTBEAT, false)
@@ -38,13 +64,21 @@ object RelayServiceLauncher {
     }
 
     fun triggerHeartbeat(context: Context) {
-        RelayPreferences(context).saveServiceState(true, context.getString(R.string.relay_service_running))
+        val preferences = RelayPreferences(context)
+        if (!preferences.isDeviceActive()) {
+            preferences.saveServiceState(false, inactiveStatus(context, preferences))
+            return
+        }
+        preferences.saveServiceState(true, context.getString(R.string.relay_service_running))
         val intent = Intent(context, RelayForegroundService::class.java)
             .setAction(ACTION_TRIGGER_HEARTBEAT)
         dispatchToService(context, intent)
     }
 
     fun setMediaKeepAlive(context: Context, enabled: Boolean) {
+        val preferences = RelayPreferences(context)
+        preferences.saveMediaKeepAliveEnabled(enabled)
+        if (!preferences.isDeviceActive()) return
         val intent = Intent(context, RelayForegroundService::class.java)
             .setAction(ACTION_SET_MEDIA_KEEPALIVE)
             .putExtra(EXTRA_MEDIA_KEEPALIVE_ENABLED, enabled)
@@ -52,7 +86,12 @@ object RelayServiceLauncher {
     }
 
     fun uploadSms(context: Context, senderPhone: String, messageBody: String, receivedAt: Long) {
-        RelayPreferences(context).saveServiceState(true, context.getString(R.string.relay_service_uploading))
+        val preferences = RelayPreferences(context)
+        if (!preferences.isDeviceActive()) {
+            preferences.saveServiceState(false, inactiveStatus(context, preferences))
+            return
+        }
+        preferences.saveServiceState(true, context.getString(R.string.relay_service_uploading))
         val intent = Intent(context, RelayForegroundService::class.java)
             .setAction(ACTION_UPLOAD_SMS)
             .putExtra(EXTRA_SENDER_PHONE, senderPhone)
@@ -74,5 +113,13 @@ object RelayServiceLauncher {
             }
         }
         ContextCompat.startForegroundService(context, intent)
+    }
+
+    private fun inactiveStatus(context: Context, preferences: RelayPreferences): String {
+        return if (preferences.readEnrollmentState().status == "REVOKED") {
+            context.getString(R.string.relay_service_revoked)
+        } else {
+            context.getString(R.string.relay_service_stopped)
+        }
     }
 }

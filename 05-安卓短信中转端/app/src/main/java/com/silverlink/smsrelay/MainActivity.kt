@@ -40,7 +40,10 @@ class MainActivity : AppCompatActivity() {
         setupFragments()
         setupBottomNavigation()
         handleExternalCommands(intent)
-        serviceStarter?.invoke(this, false) ?: RelayServiceLauncher.start(this, immediateHeartbeat = false)
+        val relayPreferences = RelayPreferences(this)
+        if (relayPreferences.isDeviceActive()) {
+            serviceStarter?.invoke(this, false) ?: RelayServiceLauncher.start(this, immediateHeartbeat = false)
+        }
         ensureSmsPermissions()
     }
 

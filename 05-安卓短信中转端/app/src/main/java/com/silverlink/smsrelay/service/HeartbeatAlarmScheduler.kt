@@ -31,6 +31,13 @@ object HeartbeatAlarmScheduler {
         }
     }
 
+    fun cancel(context: Context) {
+        val alarmManager = context.getSystemService(AlarmManager::class.java) ?: return
+        val pendingIntent = pendingIntent(context)
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
+    }
+
     internal fun pendingIntent(context: Context): PendingIntent {
         val intent = Intent(context, HeartbeatAlarmReceiver::class.java)
             .setAction(ACTION_HEARTBEAT_WAKEUP)

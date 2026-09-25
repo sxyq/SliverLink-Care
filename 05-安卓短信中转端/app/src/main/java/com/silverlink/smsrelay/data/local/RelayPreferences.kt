@@ -17,6 +17,15 @@ data class RelayConfig(
     val messagePrefix: String,
 )
 
+data class RelayEnrollmentState(
+    val requestId: String,
+    val requestToken: String,
+    val deviceSecret: String,
+    val deviceName: String,
+    val status: String,
+    val reviewReason: String,
+)
+
 data class TodayStats(
     val received: Int,
     val uploaded: Int,
@@ -32,7 +41,10 @@ data class RelayServiceState(
 class RelayPreferences(context: Context) {
 
     private val legacyPrefs = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
-    private val prefs = createPreferences(context)
+    private val preferenceStore = createPreferences(context)
+    private val prefs = preferenceStore.first
+
+    fun supportsSecureEnrollmentCredentials(): Boolean = preferenceStore.second
 
     fun readConfig(): RelayConfig {
         val storedServerBaseUrl = readStoredString(KEY_SERVER_BASE_URL)
@@ -40,7 +52,9 @@ class RelayPreferences(context: Context) {
         val storedDeviceSecret = readStoredString(KEY_DEVICE_SECRET)
         val storedReceiverPhone = readStoredString(KEY_RECEIVER_PHONE)
         val storedMessagePrefix = readStoredString(KEY_MESSAGE_PREFIX, DEFAULT_PREFIX).ifBlank { DEFAULT_PREFIX }
-        val normalizedServerBaseUrl = RelayServerUrlNormalizer.normalize(storedServerBaseUrl)
+        val normalizedServerBaseUrl = RelayServerUrlNormalizer.normalize(
+            storedServerBaseUrl.ifBlank { DEFAULT_SERVER_BASE_URL },
+        )
         val shouldMigrate =
             normalizedServerBaseUrl != storedServerBaseUrl ||
                 prefs.getString(KEY_SERVER_BASE_URL, null).isNullOrBlank() && normalizedServerBaseUrl.isNotBlank() ||
@@ -80,6 +94,72 @@ class RelayPreferences(context: Context) {
             .putString(KEY_RECEIVER_PHONE, receiverPhone)
             .putString(KEY_MESSAGE_PREFIX, messagePrefix.ifBlank { DEFAULT_PREFIX })
             .apply()
+    }
+
+    fun readEnrollmentState(): RelayEnrollmentState {
+        return RelayEnrollmentState(
+            requestId = prefs.getString(KEY_ENROLLMENT_REQUEST_ID, "") ?: "",
+            requestToken = prefs.getString(KEY_ENROLLMENT_REQUEST_TOKEN, "") ?: "",
+            deviceSecret = prefs.getString(KEY_ENROLLMENT_DEVICE_SECRET, "") ?: "",
+            deviceName = prefs.getString(KEY_ENROLLMENT_DEVICE_NAME, "") ?: "",
+            status = prefs.getString(KEY_ENROLLMENT_STATUS, "") ?: "",
+            reviewReason = prefs.getString(KEY_ENROLLMENT_REVIEW_REASON, "") ?: "",
+        )
+    }
+
+    fun saveEnrollmentDraft(requestId: String, requestToken: String, deviceSecret: String, deviceName: String) {
+        check(supportsSecureEnrollmentCredentials()) { "Secure local storage is unavailable" }
+        prefs.edit()
+            .putString(KEY_ENROLLMENT_REQUEST_ID, requestId)
+            .putString(KEY_ENROLLMENT_REQUEST_TOKEN, requestToken)
+            .putString(KEY_ENROLLMENT_DEVICE_SECRET, deviceSecret)
+            .putString(KEY_ENROLLMENT_DEVICE_NAME, deviceName)
+            .putString(KEY_ENROLLMENT_STATUS, "SUBMITTING")
+            .remove(KEY_ENROLLMENT_REVIEW_REASON)
+            .apply()
+    }
+
+    fun updateEnrollmentStatus(status: String, reviewReason: String = "") {
+        val editor = prefs.edit()
+            .putString(KEY_ENROLLMENT_STATUS, status)
+            .putString(KEY_ENROLLMENT_REVIEW_REASON, reviewReason)
+        if (status == "REJECTED" || status == "EXPIRED" || status == "ACTIVE") {
+            editor.remove(KEY_ENROLLMENT_REQUEST_TOKEN)
+                .remove(KEY_ENROLLMENT_DEVICE_SECRET)
+        }
+        editor.apply()
+    }
+
+    fun markDeviceRevoked() {
+        updateEnrollmentStatus("REVOKED")
+    }
+
+    fun isDeviceActive(): Boolean {
+        val config = readConfig()
+        return config.deviceId.isNotBlank() &&
+            config.deviceSecret.isNotBlank() &&
+            readEnrollmentState().status != "REVOKED"
+    }
+
+    fun clearDeviceEnrollment() {
+        val keys = listOf(
+            KEY_DEVICE_ID,
+            KEY_DEVICE_SECRET,
+            KEY_ENROLLMENT_REQUEST_ID,
+            KEY_ENROLLMENT_REQUEST_TOKEN,
+            KEY_ENROLLMENT_DEVICE_SECRET,
+            KEY_ENROLLMENT_DEVICE_NAME,
+            KEY_ENROLLMENT_STATUS,
+            KEY_ENROLLMENT_REVIEW_REASON,
+        )
+        val editor = prefs.edit()
+        keys.forEach(editor::remove)
+        editor.apply()
+        if (prefs !== legacyPrefs) {
+            val legacyEditor = legacyPrefs.edit()
+            keys.forEach(legacyEditor::remove)
+            legacyEditor.apply()
+        }
     }
 
     fun saveLastSyncTime(timestamp: Long) {
@@ -183,11 +263,18 @@ class RelayPreferences(context: Context) {
 
     companion object {
         private const val PREF_NAME = "sms-relay"
+        private const val DEFAULT_SERVER_BASE_URL = "https://sxyq27.online/silverlink-api"
         private const val KEY_SERVER_BASE_URL = "server_base_url"
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_DEVICE_SECRET = "device_secret"
         private const val KEY_RECEIVER_PHONE = "receiver_phone"
         private const val KEY_MESSAGE_PREFIX = "message_prefix"
+        private const val KEY_ENROLLMENT_REQUEST_ID = "enrollment_request_id"
+        private const val KEY_ENROLLMENT_REQUEST_TOKEN = "enrollment_request_token"
+        private const val KEY_ENROLLMENT_DEVICE_SECRET = "enrollment_device_secret"
+        private const val KEY_ENROLLMENT_DEVICE_NAME = "enrollment_device_name"
+        private const val KEY_ENROLLMENT_STATUS = "enrollment_status"
+        private const val KEY_ENROLLMENT_REVIEW_REASON = "enrollment_review_reason"
         private const val DEFAULT_PREFIX = "SL"
         private const val KEY_LAST_SYNC = "last_sync"
         private const val KEY_LAST_HEARTBEAT = "last_heartbeat"
@@ -202,7 +289,7 @@ class RelayPreferences(context: Context) {
         private const val KEY_STATS_FAILED = "stats_failed"
         private const val KEY_STATS_PENDING = "stats_pending"
 
-        private fun createPreferences(context: Context): SharedPreferences {
+        private fun createPreferences(context: Context): Pair<SharedPreferences, Boolean> {
             return runCatching {
                 val masterKey = MasterKey.Builder(context)
                     .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -213,9 +300,9 @@ class RelayPreferences(context: Context) {
                     masterKey,
                     EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
                     EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
-                )
+                ) to true
             }.getOrElse {
-                context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+                context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE) to false
             }
         }
     }

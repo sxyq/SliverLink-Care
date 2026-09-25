@@ -3,6 +3,7 @@ package com.silverlink.smsrelay.service
 import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
+import com.silverlink.smsrelay.R
 import com.silverlink.smsrelay.data.local.RelayPreferences
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -14,9 +15,22 @@ import org.robolectric.Shadows.shadowOf
 @RunWith(RobolectricTestRunner::class)
 class RelayServiceLauncherTest {
 
+    private fun approvedContext(): Application {
+        val context = ApplicationProvider.getApplicationContext<Application>()
+        context.getSharedPreferences("sms-relay", Application.MODE_PRIVATE).edit().clear().commit()
+        RelayPreferences(context).saveConfig(
+            serverBaseUrl = "https://relay.example.com",
+            deviceId = "device-a",
+            deviceSecret = "secret-a",
+            receiverPhone = "13800000000",
+            messagePrefix = "SL",
+        )
+        return context
+    }
+
     @Test
     fun startMarksServiceRunningAndStartsForegroundIntent() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
+        val context = approvedContext()
 
         RelayServiceLauncher.start(context, immediateHeartbeat = true)
 
@@ -29,7 +43,7 @@ class RelayServiceLauncherTest {
 
     @Test
     fun triggerHeartbeatStartsHeartbeatAction() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
+        val context = approvedContext()
 
         RelayServiceLauncher.triggerHeartbeat(context)
 
@@ -38,7 +52,7 @@ class RelayServiceLauncherTest {
 
     @Test
     fun uploadSmsIncludesInboundPayloadExtras() {
-        val context = ApplicationProvider.getApplicationContext<Application>()
+        val context = approvedContext()
 
         RelayServiceLauncher.uploadSms(
             context = context,
@@ -53,5 +67,19 @@ class RelayServiceLauncherTest {
         assertEquals("SL 123456", started.getStringExtra(RelayServiceLauncher.EXTRA_MESSAGE_BODY))
         assertEquals(1770000000000L, started.getLongExtra(RelayServiceLauncher.EXTRA_RECEIVED_AT, 0L))
         assertTrue(RelayPreferences(context).readServiceState().running)
+    }
+
+    @Test
+    fun revokedDeviceCannotRestartServiceOrHeartbeat() {
+        val context = approvedContext()
+        val preferences = RelayPreferences(context)
+        preferences.markDeviceRevoked()
+
+        RelayServiceLauncher.start(context, immediateHeartbeat = true)
+        RelayServiceLauncher.triggerHeartbeat(context)
+
+        assertEquals(null, shadowOf(context).nextStartedService)
+        assertEquals(false, preferences.readServiceState().running)
+        assertEquals(context.getString(R.string.relay_service_revoked), preferences.readServiceState().statusText)
     }
 }

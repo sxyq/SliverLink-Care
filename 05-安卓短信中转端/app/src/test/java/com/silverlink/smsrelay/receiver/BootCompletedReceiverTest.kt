@@ -36,7 +36,17 @@ class BootCompletedReceiverTest {
     }
 
     @Test
-    fun startsForegroundServiceOnBootCompleted() {
+    fun doesNotStartBeforeDeviceApproval() {
+        receiver.onReceive(context, Intent(Intent.ACTION_BOOT_COMPLETED))
+
+        assertNull(shadowOf(context).nextStartedService)
+        assertEquals(false, RelayPreferences(context).readServiceState().running)
+    }
+
+    @Test
+    fun startsForegroundServiceOnBootCompletedForRegisteredDevice() {
+        RelayPreferences(context).saveConfig("https://api.example.com", "device-1", "device-secret", "15212340000", "SL")
+
         receiver.onReceive(context, Intent(Intent.ACTION_BOOT_COMPLETED))
 
         val started = shadowOf(context).nextStartedService

@@ -8,6 +8,22 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
+import java.net.URI
+
+data class RelayEnrollmentStatus(
+    val requestId: String,
+    val status: String,
+    val deviceId: String,
+    val reviewReason: String,
+    val expiresAt: String,
+)
+
+class RelayHttpException(
+    val statusCode: Int,
+    message: String,
+) : IllegalStateException(message)
+
+fun Throwable.isRelayDeviceRevoked(): Boolean = this is RelayHttpException && statusCode == 403
 
 class RelayApiService(
     private val client: OkHttpClient,
@@ -18,7 +34,7 @@ class RelayApiService(
         deviceSecret: String,
         payload: InboundSmsPayload,
     ): Result<Unit> {
-        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        val normalizedBaseUrl = secureBaseUrl(baseUrl).getOrElse { return Result.failure(it) }
         Log.i(TAG, "uploadInboundSms baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
@@ -62,13 +78,13 @@ class RelayApiService(
 
         return runCatching {
             client.newCall(request).execute().use { response ->
-                check(response.isSuccessful) { "Relay upload failed: ${response.code}" }
+                response.requireSuccessful("Relay upload failed")
             }
         }
     }
 
     fun sendHeartbeat(baseUrl: String, deviceId: String, deviceSecret: String): Result<Unit> {
-        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        val normalizedBaseUrl = secureBaseUrl(baseUrl).getOrElse { return Result.failure(it) }
         Log.i(TAG, "sendHeartbeat baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl deviceId=$deviceId")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
@@ -96,13 +112,13 @@ class RelayApiService(
 
         return runCatching {
             client.newCall(request).execute().use { response ->
-                check(response.isSuccessful) { "Heartbeat failed: ${response.code}" }
+                response.requireSuccessful("Heartbeat failed")
             }
         }
     }
 
     fun fetchDeviceConfig(baseUrl: String, deviceId: String, deviceSecret: String): Result<JSONObject> {
-        val normalizedBaseUrl = RelayServerUrlNormalizer.normalize(baseUrl)
+        val normalizedBaseUrl = secureBaseUrl(baseUrl).getOrElse { return Result.failure(it) }
         Log.i(TAG, "fetchDeviceConfig baseUrl=$baseUrl normalizedBaseUrl=$normalizedBaseUrl deviceId=$deviceId")
         if (normalizedBaseUrl.isBlank()) {
             return Result.failure(IllegalStateException("Server base url is empty"))
@@ -126,11 +142,100 @@ class RelayApiService(
 
         return runCatching {
             client.newCall(request).execute().use { response ->
-                check(response.isSuccessful) { "Fetch config failed: ${response.code}" }
+                response.requireSuccessful("Fetch config failed")
                 val body = response.body?.string() ?: ""
                 val json = JSONObject(body)
                 json.optJSONObject("data") ?: json
             }
+        }
+    }
+
+    fun submitEnrollmentRequest(
+        baseUrl: String,
+        requestId: String,
+        requestToken: String,
+        deviceSecret: String,
+        deviceName: String,
+        receiverPhone: String,
+        messagePrefix: String,
+    ): Result<RelayEnrollmentStatus> {
+        val normalizedBaseUrl = secureBaseUrl(baseUrl).getOrElse { return Result.failure(it) }
+        if (requestId.isBlank() || requestToken.isBlank() || deviceSecret.isBlank()) {
+            return Result.failure(IllegalArgumentException("申请凭据不完整"))
+        }
+        val bodyJson = JSONObject()
+            .put("requestId", requestId)
+            .put("deviceName", deviceName)
+            .put("receiverPhone", receiverPhone)
+            .put("serverUrl", normalizedBaseUrl)
+            .put("messagePrefix", messagePrefix)
+            .put("deviceSecret", deviceSecret)
+        val request = Request.Builder()
+            .url(normalizedBaseUrl.trimEnd('/') + "/api/sms-relay/enrollment-requests")
+            .addHeader("X-Relay-Enrollment-Token", requestToken)
+            .post(bodyJson.toString().toRequestBody("application/json; charset=utf-8".toMediaType()))
+            .build()
+        return runCatching {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) error("申请提交失败：${response.code}")
+                parseEnrollmentStatus(response.body?.string().orEmpty())
+            }
+        }
+    }
+
+    fun fetchEnrollmentStatus(baseUrl: String, requestId: String, requestToken: String): Result<RelayEnrollmentStatus> {
+        val normalizedBaseUrl = secureBaseUrl(baseUrl).getOrElse { return Result.failure(it) }
+        if (requestId.isBlank() || requestToken.isBlank()) {
+            return Result.failure(IllegalArgumentException("申请凭据不完整"))
+        }
+        val request = Request.Builder()
+            .url(normalizedBaseUrl.trimEnd('/') + "/api/sms-relay/enrollment-requests/$requestId")
+            .addHeader("X-Relay-Enrollment-Token", requestToken)
+            .get()
+            .build()
+        return runCatching {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) error("申请状态获取失败：${response.code}")
+                parseEnrollmentStatus(response.body?.string().orEmpty())
+            }
+        }
+    }
+
+    private fun secureBaseUrl(baseUrl: String): Result<String> = runCatching {
+        val normalized = RelayServerUrlNormalizer.normalize(baseUrl)
+        require(normalized.isNotBlank()) { "服务器地址不能为空" }
+        val uri = URI.create(normalized)
+        val scheme = uri.scheme?.lowercase()
+        val host = uri.host?.lowercase()
+        val localHttpHost = host in setOf("localhost", "127.0.0.1", "::1", "10.0.2.2")
+        require(scheme == "https" || (scheme == "http" && localHttpHost)) {
+            "服务器地址必须使用 HTTPS"
+        }
+        require(host != null && uri.rawUserInfo == null && uri.rawQuery == null && uri.rawFragment == null) {
+            "服务器地址格式不正确"
+        }
+        normalized.trimEnd('/')
+    }
+
+    private fun parseEnrollmentStatus(body: String): RelayEnrollmentStatus {
+        val root = JSONObject(body)
+        val code = root.optInt("code", 200)
+        if (code >= 400) {
+            error(root.optString("message", "申请状态获取失败"))
+        }
+        val data = root.optJSONObject("data") ?: root
+        return RelayEnrollmentStatus(
+            requestId = data.optString("requestId"),
+            status = data.optString("status"),
+            deviceId = data.optString("deviceId"),
+            reviewReason = data.optString("reviewReason"),
+            expiresAt = data.optString("expiresAt"),
+        )
+    }
+
+    private fun okhttp3.Response.requireSuccessful(message: String) {
+        if (!isSuccessful) {
+            throw RelayHttpException(code, "$message: $code")
         }
     }
 

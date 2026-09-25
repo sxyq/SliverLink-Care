@@ -1,6 +1,8 @@
 package com.silverlink.smsrelay.ui.overview
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -20,6 +22,14 @@ class OverviewFragment : Fragment() {
     private lateinit var relayPreferences: RelayPreferences
     private lateinit var repository: SmsRelayRepository
     private lateinit var recentSmsAdapter: RecentSmsAdapter
+    private val liveStatusHandler = Handler(Looper.getMainLooper())
+    private val liveStatusRefresh = object : Runnable {
+        override fun run() {
+            if (!isResumed) return
+            view?.let { refreshLiveStatus(it) }
+            liveStatusHandler.postDelayed(this, LIVE_STATUS_REFRESH_INTERVAL_MS)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_overview, container, false)
@@ -39,8 +49,32 @@ class OverviewFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         if (::relayPreferences.isInitialized) {
+            reloadPreferences()
             view?.let { refreshData(it) }
+            liveStatusHandler.removeCallbacks(liveStatusRefresh)
+            liveStatusHandler.postDelayed(liveStatusRefresh, LIVE_STATUS_REFRESH_INTERVAL_MS)
         }
+    }
+
+    override fun onPause() {
+        liveStatusHandler.removeCallbacks(liveStatusRefresh)
+        super.onPause()
+    }
+
+    override fun onDestroyView() {
+        liveStatusHandler.removeCallbacks(liveStatusRefresh)
+        super.onDestroyView()
+    }
+
+    private fun reloadPreferences() {
+        relayPreferences = preferencesFactory?.invoke(requireContext()) ?: RelayPreferences(requireContext())
+    }
+
+    private fun refreshLiveStatus(view: View) {
+        reloadPreferences()
+        setupDeviceStatus(view)
+        setupConfigCards(view)
+        setupMetrics(view)
     }
 
     private fun refreshData(view: View) {
@@ -54,8 +88,11 @@ class OverviewFragment : Fragment() {
         val indicator = view.findViewById<View>(R.id.onlineIndicator)
         val statusText = view.findViewById<TextView>(R.id.deviceStatusText)
         val serviceStatusText = view.findViewById<TextView>(R.id.serviceStatusText)
-        val isOnline = relayPreferences.readConfig().serverBaseUrl.isNotBlank()
+        val config = relayPreferences.readConfig()
         val serviceState = relayPreferences.readServiceState()
+        val isOnline = config.deviceId.isNotBlank()
+                && config.deviceSecret.isNotBlank()
+                && serviceState.statusText == getString(R.string.relay_service_online)
         if (isOnline) {
             indicator.setBackgroundResource(R.drawable.circle_green)
             statusText.text = getString(R.string.device_online)
@@ -194,6 +231,7 @@ class OverviewFragment : Fragment() {
     }
 
     companion object {
+        private const val LIVE_STATUS_REFRESH_INTERVAL_MS = 2_000L
         internal var preferencesFactory: ((android.content.Context) -> RelayPreferences)? = null
         internal var repositoryFactory: ((android.content.Context) -> SmsRelayRepository)? = null
 

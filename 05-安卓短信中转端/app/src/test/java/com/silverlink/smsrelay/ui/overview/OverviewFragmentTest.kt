@@ -46,7 +46,7 @@ class OverviewFragmentTest {
     @Test
     fun showsConfiguredStatusAndRecentSmsList() {
         preferences.saveConfig("https://sxyq27.online/silverlink-api", "device-a", "secret", "13800000000", "SL")
-        preferences.saveServiceState(true, "运行中")
+        preferences.saveServiceState(true, application.getString(R.string.relay_service_online))
         preferences.saveTodayStats(3, 2, 1, 4)
         saveRecords(
             listOf(
@@ -68,7 +68,7 @@ class OverviewFragmentTest {
         val view = fragment.requireView()
 
         assertEquals(application.getString(R.string.device_online), view.findViewById<android.widget.TextView>(R.id.deviceStatusText).text.toString())
-        assertEquals("运行中", view.findViewById<android.widget.TextView>(R.id.serviceStatusText).text.toString())
+        assertEquals(application.getString(R.string.relay_service_online), view.findViewById<android.widget.TextView>(R.id.serviceStatusText).text.toString())
         assertEquals("13800000000", view.findViewById<android.widget.TextView>(R.id.configRowValue).text.toString())
         assertEquals(android.view.View.VISIBLE, view.findViewById<RecyclerView>(R.id.recentSmsList).visibility)
         assertTrue(view.findViewById<RecyclerView>(R.id.recentSmsList).adapter!!.itemCount == 2)

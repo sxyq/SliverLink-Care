@@ -1,6 +1,8 @@
 package com.silverlink.smsrelay
 
 import android.Manifest
+import android.app.Application
+import androidx.test.core.app.ApplicationProvider
 import androidx.fragment.app.Fragment
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -21,6 +23,8 @@ class MainActivityTest {
 
     @Test
     fun onCreateStartsRelayServiceAndKeepsOverviewByDefault() {
+        val preferences = com.silverlink.smsrelay.data.local.RelayPreferences(ApplicationProvider.getApplicationContext<Application>())
+        preferences.saveConfig("https://api.example.com", "device-1", "device-secret", "15212340000", "SL")
         var startedImmediateHeartbeat: Boolean? = null
         MainActivity.serviceStarter = { _, immediate -> startedImmediateHeartbeat = immediate }
         MainActivity.smsPermissionChecker = { true }
@@ -31,6 +35,19 @@ class MainActivityTest {
         assertNotNull(activity.supportFragmentManager.findFragmentByTag("overview"))
         assertTrue(activity.supportFragmentManager.findFragmentByTag("records")?.isHidden == true)
         assertTrue(activity.supportFragmentManager.findFragmentByTag("settings")?.isHidden == true)
+    }
+
+    @Test
+    fun onCreateDoesNotStartRelayServiceBeforeDeviceApproval() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        app.getSharedPreferences("sms-relay", Application.MODE_PRIVATE).edit().clear().commit()
+        var serviceStarted = false
+        MainActivity.serviceStarter = { _, _ -> serviceStarted = true }
+        MainActivity.smsPermissionChecker = { true }
+
+        Robolectric.buildActivity(MainActivity::class.java).setup().get()
+
+        assertEquals(false, serviceStarted)
     }
 
     @Test

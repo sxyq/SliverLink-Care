@@ -25,11 +25,11 @@ class HeartbeatWorkerTest {
     }
 
     @Test
-    fun doWorkReturnsSuccessWhenServerBaseUrlIsBlank() = runBlocking {
+    fun doWorkSkipsHeartbeatWhenApprovedDeviceCredentialsAreMissing() = runBlocking {
         preferences.saveConfig(
             serverBaseUrl = "",
-            deviceId = "device-1",
-            deviceSecret = "secret-1",
+            deviceId = "",
+            deviceSecret = "",
             receiverPhone = "13800000000",
             messagePrefix = "SL",
         )

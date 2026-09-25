@@ -26,6 +26,19 @@
                 android:padding="16dp">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/inputLayoutDeviceName"
+                    style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/enrollment_device_name">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/inputDeviceName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textCapWords" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutReceiverPhone"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
@@ -71,14 +84,13 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:hint="@string/config_device_secret"
-                    app:endIconMode="password_toggle"
-                    xmlns:app="http://schemas.android.com/apk/res-auto">
+                    android:hint="@string/config_device_secret">
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputDeviceSecret"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword" />
+                        android:importantForAutofill="no"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -94,12 +106,37 @@
                         android:layout_height="wrap_content" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnSaveConfig"
+                <TextView
+                    android:id="@+id/textEnrollmentStatus"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:text="@string/save_config" />
+                    android:layout_marginTop="12dp"
+                    android:accessibilityLiveRegion="polite"
+                    android:text="@string/enrollment_not_applied"
+                    android:textAppearance="?attr/textAppearanceBodyMedium" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnResetEnrollment"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/enrollment_reset" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnApplyEnrollment"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/enrollment_apply" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnRefreshEnrollment"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/enrollment_refresh" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnRequestPermissions"

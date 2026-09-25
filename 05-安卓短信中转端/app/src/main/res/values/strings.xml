@@ -58,7 +58,6 @@
     <string name="last_heartbeat">最后心跳</string>
     <string name="last_sync_time">最后同步时间</string>
     <string name="version_info">版本信息</string>
-    <string name="save_config">保存配置</string>
     <string name="request_sms_permission">申请短信权限</string>
     <string name="request_battery_optimization">允许息屏后台运行</string>
     <string name="request_enhanced_protection">一键开启非 Root 强保护</string>
@@ -67,10 +66,36 @@
     <string name="disable_media_keepalive">关闭媒体保活模式</string>
     <string name="request_root_force_protection">开启 Root 保活</string>
     <string name="sync_remote_config">同步服务端配置</string>
-    <string name="config_saved">配置已保存</string>
     <string name="config_synced">已同步服务端配置</string>
     <string name="config_sync_failed">同步配置失败</string>
     <string name="config_ready">当前可配置设备与服务器信息</string>
+    <string name="enrollment_device_name">设备名称</string>
+    <string name="enrollment_apply">申请成为新设备</string>
+    <string name="enrollment_retry">重试提交申请</string>
+    <string name="enrollment_refresh">刷新审批状态</string>
+    <string name="enrollment_not_applied">填写设备信息后，可提交接入申请</string>
+    <string name="enrollment_submitting">正在提交申请…</string>
+    <string name="enrollment_pending">申请已提交，等待管理员审批</string>
+    <string name="enrollment_submission_failed">申请结果暂未确认，可重试提交或刷新状态</string>
+    <string name="enrollment_approved">申请已通过，正在连接服务器</string>
+    <string name="enrollment_active">设备已接入：%1$s</string>
+    <string name="enrollment_rejected">申请未通过：%1$s</string>
+    <string name="enrollment_expired">申请已过期，请重新提交</string>
+    <string name="enrollment_existing_device">当前设备已配置：%1$s</string>
+    <string name="enrollment_revoked">当前设备已被管理员吊销，请重新申请接入</string>
+    <string name="enrollment_reset">重新申请接入</string>
+    <string name="enrollment_reset_title">重新申请设备接入</string>
+    <string name="enrollment_reset_message">将清除本机保存的设备编号、设备密钥和申请状态，保留服务器地址、SIM 接收手机号、短信前缀及本机短信记录。服务器中的设备记录需由管理员另行移除。</string>
+    <string name="enrollment_reset_confirm">清除并继续</string>
+    <string name="enrollment_reset_done">本机设备登记已清除，可重新提交申请</string>
+    <string name="enrollment_request_failed">申请提交失败，请确认服务器地址和网络</string>
+    <string name="enrollment_status_failed">审批状态获取失败，请稍后重试</string>
+    <string name="enrollment_phone_required">请填写有效的 SIM 接收手机号</string>
+    <string name="enrollment_name_required">请填写设备名称</string>
+    <string name="enrollment_name_too_long">设备名称不能超过 100 个字符</string>
+    <string name="enrollment_prefix_invalid">短信前缀长度需为 1 到 32 个字符</string>
+    <string name="enrollment_server_https_required">服务器地址需为有效的 HTTPS 地址</string>
+    <string name="enrollment_secure_storage_unavailable">无法安全保存设备凭据，请升级系统后重试</string>
     <string name="sms_permission_ready">已授权</string>
     <string name="sms_permission_missing">未授权</string>
     <string name="sms_permission_granted">短信权限已授权</string>
@@ -106,6 +131,7 @@
     <string name="relay_service_uploading">正在后台上传短信</string>
     <string name="relay_service_retrying">后台服务运行中，等待重试或下次心跳</string>
     <string name="relay_service_stopped">后台服务未运行</string>
+    <string name="relay_service_revoked">设备已吊销，后台服务已停止</string>
     <string name="relay_service_media_keepalive">媒体保活中 · %1$s</string>
 
     <!-- 提示 -->

@@ -49,7 +49,7 @@ class RelayConfigSyncResolverTest {
 
         val merged = RelayConfigSyncResolver.merge(local, remote)
 
-        assertEquals("http://sxyq27.online/silverlink-api", merged.serverBaseUrl)
+        assertEquals("https://sxyq27.online/silverlink-api", merged.serverBaseUrl)
         assertEquals("relay-android-02", merged.deviceId)
         assertEquals("secret-001", merged.deviceSecret)
         assertEquals("19912345678", merged.receiverPhone)

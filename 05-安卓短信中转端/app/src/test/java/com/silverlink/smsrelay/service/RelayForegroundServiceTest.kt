@@ -48,7 +48,7 @@ class RelayForegroundServiceTest {
         val service = Robolectric.buildService(RelayForegroundService::class.java).create().get()
 
         val state = preferences.readServiceState()
-        assertEquals(true, state.running)
+        assertEquals(false, state.running)
         assertEquals(application.getString(R.string.relay_service_waiting_config), state.statusText)
         assertEquals(1, shadowOf(service.getSystemService(android.app.NotificationManager::class.java)).allNotifications.size)
     }

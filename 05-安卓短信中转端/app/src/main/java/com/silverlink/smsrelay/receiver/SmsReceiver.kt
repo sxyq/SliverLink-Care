@@ -22,7 +22,9 @@ class SmsReceiver : BroadcastReceiver() {
         val body = messages.joinToString(separator = "") { it.messageBody.orEmpty() }
         val sender = messages.firstOrNull()?.originatingAddress.orEmpty()
         val receivedAt = messages.firstOrNull()?.timestampMillis ?: System.currentTimeMillis()
-        val config = RelayPreferences(context).readConfig()
+        val preferences = RelayPreferences(context)
+        if (!preferences.isDeviceActive()) return
+        val config = preferences.readConfig()
         val parsed = SmsParser.parse(body, config.messagePrefix)
 
         if (!parsed.matched) {

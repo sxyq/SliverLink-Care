@@ -9,6 +9,7 @@ import com.silverlink.smsrelay.R
 import com.silverlink.smsrelay.data.local.RelayPreferences
 import com.silverlink.smsrelay.data.network.ApiClientFactory
 import com.silverlink.smsrelay.data.network.RelayApiService
+import com.silverlink.smsrelay.data.network.isRelayDeviceRevoked
 import com.silverlink.smsrelay.service.HeartbeatAlarmScheduler
 import com.silverlink.smsrelay.service.RelayServiceLauncher
 import com.silverlink.smsrelay.worker.HeartbeatScheduler
@@ -28,6 +29,19 @@ class HeartbeatAlarmReceiver : BroadcastReceiver() {
         }
 
         val appContext = context.applicationContext
+        val preferences = RelayPreferences(appContext)
+        val config = preferences.readConfig()
+        if (!preferences.isDeviceActive()) {
+            HeartbeatScheduler.cancel(appContext)
+            HeartbeatAlarmScheduler.cancel(appContext)
+            val status = if (preferences.readEnrollmentState().status == "REVOKED") {
+                appContext.getString(R.string.relay_service_revoked)
+            } else {
+                appContext.getString(R.string.relay_service_stopped)
+            }
+            preferences.saveServiceState(false, status)
+            return
+        }
         RelayServiceLauncher.ensureRunning(appContext)
         HeartbeatScheduler.schedule(appContext, enqueueImmediate = true)
         val pendingResult = goAsync()
@@ -65,12 +79,19 @@ class HeartbeatAlarmReceiver : BroadcastReceiver() {
                 preferences.saveServiceState(true, context.getString(R.string.relay_service_online))
                 Log.i(TAG, "Alarm heartbeat success for device=${config.deviceId}")
             }.onFailure {
+                if (it.isRelayDeviceRevoked()) {
+                    RelayServiceLauncher.markDeviceRevoked(context)
+                    Log.w(TAG, "Alarm heartbeat stopped because device was revoked: device=${config.deviceId}")
+                    return@onFailure
+                }
                 preferences.saveServiceState(true, context.getString(R.string.relay_service_retrying))
                 Log.w(TAG, "Alarm heartbeat failed for device=${config.deviceId}: ${it.message}")
             }
         }
 
-        HeartbeatAlarmScheduler.scheduleNext(context)
+        if (preferences.isDeviceActive()) {
+            HeartbeatAlarmScheduler.scheduleNext(context)
+        }
         return success
     }
 

@@ -40,7 +40,7 @@ class RelayPreferencesTest {
         preferences.saveUptimeStart(System.currentTimeMillis() - 90 * 60 * 1000L)
 
         val config = preferences.readConfig()
-        assertEquals("http://sxyq27.online/silverlink-api", config.serverBaseUrl)
+        assertEquals("https://sxyq27.online/silverlink-api", config.serverBaseUrl)
         assertEquals("device-1", config.deviceId)
         assertEquals("SL", config.messagePrefix)
         assertTrue(preferences.getLastSyncTime().contains("2026"))
@@ -83,12 +83,76 @@ class RelayPreferencesTest {
 
     @Test
     fun returnsDefaultsForUnsetValues() {
-        assertEquals("", preferences.readConfig().serverBaseUrl)
+        assertEquals("https://sxyq27.online/silverlink-api", preferences.readConfig().serverBaseUrl)
         assertEquals("从未", preferences.getLastSyncTime())
         assertEquals("从未", preferences.getLastHeartbeat())
         assertEquals("未知", preferences.getUptime())
         assertEquals(false, preferences.readServiceState().running)
         assertEquals("未启动", preferences.readServiceState().statusText)
         assertEquals(TodayStats(0, 0, 0, 0), preferences.readTodayStats())
+    }
+
+    @Test
+    fun storesEnrollmentCredentialsAndClearsThemAfterActivation() {
+        if (!preferences.supportsSecureEnrollmentCredentials()) {
+            assertTrue(runCatching {
+                preferences.saveEnrollmentDraft("request-1", "request-token", "device-secret", "值守手机")
+            }.isFailure)
+            return
+        }
+        preferences.saveEnrollmentDraft("request-1", "request-token", "device-secret", "值守手机")
+        preferences.updateEnrollmentStatus("PENDING")
+
+        val pending = preferences.readEnrollmentState()
+        assertEquals("request-1", pending.requestId)
+        assertEquals("request-token", pending.requestToken)
+        assertEquals("device-secret", pending.deviceSecret)
+        assertEquals("PENDING", pending.status)
+
+        preferences.updateEnrollmentStatus("ACTIVE")
+        val active = preferences.readEnrollmentState()
+        assertEquals("ACTIVE", active.status)
+        assertEquals("", active.requestToken)
+        assertEquals("", active.deviceSecret)
+    }
+
+    @Test
+    fun clearingEnrollmentKeepsRelayConnectionDetails() {
+        preferences.saveConfig(
+            serverBaseUrl = "https://api.example.com/silverlink-api",
+            deviceId = "relay-old-device",
+            deviceSecret = "old-device-secret",
+            receiverPhone = "15212343755",
+            messagePrefix = "SL",
+        )
+        preferences.updateEnrollmentStatus("ACTIVE")
+
+        preferences.clearDeviceEnrollment()
+
+        val config = preferences.readConfig()
+        assertEquals("", config.deviceId)
+        assertEquals("", config.deviceSecret)
+        assertEquals("https://api.example.com/silverlink-api", config.serverBaseUrl)
+        assertEquals("15212343755", config.receiverPhone)
+        assertEquals("SL", config.messagePrefix)
+        assertEquals("", preferences.readEnrollmentState().status)
+    }
+
+    @Test
+    fun revokedDeviceKeepsCredentialsButIsNoLongerActive() {
+        preferences.saveConfig(
+            serverBaseUrl = "https://api.example.com/silverlink-api",
+            deviceId = "relay-old-device",
+            deviceSecret = "old-device-secret",
+            receiverPhone = "15212343755",
+            messagePrefix = "SL",
+        )
+
+        preferences.markDeviceRevoked()
+
+        assertEquals("relay-old-device", preferences.readConfig().deviceId)
+        assertEquals("old-device-secret", preferences.readConfig().deviceSecret)
+        assertEquals("REVOKED", preferences.readEnrollmentState().status)
+        assertEquals(false, preferences.isDeviceActive())
     }
 }

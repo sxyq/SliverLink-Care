@@ -12,10 +12,13 @@ object RelayServerUrlNormalizer {
         val trimmed = value.trim()
         if (trimmed.isBlank()) return ""
         if (trimmed.startsWith(LEGACY_RELAY_HTTPS_PREFIX, ignoreCase = true)) {
-            return LEGACY_RELAY_HTTP_PREFIX + trimmed.removePrefix(LEGACY_RELAY_HTTPS_PREFIX)
+            return LEGACY_RELAY_HTTPS_PREFIX + trimmed.substring(LEGACY_RELAY_HTTPS_PREFIX.length)
+        }
+        if (trimmed.startsWith(LEGACY_RELAY_HTTP_PREFIX, ignoreCase = true)) {
+            return LEGACY_RELAY_HTTPS_PREFIX + trimmed.substring(LEGACY_RELAY_HTTP_PREFIX.length)
         }
         if (trimmed.startsWith(LEGACY_RELAY_BARE_PREFIX, ignoreCase = true)) {
-            return LEGACY_RELAY_HTTP_PREFIX + trimmed.removePrefix(LEGACY_RELAY_BARE_PREFIX)
+            return LEGACY_RELAY_HTTPS_PREFIX + trimmed.substring(LEGACY_RELAY_BARE_PREFIX.length)
         }
 
         val candidate = if (trimmed.contains("://")) trimmed else "https://$trimmed"

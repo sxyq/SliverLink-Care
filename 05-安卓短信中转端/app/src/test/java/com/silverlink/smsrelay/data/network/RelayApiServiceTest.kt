@@ -72,6 +72,47 @@ class RelayApiServiceTest {
     }
 
     @Test
+    fun submitsEnrollmentAndReadsStatusUsingApplicantToken() {
+        server.enqueue(MockResponse().setResponseCode(200).setBody(
+            """{"code":200,"data":{"requestId":"request-1","status":"PENDING"}}""",
+        ))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(
+            """{"code":200,"data":{"requestId":"request-1","status":"APPROVED","deviceId":"relay-1"}}""",
+        ))
+
+        val submitted = service.submitEnrollmentRequest(
+            baseUrl = server.url("/").toString(),
+            requestId = "request-1",
+            requestToken = "request-token",
+            deviceSecret = "device-secret",
+            deviceName = "值守手机",
+            receiverPhone = "13800000000",
+            messagePrefix = "SL",
+        )
+        assertTrue(submitted.isSuccess)
+        assertEquals("PENDING", submitted.getOrThrow().status)
+        val submitRequest = server.takeRequest()
+        assertEquals("POST", submitRequest.method)
+        assertEquals("/api/sms-relay/enrollment-requests", submitRequest.path)
+        assertEquals("request-token", submitRequest.getHeader("X-Relay-Enrollment-Token"))
+        assertTrue(submitRequest.body.readUtf8().contains("\"deviceSecret\":\"device-secret\""))
+
+        val status = service.fetchEnrollmentStatus(server.url("/").toString(), "request-1", "request-token")
+        assertTrue(status.isSuccess)
+        assertEquals("relay-1", status.getOrThrow().deviceId)
+        val statusRequest = server.takeRequest()
+        assertEquals("GET", statusRequest.method)
+        assertEquals("/api/sms-relay/enrollment-requests/request-1", statusRequest.path)
+        assertEquals("request-token", statusRequest.getHeader("X-Relay-Enrollment-Token"))
+    }
+
+    @Test
+    fun blocksPublicHttpRelayUrls() {
+        assertTrue(service.sendHeartbeat("http://example.com", "device-1", "secret-1").isFailure)
+        assertEquals(0, server.requestCount)
+    }
+
+    @Test
     fun returnsFailureForBlankBaseUrlAndUnsuccessfulResponses() {
         assertTrue(service.uploadInboundSms("", "secret", InboundSmsPayload("", "", "", "", 0, "SL")).isFailure)
         assertTrue(service.sendHeartbeat("", "device-1", "secret").isFailure)
@@ -80,5 +121,17 @@ class RelayApiServiceTest {
         server.enqueue(MockResponse().setResponseCode(500))
         val result = service.sendHeartbeat(server.url("/").toString(), "device-1", "secret")
         assertTrue(result.isFailure)
+    }
+
+    @Test
+    fun exposesForbiddenResponsesAsRevokedDeviceFailures() {
+        server.enqueue(MockResponse().setResponseCode(403))
+
+        val error = service.sendHeartbeat(server.url("/").toString(), "device-1", "secret")
+            .exceptionOrNull()
+
+        assertTrue(error is RelayHttpException)
+        assertEquals(403, (error as RelayHttpException).statusCode)
+        assertTrue(error.isRelayDeviceRevoked())
     }
 }

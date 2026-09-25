@@ -37,4 +37,10 @@ object HeartbeatScheduler {
             )
         }
     }
+
+    fun cancel(context: Context) {
+        val workManager = WorkManager.getInstance(context)
+        workManager.cancelUniqueWork(IMMEDIATE_WORK_NAME)
+        workManager.cancelUniqueWork(PERIODIC_WORK_NAME)
+    }
 }

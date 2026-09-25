@@ -19,6 +19,7 @@ import com.silverlink.smsrelay.R
 import com.silverlink.smsrelay.data.local.RelayPreferences
 import com.silverlink.smsrelay.data.network.ApiClientFactory
 import com.silverlink.smsrelay.data.network.RelayApiService
+import com.silverlink.smsrelay.data.network.isRelayDeviceRevoked
 import com.silverlink.smsrelay.repository.SmsRelayRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -51,6 +52,16 @@ class RelayForegroundService : Service() {
         Log.i(TAG, "RelayForegroundService.onCreate")
         ensureNotificationChannel()
         startForeground(NOTIFICATION_ID, buildNotification(getString(R.string.relay_service_running)))
+        if (!relayPreferences.isDeviceActive()) {
+            val status = if (relayPreferences.readEnrollmentState().status == "REVOKED") {
+                getString(R.string.relay_service_revoked)
+            } else {
+                getString(R.string.relay_service_waiting_config)
+            }
+            relayPreferences.saveServiceState(false, status)
+            stopSelf()
+            return
+        }
         relayPreferences.saveServiceState(true, getString(R.string.relay_service_running))
         syncMediaKeepAliveMode()
         registerInboxObserver()
@@ -60,6 +71,10 @@ class RelayForegroundService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Log.i(TAG, "RelayForegroundService.onStartCommand action=${intent?.action} startId=$startId")
+        if (!relayPreferences.isDeviceActive()) {
+            stopSelf(startId)
+            return START_NOT_STICKY
+        }
         when (intent?.action) {
             RelayServiceLauncher.ACTION_UPLOAD_SMS -> handleSmsUpload(
                 senderPhone = intent.getStringExtra(RelayServiceLauncher.EXTRA_SENDER_PHONE).orEmpty(),
@@ -118,7 +133,7 @@ class RelayForegroundService : Service() {
 
     private suspend fun sendHeartbeat() {
         val config = relayPreferences.readConfig()
-        if (config.serverBaseUrl.isBlank() || config.deviceId.isBlank() || config.deviceSecret.isBlank()) {
+        if (!relayPreferences.isDeviceActive() || config.serverBaseUrl.isBlank()) {
             updateNotification(getString(R.string.relay_service_waiting_config))
             relayPreferences.saveServiceState(true, getString(R.string.relay_service_waiting_config))
             HeartbeatAlarmScheduler.scheduleNext(this)
@@ -133,12 +148,19 @@ class RelayForegroundService : Service() {
                 relayPreferences.saveServiceState(true, getString(R.string.relay_service_online))
                 Log.i(TAG, "Foreground heartbeat success for device=${config.deviceId}")
             }.onFailure {
+                if (it.isRelayDeviceRevoked()) {
+                    Log.w(TAG, "Foreground heartbeat stopped because device was revoked: device=${config.deviceId}")
+                    RelayServiceLauncher.markDeviceRevoked(this)
+                    return@onFailure
+                }
                 updateNotification(getString(R.string.relay_service_retrying))
                 relayPreferences.saveServiceState(true, getString(R.string.relay_service_retrying))
                 Log.w(TAG, "Foreground heartbeat failed for device=${config.deviceId}: ${it.message}")
             }
         } finally {
-            HeartbeatAlarmScheduler.scheduleNext(this)
+            if (relayPreferences.isDeviceActive()) {
+                HeartbeatAlarmScheduler.scheduleNext(this)
+            }
         }
     }
 
@@ -153,6 +175,10 @@ class RelayForegroundService : Service() {
                     updateNotification(getString(R.string.relay_service_online))
                     relayPreferences.saveServiceState(true, getString(R.string.relay_service_online))
                 }.onFailure {
+                    if (it.isRelayDeviceRevoked()) {
+                        RelayServiceLauncher.markDeviceRevoked(this@RelayForegroundService)
+                        return@onFailure
+                    }
                     updateNotification(getString(R.string.relay_service_retrying))
                     relayPreferences.saveServiceState(true, getString(R.string.relay_service_retrying))
                 }
@@ -244,7 +270,12 @@ class RelayForegroundService : Service() {
         inboxObserver?.let { contentResolver.unregisterContentObserver(it) }
         inboxObserver = null
         mediaKeepAliveController.stop()
-        relayPreferences.saveServiceState(false, getString(R.string.relay_service_stopped))
+        val status = if (relayPreferences.readEnrollmentState().status == "REVOKED") {
+            getString(R.string.relay_service_revoked)
+        } else {
+            getString(R.string.relay_service_stopped)
+        }
+        relayPreferences.saveServiceState(false, status)
         serviceScope.cancel()
     }
 

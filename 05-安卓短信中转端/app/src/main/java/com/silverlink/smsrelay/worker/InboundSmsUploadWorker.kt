@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.silverlink.smsrelay.repository.SmsRelayRepository
+import com.silverlink.smsrelay.data.network.isRelayDeviceRevoked
 
 class InboundSmsUploadWorker(
     appContext: Context,
@@ -24,7 +25,7 @@ class InboundSmsUploadWorker(
         return repository.uploadInboundSms(senderPhone, messageBody, receivedAt)
             .fold(
                 onSuccess = { Result.success() },
-                onFailure = { Result.retry() },
+                onFailure = { if (it.isRelayDeviceRevoked()) Result.success() else Result.retry() },
             )
     }
 

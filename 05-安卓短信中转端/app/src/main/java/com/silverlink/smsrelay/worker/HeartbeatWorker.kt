@@ -7,6 +7,8 @@ import androidx.work.WorkerParameters
 import com.silverlink.smsrelay.data.local.RelayPreferences
 import com.silverlink.smsrelay.data.network.ApiClientFactory
 import com.silverlink.smsrelay.data.network.RelayApiService
+import com.silverlink.smsrelay.data.network.isRelayDeviceRevoked
+import com.silverlink.smsrelay.service.RelayServiceLauncher
 
 class HeartbeatWorker(
     appContext: Context,
@@ -18,8 +20,8 @@ class HeartbeatWorker(
 
     override suspend fun doWork(): Result {
         val config = relayPreferences.readConfig()
-        if (config.serverBaseUrl.isBlank()) {
-            Log.w(TAG, "HeartbeatWorker skipped: empty server base url")
+        if (!relayPreferences.isDeviceActive() || config.serverBaseUrl.isBlank()) {
+            Log.w(TAG, "HeartbeatWorker skipped: relay device is not active")
             return Result.success()
         }
 
@@ -28,6 +30,11 @@ class HeartbeatWorker(
             relayPreferences.saveLastHeartbeat(System.currentTimeMillis())
             Log.i(TAG, "HeartbeatWorker success for device=${config.deviceId}")
         }.onFailure {
+            if (it.isRelayDeviceRevoked()) {
+                RelayServiceLauncher.markDeviceRevoked(applicationContext)
+                Log.w(TAG, "HeartbeatWorker stopped because device was revoked: device=${config.deviceId}")
+                return Result.success()
+            }
             Log.w(TAG, "HeartbeatWorker failed for device=${config.deviceId}: ${it.message}")
         }
         return if (result.isSuccess) Result.success() else Result.retry()
